@@ -1,0 +1,32 @@
+node_modules/
+dist/
+build/
+coverage/
+
+# Turborepo and TanStack Router each write cache directories at the root and
+# per package, including compressed tarballs.
+.turbo/
+.tanstack/
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+*.log
+npm-debug.log*
+
+# Editor settings are committed on purpose: Tailwind v4 uses @theme, @source and
+# @custom-variant, none of which the built-in CSS parser knows, so without these
+# every developer sees the same false error.
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+*.tsbuildinfo
+
+# Planning documents. Internal — customer names, auth design and infrastructure topology.
+migration/
+
+.eslintcache

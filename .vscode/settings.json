@@ -1,0 +1,14 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "files.associations": { "*.css": "tailwindcss" },
+
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  "editor.codeActionsOnSave": {
+    "source.removeUnusedImports": "explicit",
+    "source.fixAll.eslint": "explicit"
+  },
+
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
+}
