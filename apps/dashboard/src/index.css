@@ -1,0 +1,9 @@
+@import '@irene/ui/styles';
+
+/*
+  Tells Tailwind which files to read class names from. '../..' is this app's
+  own directory, so this stylesheet holds only the classes this app uses.
+
+  Keep it scoped per app. See packages/ui/src/styles/index.css.
+*/
+@source '../..';

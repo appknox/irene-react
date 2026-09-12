@@ -1,0 +1,48 @@
+/*
+  The design system entry. Every app imports this, so Tailwind, the layer order
+  and the tokens have one definition and no module can drift from it.
+*/
+
+/*
+  Declared once, and before the import — CSS allows a @layer statement ahead of
+  @import, and first declaration is what fixes cascade order. Tailwind declares
+  its own layers on import, so a later statement here would not reorder them.
+
+  `legacy` sits below components and utilities, so ported stylesheets lose to
+  both without needing !important.
+*/
+@layer theme, base, legacy, components, utilities;
+
+@import 'tailwindcss';
+
+@theme {
+  /*
+    Placeholder scale. The design team's tokens replace these.
+
+    Tailwind ships these in rem, which would rescale everything by 87.5% against
+    irene's 14px root and land on fractional pixels. Overriding in px pins the
+    grid and the type scale to whole numbers.
+  */
+  --spacing: 4px;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+}
+
+@layer base {
+  html {
+    font-size: 14px;
+  }
+}
+
+/*
+  Tells Tailwind which files to read class names from. Paths resolve against
+  this file, so '..' is packages/ui — the shared components, nothing else.
+
+  Do not widen this to the repository root. Every app imports this file, so a
+  root-wide scan would put every app's classes into every app's stylesheet.
+  Harmless today with one build, wasteful once each module builds its own.
+*/
+@source '..';
