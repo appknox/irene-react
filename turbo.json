@@ -1,0 +1,31 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalEnv": [
+    "IRENE_API_HOST",
+    "IRENE_SHOW_LICENSE",
+    "IRENE_ENABLE_PENDO",
+    "IRENE_ENABLE_MARKETPLACE",
+    "IRENE_POSTHOG_API_KEY",
+    "IRENE_POSTHOG_API_HOST",
+    "ENTERPRISE",
+    "WHITELABEL_ENABLED",
+    "WHITELABEL_NAME",
+    "WHITELABEL_LOGO",
+    "WHITELABEL_THEME",
+    "WHITELABEL_FAVICON"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "src/routeTree.gen.ts"]
+    },
+    "build:test": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "src/routeTree.gen.ts"]
+    },
+    "dev": { "cache": false, "persistent": true },
+    "lint": {},
+    "type-check": { "dependsOn": ["^build"] },
+    "test": { "dependsOn": ["^build"] }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "files": [],
+  "references": [{ "path": "./apps/dashboard" }],
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./packages/ui/src/*"],
+      "@ui/*": ["./packages/ui/src/*"],
+      "@api/*": ["./packages/api/src/*"],
+      "@config/*": ["./packages/config/src/*"],
+      "@irene/ui": ["./packages/ui/src/index.ts"],
+      "@irene/api": ["./packages/api/src/index.ts"],
+      "@irene/config": ["./packages/config/src/index.ts"],
+      "@irene/*": ["./apps/*/src/index.tsx"]
+    }
+  }
+}
