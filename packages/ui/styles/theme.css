@@ -1,0 +1,178 @@
+/* 
+The design system tokens.
+Two layers, deliberately separate:
+
+  @theme: the design system — palette, spacing, radius, shadows, type.
+         Tailwind generates a utility for every entry here.
+  :root: one-off values kept verbatim, waiting to be mapped onto the
+         palette. No utilities, no new usage.
+*/
+
+@theme {
+  /* ---------------------------------------------------------------------
+     Spacing — one step drives the whole scale. p-1 is 4px, p-4 is 16px.
+     Declared in px because the page root is 14px, so Tailwind's rem defaults
+     would land on fractional pixels.
+     --------------------------------------------------------------------- */
+  --spacing: 4px;
+
+  /* ---------------------------------------------------------------------
+     Colour palette — hue families with numeric steps.
+
+     Opacity variants need no tokens of their own: Tailwind derives them from
+     these, so bg-red-500/10 and bg-red-500/5 work without being declared.
+     --------------------------------------------------------------------- */
+
+  --color-black: #000000;
+  --color-white: #ffffff;
+
+  /* Neutral — the grey ramp */
+  --color-neutral-50: #fcfcfc;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e9e9e9;
+  --color-neutral-300: #d9d9d9;
+  --color-neutral-400: #c4c4c4;
+  --color-neutral-500: #9d9d9d;
+  --color-neutral-600: #7b7b7b;
+  --color-neutral-700: #555555;
+  --color-neutral-800: #434343;
+  --color-neutral-900: #262626;
+  --color-neutral-950: #171717;
+
+  /* Red — the brand hue. 500 is the brand red, 700 the error red. */
+  --color-red-50: #ffeeed;
+  --color-red-100: #ffd1d4;
+  --color-red-500: #ff4d3f;
+  --color-red-600: #e23123;
+  --color-red-700: #d72f2f;
+
+  --color-green-50: #e9f5ed;
+  --color-green-500: #2db421;
+
+  --color-yellow-50: #fff7d7;
+  --color-yellow-400: #fad34a;
+  --color-yellow-500: #ffd52e;
+  --color-yellow-700: #a5872d;
+
+  --color-blue-50: #deebff;
+  --color-blue-500: #087edb;
+  --color-blue-700: #0052cc;
+  --color-blue-900: #2141b4;
+
+  --color-orange-500: #f98746;
+  --color-cyan-400: #46cef9;
+
+  /* ---------------------------------------------------------------------
+     Semantic colours — what a colour means, not which colour it is.
+     Components reference these. Only this block changes when the palette does.
+     --------------------------------------------------------------------- */
+  --color-primary: var(--color-red-500);
+  --color-primary-hover: var(--color-red-600);
+  --color-primary-foreground: var(--color-white);
+
+  --color-secondary: #424651;
+  --color-secondary-foreground: var(--color-white);
+
+  --color-danger: var(--color-red-700);
+  --color-danger-subtle: var(--color-red-100);
+  --color-danger-surface: var(--color-red-50);
+
+  --color-success: var(--color-green-500);
+  --color-success-surface: var(--color-green-50);
+
+  --color-warning: var(--color-yellow-500);
+  --color-warning-strong: var(--color-yellow-700);
+  --color-warning-surface: var(--color-yellow-50);
+
+  --color-info: var(--color-blue-500);
+  --color-info-strong: var(--color-blue-700);
+  --color-info-surface: var(--color-blue-50);
+
+  --color-background: var(--color-white);
+  --color-background-subtle: #fafafa;
+  --color-background-inverse: #424651;
+
+  --color-foreground: var(--color-neutral-950);
+  --color-foreground-muted: var(--color-neutral-600);
+  --color-foreground-disabled: var(--color-neutral-400);
+
+  --color-border: var(--color-neutral-200);
+  --color-border-strong: var(--color-neutral-400);
+
+  --color-divider: var(--color-neutral-100);
+  --color-divider-strong: var(--color-neutral-200);
+  --color-divider-subtle: #f8f8f8;
+
+  --color-overlay: rgba(0, 0, 0, 0.42);
+  --color-hover-light: rgba(0, 0, 0, 0.04);
+  --color-hover-dark: rgba(255, 255, 255, 0.15);
+
+  --color-disabled-field: var(--color-neutral-100);
+  --color-disabled-button: var(--color-neutral-400);
+
+  /* ---------------------------------------------------------------------
+     Radius — six sizes plus a capsule.
+     --------------------------------------------------------------------- */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 999px;
+
+  /* ---------------------------------------------------------------------
+     Shadows — every one currently in use, kept together until the design team
+     defines the levels. Several are directional (upward, leftward, rightward)
+     or inset borders, so they are not a single scale yet.
+     --------------------------------------------------------------------- */
+  --shadow-1: 4px 4px 8px 0px rgba(0, 0, 0, 0.1);
+  --shadow-2: 4px 4px 10px 0px rgba(0, 0, 0, 0.15);
+  --shadow-3: 4px 4px 15px rgba(0, 0, 0, 0.04);
+  --shadow-4: 0px -4px 8px 4px rgba(0, 0, 0, 0.03);
+  --shadow-5: 3px 4px 6px rgba(216, 216, 216, 0.25);
+  --shadow-6: 0px 5px 14px 0px rgba(64, 64, 64, 0.05);
+  --shadow-7: 0px 2px 6px 0px rgba(64, 64, 64, 0.15);
+  --shadow-8: -5px 0px 9px 0px rgba(64, 64, 64, 0.03);
+  --shadow-9: 0 5px 20px 0px rgba(0, 0, 0, 0.1);
+  --shadow-10: 5px 0px 10px 0px rgba(0, 0, 0, 0.05);
+  --shadow-11: inset 0 0 0 0.5px;
+  --shadow-12:
+    1px 0px 0px 0px #f8f8f8 inset, -1px 0px 0px 0px #f8f8f8 inset, 0px 1px 0px 0px #f8f8f8 inset,
+    -1px -1px 0px 0px #f8f8f8 inset;
+  --shadow-13: 0px -1px 10px 0px rgba(0, 0, 0, 0.05);
+  --shadow-14: 4px 4px 15px 0px rgba(0, 0, 0, 0.031);
+  --shadow-15: 0px 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-16: 0 5px 5px 0 rgba(64, 64, 64, 0.1);
+  --shadow-17: 0 4px 12px rgba(64, 64, 64, 0.25);
+
+  /* ---------------------------------------------------------------------
+     Typography — px for the same reason as spacing.
+     --------------------------------------------------------------------- */
+  --font-sans: 'Open Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+  --text-3xl: 24px;
+
+  /* ---------------------------------------------------------------------
+     Stacking order
+     --------------------------------------------------------------------- */
+  --z-index-appbar: 1100;
+  --z-index-drawer: 1200;
+  --z-index-modal: 1300;
+  --z-index-snackbar: 1400;
+  --z-index-tooltip: 1500;
+}

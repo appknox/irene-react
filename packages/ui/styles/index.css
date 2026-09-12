@@ -4,9 +4,9 @@
 */
 
 /*
-  Declared once, and before the import — CSS allows a @layer statement ahead of
-  @import, and first declaration is what fixes cascade order. Tailwind declares
-  its own layers on import, so a later statement here would not reorder them.
+  Declared before the import — CSS allows a @layer statement ahead of @import,
+  and the first declaration fixes cascade order. Tailwind declares its own
+  layers on import, so a later statement here would not reorder them.
 
   `legacy` sits below components and utilities, so ported stylesheets lose to
   both without needing !important.
@@ -15,25 +15,23 @@
 
 @import 'tailwindcss';
 
-@theme {
-  /*
-    Placeholder scale. The design team's tokens replace these.
-
-    Tailwind ships these in rem, which would rescale everything by 87.5% against
-    irene's 14px root and land on fractional pixels. Overriding in px pins the
-    grid and the type scale to whole numbers.
-  */
-  --spacing: 4px;
-
-  --text-xs: 11px;
-  --text-sm: 12px;
-  --text-base: 14px;
-  --text-lg: 16px;
-}
+@import './fonts.css';
+@import './theme.css';
+@import './legacy-theme.css' layer(legacy);
 
 @layer base {
+  /*
+    The page root is 14px and every ported stylesheet assumes it. The px scales
+    in theme.css exist so Tailwind's rem defaults do not rescale against this.
+  */
   html {
     font-size: 14px;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-foreground);
+    background-color: var(--color-background);
   }
 }
 
