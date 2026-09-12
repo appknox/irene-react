@@ -8,11 +8,22 @@
     "pnpm": ">=10"
   },
   "scripts": {
-    "dev": "turbo dev",
     "build": "turbo build",
-    "lint": "turbo lint",
-    "type-check": "turbo type-check",
-    "test": "turbo test",
+    "build:test": "turbo build:test",
+    "dev": "turbo dev",
+    "start": "cross-env IRENE_API_HOST=http://localhost:8000 turbo dev",
+    "startstaging": "cross-env IRENE_API_HOST=https://api.appknox.io turbo dev",
+    "startprod": "cross-env IRENE_API_HOST=https://api.appknox.com turbo dev",
+    "lint": "concurrently \"npm:lint:*(!fix)\" --names \"lint:\"",
+    "lint:fix": "concurrently \"npm:lint:*:fix\" --names \"fix:\"",
+    "lint:js": "eslint . --cache",
+    "lint:js:fix": "eslint . --fix",
+    "lint:types": "turbo type-check",
+    "test": "concurrently \"npm:lint\" \"npm:test:*\" --names \"lint,test:\"",
+    "test:unit": "turbo test",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run --browser chrome",
+    "netlify:deploy": "netlify deploy --dir apps/dashboard/dist",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\""
   },
   "devDependencies": {
