@@ -75,7 +75,7 @@ describe('IRENE_API_HOST normalisation', () => {
 });
 
 describe('WHITELABEL_FAVICON has no default', () => {
-  // irene defaults it in the whitelabel service instead. An unset key must stay
+  // The whitelabel layer supplies its own default. An unset key must stay
   // undefined here, or a backend-supplied favicon can never take precedence.
   it('resolves to undefined when neither tier sets it', () => {
     expect(getConfig('WHITELABEL_FAVICON')).toBeUndefined();
@@ -99,7 +99,7 @@ describe('unregistered keys', () => {
     expect(() => getConfig('NOT_A_KEY' as ConfigKey)).toThrow('ENV: NOT_A_KEY not registered');
   });
 
-  it('registers exactly the twelve keys irene declares', () => {
+  it('registers exactly twelve keys', () => {
     expect(CONFIG_KEYS).toHaveLength(12);
   });
 });
@@ -156,8 +156,8 @@ describe('a key counts as configured only when a tier carries it', () => {
 });
 
 describe('isPluginEnabled', () => {
-  // Each case matches the output of irene's own config/environment.js, run
-  // against the same inputs.
+  // Each case was verified against the Ember implementation's output for the
+  // same inputs.
   const plugins: ConfigKey[] = ['IRENE_ENABLE_PENDO', 'IRENE_ENABLE_MARKETPLACE'];
 
   it('falls back to its own default when nothing is set', () => {

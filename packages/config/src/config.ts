@@ -19,8 +19,8 @@ declare global {
 }
 
 /**
- * What a key can resolve to. Undefined means no tier set it and irene declares
- * no default — see WHITELABEL_FAVICON below.
+ * What a key can resolve to. Undefined means no tier set it and there is no
+ * fallback — see WHITELABEL_FAVICON below.
  */
 export type ConfigValue = string | boolean | undefined;
 
@@ -28,11 +28,9 @@ export type ConfigValue = string | boolean | undefined;
 type ConfigSource = Record<string, string>;
 
 /**
- * Mirrors ENVHandlerCONST.defaults exactly.
- *
- * WHITELABEL_FAVICON is absent on purpose. irene defaults it in the whitelabel
- * service instead, and an unset key here is what lets a backend-supplied
- * favicon take precedence — see app/services/whitelabel.ts.
+ * WHITELABEL_FAVICON is absent on purpose. The whitelabel layer supplies its
+ * own default, and an unset key here is what lets a backend-supplied favicon
+ * take precedence.
  */
 const DEFAULTS: Partial<Record<ConfigKey, string | boolean>> = {
   IRENE_API_HOST: 'https://api.appknox.com',
@@ -50,7 +48,7 @@ const DEFAULTS: Partial<Record<ConfigKey, string | boolean>> = {
 
 const isKnownKey = (key: string): key is ConfigKey => CONFIG_KEYS.includes(key as ConfigKey);
 
-/** Throw on a key nobody registered, as ENVHandler.assertEnvKey does. */
+/** Throw on a key nobody registered. */
 function assertKnownKey(key: string): asserts key is ConfigKey {
   if (!isKnownKey(key)) {
     throw new Error(`ENV: ${key} not registered`);
@@ -80,7 +78,7 @@ const wasSetByDeployment = (key: ConfigKey) => wasInjected(key) || wasSetAtBuild
 const sameOriginAsEmpty = (key: ConfigKey, value: string) =>
   key === 'IRENE_API_HOST' && value === '/' ? '' : value;
 
-/** The built-in value for a key, or undefined where irene declares none. */
+/** The fallback for a key, or undefined where none is declared. */
 const builtInConfigValue = (key: ConfigKey): ConfigValue => DEFAULTS[key];
 
 /** Check if a config value reads as true. */
@@ -108,7 +106,7 @@ export const getConfigFlag = (key: ConfigKey): boolean => readsAsTrue(getConfig(
 export const getConfigText = (key: ConfigKey): string => String(getConfig(key) ?? '');
 
 /**
- * Whether an optional product is switched on. Ports ENVHandler.getValueForPlugin.
+ * Whether an optional product is switched on.
  *
  * Pendo and Marketplace do not resolve like other keys. When no deployment sets
  * them, they follow the inverse of ENTERPRISE — an enterprise deployment turns

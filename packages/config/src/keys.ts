@@ -4,9 +4,9 @@
  * One definition, shared by the resolver and by every app's Vite `define`, so a
  * key cannot be added to the build without the resolver knowing about it.
  *
- * These names match irene's exactly. Vite's `define` imposes no prefix, which is
- * why we use it instead of `import.meta.env.VITE_*` — a prefix would rename all
- * twelve keys and break seven whitelabel configs and both regional pod specs.
+ * Vite's `define` imposes no prefix, which is why we use it instead of
+ * `import.meta.env.VITE_*` — a prefix would rename all twelve keys and break
+ * seven whitelabel configs and both regional pod specs.
  */
 export const CONFIG_KEYS = [
   'IRENE_API_HOST',
