@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { cn, SHADOW_SCALE } from './index';
+import { cn, SHADOW_SCALE } from '@irene/ui/cn';
 
 describe('joining', () => {
   it('joins strings', () => {
@@ -50,7 +51,9 @@ describe('the custom theme', () => {
   });
 
   it('fails if the shadow scale drifts from the theme', () => {
-    const theme = readFileSync(new URL('../../../styles/theme.css', import.meta.url), 'utf8');
+    // process.cwd() is the package root under vitest; import.meta.url is not
+    // a file URL in the jsdom environment.
+    const theme = readFileSync(join(process.cwd(), 'styles/theme.css'), 'utf8');
     const declared = [...theme.matchAll(/--shadow-([\w-]+):/g)].map((m) => m[1]);
 
     expect([...SHADOW_SCALE].sort()).toEqual([...declared].sort());

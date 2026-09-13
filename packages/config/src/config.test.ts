@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { getConfig, getConfigFlag, getConfigText, isPluginEnabled } from './config';
-import { CONFIG_KEYS, type ConfigKey } from './keys';
+import { getConfig, getConfigFlag, getConfigText, isPluginEnabled } from '@irene/config/config';
+import { CONFIG_KEYS, type ConfigKey } from '@irene/config/keys';
 
 /** Set the values a build would have frozen in. */
 const atBuild = (values: Record<string, string>) => {

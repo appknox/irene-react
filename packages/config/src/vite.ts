@@ -1,3 +1,6 @@
+// Relative, with the extension, on purpose: an app's vite.config.ts imports
+// this, and Node loads it before Vite's resolver exists. No package path
+// would resolve there, and the native loader needs the file extension.
 import { CONFIG_KEYS, type ConfigKey } from './keys.ts';
 
 /**

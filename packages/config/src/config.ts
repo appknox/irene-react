@@ -8,7 +8,7 @@
  * a rebuild.
  */
 
-import { CONFIG_KEYS, type ConfigKey } from './keys';
+import { CONFIG_KEYS, type ConfigKey } from './keys.ts';
 
 declare const __BUILD_CONFIG__: Record<string, string>;
 
