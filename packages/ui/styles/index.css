@@ -17,7 +17,18 @@
 
 @import './fonts.css';
 @import './theme.css';
+@import './shadcn.css';
 @import './legacy-theme.css' layer(legacy);
+
+/*
+  Dark mode is not supported yet, but shadcn components ship `dark:` classes. Left on the
+  default, those activate from the operating system's colour preference and
+  half-style the components against a light palette.
+
+  Binding the variant to a `.dark` class instead means it never matches, since
+  nothing adds that class. Remove this to turn dark mode on.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   /*

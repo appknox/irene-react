@@ -1,0 +1,51 @@
+/*
+  shadcn's fixed token names, pointed at ours.
+
+  Every name on the left is one shadcn components hardcode; every value on the
+  right is a token from theme.css. No colour is declared twice, so changing a
+  theme token moves the shadcn components with it.
+
+  TODO:Temporary. Once the design team's set lands, these names can be declared
+  directly in theme.css and this file deleted. A name left out does not error —
+  the component silently falls back to shadcn's own colour, which shows up as
+  one off-palette element.
+*/
+
+@theme {
+  /* surfaces */
+  --color-card: var(--color-background);
+  --color-card-foreground: var(--color-foreground);
+  --color-popover: var(--color-background);
+  --color-popover-foreground: var(--color-foreground);
+
+  /* actions */
+  --color-destructive: var(--color-danger);
+  --color-destructive-foreground: var(--color-white);
+
+  /* de-emphasis, and the hover surface */
+  --color-muted: var(--color-neutral-100);
+  --color-muted-foreground: var(--color-foreground-muted);
+  --color-accent: var(--color-neutral-100);
+  --color-accent-foreground: var(--color-foreground);
+
+  /* edges */
+  --color-input: var(--color-border-strong);
+  --color-ring: var(--color-primary);
+
+  /* charts — status colours for now, not a dedicated chart palette */
+  --color-chart-1: var(--color-primary);
+  --color-chart-2: var(--color-info);
+  --color-chart-3: var(--color-success);
+  --color-chart-4: var(--color-warning);
+  --color-chart-5: var(--color-neutral-500);
+
+  /* sidebar — its own surface, mapped to the dark background */
+  --color-sidebar: var(--color-background-inverse);
+  --color-sidebar-foreground: var(--color-white);
+  --color-sidebar-primary: var(--color-primary);
+  --color-sidebar-primary-foreground: var(--color-primary-foreground);
+  --color-sidebar-accent: var(--color-hover-dark);
+  --color-sidebar-accent-foreground: var(--color-white);
+  --color-sidebar-border: var(--color-border);
+  --color-sidebar-ring: var(--color-primary);
+}
