@@ -67,7 +67,7 @@ const prefixed = (name: string) =>
 
 /** Every identifier the file exports, in declaration order. */
 function exportedNames(source: string): string[] {
-  const block = new RegExp(/export \{([^}]*)\}/).exec(source);
+  const block = /export \{([^}]*)\}/.exec(source);
 
   return block
     ? block[1]
