@@ -2,11 +2,14 @@ node_modules/
 dist/
 build/
 coverage/
+/tmp/
 
 # Turborepo and TanStack Router each write cache directories at the root and
 # per package, including compressed tarballs.
 .turbo/
 .tanstack/
+.eslintcache
+*.tsbuildinfo
 
 .env
 .env.*
@@ -24,9 +27,16 @@ npm-debug.log*
 !.vscode/extensions.json
 .idea/
 
-*.tsbuildinfo
-
-# Planning documents. Internal — customer names, auth design and infrastructure topology.
+# Planning documents
 migration/
 
-.eslintcache
+storybook-static/
+
+# Local Netlify folder
+.netlify
+
+# cypress
+cypress.env.json
+/cypress/downloads/
+/cypress/snapshots/actual
+/cypress/snapshots/diff
