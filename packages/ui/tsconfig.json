@@ -5,7 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "types": ["node"],
+    "types": ["node", "vite/client", "@testing-library/jest-dom"],
 
     "strict": true,
     "noUnusedLocals": true,
@@ -17,9 +17,14 @@
     "skipLibCheck": true,
     "noEmit": true,
 
+    // The shadcn CLI resolves its aliases through these. TypeScript itself
+    // reads the package exports map, so they only have to agree with it.
     "paths": {
-      "@ui/*": ["./src/*"]
+      "@irene/ui": ["./src/index.ts"],
+      "@irene/ui/cn": ["./src/utils/cn/index.ts"],
+      "@irene/ui/styles/*": ["./styles/*"],
+      "@irene/ui/*": ["./src/components/*/index.tsx"]
     }
   },
-  "include": ["src", "styles", "vitest.config.ts"]
+  "include": ["src", "styles", "tests", "scripts", ".storybook/**/*", "vitest.config.ts"]
 }

@@ -6,8 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./styles": "./styles/index.css",
+    "./styles/index.css": "./styles/index.css",
     "./cn": "./src/utils/cn/index.ts",
-    "./ui/*": "./src/components/ui/*.tsx",
     "./*": "./src/components/*/index.tsx",
     "./*/variants": "./src/components/*/variants.ts"
   },
@@ -16,20 +16,31 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@storybook/react-vite": "^10.6.0",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "prettier": "^3.9.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "sass-embedded": "^1.104.1"
+    "sass-embedded": "^1.104.1",
+    "shadcn": "^4.21.0",
+    "storybook": "^10.6.0",
+    "vite": "^8.3.0"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "radix-ui": "^1.6.7",
     "tailwind-merge": "^3.7.0"
   },
   "scripts": {
+    "build-storybook": "storybook build",
     "lint": "eslint .",
+    "shadcn:add": "shadcn add --yes && node scripts/rewrite-shadcn-imports.ts && prettier --write src/components",
+    "storybook": "storybook dev -p 6006",
     "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc -b --noEmit"
