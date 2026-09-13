@@ -17,14 +17,13 @@
 
     "skipLibCheck": true,
     "noEmit": true,
-
-    // The shadcn CLI resolves its aliases through these. TypeScript itself
-    // reads the package exports map, so they only have to agree with it.
     "paths": {
       "@irene/ui": ["./src/index.ts"],
       "@irene/ui/cn": ["./src/utils/cn/index.ts"],
       "@irene/ui/ui": ["./src/components/ui"],
       "@irene/ui/styles/*": ["./styles/*"],
+      "@irene/ui/*/variants": ["./src/components/*/variants.ts"],
+      "@irene/ui/*/context": ["./src/components/*/context.ts"],
       "@irene/ui/*": ["./src/components/*/index.tsx"]
     }
   },
