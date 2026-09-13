@@ -1,0 +1,53 @@
+{
+  "extends": ["stylelint-config-standard-scss"],
+  "ignoreFiles": ["**/node_modules/**", "**/dist/**", "**/storybook-static/**"],
+  "rules": {
+    "scss/at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "theme",
+          "source",
+          "custom-variant",
+          "utility",
+          "variant",
+          "apply",
+          "plugin",
+          "config",
+          "reference"
+        ]
+      }
+    ],
+    "custom-property-pattern": null,
+    "no-descending-specificity": null,
+    "color-function-notation": null,
+    "color-function-alias-notation": null,
+    "alpha-value-notation": null,
+    "custom-property-empty-line-before": null,
+    "comment-empty-line-before": null,
+    "declaration-property-value-disallowed-list": [
+      {
+        "/^color$|^background|^border-color|^outline-color|^fill$|^stroke$/": [
+          "/#[0-9a-fA-F]{3,8}/",
+          "/^rgba?\\(/",
+          "/^hsla?\\(/"
+        ],
+        "/border-radius/": ["/^[0-9]/"],
+        "box-shadow": ["/[0-9]+px/"]
+      },
+      {
+        "message": "Raw value. Use a token from packages/ui/styles/theme.css."
+      }
+    ],
+    "color-hex-length": null,
+    "at-rule-empty-line-before": null
+  },
+  "overrides": [
+    {
+      "files": ["packages/ui/styles/theme.css", "packages/ui/styles/legacy-theme.css"],
+      "rules": {
+        "declaration-property-value-disallowed-list": null
+      }
+    }
+  ]
+}
