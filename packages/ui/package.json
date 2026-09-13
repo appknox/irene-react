@@ -8,6 +8,9 @@
     "./styles": "./styles/index.css",
     "./styles/index.css": "./styles/index.css",
     "./cn": "./src/utils/cn/index.ts",
+    "./icons/sets": "./src/icons/sets.ts",
+    "./icons/register": "./src/icons/register.ts",
+    "./icons/icons.json": "./src/icons/icons.json",
     "./*": "./src/components/*/index.tsx",
     "./*/variants": "./src/components/*/variants.ts"
   },
@@ -16,6 +19,22 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@iconify-json/bx": "^1.2.3",
+    "@iconify-json/fa-brands": "^1.2.2",
+    "@iconify-json/fluent": "^1.2.57",
+    "@iconify-json/hugeicons": "^1.2.34",
+    "@iconify-json/ic": "^1.2.4",
+    "@iconify-json/iconoir": "^1.2.11",
+    "@iconify-json/ix": "^1.2.12",
+    "@iconify-json/majesticons": "^1.2.5",
+    "@iconify-json/material-symbols": "^1.2.92",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify-json/mi": "^1.2.2",
+    "@iconify-json/mynaui": "^1.2.19",
+    "@iconify-json/ph": "^1.2.2",
+    "@iconify-json/solar": "^1.2.10",
+    "@iconify-json/streamline-plump": "^1.2.0",
+    "@iconify/utils": "^3.1.7",
     "@storybook/react-vite": "^10.6.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.4",
@@ -31,15 +50,17 @@
     "vite": "^8.3.0"
   },
   "dependencies": {
+    "@iconify/react": "^6.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "radix-ui": "^1.6.7",
     "tailwind-merge": "^3.7.0"
   },
   "scripts": {
+    "build-icons": "node scripts/build-icons.ts",
     "build-storybook": "storybook build",
     "lint": "eslint .",
-    "shadcn:add": "shadcn add --yes && node scripts/rewrite-shadcn-imports.ts && prettier --write src/components",
+    "shadcn:add": "sh -c 'shadcn add --yes \"$@\" && node scripts/rewrite-shadcn-imports.ts && prettier --write src/components' --",
     "storybook": "storybook dev -p 6006",
     "test": "vitest run",
     "test:watch": "vitest",

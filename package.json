@@ -10,6 +10,7 @@
   "scripts": {
     "build": "turbo build",
     "build:test": "turbo build:test",
+    "build:icons": "pnpm --filter @irene/ui build-icons",
     "dev": "turbo dev",
     "start": "cross-env IRENE_API_HOST=http://localhost:8000 turbo dev",
     "startstaging": "cross-env IRENE_API_HOST=https://api.appknox.io turbo dev",
