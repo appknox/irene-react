@@ -4,10 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./config": "./src/config.ts",
-    "./keys": "./src/keys.ts",
-    "./vite": "./src/vite.ts"
+    ".": "./src/index.ts"
   },
   "scripts": {
     "lint": "eslint .",

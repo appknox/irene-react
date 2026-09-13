@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-import { buildConfigDefine } from '@irene/config/vite';
+import { buildConfigDefine } from '@irene/config';
 
 // Resolve paths to files in the src directory.
 const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.url));
