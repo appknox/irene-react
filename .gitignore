@@ -40,3 +40,6 @@ cypress.env.json
 /cypress/downloads/
 /cypress/snapshots/actual
 /cypress/snapshots/diff
+
+# Generated from src/routes by the router plugin
+routeTree.gen.ts

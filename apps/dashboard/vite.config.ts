@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
 
 import { buildConfigDefine } from '@irene/config';
 
@@ -10,10 +11,15 @@ import { buildConfigDefine } from '@irene/config';
 const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
-  // Freezes the registered config keys into the bundle. Every app needs
-  // this; without it __BUILD_CONFIG__ is undefined.
+  // Freezes the registered config keys into the bundle. Without it
+  // __BUILD_CONFIG__ is undefined at runtime.
   define: buildConfigDefine(),
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    // Generates routeTree.gen.ts. Must run before the React plugin.
+    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
+    react(),
+    tailwindcss(),
+  ],
   resolve: { alias: { '@': resolvePath('./src') } },
   server: { port: 4200, strictPort: true },
 });
