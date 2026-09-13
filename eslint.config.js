@@ -61,16 +61,18 @@ export default defineConfig([
             //   message: 'Hardcoded value. Use a token from packages/ui/styles/theme.css.',
             // },
             {
-              pattern: String.raw`(^|:)rounded(-(s|e|t|r|b|l|ss|se|ee|es|tl|tr|br|bl))?-\[`,
+              // (?!var\() lets a class reference a runtime custom property,
+              // like the values Radix sets on a popover.
+              pattern: String.raw`(^|:)rounded(-(s|e|t|r|b|l|ss|se|ee|es|tl|tr|br|bl))?-\[(?!var\()`,
               message: 'Hardcoded radius. Use rounded-xs through rounded-2xl, or rounded-full.',
             },
             {
-              pattern: String.raw`(^|:)(p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y|w|h|size|min-w|min-h|max-w|max-h|inset|inset-x|inset-y|top|right|bottom|left)-\[`,
+              pattern: String.raw`(^|:)(p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y|w|h|size|min-w|min-h|max-w|max-h|inset|inset-x|inset-y|top|right|bottom|left)-\[(?!var\()`,
               message:
                 'Hardcoded spacing. The scale is driven by --spacing; add a token if none fits.',
             },
             {
-              pattern: String.raw`(^|:)(text|leading|tracking|font)-\[`,
+              pattern: String.raw`(^|:)(text|leading|tracking|font)-\[(?!var\()`,
               message: 'Hardcoded type value. Use the --text-* and --font-weight-* tokens.',
             },
           ],

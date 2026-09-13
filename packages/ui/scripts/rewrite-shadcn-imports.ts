@@ -18,12 +18,39 @@
  *    that point at an app. Components import through the package name, so no
  *    alias plumbing is needed anywhere.
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
 const componentsDir = fileURLToPath(new URL('../src/components/', import.meta.url));
-const incomingDir = join(componentsDir, 'ui');
+
+/**
+ * Where the CLI drops files. It resolves the `ui` alias through tsconfig paths
+ * and the exact directory it picks has moved between versions, so rather than
+ * hard-coding one, collect every flat .tsx that is not already in a component
+ * folder.
+ */
+function stagedFiles(dir: string): string[] {
+  const found: string[] = [];
+
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      if (!entry.name.startsWith('ak-')) {
+        found.push(...stagedFiles(path));
+      }
+
+      continue;
+    }
+
+    if (entry.name.endsWith('.tsx') && !entry.name.startsWith('index.')) {
+      found.push(path);
+    }
+  }
+
+  return found;
+}
 
 const importRewrites: [RegExp, string][] = [
   [/import \{ cn \} from ["']cn["'];?/g, "import { cn } from '@irene/ui/cn';"],
@@ -52,7 +79,7 @@ function exportedNames(source: string): string[] {
 
 /** Pull top-level `const xVariants = cva(...)` blocks out of a component file. */
 function splitVariants(source: string) {
-  const blocks = [...source.matchAll(/^const (\w+Variants) = cva\([\s\S]*?\n\);$/gm)];
+  const blocks = [...source.matchAll(/^const (\w+Variants) = cva\([\s\S]*?\n\);?$/gm)];
 
   if (blocks.length === 0) {
     return { names: [], body: '', rest: source };
@@ -70,33 +97,41 @@ function splitVariants(source: string) {
   };
 }
 
-// The CLI creates this directory only while adding; nothing to do otherwise.
-if (!existsSync(incomingDir)) {
-  process.stdout.write('nothing to restructure\n');
-  process.exit(0);
-}
-
 let handled = 0;
 
-for (const entry of readdirSync(incomingDir, { withFileTypes: true })) {
-  if (!entry.isFile() || !entry.name.endsWith('.tsx')) {
-    continue;
-  }
-
-  const base = entry.name.replace(/\.tsx$/, '');
-  const flatPath = join(incomingDir, entry.name);
+for (const flatPath of stagedFiles(componentsDir)) {
+  const base = flatPath
+    .split('/')
+    .pop()!
+    .replace(/\.tsx$/, '');
   const folder = join(componentsDir, `ak-${base}`);
 
   let source = rewriteImports(readFileSync(flatPath, 'utf8'));
 
   // Rename every exported identifier. Matching whole identifiers and looking
   // each one up means DialogTrigger is not caught by the rule for Dialog.
-  const renames = new Map(exportedNames(source).map((name) => [name, prefixed(name)]));
-
-  source = source.replace(
-    /\b[A-Za-z_$][\w$]*\b/g,
-    (identifier: string) => renames.get(identifier) ?? identifier
+  // Exported names, plus the cva consts — the split makes those public through
+  // the variants entry even when shadcn keeps them file-local.
+  const variantNames = [...source.matchAll(/^const (\w+Variants) = cva\(/gm)].map(
+    ([, name]) => name
   );
+
+  const renames = new Map(
+    [...exportedNames(source), ...variantNames].map((name) => [name, prefixed(name)])
+  );
+
+  // Imports are masked while renaming. They name things owned by other
+  // packages — `import { Select } from 'radix-ui'` must stay Select.
+  const imports: string[] = [];
+
+  source = source
+    .replace(/^import [\s\S]*?from ['"][^'"]*['"];?$/gm, (statement) => {
+      imports.push(statement);
+
+      return `/*__IMPORT_${imports.length - 1}__*/`;
+    })
+    .replace(/\b[A-Za-z_$][\w$]*\b/g, (identifier: string) => renames.get(identifier) ?? identifier)
+    .replace(/\/\*__IMPORT_(\d+)__\*\//g, (_, index) => imports[Number(index)]);
 
   const variants = splitVariants(source);
 
@@ -115,7 +150,7 @@ for (const entry of readdirSync(incomingDir, { withFileTypes: true })) {
       )
       .replace(
         /^(import \{ cn \}[^\n]*\n)/m,
-        `$1import { ${variants.names.join(', ')} } from './variants';\n`
+        `$1import { ${variants.names.join(', ')} } from '@irene/ui/ak-${base}/variants';\n`
       )
       .replace(/export \{([^}]*)\}/, (_, exported) => {
         const kept = exported
@@ -135,8 +170,9 @@ for (const entry of readdirSync(incomingDir, { withFileTypes: true })) {
   handled += 1;
 }
 
-// The CLI recreates this directory on every add; it is a staging area only.
-rmSync(incomingDir, { recursive: true, force: true });
+// Everything the CLI wrote has been moved into a component folder; what is
+// left under src/components/ui is an empty staging area.
+rmSync(join(componentsDir, 'ui'), { recursive: true, force: true });
 
 process.stdout.write(
   handled === 0 ? 'nothing to restructure\n' : `restructured ${handled} component(s)\n`
