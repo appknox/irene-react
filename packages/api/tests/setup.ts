@@ -1,5 +1,4 @@
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
-
 import { server } from '@tests/server';
 
 declare global {

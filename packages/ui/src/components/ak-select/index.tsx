@@ -1,9 +1,10 @@
 'use client';
 
-import * as React from 'react';
-import { cn } from '@irene/ui/cn';
-import { AkIcon } from '@irene/ui/ak-icon';
 import { Select as SelectPrimitive } from 'radix-ui';
+import * as React from 'react';
+
+import { AkIcon } from '@irene/ui/ak-icon';
+import { cn } from '@irene/ui/cn';
 
 function AkSelect({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;

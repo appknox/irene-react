@@ -1,6 +1,6 @@
-import { http, HttpResponse } from 'msw';
 import { faker } from '@faker-js/faker';
 import { isAxiosError } from 'axios';
+import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
 import { AuthService } from '@irene/api/services/auth';
@@ -56,6 +56,7 @@ describe('AuthService.check', () => {
       const error = await AuthService.check(B64TOKEN).catch((reason: unknown) => reason);
 
       expect(isAxiosError(error) ? error.status : undefined).toBe(401);
+
       expect(isAxiosError(error) ? error.response?.data : undefined).toEqual({
         detail: 'Invalid token.',
       });
@@ -94,6 +95,7 @@ describe('AuthService.check', () => {
 
 describe('AuthService.login', () => {
   const LOGIN_URL = apiUrl('api/login');
+
   const credentials = {
     username: faker.internet.email(),
     password: faker.internet.password(),
@@ -143,6 +145,7 @@ describe('AuthService.login', () => {
       const error = await AuthService.login(credentials).catch((reason: unknown) => reason);
 
       expect(isAxiosError(error) ? error.status : undefined).toBe(401);
+
       expect(isAxiosError(error) ? error.response?.data : undefined).toEqual({
         detail: 'Invalid username or password',
       });

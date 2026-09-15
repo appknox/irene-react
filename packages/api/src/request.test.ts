@@ -1,10 +1,10 @@
-import { http, HttpResponse } from 'msw';
-import type { JsonBodyType } from 'msw';
 import { isAxiosError } from 'axios';
+import { http, HttpResponse, type JsonBodyType } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
-import { apiRequest, currentProduct, request } from '@irene/api/request';
 import { ENUMS } from '@irene/enums';
+
+import { apiRequest, currentProduct, request } from '@irene/api/request';
 import { apiUrl, server } from '@tests/server';
 
 const PING = apiUrl('api/ping');

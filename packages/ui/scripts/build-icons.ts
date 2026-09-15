@@ -7,8 +7,6 @@
  */
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-
-import { getIcons } from '@iconify/utils';
 import { icons as bx } from '@iconify-json/bx';
 import { icons as faBrands } from '@iconify-json/fa-brands';
 import { icons as fluent } from '@iconify-json/fluent';
@@ -24,6 +22,7 @@ import { icons as mynaui } from '@iconify-json/mynaui';
 import { icons as ph } from '@iconify-json/ph';
 import { icons as solar } from '@iconify-json/solar';
 import { icons as streamlinePlump } from '@iconify-json/streamline-plump';
+import { getIcons } from '@iconify/utils';
 
 import { iconSets } from '../src/icons/sets.ts';
 

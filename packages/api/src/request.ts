@@ -1,5 +1,4 @@
-import axios from 'axios';
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 
 import { getConfigValue } from '@irene/config';
 import { ENUMS } from '@irene/enums';

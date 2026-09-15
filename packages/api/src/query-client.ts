@@ -1,5 +1,5 @@
-import { isAxiosError } from 'axios';
 import { QueryClient } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 
 const RETRYABLE_ATTEMPTS = 2;
 

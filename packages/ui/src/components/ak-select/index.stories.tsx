@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AkLabel } from '@irene/ui/ak-label';
 import {
   AkSelect,
   AkSelectContent,
@@ -11,6 +10,8 @@ import {
   AkSelectTrigger,
   AkSelectValue,
 } from '@irene/ui/ak-select';
+
+import { AkLabel } from '@irene/ui/ak-label';
 
 const meta = {
   title: 'Components/AkSelect',

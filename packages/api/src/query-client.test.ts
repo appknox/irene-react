@@ -1,7 +1,7 @@
+import { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { describe, expect, it } from 'vitest';
 
 import { queryClient } from '@irene/api';
-import { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 /** A failure shaped the way the client actually rejects. */
 const failedWith = (status: number) =>

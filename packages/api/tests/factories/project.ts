@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-
 import type { Project } from '@irene/api/types/project';
 
 export const buildProject = (overrides: Partial<Project> = {}): Project => ({

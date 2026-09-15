@@ -1,6 +1,7 @@
 import { apiRequest } from '@irene/api/request';
-import { AuthEndpoints } from './config';
 import type { LoginRequest, SessionResponse } from '@irene/api/types/session';
+
+import { AuthEndpoints } from './config';
 
 /** Talks to the endpoints that sign a user in and check their session. */
 export default class AuthService {

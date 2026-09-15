@@ -1,11 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AkButton } from '@irene/ui/ak-button';
-import { AkInput } from '@irene/ui/ak-input';
 import {
   AkForm,
   AkFormControl,
@@ -15,6 +13,9 @@ import {
   AkFormLabel,
   AkFormMessage,
 } from '@irene/ui/ak-form';
+
+import { AkButton } from '@irene/ui/ak-button';
+import { AkInput } from '@irene/ui/ak-input';
 
 const schema = z.object({
   email: z.email('Enter a valid email address'),

@@ -1,16 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  SESSION_STORAGE_KEY,
-  encodeBase64Utf8,
-  clearStoredSession,
   buildBasicCredential,
-  getStoredSession,
+  clearStoredSession,
+  createSessionFromResponse,
+  encodeBase64Utf8,
   getAuthorizationHeader,
   getSignedInUserId,
+  getStoredSession,
   isSignedIn,
+  SESSION_STORAGE_KEY,
   storeSession,
-  createSessionFromResponse,
   type Session,
 } from '@irene/api/utils/session';
 

@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { type VariantProps } from 'class-variance-authority';
 
-import { cn } from '@irene/ui/cn';
 import { akAlertVariants } from '@irene/ui/ak-alert/variants';
+import { cn } from '@irene/ui/cn';
 
 function AkAlert({
   className,

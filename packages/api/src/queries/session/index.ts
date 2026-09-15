@@ -2,7 +2,6 @@ import { queryOptions } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 
 import { AUTH_SESSION_QUERY_KEY, AuthService } from '@irene/api/services/auth';
-
 import { clearStoredSession, getStoredSession } from '@irene/api/utils/session';
 
 /**

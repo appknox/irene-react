@@ -1,11 +1,9 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { describe, expect, it, vi } from 'vitest';
 import * as z from 'zod';
-
-import { AkInput } from '@irene/ui/ak-input';
 
 import {
   AkForm,
@@ -16,6 +14,8 @@ import {
   AkFormLabel,
   AkFormMessage,
 } from '@irene/ui/ak-form';
+
+import { AkInput } from '@irene/ui/ak-input';
 
 const schema = z.object({
   email: z.email('Enter a valid email address'),

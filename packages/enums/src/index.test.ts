@@ -76,6 +76,7 @@ describe('types', () => {
 describe('ENUMS_DISPLAY', () => {
   it('names the platforms', () => {
     expect(ENUMS_DISPLAY.PLATFORM[ENUMS.PLATFORM.IOS]).toBe('iOS');
+
     expect(ENUMS_DISPLAY.SBOM_COMPONENT_TYPE_NAMES[ENUMS.SBOM_COMPONENT_TYPE.LIBRARY]).toBe(
       'library'
     );

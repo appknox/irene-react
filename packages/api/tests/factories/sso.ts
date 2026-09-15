@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-
 import type { SsoCheck } from '@irene/api/types/sso';
 
 export const buildSsoCheck = (overrides: Partial<SsoCheck> = {}): SsoCheck => ({

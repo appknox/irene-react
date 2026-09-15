@@ -1,6 +1,7 @@
 import { apiRequest } from '@irene/api/request';
-import { SsoEndpoints } from './config';
 import type { SsoCheck } from '@irene/api/types/sso';
+
+import { SsoEndpoints } from './config';
 
 /** Talks to the endpoints that decide and start SSO sign-in. */
 export default class SsoService {

@@ -5,8 +5,8 @@ import { importGroupOf, importOrderFor, ownPatternsFor } from './import-order.js
 
 /*
   Runs the sort plugin, then spaces the import block by how many imports a file has:
-  - up to 2 imports: no blank lines
-  - 3 to 5 imports: groups 1–2 together, group 3 alone, groups 4–5 together
+  - up to 2 imports: no blank lines, except around a multi-line import
+  - 3 to 5 imports: group 1 alone, groups 2–3 together, groups 4–5 together
   - more than 5: all five groups apart
   Standalone `import type` lines go last in their group; mixed imports such as
   `import { value, type Type }` stay on one line. An import that prints across
@@ -24,7 +24,7 @@ import { importGroupOf, importOrderFor, ownPatternsFor } from './import-order.js
  * @property {boolean} isBarrier - Whether it is a side-effect import that must not move.
  */
 
-const MERGED_GROUPS = { 1: 1, 2: 1, 3: 3, 4: 4, 5: 4 };
+const MERGED_GROUPS = { 1: 1, 2: 2, 3: 2, 4: 4, 5: 4 };
 
 /**
  * Estimates whether Prettier will break an import across lines, by printing it on one line.
@@ -40,6 +40,32 @@ function _isMultiline(statement, printWidth) {
     .replace(/,? ?\}/, ' }');
 
   return oneLine.length > printWidth;
+}
+
+/**
+ * Checks whether an import brings in only types: `import type { A }`, or `import { type A, type B }`.
+ *
+ * @param {import('typescript').ImportClause | undefined} clause - The import's clause.
+ * @returns {boolean} Whether every imported name is a type.
+ */
+function _importsOnlyTypes(clause) {
+  if (!clause) {
+    return false;
+  }
+
+  if (clause.phaseModifier === ts.SyntaxKind.TypeKeyword) {
+    return true;
+  }
+
+  const bindings = clause.namedBindings;
+
+  return (
+    !clause.name &&
+    bindings !== undefined &&
+    ts.isNamedImports(bindings) &&
+    bindings.elements.length > 0 &&
+    bindings.elements.every((element) => element.isTypeOnly)
+  );
 }
 
 /**
@@ -88,7 +114,7 @@ function _readImports(code, options) {
     return {
       text,
       group,
-      isType: statement.importClause?.phaseModifier === ts.SyntaxKind.TypeKeyword,
+      isType: _importsOnlyTypes(statement.importClause),
       isMultiline: _isMultiline(statement.getText(sourceFile), options.printWidth),
       isBarrier: !statement.importClause && group !== 5,
     };
@@ -118,6 +144,28 @@ function _layoutGroup(entries) {
 }
 
 /**
+ * Keeps imports in their order, setting any multi-line import apart with blank lines.
+ *
+ * @param {ImportEntry[]} entries - The imports, in sorted order.
+ * @returns {string} The imports, joined with the right blank lines.
+ */
+function _spaceMultilineInOrder(entries) {
+  const blocks = [];
+
+  for (const entry of entries) {
+    const previous = blocks.at(-1);
+
+    if (entry.isMultiline || !previous || previous.isMultiline) {
+      blocks.push({ isMultiline: entry.isMultiline, lines: [entry.text] });
+    } else {
+      previous.lines.push(entry.text);
+    }
+  }
+
+  return blocks.map((block) => block.lines.join('\n')).join('\n\n');
+}
+
+/**
  * Spaces a run of sortable imports by the file's import count.
  *
  * @param {ImportEntry[]} entries - The imports between two barriers, in sorted order.
@@ -126,7 +174,7 @@ function _layoutGroup(entries) {
  */
 function _layoutRun(entries, total) {
   if (total <= 2) {
-    return entries.map((entry) => entry.text).join('\n');
+    return _spaceMultilineInOrder(entries);
   }
 
   const groupKey = (entry) => (total <= 5 ? MERGED_GROUPS[entry.group] : entry.group);

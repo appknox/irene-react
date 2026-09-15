@@ -27,6 +27,7 @@ describe('sessionCheckOptions', () => {
       let authorization: string | null = null;
 
       storeSession(session);
+
       server.use(
         http.post(CHECK_URL, ({ request }) => {
           authorization = request.headers.get('Authorization');
@@ -51,6 +52,7 @@ describe('sessionCheckOptions', () => {
   describe('when the credential is refused', () => {
     it('resolves to null and clears the stored session on a 401', async () => {
       storeSession(session);
+
       server.use(
         http.post(CHECK_URL, () => HttpResponse.json({ detail: 'Invalid token.' }, { status: 401 }))
       );
@@ -66,6 +68,7 @@ describe('sessionCheckOptions', () => {
       await expect(queryClient.query({ ...sessionCheckOptions(), retry: false })).rejects.toThrow(
         '500'
       );
+
       expect(getStoredSession()).toEqual(session);
     });
   });

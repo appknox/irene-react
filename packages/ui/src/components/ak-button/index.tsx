@@ -1,8 +1,9 @@
+import { Slot } from 'radix-ui';
 import * as React from 'react';
 import { type VariantProps } from 'class-variance-authority';
-import { Slot } from 'radix-ui';
 
 import { cn } from '@irene/ui/cn';
+
 import { akButtonVariants } from './variants';
 
 type ButtonProps = React.ComponentProps<'button'> &

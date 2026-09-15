@@ -1,7 +1,8 @@
 import { apiRequest } from '@irene/api/request';
-import { ProjectEndpoints } from './config';
 import type { ApiPage, DrfPageResponse } from '@irene/api/types/pagination';
 import type { Project, ProjectListParams } from '@irene/api/types/project';
+
+import { ProjectEndpoints } from './config';
 
 /** Talks to the project endpoints. */
 export default class ProjectService {

@@ -1,5 +1,5 @@
-import { http, HttpResponse } from 'msw';
 import { isAxiosError } from 'axios';
+import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
 import { SsoService } from '@irene/api/services/sso';
@@ -61,6 +61,7 @@ describe('SsoService.check', () => {
 
       expect(isAxiosError(error)).toBe(true);
       expect(isAxiosError(error) ? error.status : undefined).toBe(400);
+
       expect(isAxiosError(error) ? error.response?.data : undefined).toEqual({
         username: ['Enter a valid email address.'],
       });

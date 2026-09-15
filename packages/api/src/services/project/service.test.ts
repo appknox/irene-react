@@ -1,11 +1,11 @@
-import { http, HttpResponse } from 'msw';
 import { isAxiosError } from 'axios';
+import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
+import { ProjectService } from '@irene/api/services/project';
 import { buildProject } from '@tests/factories';
 import { apiUrl, server } from '@tests/server';
 import { buildDrfPage } from '@tests/utils';
-import { ProjectService } from '@irene/api/services/project';
 
 const LIST_URL = apiUrl('api/v3/projects');
 const detailUrl = (id: string) => apiUrl(`api/v3/projects/${id}`);

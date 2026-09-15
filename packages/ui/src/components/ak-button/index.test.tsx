@@ -86,6 +86,7 @@ describe('behaviour', () => {
 
   it('does not fire when disabled', async () => {
     const onClick = vi.fn();
+
     render(
       <AkButton disabled onClick={onClick}>
         Scan
