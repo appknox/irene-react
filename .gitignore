@@ -43,3 +43,6 @@ cypress.env.json
 
 # Generated from src/routes by the router plugin
 routeTree.gen.ts
+
+# Generated from translations/ by packages/translations/scripts/generate.ts
+packages/translations/src/generated/

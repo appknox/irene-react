@@ -1,10 +1,24 @@
-import { defineConfig, globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
+import stylistic from '@stylistic/eslint-plugin';
 import betterTailwind from 'eslint-plugin-better-tailwindcss';
-import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
+
+import maxComponentLines from './eslint/rules/max-component-lines.js';
+
+const MULTILINE_STATEMENTS = [
+  'multiline-const',
+  'multiline-let',
+  'multiline-var',
+  'multiline-using',
+  'multiline-expression',
+  'multiline-export',
+  'multiline-type',
+  'multiline-return',
+];
 
 export default defineConfig([
   globalIgnores(['**/dist', '**/coverage', '**/.turbo', '**/routeTree.gen.ts']),
@@ -20,6 +34,7 @@ export default defineConfig([
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       'better-tailwindcss': betterTailwind,
+      '@stylistic': stylistic,
     },
 
     settings: {
@@ -30,11 +45,16 @@ export default defineConfig([
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'padding-line-between-statements': [
+      // Runtime namespaces stay banned; `declare global` augmentations of library types are allowed.
+      '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }],
+      '@stylistic/padding-line-between-statements': [
         'error',
         { blankLine: 'always', prev: '*', next: 'return' },
         { blankLine: 'always', prev: ['block', 'block-like'], next: '*' },
         { blankLine: 'always', prev: '*', next: ['block', 'block-like'] },
+        // A statement spanning several lines gets a blank line on both sides.
+        { blankLine: 'always', prev: MULTILINE_STATEMENTS, next: '*' },
+        { blankLine: 'always', prev: '*', next: MULTILINE_STATEMENTS },
       ],
       // `@ui/*` and `@api/*` are path aliases for package internals. An app
       // reaching for them bypasses the exports map and pulls in more than it asked for.
@@ -92,6 +112,14 @@ export default defineConfig([
         },
       ],
     },
+  },
+
+  {
+    // A component past 350 lines of code does too much; the error says how to split it.
+    files: ['**/*.tsx'],
+    ignores: ['**/*.test.tsx', '**/*.stories.tsx'],
+    plugins: { irene: { rules: { 'max-component-lines': maxComponentLines } } },
+    rules: { 'irene/max-component-lines': ['error', { max: 350 }] },
   },
 
   {
