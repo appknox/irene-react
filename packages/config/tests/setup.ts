@@ -13,5 +13,8 @@ const reset = () => {
   delete window.runtimeGlobalConfig;
 };
 
+// Modules read config at import, so the tiers must exist before they load.
+reset();
+
 beforeEach(reset);
 afterEach(reset);

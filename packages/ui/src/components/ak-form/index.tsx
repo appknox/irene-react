@@ -1,15 +1,8 @@
 import { useId, useMemo } from 'react';
-
-import {
-  Controller,
-  FormProvider,
-  type ControllerProps,
-  type FieldPath,
-  type FieldValues,
-} from 'react-hook-form';
-
+import { Controller, FormProvider } from 'react-hook-form';
 import { Slot } from 'radix-ui';
 import type { Label as LabelPrimitive } from 'radix-ui';
+import { type ControllerProps, type FieldPath, type FieldValues } from 'react-hook-form';
 
 import { cn } from '@irene/ui/cn';
 import { AkLabel } from '@irene/ui/ak-label';

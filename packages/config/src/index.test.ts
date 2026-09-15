@@ -4,7 +4,7 @@ import {
   CONFIG_KEYS,
   getConfig,
   getConfigFlag,
-  getConfigText,
+  getConfigValue,
   isPluginEnabled,
   type ConfigKey,
 } from '@irene/config';
@@ -138,13 +138,13 @@ describe('boolean handling', () => {
   });
 });
 
-describe('getConfigText', () => {
+describe('getConfigValue', () => {
   it('returns an empty string for a key with no default', () => {
-    expect(getConfigText('WHITELABEL_FAVICON')).toBe('');
+    expect(getConfigValue('WHITELABEL_FAVICON')).toBe('');
   });
 
   it('stringifies a boolean default', () => {
-    expect(getConfigText('ENTERPRISE')).toBe('false');
+    expect(getConfigValue('ENTERPRISE')).toBe('false');
   });
 });
 
