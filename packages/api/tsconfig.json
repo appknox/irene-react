@@ -14,7 +14,11 @@
     "isolatedModules": true,
 
     "skipLibCheck": true,
+
+    "paths": {
+      "@tests/*": ["./tests/*"]
+    },
     "noEmit": true
   },
-  "include": ["src", "tests", "vitest.config.ts"]
+  "include": ["src", "tests", "vitest.config.ts", "../../types"]
 }

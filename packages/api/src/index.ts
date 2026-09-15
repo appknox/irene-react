@@ -1,2 +1,3 @@
-export { apiClient, currentProduct, PRODUCT } from '@irene/api/client';
-export { API_NAMESPACES, buildUrl, type ApiNamespace } from '@irene/api/namespaces';
+export { queryClient } from '@irene/api/query-client';
+export { client, currentProduct, apiRequest, request } from '@irene/api/request';
+export { API_NAMESPACES, type ApiNamespace } from '@irene/api/namespaces';
