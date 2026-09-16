@@ -4,17 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import { describe, expect, it, vi } from 'vitest';
 import * as z from 'zod';
+import type { ReactNode } from 'react';
 
-import {
-  AkForm,
-  AkFormControl,
-  AkFormDescription,
-  AkFormField,
-  AkFormItem,
-  AkFormLabel,
-  AkFormMessage,
-} from '@irene/ui/ak-form';
-
+import { AkForm, AkFormField } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
 
 const schema = z.object({
@@ -23,7 +15,15 @@ const schema = z.object({
 
 type Values = z.infer<typeof schema>;
 
-function TestForm({ onValid = vi.fn() }: { onValid?: (values: Values) => void }) {
+function TestForm({
+  onValid = vi.fn(),
+  children = <AkInput />,
+  labelAction,
+}: {
+  onValid?: (values: Values) => void;
+  children?: ReactNode;
+  labelAction?: ReactNode;
+}) {
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { email: '' },
@@ -33,27 +33,48 @@ function TestForm({ onValid = vi.fn() }: { onValid?: (values: Values) => void })
     <AkForm {...form}>
       <form onSubmit={form.handleSubmit(onValid)}>
         <AkFormField
-          control={form.control}
           name="email"
-          render={({ field }) => (
-            <AkFormItem>
-              <AkFormLabel>Email</AkFormLabel>
-
-              <AkFormControl>
-                <AkInput {...field} />
-              </AkFormControl>
-
-              <AkFormDescription>We only use this to sign you in.</AkFormDescription>
-              <AkFormMessage />
-            </AkFormItem>
-          )}
-        />
+          label="Email"
+          labelAction={labelAction}
+          description="We only use this to sign you in."
+        >
+          {children}
+        </AkFormField>
 
         <button type="submit">Sign in</button>
       </form>
     </AkForm>
   );
 }
+
+describe('the control as a child', () => {
+  it("keeps the control's own change handler alongside the field's", async () => {
+    const onChange = vi.fn();
+    const onValid = vi.fn();
+
+    render(
+      <TestForm onValid={onValid}>
+        <AkInput onChange={onChange} />
+      </TestForm>
+    );
+
+    await userEvent.type(screen.getByLabelText('Email'), 'a@b.com');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    expect(onChange).toHaveBeenCalled();
+
+    expect(onValid).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'a@b.com' }),
+      expect.anything()
+    );
+  });
+
+  it('renders an action opposite the label', () => {
+    render(<TestForm labelAction={<a href="/recover">Forgot Password?</a>} />);
+
+    expect(screen.getByRole('link', { name: 'Forgot Password?' })).toBeInTheDocument();
+  });
+});
 
 describe('rendering', () => {
   it('ties the label to the control', () => {

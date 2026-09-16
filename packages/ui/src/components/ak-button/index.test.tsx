@@ -12,25 +12,27 @@ describe('rendering', () => {
     expect(screen.getByRole('button', { name: 'Scan now' })).toBeInTheDocument();
   });
 
-  it('defaults to the default variant and size', () => {
+  it('defaults to a filled primary button', () => {
     render(<AkButton>Scan</AkButton>);
 
     const button = screen.getByRole('button');
 
-    expect(button).toHaveAttribute('data-variant', 'default');
+    expect(button).toHaveAttribute('data-variant', 'filled');
+    expect(button).toHaveAttribute('data-color', 'primary');
     expect(button).toHaveAttribute('data-size', 'default');
   });
 
-  it('records the variant and size it was given', () => {
+  it('records the variant, color and size it was given', () => {
     render(
-      <AkButton variant="destructive" size="sm">
+      <AkButton variant="outlined" color="error" size="sm">
         Delete
       </AkButton>
     );
 
     const button = screen.getByRole('button');
 
-    expect(button).toHaveAttribute('data-variant', 'destructive');
+    expect(button).toHaveAttribute('data-variant', 'outlined');
+    expect(button).toHaveAttribute('data-color', 'error');
     expect(button).toHaveAttribute('data-size', 'sm');
   });
 
@@ -47,10 +49,23 @@ describe('rendering', () => {
 });
 
 describe('class handling', () => {
-  it('applies the variant classes', () => {
-    render(<AkButton variant="destructive">Delete</AkButton>);
+  it('applies the classes for the variant and color together', () => {
+    render(<AkButton color="error">Delete</AkButton>);
 
-    expect(screen.getByRole('button')).toHaveClass('bg-destructive');
+    expect(screen.getByRole('button')).toHaveClass('bg-danger');
+  });
+
+  it('tints an outlined button with its color', () => {
+    render(
+      <AkButton variant="outlined" color="primary">
+        Login using SSO
+      </AkButton>
+    );
+
+    const button = screen.getByRole('button');
+
+    expect(button).toHaveClass('border-primary');
+    expect(button).toHaveClass('text-primary');
   });
 
   it('lets a caller override a conflicting class', () => {
@@ -113,8 +128,67 @@ describe('behaviour', () => {
   });
 });
 
+describe('loading', () => {
+  it('shows a spinner and disables the button', () => {
+    render(<AkButton loading>Login</AkButton>);
+
+    const button = screen.getByRole('button', { name: 'Login' });
+
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('keeps its label while loading, so the button does not resize', () => {
+    render(<AkButton loading>Login</AkButton>);
+
+    expect(screen.getByRole('button')).toHaveTextContent('Login');
+  });
+
+  it('does not fire while loading', async () => {
+    const onClick = vi.fn();
+
+    render(
+      <AkButton loading onClick={onClick}>
+        Login
+      </AkButton>
+    );
+
+    await userEvent.click(screen.getByRole('button'));
+
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it.each(['filled', 'outlined', 'text'] as const)('loads in the %s variant', (variant) => {
+    render(
+      <AkButton variant={variant} loading>
+        Login
+      </AkButton>
+    );
+
+    const button = screen.getByRole('button', { name: 'Login' });
+
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('data-loading');
+    expect(button.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('keeps its colour while loading rather than looking unavailable', () => {
+    render(<AkButton loading>Login</AkButton>);
+
+    // The disabled background only applies to a button that is not loading.
+    expect(screen.getByRole('button')).toHaveClass('disabled:not-data-loading:bg-disabled-button');
+  });
+
+  it('has no spinner when it is not loading', () => {
+    render(<AkButton>Login</AkButton>);
+
+    expect(screen.getByRole('button').querySelector('svg')).toBeNull();
+  });
+});
+
 describe('akButtonVariants used on its own', () => {
   it('produces the classes for a variant without rendering a button', () => {
-    expect(akButtonVariants({ variant: 'link' })).toContain('underline-offset-4');
+    expect(akButtonVariants({ variant: 'text', color: 'primary' })).toContain('text-primary');
   });
 });

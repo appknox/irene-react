@@ -27,7 +27,7 @@ export const AllVariants: Story = {
         <AkAlertDescription>The build is in the queue and will start shortly.</AkAlertDescription>
       </AkAlert>
 
-      <AkAlert variant="destructive">
+      <AkAlert variant="error">
         <AkIcon name="material-symbols:error" />
         <AkAlertTitle>Scan failed</AkAlertTitle>
         <AkAlertDescription>The binary could not be read. Upload it again.</AkAlertDescription>
@@ -47,7 +47,7 @@ export const Default: Story = {
 
 export const Destructive: Story = {
   render: () => (
-    <AkAlert variant="destructive" className="w-96">
+    <AkAlert variant="error" className="w-96">
       <AkAlertTitle>Scan failed</AkAlertTitle>
       <AkAlertDescription>The binary could not be read.</AkAlertDescription>
     </AkAlert>

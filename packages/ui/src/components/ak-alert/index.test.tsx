@@ -45,17 +45,22 @@ describe('variants', () => {
   it('defaults to the neutral surface', () => {
     render(<AkAlert>Body</AkAlert>);
 
-    expect(screen.getByRole('alert')).toHaveClass('bg-card');
+    expect(screen.getByRole('alert')).toHaveClass('bg-background');
   });
 
-  it('applies the destructive variant', () => {
-    render(<AkAlert variant="destructive">Body</AkAlert>);
+  it.each([
+    ['error', 'bg-danger-surface'],
+    ['warning', 'bg-warning-surface'],
+    ['success', 'bg-success-surface'],
+    ['info', 'bg-info-surface'],
+  ] as const)('tints the %s variant', (variant, surface) => {
+    render(<AkAlert variant={variant}>Body</AkAlert>);
 
-    expect(screen.getByRole('alert')).toHaveClass('text-destructive');
+    expect(screen.getByRole('alert')).toHaveClass(surface);
   });
 
   it('produces classes without rendering', () => {
-    expect(akAlertVariants({ variant: 'destructive' })).toContain('text-destructive');
+    expect(akAlertVariants({ variant: 'error' })).toContain('text-danger');
   });
 });
 
