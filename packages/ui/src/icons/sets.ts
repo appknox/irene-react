@@ -263,6 +263,16 @@ export const majesticons = ['pulse'] as const;
 /** https://icon-sets.iconify.design/mi/ */
 export const mi = ['select'] as const;
 
+/** https://icon-sets.iconify.design/lucide/ */
+export const lucide = [
+  'circle-check',
+  'info',
+  'loader-circle',
+  'octagon-x',
+  'triangle-alert',
+  'x',
+] as const;
+
 export const iconSets = {
   'material-symbols': materialSymbols,
   mdi: mdi,
@@ -279,6 +289,7 @@ export const iconSets = {
   ix: ix,
   majesticons: majesticons,
   mi: mi,
+  lucide: lucide,
 } as const;
 
 export type IconSet = keyof typeof iconSets;
@@ -312,4 +323,5 @@ export const iconNamesBySet: {
   ix: ix.map((name) => `ix:${name}` as const),
   majesticons: majesticons.map((name) => `majesticons:${name}` as const),
   mi: mi.map((name) => `mi:${name}` as const),
+  lucide: lucide.map((name) => `lucide:${name}` as const),
 };

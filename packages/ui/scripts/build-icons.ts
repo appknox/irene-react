@@ -14,6 +14,7 @@ import { icons as hugeicons } from '@iconify-json/hugeicons';
 import { icons as ic } from '@iconify-json/ic';
 import { icons as iconoir } from '@iconify-json/iconoir';
 import { icons as ix } from '@iconify-json/ix';
+import { icons as lucide } from '@iconify-json/lucide';
 import { icons as majesticons } from '@iconify-json/majesticons';
 import { icons as materialSymbols } from '@iconify-json/material-symbols';
 import { icons as mdi } from '@iconify-json/mdi';
@@ -34,6 +35,7 @@ const sources = {
   ic,
   iconoir,
   ix,
+  lucide,
   majesticons,
   'material-symbols': materialSymbols,
   mdi,
