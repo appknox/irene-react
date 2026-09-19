@@ -2,7 +2,6 @@ import { toast, type ExternalToast } from 'sonner';
 import type { ReactNode } from 'react';
 
 import { AkAlert, AkAlertDescription, AkAlertTitle } from '@irene/ui/ak-alert';
-import { AkButton } from '@irene/ui/ak-button';
 import { AkIcon } from '@irene/ui/ak-icon';
 import type { IconName } from '@irene/ui/icons/sets';
 
@@ -29,23 +28,12 @@ function _notify(kind: NotifyKind, message: ReactNode, options: NotifyOptions = 
 
   return toast.custom(
     (id) => (
-      <AkAlert variant={kind} className="shadow-lg">
+      <AkAlert variant={kind} className="shadow-lg" onDismiss={() => toast.dismiss(id)}>
         <AkIcon name={ICONS[kind]} />
 
         <AkAlertTitle>{message}</AkAlertTitle>
 
         {description && <AkAlertDescription>{description}</AkAlertDescription>}
-
-        <AkButton
-          variant="text"
-          color="textSecondary"
-          size="xs"
-          aria-label="Close"
-          className="absolute top-2 right-2"
-          onClick={() => toast.dismiss(id)}
-        >
-          <AkIcon name="lucide:x" />
-        </AkButton>
       </AkAlert>
     ),
     rest

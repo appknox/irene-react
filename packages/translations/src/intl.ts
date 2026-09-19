@@ -51,9 +51,19 @@ function _buildIntl(locale: Locale, messages: Messages): IntlShape {
       messages,
       formats: FORMATS,
       defaultLocale: DEFAULT_LOCALE,
+      onError: _reportError,
+
       // Renders markup in any message without each call site passing the tags.
       defaultRichTextElements: RICH_TEXT_TAGS,
-      onError: _reportError,
+
+      /*
+        Messages ship as ICU strings rather than a pre-compiled AST, which costs
+        ~4KB gzipped per locale to change and buys only a parse that is memoised
+        on first use. react-intl warns about the combination; this is the sole
+        thing it sends to onWarn, so silencing it hides nothing else. Revisit if
+        an upgrade starts reporting anything more through this channel.
+      */
+      onWarn: () => undefined,
     },
     cache
   );

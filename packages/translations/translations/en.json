@@ -1202,7 +1202,6 @@
   "login": "Login",
   "loginFailed": "Login failed: Invalid User. Please contact your admin.",
   "loginTitle": "Login to your account",
-  "translationDemo": "Line one<br>Line two with <strong>{name}</strong>",
   "logout": "Logout",
   "low": "Low",
   "manage": "Manage",

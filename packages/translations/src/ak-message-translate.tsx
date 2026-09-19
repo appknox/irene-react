@@ -1,4 +1,6 @@
+import { Fragment } from 'react';
 import { useIntl } from 'react-intl';
+
 import type { MessageArgumentValues, MessageId } from '@irene/translations/messages';
 
 /** Props whose `values` are required with exactly the message's arguments, and absent when it has none. */
@@ -20,5 +22,5 @@ export function AkMessageTranslate<Id extends MessageId>({
 }: AkMessageTranslateProps<Id>) {
   const intl = useIntl();
 
-  return <>{intl.formatMessage({ id }, values)}</>;
+  return <Fragment>{intl.formatMessage({ id }, values)}</Fragment>;
 }

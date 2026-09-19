@@ -77,6 +77,30 @@ describe('AkToaster', () => {
     expect(await screen.findByText('Invalid username or password.')).toBeInTheDocument();
   });
 
+  it('sits in the bottom right corner', async () => {
+    const { container } = renderToaster();
+
+    akNotify.info('Scan queued');
+    await screen.findByText('Scan queued');
+
+    const toaster = container.querySelector('[data-sonner-toaster]');
+
+    expect(toaster).toHaveAttribute('data-y-position', 'bottom');
+    expect(toaster).toHaveAttribute('data-x-position', 'right');
+  });
+
+  it("uses the app's own font, not sonner's system stack", async () => {
+    const { container } = renderToaster();
+
+    akNotify.info('Scan queued');
+    await screen.findByText('Scan queued');
+
+    // Inline, because sonner's stylesheet would otherwise win.
+    expect(container.querySelector('[data-sonner-toaster]')).toHaveStyle({
+      fontFamily: 'var(--font-sans)',
+    });
+  });
+
   it('takes an override for sonner props', async () => {
     const { container } = renderToaster({ position: 'bottom-center' });
 

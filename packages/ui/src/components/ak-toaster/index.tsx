@@ -12,9 +12,12 @@ export const AK_TOAST_DURATION = 7000;
 function AkToaster(props: Readonly<ToasterProps>) {
   return (
     <Sonner
-      position="bottom-left"
+      position="bottom-right"
       duration={AK_TOAST_DURATION}
       visibleToasts={3}
+      // Sonner hardcodes a system font stack on its container. An inline style
+      // is what beats that stylesheet; toasts inherit from here.
+      style={{ fontFamily: 'var(--font-sans)' }}
       // Each toast renders an AkAlert, so sonner's own surface is turned off.
       toastOptions={{ unstyled: true, classNames: { toast: 'w-full' } }}
       {...props}

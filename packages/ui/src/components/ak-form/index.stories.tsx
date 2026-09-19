@@ -5,7 +5,7 @@ import * as z from 'zod';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { AkButton } from '@irene/ui/ak-button';
-import { AkForm, AkFormField } from '@irene/ui/ak-form';
+import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
 
 const schema = z.object({
@@ -42,7 +42,7 @@ function EmailField({ description, invalid = false }: Readonly<EmailFieldProps>)
   }, [invalid, setError]);
 
   return (
-    <AkForm {...form}>
+    <AkFormProvider {...form}>
       <form className="w-72 space-y-4" onSubmit={form.handleSubmit(() => {})}>
         <AkFormField name="email" label="Email" description={description}>
           <AkInput placeholder="you@appknox.com" />
@@ -50,12 +50,12 @@ function EmailField({ description, invalid = false }: Readonly<EmailFieldProps>)
 
         <AkButton type="submit">Sign in</AkButton>
       </form>
-    </AkForm>
+    </AkFormProvider>
   );
 }
 
 const meta = {
-  title: 'Components/AkForm',
+  title: 'Components/AkFormProvider',
   component: EmailField,
   parameters: { layout: 'centered' },
   tags: ['autodocs'],

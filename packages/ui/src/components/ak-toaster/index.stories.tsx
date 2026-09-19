@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { AkButton } from '@irene/ui/ak-button';
@@ -21,7 +22,7 @@ export const AllKinds: Story = {
     <div className="flex flex-wrap gap-3">
       <AkToaster />
 
-      <AkButton color="success" onClick={() => akNotify.success('Project created')}>
+      <AkButton color="success" onClick={() => akNotify.success('ApiProject created')}>
         Success
       </AkButton>
 
@@ -47,7 +48,7 @@ export const AllKinds: Story = {
 /** A message with a description under it. */
 export const WithDescription: Story = {
   render: () => (
-    <>
+    <Fragment>
       <AkToaster />
 
       <AkButton
@@ -57,6 +58,6 @@ export const WithDescription: Story = {
       >
         Raise
       </AkButton>
-    </>
+    </Fragment>
   ),
 };

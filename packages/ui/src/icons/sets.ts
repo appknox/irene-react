@@ -209,6 +209,7 @@ export const materialSymbols = [
 /** https://icon-sets.iconify.design/mdi/ */
 export const mdi = [
   'calendar-month-outline',
+  'close-circle-outline',
   'checkbox-blank-outline',
   'checkbox-marked',
   'delete',

@@ -128,6 +128,33 @@ describe('behaviour', () => {
   });
 });
 
+describe('noPadding', () => {
+  it('drops the padding when asked', () => {
+    render(<AkButton noPadding>Register Today</AkButton>);
+
+    const button = screen.getByRole('button');
+
+    expect(button).toHaveClass('p-0');
+    expect(button).not.toHaveClass('px-4');
+  });
+
+  it('keeps its padding by default', () => {
+    render(<AkButton>Login</AkButton>);
+
+    expect(screen.getByRole('button')).toHaveClass('px-4');
+  });
+
+  it('still lets a caller set their own padding', () => {
+    render(
+      <AkButton noPadding className="px-2">
+        Login
+      </AkButton>
+    );
+
+    expect(screen.getByRole('button')).toHaveClass('px-2');
+  });
+});
+
 describe('loading', () => {
   it('shows a spinner and disables the button', () => {
     render(<AkButton loading>Login</AkButton>);

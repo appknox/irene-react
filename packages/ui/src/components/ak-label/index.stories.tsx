@@ -8,7 +8,7 @@ const meta = {
   component: AkLabel,
   parameters: { layout: 'centered' },
   tags: ['autodocs'],
-  args: { children: 'Project name' },
+  args: { children: 'ApiProject name' },
 } satisfies Meta<typeof AkLabel>;
 
 export default meta;
@@ -19,7 +19,7 @@ type Story = StoryObj<typeof meta>;
 export const WithControl: Story = {
   render: () => (
     <div className="flex w-64 flex-col gap-2">
-      <AkLabel htmlFor="project">Project name</AkLabel>
+      <AkLabel htmlFor="project">ApiProject name</AkLabel>
       <AkInput id="project" placeholder="Acme Mobile" />
     </div>
   ),

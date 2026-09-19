@@ -30,7 +30,7 @@ const meta = {
     },
     disabled: { control: 'boolean' },
   },
-  args: { placeholder: 'Project name' },
+  args: { placeholder: 'ApiProject name' },
 } satisfies Meta<typeof AkInput>;
 
 export default meta;
@@ -54,7 +54,7 @@ export const AllStates: Story = {
 export const WithLabel: Story = {
   render: () => (
     <div className="flex w-64 flex-col gap-2">
-      <AkLabel htmlFor="project">Project name</AkLabel>
+      <AkLabel htmlFor="project">ApiProject name</AkLabel>
       <AkInput id="project" placeholder="Acme Mobile" />
     </div>
   ),
@@ -78,6 +78,16 @@ export const AllTypes: Story = {
       <AkInput type="week" />
       <AkInput type="color" defaultValue="#ff4d3f" />
       <AkInput type="file" />
+    </div>
+  ),
+};
+
+/** The error states: a coloured border alone, and a border with its message. */
+export const Errors: Story = {
+  render: () => (
+    <div className="flex w-72 flex-col gap-4">
+      <AkInput hasError defaultValue="wrong@appknox" />
+      <AkInput errorMessage="Account Locked Out" defaultValue="wrong@appknox" />
     </div>
   ),
 };

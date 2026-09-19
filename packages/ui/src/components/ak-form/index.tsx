@@ -6,7 +6,8 @@ import { FormFieldContext, FormItemContext, useAkFormField } from '@irene/ui/ak-
 import { AkLabel } from '@irene/ui/ak-label';
 import { cn } from '@irene/ui/cn';
 
-const AkForm = FormProvider;
+/** Supplies the form to everything nested inside it. Renders nothing itself. */
+const AkFormProvider = FormProvider;
 
 /** Groups a label, control, description and message under one generated id. */
 function AkFormItem({ className, ...props }: ComponentProps<'div'>) {
@@ -15,7 +16,7 @@ function AkFormItem({ className, ...props }: ComponentProps<'div'>) {
 
   return (
     <FormItemContext.Provider value={itemId}>
-      <div data-slot="form-item" className={cn('grid gap-2', className)} {...props} />
+      <div data-slot="form-item" className={cn('grid gap-1.5', className)} {...props} />
     </FormItemContext.Provider>
   );
 }
@@ -98,7 +99,6 @@ type AkFormFieldProps<
   name: TName;
   children: ReactNode;
   label?: ReactNode;
-  /** Sits opposite the label, e.g. a "Forgot Password?" link. */
   labelAction?: ReactNode;
   description?: ReactNode;
 };
@@ -134,7 +134,7 @@ function AkFormField<TFieldValues extends FieldValues, TName extends FieldPath<T
       <AkFormItem {...props}>
         {(label || labelAction) && (
           <div className="flex items-center justify-between gap-2">
-            <AkFormLabel>{label}</AkFormLabel>
+            <AkFormLabel className="text-md font-medium">{label}</AkFormLabel>
             {labelAction}
           </div>
         )}
@@ -150,7 +150,7 @@ function AkFormField<TFieldValues extends FieldValues, TName extends FieldPath<T
 }
 
 export {
-  AkForm,
+  AkFormProvider,
   AkFormControl,
   AkFormDescription,
   AkFormField,

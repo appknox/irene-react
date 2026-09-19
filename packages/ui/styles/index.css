@@ -44,6 +44,17 @@
     color: var(--color-foreground);
     background-color: var(--color-background);
   }
+
+  /*
+    A link is text, so it takes the height of its own content rather than
+    stretching to whatever lays it out — a flex row, a grid cell, a list item.
+
+    In the base layer, so any height utility on the element still wins. A link
+    styled as a button keeps that button's height.
+  */
+  a {
+    height: fit-content;
+  }
 }
 
 /*

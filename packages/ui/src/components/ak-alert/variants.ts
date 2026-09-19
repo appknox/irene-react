@@ -5,7 +5,7 @@ import { cva } from 'class-variance-authority';
   through `akNotify`, as the body of a toast.
 */
 export const akAlertVariants = cva(
-  'relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-md border px-4 py-3 text-sm has-[>svg]:grid-cols-[--spacing(4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5',
+  'relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-sm border px-4 py-3 text-sm has-[>svg]:grid-cols-[--spacing(4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5',
   {
     variants: {
       variant: {

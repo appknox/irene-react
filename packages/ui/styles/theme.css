@@ -159,13 +159,19 @@ Two layers, deliberately separate:
   --font-weight-bold: 700;
   --font-weight-extrabold: 800;
 
+  /* The design system's body3. */
+  --text-2xs: 10px;
   --text-xs: 11px;
   --text-sm: 12px;
+  /* Its body2 and subtitle2, between sm and base. */
+  --text-md: 13px;
   --text-base: 14px;
   --text-lg: 16px;
   --text-xl: 18px;
   --text-2xl: 20px;
   --text-3xl: 24px;
+  --text-4xl: 28px;
+  --text-5xl: 32px;
 
   /* ---------------------------------------------------------------------
      Stacking order

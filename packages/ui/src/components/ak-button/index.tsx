@@ -1,17 +1,17 @@
 import { Slot } from 'radix-ui';
+import { Fragment, type ComponentProps } from 'react';
 import { type VariantProps } from 'class-variance-authority';
-import { type ComponentProps } from 'react';
 
 import { AkSpinner } from '@irene/ui/ak-spinner';
 import { cn } from '@irene/ui/cn';
 
 import { akButtonVariants } from './variants';
 
-type ButtonProps = ComponentProps<'button'> &
+type AkButtonProps = ComponentProps<'button'> &
   VariantProps<typeof akButtonVariants> & {
     asChild?: boolean;
-    /** Shows a spinner and blocks clicks while an action runs. */
     loading?: boolean;
+    noPadding?: boolean;
   };
 
 /**
@@ -21,6 +21,7 @@ type ButtonProps = ComponentProps<'button'> &
  * @param props.color - Tints the variant.
  * @param props.loading - Shows a spinner and disables the button.
  * @param props.asChild - Renders the child element instead, e.g. an anchor.
+ * @param props.noPadding - Drops the padding so the label lines up with surrounding text.
  */
 function AkButton({
   className,
@@ -29,10 +30,11 @@ function AkButton({
   size = 'default',
   asChild = false,
   loading = false,
+  noPadding = false,
   disabled,
   children,
   ...props
-}: ButtonProps) {
+}: AkButtonProps) {
   const Comp = asChild ? Slot.Root : 'button';
   const isBlocked = disabled || loading;
 
@@ -43,24 +45,25 @@ function AkButton({
       data-color={color}
       data-size={size}
       data-loading={loading || undefined}
-      // An anchor or label has no disabled attribute, so it is blocked with a class instead.
       data-disabled={asChild && isBlocked ? '' : undefined}
       disabled={asChild ? undefined : isBlocked}
       aria-disabled={asChild && isBlocked ? true : undefined}
       aria-busy={loading || undefined}
       className={cn(
-        akButtonVariants({ variant, color, size, className }),
-        asChild && isBlocked && 'pointer-events-none opacity-60'
+        akButtonVariants({ variant, color, size }),
+        asChild && isBlocked && 'pointer-events-none opacity-60',
+        noPadding && 'p-0',
+        className
       )}
       {...props}
     >
       {asChild ? (
         children
       ) : (
-        <>
+        <Fragment>
           {loading && <AkSpinner aria-hidden className="size-4" />}
           {children}
-        </>
+        </Fragment>
       )}
     </Comp>
   );

@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -6,8 +7,10 @@ import { describe, expect, it, vi } from 'vitest';
 import * as z from 'zod';
 import type { ReactNode } from 'react';
 
-import { AkForm, AkFormField } from '@irene/ui/ak-form';
+import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
+
+const EMAIL = faker.internet.email();
 
 const schema = z.object({
   email: z.email('Enter a valid email address'),
@@ -30,7 +33,7 @@ function TestForm({
   });
 
   return (
-    <AkForm {...form}>
+    <AkFormProvider {...form}>
       <form onSubmit={form.handleSubmit(onValid)}>
         <AkFormField
           name="email"
@@ -43,7 +46,7 @@ function TestForm({
 
         <button type="submit">Sign in</button>
       </form>
-    </AkForm>
+    </AkFormProvider>
   );
 }
 
@@ -135,10 +138,10 @@ describe('validation', () => {
     const onValid = vi.fn();
     render(<TestForm onValid={onValid} />);
 
-    await userEvent.type(screen.getByLabelText('Email'), 'someone@appknox.com');
+    await userEvent.type(screen.getByLabelText('Email'), EMAIL);
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(onValid).toHaveBeenCalledWith({ email: 'someone@appknox.com' }, expect.anything());
+    expect(onValid).toHaveBeenCalledWith({ email: EMAIL }, expect.anything());
   });
 
   it('clears the message once the value is corrected', async () => {
@@ -147,7 +150,7 @@ describe('validation', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     await screen.findByText('Enter a valid email address');
 
-    await userEvent.type(screen.getByLabelText('Email'), 'someone@appknox.com');
+    await userEvent.type(screen.getByLabelText('Email'), EMAIL);
 
     expect(screen.queryByText('Enter a valid email address')).not.toBeInTheDocument();
   });
