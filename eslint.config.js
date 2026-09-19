@@ -21,13 +21,7 @@ const MULTILINE_STATEMENTS = [
 ];
 
 export default defineConfig([
-  globalIgnores([
-    '**/dist',
-    '**/coverage',
-    '**/.turbo',
-    '**/routeTree.gen.ts',
-    '**/public/mockServiceWorker.js',
-  ]),
+  globalIgnores(['**/dist', '**/coverage', '**/.turbo', '**/routeTree.gen.ts']),
 
   {
     files: ['**/*.{ts,tsx}'],
