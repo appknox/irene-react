@@ -154,6 +154,15 @@ export function isPluginEnabled(key: ConfigKey): boolean {
 }
 
 /**
+ * Whether this deployment carries Appknox's own branding rather than a
+ * customer's. Appknox's own channels, such as its support address, are gated
+ * on this so a whitelabel deployment does not point users at them.
+ *
+ * @returns True unless the deployment is whitelabelled.
+ */
+export const isAppknoxBranded = (): boolean => !getConfigFlag('WHITELABEL_ENABLED');
+
+/**
  * Build the `define` entry that freezes build-time config into an app's bundle.
  *
  * Every app's `vite.config.ts` must spread this in. A module that omits it

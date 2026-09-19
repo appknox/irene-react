@@ -5,6 +5,7 @@ import {
   getConfig,
   getConfigFlag,
   getConfigValue,
+  isAppknoxBranded,
   isPluginEnabled,
   type ConfigKey,
 } from '@irene/config';
@@ -212,5 +213,29 @@ describe('isPluginEnabled', () => {
 
   it('rejects an unregistered key', () => {
     expect(() => isPluginEnabled('NOPE' as ConfigKey)).toThrow('ENV: NOPE not registered');
+  });
+});
+
+describe('isAppknoxBranded', () => {
+  it('reads as Appknox when no deployment claims otherwise', () => {
+    expect(isAppknoxBranded()).toBe(true);
+  });
+
+  it('reads as whitelabelled when the build sets the flag', () => {
+    atBuild({ WHITELABEL_ENABLED: 'true' });
+
+    expect(isAppknoxBranded()).toBe(false);
+  });
+
+  it('reads as whitelabelled when a server injects the flag at runtime', () => {
+    injected({ WHITELABEL_ENABLED: 'true' });
+
+    expect(isAppknoxBranded()).toBe(false);
+  });
+
+  it('reads as Appknox when a deployment explicitly turns whitelabelling off', () => {
+    atBuild({ WHITELABEL_ENABLED: 'false' });
+
+    expect(isAppknoxBranded()).toBe(true);
   });
 });
