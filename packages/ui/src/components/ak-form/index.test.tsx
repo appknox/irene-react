@@ -1,21 +1,16 @@
+import { faker } from '@faker-js/faker';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { describe, expect, it, vi } from 'vitest';
 import * as z from 'zod';
+import type { ReactNode } from 'react';
 
+import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
 
-import {
-  AkForm,
-  AkFormControl,
-  AkFormDescription,
-  AkFormField,
-  AkFormItem,
-  AkFormLabel,
-  AkFormMessage,
-} from '@irene/ui/ak-form';
+const EMAIL = faker.internet.email();
 
 const schema = z.object({
   email: z.email('Enter a valid email address'),
@@ -23,37 +18,66 @@ const schema = z.object({
 
 type Values = z.infer<typeof schema>;
 
-function TestForm({ onValid = vi.fn() }: { onValid?: (values: Values) => void }) {
+function TestForm({
+  onValid = vi.fn(),
+  children = <AkInput />,
+  labelAction,
+}: {
+  onValid?: (values: Values) => void;
+  children?: ReactNode;
+  labelAction?: ReactNode;
+}) {
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { email: '' },
   });
 
   return (
-    <AkForm {...form}>
+    <AkFormProvider {...form}>
       <form onSubmit={form.handleSubmit(onValid)}>
         <AkFormField
-          control={form.control}
           name="email"
-          render={({ field }) => (
-            <AkFormItem>
-              <AkFormLabel>Email</AkFormLabel>
-
-              <AkFormControl>
-                <AkInput {...field} />
-              </AkFormControl>
-
-              <AkFormDescription>We only use this to sign you in.</AkFormDescription>
-              <AkFormMessage />
-            </AkFormItem>
-          )}
-        />
+          label="Email"
+          labelAction={labelAction}
+          description="We only use this to sign you in."
+        >
+          {children}
+        </AkFormField>
 
         <button type="submit">Sign in</button>
       </form>
-    </AkForm>
+    </AkFormProvider>
   );
 }
+
+describe('the control as a child', () => {
+  it("keeps the control's own change handler alongside the field's", async () => {
+    const onChange = vi.fn();
+    const onValid = vi.fn();
+
+    render(
+      <TestForm onValid={onValid}>
+        <AkInput onChange={onChange} />
+      </TestForm>
+    );
+
+    await userEvent.type(screen.getByLabelText('Email'), 'a@b.com');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    expect(onChange).toHaveBeenCalled();
+
+    expect(onValid).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'a@b.com' }),
+      expect.anything()
+    );
+  });
+
+  it('renders an action opposite the label', () => {
+    render(<TestForm labelAction={<a href="/recover">Forgot Password?</a>} />);
+
+    expect(screen.getByRole('link', { name: 'Forgot Password?' })).toBeInTheDocument();
+  });
+});
 
 describe('rendering', () => {
   it('ties the label to the control', () => {
@@ -114,10 +138,10 @@ describe('validation', () => {
     const onValid = vi.fn();
     render(<TestForm onValid={onValid} />);
 
-    await userEvent.type(screen.getByLabelText('Email'), 'someone@appknox.com');
+    await userEvent.type(screen.getByLabelText('Email'), EMAIL);
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(onValid).toHaveBeenCalledWith({ email: 'someone@appknox.com' }, expect.anything());
+    expect(onValid).toHaveBeenCalledWith({ email: EMAIL }, expect.anything());
   });
 
   it('clears the message once the value is corrected', async () => {
@@ -126,7 +150,7 @@ describe('validation', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     await screen.findByText('Enter a valid email address');
 
-    await userEvent.type(screen.getByLabelText('Email'), 'someone@appknox.com');
+    await userEvent.type(screen.getByLabelText('Email'), EMAIL);
 
     expect(screen.queryByText('Enter a valid email address')).not.toBeInTheDocument();
   });

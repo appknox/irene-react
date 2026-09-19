@@ -12,9 +12,10 @@ const config: StorybookConfig = {
   async viteFinal(config) {
     const { mergeConfig } = await import('vite');
     const tailwindcss = (await import('@tailwindcss/vite')).default;
+    const { svgrPlugin } = await import('@irene/ui/vite');
 
     return mergeConfig(config, {
-      plugins: [tailwindcss()],
+      plugins: [tailwindcss(), svgrPlugin()],
     });
   },
 };

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { AkIcon } from '@irene/ui/ak-icon';
-import { iconSets } from '@irene/ui/icons/sets';
+import { iconNamesBySet } from '@irene/ui/icons/sets';
 
 const meta = {
   title: 'Components/AkIcon',
@@ -22,7 +22,7 @@ type Story = StoryObj<typeof meta>;
 export const AllIcons: Story = {
   render: () => (
     <div className="max-w-3xl">
-      {Object.entries(iconSets).map(([set, names]) => (
+      {Object.entries(iconNamesBySet).map(([set, names]) => (
         <section key={set} className="mb-6">
           <h3 className="mb-2 text-sm font-semibold">
             {set} <span className="text-foreground-muted">({names.length})</span>
@@ -31,10 +31,10 @@ export const AllIcons: Story = {
             {names.map((name) => (
               <span
                 key={name}
-                title={`${set}:${name}`}
+                title={name}
                 className="flex size-8 items-center justify-center rounded-sm border border-border"
               >
-                <AkIcon name={`${set}:${name}` as never} size="20px" />
+                <AkIcon name={name} size="20px" />
               </span>
             ))}
           </div>

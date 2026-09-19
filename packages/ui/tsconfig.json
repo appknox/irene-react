@@ -7,7 +7,7 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "jsx": "react-jsx",
-    "types": ["node", "vite/client", "@testing-library/jest-dom"],
+    "types": ["node", "vite/client", "vite-plugin-svgr/client", "@testing-library/jest-dom"],
 
     "strict": true,
     "noUnusedLocals": true,
@@ -27,5 +27,5 @@
       "@irene/ui/*": ["./src/components/*/index.tsx"]
     }
   },
-  "include": ["src", "styles", "tests", "scripts", ".storybook/**/*", "vitest.config.ts"]
+  "include": ["src", "styles", "tests", "scripts", "vite", ".storybook/**/*", "vitest.config.ts"]
 }

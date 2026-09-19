@@ -8,6 +8,7 @@
     "pnpm": ">=10"
   },
   "scripts": {
+    "prepare": "husky",
     "build": "turbo build",
     "build:test": "turbo build:test",
     "build:icons": "pnpm --filter @irene/ui build-icons",
@@ -33,9 +34,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
+    "@types/node": "catalog:",
     "@vitest/coverage-v8": "^5.0.0",
     "concurrently": "^10.0.5",
     "cross-env": "^10.1.0",
@@ -44,7 +48,9 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
     "globals": "^17.12.0",
+    "husky": "^9.1.7",
     "jsdom": "^30.0.1",
+    "lint-staged": "^17.5.1",
     "prettier": "^3.9.6",
     "stylelint": "^17.15.0",
     "stylelint-config-standard-scss": "^17.0.0",
@@ -52,6 +58,20 @@
     "turbo": "^2.10.12",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
+    "vite": "catalog:",
     "vitest": "^5.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss}": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,html}": [
+      "prettier --write"
+    ]
   }
 }

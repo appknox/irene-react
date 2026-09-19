@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 
 import { AkAlert, AkAlertDescription, AkAlertTitle } from '@irene/ui/ak-alert';
 import { akAlertVariants } from '@irene/ui/ak-alert/variants';
@@ -41,21 +42,69 @@ describe('rendering', () => {
   });
 });
 
+describe('dismissing', () => {
+  it('has no close button unless it can be dismissed', () => {
+    render(<AkAlert>Body</AkAlert>);
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('shows a close button when given an onDismiss', () => {
+    render(<AkAlert onDismiss={vi.fn()}>Body</AkAlert>);
+
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+  });
+
+  it('calls onDismiss when the close button is pressed', async () => {
+    const onDismiss = vi.fn();
+
+    render(<AkAlert onDismiss={onDismiss}>Body</AkAlert>);
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onDismiss).toHaveBeenCalledOnce();
+  });
+
+  it('takes its own label, for a translated one', () => {
+    render(
+      <AkAlert onDismiss={vi.fn()} dismissLabel="閉じる">
+        Body
+      </AkAlert>
+    );
+
+    expect(screen.getByRole('button', { name: '閉じる' })).toBeInTheDocument();
+  });
+
+  it('centres the button on the top-right corner', () => {
+    render(<AkAlert onDismiss={vi.fn()}>Body</AkAlert>);
+
+    const button = screen.getByRole('button', { name: 'Close' });
+
+    // Negative offsets, so the button straddles the corner rather than sitting inside it.
+    expect(button.className).toMatch(/-top-\d/);
+    expect(button.className).toMatch(/-right-\d/);
+  });
+});
+
 describe('variants', () => {
   it('defaults to the neutral surface', () => {
     render(<AkAlert>Body</AkAlert>);
 
-    expect(screen.getByRole('alert')).toHaveClass('bg-card');
+    expect(screen.getByRole('alert')).toHaveClass('bg-background');
   });
 
-  it('applies the destructive variant', () => {
-    render(<AkAlert variant="destructive">Body</AkAlert>);
+  it.each([
+    ['error', 'bg-danger-surface'],
+    ['warning', 'bg-warning-surface'],
+    ['success', 'bg-success-surface'],
+    ['info', 'bg-info-surface'],
+  ] as const)('tints the %s variant', (variant, surface) => {
+    render(<AkAlert variant={variant}>Body</AkAlert>);
 
-    expect(screen.getByRole('alert')).toHaveClass('text-destructive');
+    expect(screen.getByRole('alert')).toHaveClass(surface);
   });
 
   it('produces classes without rendering', () => {
-    expect(akAlertVariants({ variant: 'destructive' })).toContain('text-destructive');
+    expect(akAlertVariants({ variant: 'error' })).toContain('text-danger');
   });
 });
 

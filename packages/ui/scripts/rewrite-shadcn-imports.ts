@@ -36,8 +36,10 @@ class ShadcnComponentRewriter {
   private readonly name: string;
   private readonly folder: string;
   private readonly renames = new Map<string, string>();
+  private readonly flatPath: string;
 
-  constructor(private readonly flatPath: string) {
+  constructor(flatPath: string) {
+    this.flatPath = flatPath;
     this.source = readFileSync(flatPath, 'utf8');
     this.name = basename(flatPath, '.tsx');
     this.folder = join(componentsDir, `ak-${this.name}`);

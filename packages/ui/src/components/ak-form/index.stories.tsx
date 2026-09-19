@@ -1,20 +1,12 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { AkButton } from '@irene/ui/ak-button';
+import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
-import {
-  AkForm,
-  AkFormControl,
-  AkFormDescription,
-  AkFormField,
-  AkFormItem,
-  AkFormLabel,
-  AkFormMessage,
-} from '@irene/ui/ak-form';
 
 const schema = z.object({
   email: z.email('Enter a valid email address'),
@@ -50,33 +42,20 @@ function EmailField({ description, invalid = false }: Readonly<EmailFieldProps>)
   }, [invalid, setError]);
 
   return (
-    <AkForm {...form}>
+    <AkFormProvider {...form}>
       <form className="w-72 space-y-4" onSubmit={form.handleSubmit(() => {})}>
-        <AkFormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <AkFormItem>
-              <AkFormLabel>Email</AkFormLabel>
-
-              <AkFormControl>
-                <AkInput placeholder="you@appknox.com" {...field} />
-              </AkFormControl>
-
-              {description ? <AkFormDescription>{description}</AkFormDescription> : null}
-              <AkFormMessage />
-            </AkFormItem>
-          )}
-        />
+        <AkFormField name="email" label="Email" description={description}>
+          <AkInput placeholder="you@appknox.com" />
+        </AkFormField>
 
         <AkButton type="submit">Sign in</AkButton>
       </form>
-    </AkForm>
+    </AkFormProvider>
   );
 }
 
 const meta = {
-  title: 'Components/AkForm',
+  title: 'Components/AkFormProvider',
   component: EmailField,
   parameters: { layout: 'centered' },
   tags: ['autodocs'],

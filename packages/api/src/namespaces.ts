@@ -1,3 +1,4 @@
+/** The backend serves several API generations, so an endpoint names its own. */
 export const API_NAMESPACES = {
   v1: 'api',
   v2: 'api/v2',
@@ -5,11 +6,5 @@ export const API_NAMESPACES = {
   hudson: 'api/hudson-api',
 } as const;
 
+/** Any one of the API path prefixes. */
 export type ApiNamespace = (typeof API_NAMESPACES)[keyof typeof API_NAMESPACES];
-
-/** Leading slashes on the resource collapse. */
-export function buildUrl(namespace: ApiNamespace, path: string): string {
-  const resource = path.replace(/^\/+/, '');
-
-  return resource ? `${namespace}/${resource}` : namespace;
-}

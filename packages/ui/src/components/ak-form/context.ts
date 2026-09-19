@@ -1,10 +1,3 @@
-/**
- * The wiring a field needs to describe itself: which form field it is, and the
- * ids that tie its label, description and error message together.
- *
- * Separate from the components so the component file exports only components,
- * which is what Fast Refresh needs to swap them without reloading the page.
- */
 import * as React from 'react';
 import { useFormContext, useFormState, type FieldPath, type FieldValues } from 'react-hook-form';
 

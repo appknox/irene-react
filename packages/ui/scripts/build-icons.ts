@@ -7,8 +7,6 @@
  */
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-
-import { getIcons } from '@iconify/utils';
 import { icons as bx } from '@iconify-json/bx';
 import { icons as faBrands } from '@iconify-json/fa-brands';
 import { icons as fluent } from '@iconify-json/fluent';
@@ -16,6 +14,7 @@ import { icons as hugeicons } from '@iconify-json/hugeicons';
 import { icons as ic } from '@iconify-json/ic';
 import { icons as iconoir } from '@iconify-json/iconoir';
 import { icons as ix } from '@iconify-json/ix';
+import { icons as lucide } from '@iconify-json/lucide';
 import { icons as majesticons } from '@iconify-json/majesticons';
 import { icons as materialSymbols } from '@iconify-json/material-symbols';
 import { icons as mdi } from '@iconify-json/mdi';
@@ -24,6 +23,7 @@ import { icons as mynaui } from '@iconify-json/mynaui';
 import { icons as ph } from '@iconify-json/ph';
 import { icons as solar } from '@iconify-json/solar';
 import { icons as streamlinePlump } from '@iconify-json/streamline-plump';
+import { getIcons } from '@iconify/utils';
 
 import { iconSets } from '../src/icons/sets.ts';
 
@@ -35,6 +35,7 @@ const sources = {
   ic,
   iconoir,
   ix,
+  lucide,
   majesticons,
   'material-symbols': materialSymbols,
   mdi,

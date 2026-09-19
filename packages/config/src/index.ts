@@ -7,14 +7,25 @@
  */
 
 /**
+ * Resolution runs in three tiers:
+ *   1. injected  a server writes runtimeGlobalConfig at container start
+ *   2. build     the build freezes __BUILD_CONFIG__ into the bundle
+ *   3. fallback  everything else
+ *
+ * Injected wins over build so an operator can override a released value without
+ * a rebuild.
+ */
+
+declare const __BUILD_CONFIG__: Record<string, string>;
+
+/**
  * The config keys CI may bake in and a server may inject.
  *
  * One definition, shared by the resolver and by every app's Vite `define`, so a
  * key cannot be added to the build without the resolver knowing about it.
  *
  * Vite's `define` imposes no prefix, which is why we use it instead of
- * `import.meta.env.VITE_*` — a prefix would rename all twelve keys and break
- * seven whitelabel configs and both regional pod specs.
+ * `import.meta.env.VITE_*` — a prefix would rename all keys and break configurations.
  */
 export const CONFIG_KEYS = [
   'IRENE_API_HOST',
@@ -32,24 +43,6 @@ export const CONFIG_KEYS = [
 ] as const;
 
 export type ConfigKey = (typeof CONFIG_KEYS)[number];
-
-/**
- * Resolution runs in three tiers:
- *   1. injected  a server writes runtimeGlobalConfig at container start
- *   2. build     the build freezes __BUILD_CONFIG__ into the bundle
- *   3. fallback  everything else
- *
- * Injected wins over build so an operator can override a released value without
- * a rebuild.
- */
-
-declare const __BUILD_CONFIG__: Record<string, string>;
-
-declare global {
-  interface Window {
-    runtimeGlobalConfig?: Record<string, string>;
-  }
-}
 
 /**
  * What a key can resolve to. Undefined means no tier set it and there is no
@@ -135,8 +128,8 @@ export function getConfig(key: ConfigKey): ConfigValue {
 /** Resolve a key that carries an on/off switch. */
 export const getConfigFlag = (key: ConfigKey): boolean => readsAsTrue(getConfig(key));
 
-/** Resolve a key that carries text. Unset keys read as an empty string. */
-export const getConfigText = (key: ConfigKey): string => String(getConfig(key) ?? '');
+/** Unset keys read as an empty string. */
+export const getConfigValue = (key: ConfigKey): string => String(getConfig(key) ?? '');
 
 /**
  * Whether an optional product is switched on.
@@ -159,6 +152,15 @@ export function isPluginEnabled(key: ConfigKey): boolean {
 
   return readsAsTrue(builtInConfigValue(key));
 }
+
+/**
+ * Whether this deployment carries Appknox's own branding rather than a
+ * customer's. Appknox's own channels, such as its support address, are gated
+ * on this so a whitelabel deployment does not point users at them.
+ *
+ * @returns True unless the deployment is whitelabelled.
+ */
+export const isAppknoxBranded = (): boolean => !getConfigFlag('WHITELABEL_ENABLED');
 
 /**
  * Build the `define` entry that freezes build-time config into an app's bundle.

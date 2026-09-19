@@ -1,12 +1,15 @@
 import { createRouter } from '@tanstack/react-router';
 
-import { RouteError } from '@/components/RouteError';
-import { RouteNotFound } from '@/components/RouteNotFound';
-import { RoutePending } from '@/components/RoutePending';
+import { queryClient } from '@irene/api';
+
+import { RouteError } from '@/components/route-error';
+import { RouteNotFound } from '@/components/route-not-found';
+import { RoutePending } from '@/components/route-pending';
 import { routeTree } from '@/routeTree.gen';
 
 export const router = createRouter({
   routeTree,
+  context: { queryClient },
   defaultPendingComponent: RoutePending,
   defaultErrorComponent: RouteError,
   defaultNotFoundComponent: RouteNotFound,

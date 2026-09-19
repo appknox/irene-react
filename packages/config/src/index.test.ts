@@ -4,7 +4,8 @@ import {
   CONFIG_KEYS,
   getConfig,
   getConfigFlag,
-  getConfigText,
+  getConfigValue,
+  isAppknoxBranded,
   isPluginEnabled,
   type ConfigKey,
 } from '@irene/config';
@@ -138,13 +139,13 @@ describe('boolean handling', () => {
   });
 });
 
-describe('getConfigText', () => {
+describe('getConfigValue', () => {
   it('returns an empty string for a key with no default', () => {
-    expect(getConfigText('WHITELABEL_FAVICON')).toBe('');
+    expect(getConfigValue('WHITELABEL_FAVICON')).toBe('');
   });
 
   it('stringifies a boolean default', () => {
-    expect(getConfigText('ENTERPRISE')).toBe('false');
+    expect(getConfigValue('ENTERPRISE')).toBe('false');
   });
 });
 
@@ -212,5 +213,29 @@ describe('isPluginEnabled', () => {
 
   it('rejects an unregistered key', () => {
     expect(() => isPluginEnabled('NOPE' as ConfigKey)).toThrow('ENV: NOPE not registered');
+  });
+});
+
+describe('isAppknoxBranded', () => {
+  it('reads as Appknox when no deployment claims otherwise', () => {
+    expect(isAppknoxBranded()).toBe(true);
+  });
+
+  it('reads as whitelabelled when the build sets the flag', () => {
+    atBuild({ WHITELABEL_ENABLED: 'true' });
+
+    expect(isAppknoxBranded()).toBe(false);
+  });
+
+  it('reads as whitelabelled when a server injects the flag at runtime', () => {
+    injected({ WHITELABEL_ENABLED: 'true' });
+
+    expect(isAppknoxBranded()).toBe(false);
+  });
+
+  it('reads as Appknox when a deployment explicitly turns whitelabelling off', () => {
+    atBuild({ WHITELABEL_ENABLED: 'false' });
+
+    expect(isAppknoxBranded()).toBe(true);
   });
 });

@@ -1,0 +1,69 @@
+import {
+  createMemoryHistory,
+  createRouter,
+  RouterProvider,
+  type AnyRouter,
+} from '@tanstack/react-router';
+
+import { QueryClientProvider } from '@tanstack/react-query';
+import { render } from '@testing-library/react';
+import type { ReactNode } from 'react';
+
+import { queryClient } from '@irene/api';
+import { TranslationsProvider } from '@irene/translations/provider';
+import { AkToaster } from '@irene/ui/ak-toaster';
+
+import { routeTree } from '@/routeTree.gen';
+
+/** Renders inside the providers the app supplies, with a cache per test. */
+export function renderWithProviders(ui: ReactNode) {
+  queryClient.clear();
+
+  return {
+    queryClient,
+    ...render(
+      <TranslationsProvider>
+        <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+      </TranslationsProvider>
+    ),
+  };
+}
+
+/**
+ * Renders the app at one URL, through the real route tree. Use it for a page
+ * that reads search params or navigates; `renderWithProviders` is enough for a
+ * component that does neither.
+ *
+ * @param path - The URL to start at, e.g. `/login?unauthenticated=true`.
+ * @param settle - Whether to wait for guards and loaders. Pass false to assert
+ * what the route shows while its loader is still in flight.
+ * @returns The testing-library result, plus the router and cache.
+ */
+export async function renderAtRoute(path: string, settle = true) {
+  queryClient.clear();
+
+  const router: AnyRouter = createRouter({
+    routeTree,
+    context: { queryClient },
+    history: createMemoryHistory({ initialEntries: [path] }),
+  });
+
+  // Route guards and loaders run before the first paint, so let them settle
+  // rather than leaving every test to wait the page out.
+  if (settle) {
+    await router.load();
+  }
+
+  return {
+    queryClient,
+    router,
+    ...render(
+      <TranslationsProvider>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+          <AkToaster />
+        </QueryClientProvider>
+      </TranslationsProvider>
+    ),
+  };
+}

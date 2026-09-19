@@ -209,6 +209,7 @@ export const materialSymbols = [
 /** https://icon-sets.iconify.design/mdi/ */
 export const mdi = [
   'calendar-month-outline',
+  'close-circle-outline',
   'checkbox-blank-outline',
   'checkbox-marked',
   'delete',
@@ -263,6 +264,16 @@ export const majesticons = ['pulse'] as const;
 /** https://icon-sets.iconify.design/mi/ */
 export const mi = ['select'] as const;
 
+/** https://icon-sets.iconify.design/lucide/ */
+export const lucide = [
+  'circle-check',
+  'info',
+  'loader-circle',
+  'octagon-x',
+  'triangle-alert',
+  'x',
+] as const;
+
 export const iconSets = {
   'material-symbols': materialSymbols,
   mdi: mdi,
@@ -279,6 +290,7 @@ export const iconSets = {
   ix: ix,
   majesticons: majesticons,
   mi: mi,
+  lucide: lucide,
 } as const;
 
 export type IconSet = keyof typeof iconSets;
@@ -287,3 +299,30 @@ export type IconSet = keyof typeof iconSets;
 export type IconName = {
   [Set in IconSet]: `${Set}:${(typeof iconSets)[Set][number]}`;
 }[IconSet];
+
+/** Every icon name grouped by set, typed as the `set:icon` union.
+ *
+ * Written out rather than derived: TypeScript cannot correlate a generic set
+ * key with its own names inside a template literal, and the annotation here
+ * makes the compiler check each entry instead of us asserting it.
+ */
+export const iconNamesBySet: {
+  [TSet in IconSet]: `${TSet}:${(typeof iconSets)[TSet][number]}`[];
+} = {
+  'material-symbols': materialSymbols.map((name) => `material-symbols:${name}` as const),
+  mdi: mdi.map((name) => `mdi:${name}` as const),
+  hugeicons: hugeicons.map((name) => `hugeicons:${name}` as const),
+  'fa-brands': faBrands.map((name) => `fa-brands:${name}` as const),
+  ic: ic.map((name) => `ic:${name}` as const),
+  bx: bx.map((name) => `bx:${name}` as const),
+  ph: ph.map((name) => `ph:${name}` as const),
+  mynaui: mynaui.map((name) => `mynaui:${name}` as const),
+  solar: solar.map((name) => `solar:${name}` as const),
+  iconoir: iconoir.map((name) => `iconoir:${name}` as const),
+  fluent: fluent.map((name) => `fluent:${name}` as const),
+  'streamline-plump': streamlinePlump.map((name) => `streamline-plump:${name}` as const),
+  ix: ix.map((name) => `ix:${name}` as const),
+  majesticons: majesticons.map((name) => `majesticons:${name}` as const),
+  mi: mi.map((name) => `mi:${name}` as const),
+  lucide: lucide.map((name) => `lucide:${name}` as const),
+};

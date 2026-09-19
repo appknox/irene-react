@@ -24,16 +24,68 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/** Every variant side by side, to catch one drifting from the others. */
+const COLORS = [
+  'primary',
+  'neutral',
+  'error',
+  'success',
+  'warning',
+  'info',
+  'textPrimary',
+  'textSecondary',
+] as const;
+
+/** Every variant and color side by side, to catch one drifting from the others. */
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-wrap items-center gap-2">
-      <AkButton>Default</AkButton>
-      <AkButton variant="destructive">Destructive</AkButton>
-      <AkButton variant="outline">Outline</AkButton>
-      <AkButton variant="secondary">Secondary</AkButton>
-      <AkButton variant="ghost">Ghost</AkButton>
-      <AkButton variant="link">Link</AkButton>
+    <div className="flex flex-col gap-4">
+      {(['filled', 'outlined', 'text'] as const).map((variant) => (
+        <div key={variant} className="flex flex-wrap items-center gap-3">
+          {COLORS.map((color) => (
+            <AkButton key={color} variant={variant} color={color}>
+              {color}
+            </AkButton>
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+/** Loading, disabled and idle for every variant, since all three can load. */
+export const States: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {(['filled', 'outlined', 'text'] as const).map((variant) => (
+        <div key={variant} className="flex flex-wrap items-center gap-3">
+          <AkButton variant={variant}>{variant}</AkButton>
+
+          <AkButton variant={variant} loading>
+            {variant} loading
+          </AkButton>
+
+          <AkButton variant={variant} disabled>
+            {variant} disabled
+          </AkButton>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+/** Loading in every colour, to check the spinner against each background. */
+export const LoadingColors: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {(['filled', 'outlined', 'text'] as const).map((variant) => (
+        <div key={variant} className="flex flex-wrap items-center gap-3">
+          {COLORS.map((color) => (
+            <AkButton key={color} variant={variant} color={color} loading>
+              {color}
+            </AkButton>
+          ))}
+        </div>
+      ))}
     </div>
   ),
 };
@@ -51,15 +103,3 @@ export const AllSizes: Story = {
 };
 
 export const Default: Story = {};
-
-export const Destructive: Story = { args: { variant: 'destructive' } };
-
-export const Outline: Story = { args: { variant: 'outline' } };
-
-export const Secondary: Story = { args: { variant: 'secondary' } };
-
-export const Ghost: Story = { args: { variant: 'ghost' } };
-
-export const Link: Story = { args: { variant: 'link' } };
-
-export const Disabled: Story = { args: { disabled: true } };

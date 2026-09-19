@@ -1,0 +1,127 @@
+import { isAxiosError } from 'axios';
+
+/** Per-field messages from a DRF error body, keyed by field name. */
+export type ApiFieldErrors<TFields extends string = string> = Partial<Record<TFields, string[]>>;
+
+/** DRF puts a form-wide complaint under `detail`; it is filed here instead. */
+const NON_FIELD = 'non_field_errors';
+
+/**
+ * Normalises one DRF error value into a list of messages.
+ *
+ * @param value - A message string, a list of messages, or anything else.
+ * @returns The messages, or an empty list when the value holds none.
+ */
+function _asMessages(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map(String);
+  }
+
+  return typeof value === 'string' ? [value] : [];
+}
+
+/**
+ * Parses a body into per-field messages. A top-level array is a form-wide
+ * complaint, so it is filed under `non_field_errors`.
+ *
+ * A body that is one bare string is ignored: that is what a server returns when
+ * it hands back an HTML error page, and no user should be shown that.
+ *
+ * @param payload - The response body.
+ * @returns Messages keyed by field.
+ */
+function _parseFieldErrors(payload: unknown): ApiFieldErrors {
+  if (Array.isArray(payload)) {
+    const formWide = _asMessages(payload);
+
+    return formWide.length > 0 ? { [NON_FIELD]: formWide } : {};
+  }
+
+  if (payload === null || typeof payload !== 'object') {
+    return {};
+  }
+
+  const errors: ApiFieldErrors = {};
+
+  for (const [key, value] of Object.entries(payload)) {
+    const messages = _asMessages(value);
+
+    if (messages.length > 0) {
+      errors[key === 'detail' ? NON_FIELD : key] = messages;
+    }
+  }
+
+  return errors;
+}
+
+/**
+ * Whether the request never reached the server, so there is no response to read.
+ *
+ * @param error - Whatever the request rejected with.
+ * @returns Whether the failure was the network rather than the server.
+ */
+export function isNetworkError(error: unknown): boolean {
+  return isAxiosError(error) && !error.response;
+}
+
+/**
+ * Reads the HTTP status off a failed request.
+ *
+ * @param error - Whatever the request rejected with.
+ * @returns The status, or undefined when the request never reached the server.
+ */
+export function getApiErrorStatus(error: unknown): number | undefined {
+  return isAxiosError(error) ? error.status : undefined;
+}
+
+/**
+ * Reads the per-field messages off a failed request, so a form can put each
+ * complaint on the field it belongs to.
+ *
+ * @param error - Whatever the request rejected with.
+ * @returns Messages keyed by field, or an empty object when the body holds none.
+ * @example
+ * const errors = getApiFieldErrors<'username' | 'password'>(error);
+ * form.setError('username', { message: errors.username?.[0] });
+ */
+export function getApiFieldErrors<TFields extends string = string>(
+  error: unknown
+): ApiFieldErrors<TFields> {
+  return _parseFieldErrors(getApiErrorPayload(error)) as ApiFieldErrors<TFields>;
+}
+
+/**
+ * Turns a failed request into the one message worth showing.
+ *
+ * Returns nothing when the body explains nothing, so the caller picks its own
+ * wording rather than showing axios's own text to a user.
+ *
+ * @param error - Whatever the request rejected with, or nothing when it succeeded.
+ * @returns The server's own message, or undefined when it did not give one.
+ */
+export function getApiErrorMessage(error: unknown): string | undefined {
+  if (error === null || error === undefined) {
+    return undefined;
+  }
+
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  return Object.values(getApiFieldErrors(error)).flat()[0];
+}
+
+/**
+ * Reads the response body off a failed request.
+ *
+ * Use it for bodies that are not complaints — the MFA challenge, or the
+ * `lock_time` a 429 carries — which the other two would flatten into text.
+ *
+ * @param error - Whatever the request rejected with.
+ * @returns The body, or undefined when the request never reached the server.
+ * @example
+ * const challenge = getApiErrorPayload<ApiMfaRequirement>(error);
+ */
+export function getApiErrorPayload<TPayload = unknown>(error: unknown): TPayload | undefined {
+  return isAxiosError<TPayload>(error) ? error.response?.data : undefined;
+}

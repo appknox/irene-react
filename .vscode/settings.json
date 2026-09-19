@@ -9,6 +9,16 @@
   */
   "tailwindCSS.classFunctions": ["cva", "cn", "clsx", "twMerge", "cx"],
 
+  /*
+    Each Tailwind entry only scans its own folder, so the ui package's entry never
+    sees packages/ui/src and IntelliSense stays silent there. Pointing each part of
+    the repo at its entry gives both packages completions and hovers.
+  */
+  "tailwindCSS.experimental.configFile": {
+    "packages/ui/styles/index.css": "packages/ui/**",
+    "apps/dashboard/src/index.css": "apps/dashboard/**"
+  },
+
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
 
@@ -17,5 +27,29 @@
     "source.fixAll.eslint": "explicit"
   },
 
-  "js/ts.tsdk.path": "node_modules/typescript/lib"
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+
+  /*
+    i18n Ally shows every locale's text when hovering a message id, and flags ids
+    missing from either file. Inline annotations are off so the id itself stays
+    visible.
+  */
+  "i18n-ally.localesPaths": ["packages/translations/translations"],
+  "i18n-ally.pathMatcher": "{locale}.json",
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.sourceLanguage": "en",
+  "i18n-ally.displayLanguage": "en",
+  "i18n-ally.enabledFrameworks": ["react", "custom"],
+  "i18n-ally.enabledParsers": ["json"],
+  "i18n-ally.annotations": false,
+
+  /*
+    Messages are read through our own wrappers, which none of the built-in React
+    patterns match. Without these the extension guesses at the nearest
+    key-shaped string and underlines the wrong text.
+  */
+  "i18n-ally.regex.usageMatchAppend": [
+    "\\bakMT\\(\\s*['\"`]({key})['\"`]",
+    "<AkMessageTranslate\\s+id=['\"]({key})['\"]"
+  ]
 }

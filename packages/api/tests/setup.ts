@@ -1,8 +1,5 @@
-import { afterEach, beforeEach } from 'vitest';
-
-declare global {
-  var __BUILD_CONFIG__: Record<string, string>;
-}
+import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
+import { server } from '@tests/server';
 
 /**
  * Both config tiers are globals, so a value left behind by one test would leak
@@ -13,5 +10,21 @@ const reset = () => {
   delete window.runtimeGlobalConfig;
 };
 
+// Modules read config at import, so the tiers must exist before they load.
+reset();
+
 beforeEach(reset);
 afterEach(reset);
+
+beforeAll(() => {
+  // An unhandled request means a test is hitting an endpoint it did not declare.
+  server.listen({ onUnhandledRequest: 'error' });
+});
+
+afterEach(() => {
+  server.resetHandlers();
+});
+
+afterAll(() => {
+  server.close();
+});

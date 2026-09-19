@@ -1,4 +1,7 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
+
+const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
   define: {
@@ -6,6 +9,7 @@ export default defineConfig({
     // identifier has to resolve at runtime instead.
     __BUILD_CONFIG__: 'globalThis.__BUILD_CONFIG__',
   },
+  resolve: { alias: { '@tests': resolvePath('./tests') } },
   test: {
     environment: 'jsdom',
     globals: true,

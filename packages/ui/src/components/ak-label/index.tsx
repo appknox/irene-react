@@ -1,6 +1,7 @@
-import * as React from 'react';
-import { cn } from '@irene/ui/cn';
 import { Label as LabelPrimitive } from 'radix-ui';
+import * as React from 'react';
+
+import { cn } from '@irene/ui/cn';
 
 function AkLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
   return (
