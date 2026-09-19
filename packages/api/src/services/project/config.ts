@@ -7,8 +7,3 @@ export const ProjectEndpoints = {
   detail: (id: number | string) =>
     `${API_NAMESPACES.v3}/projects/${encodeURIComponent(id)}` as const,
 };
-
-/** Query key for a page of projects. */
-export const PROJECT_LIST_QUERY_KEY = 'PROJECT_LIST_QUERY_KEY';
-/** Query key for one project. */
-export const PROJECT_QUERY_KEY = 'PROJECT_QUERY_KEY';

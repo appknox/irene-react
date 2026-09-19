@@ -1,5 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
-import { isAxiosError } from 'axios';
+
+import { HTTP_STATUS_CODES } from '@irene/constants';
+import { getApiErrorStatus } from '@irene/api/utils/errors';
 
 const RETRYABLE_ATTEMPTS = 2;
 
@@ -12,9 +14,9 @@ const _shouldRetry = (failureCount: number, error: unknown) => {
     return false;
   }
 
-  const status = isAxiosError(error) ? error.status : undefined;
+  const status = getApiErrorStatus(error);
 
-  return status === undefined || status >= 500;
+  return status === undefined || status >= HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
 };
 
 /** 

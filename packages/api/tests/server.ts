@@ -13,5 +13,5 @@ export const server = setupServer();
  */
 export const apiHost = () => getConfigValue('IRENE_API_HOST');
 
-/** Builds a URL from the host and a path. */
-export const apiUrl = (path: string) => `${apiHost()}/${path}`;
+/** Builds the URL a handler intercepts, from the host and a path. */
+export const buildAPITestURL = (path: string) => `${apiHost()}/${path}`;

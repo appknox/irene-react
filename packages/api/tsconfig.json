@@ -5,14 +5,15 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "types": ["node"],
+    /* Set because this package reads translated messages, and that module is JSX. */
+    "jsx": "react-jsx",
+    "types": ["node", "vite/client"],
 
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
-
     "skipLibCheck": true,
 
     "paths": {

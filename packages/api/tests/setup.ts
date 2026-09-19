@@ -1,10 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
 import { server } from '@tests/server';
 
-declare global {
-  var __BUILD_CONFIG__: Record<string, string>;
-}
-
 /**
  * Both config tiers are globals, so a value left behind by one test would leak
  * into the next. Clear them around every case.

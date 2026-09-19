@@ -1,5 +1,5 @@
 /** A project as v3/projects returns it. Field names are the API's. */
-export interface Project {
+export interface ApiProject {
   id: number;
   package_name: string;
   url: string;
@@ -12,7 +12,7 @@ export interface Project {
 }
 
 /** What the list endpoint accepts. `q` filters by package name. */
-export interface ProjectListParams {
+export interface ApiProjectListRequest {
   limit: number;
   offset: number;
   q?: string;

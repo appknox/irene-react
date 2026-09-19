@@ -1,14 +1,16 @@
-import { isAxiosError } from 'axios';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
-import { ProjectService } from '@irene/api/services/project';
+import { HTTP_STATUS_CODES } from '@irene/constants';
+
+import { ProjectEndpoints, ProjectService } from '@irene/api/services/project';
+import { getApiErrorStatus } from '@irene/api/utils/errors';
 import { buildProject } from '@tests/factories';
-import { apiUrl, server } from '@tests/server';
+import { buildAPITestURL, server } from '@tests/server';
 import { buildDrfPage } from '@tests/utils';
 
-const LIST_URL = apiUrl('api/v3/projects');
-const detailUrl = (id: string) => apiUrl(`api/v3/projects/${id}`);
+const LIST_URL = buildAPITestURL(ProjectEndpoints.list());
+const detailUrl = (id: string) => buildAPITestURL(ProjectEndpoints.detail(id));
 
 /** Captures the query string msw received, so assertions can read the params. */
 function interceptList(respond: () => Response) {
@@ -70,17 +72,21 @@ describe('ProjectService.list', () => {
 
   describe('when the request fails', () => {
     it('propagates a 403 for an organisation the user cannot see', async () => {
-      interceptList(() => HttpResponse.json({ detail: 'Forbidden' }, { status: 403 }));
+      interceptList(() =>
+        HttpResponse.json({ detail: 'Forbidden' }, { status: HTTP_STATUS_CODES.FORBIDDEN })
+      );
 
       const error = await ProjectService.list({ limit: 9, offset: 0 }).catch(
         (reason: unknown) => reason
       );
 
-      expect(isAxiosError(error) ? error.status : undefined).toBe(403);
+      expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.FORBIDDEN);
     });
 
     it('propagates a server error', async () => {
-      interceptList(() => HttpResponse.json({}, { status: 500 }));
+      interceptList(() =>
+        HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
+      );
 
       await expect(ProjectService.list({ limit: 9, offset: 0 })).rejects.toThrow('500');
     });
@@ -97,13 +103,18 @@ describe('ProjectService.detail', () => {
   });
 
   it('encodes an id that needs escaping', async () => {
-    server.use(http.get(detailUrl('a%2Fb'), () => HttpResponse.json(buildProject())));
+    // The builder escapes it, exactly as the service does.
+    server.use(http.get(detailUrl('a/b'), () => HttpResponse.json(buildProject())));
 
     await expect(ProjectService.detail('a/b')).resolves.toBeDefined();
   });
 
   it('propagates a 404 for a project that does not exist', async () => {
-    server.use(http.get(detailUrl('9999'), () => HttpResponse.json({}, { status: 404 })));
+    server.use(
+      http.get(detailUrl('9999'), () =>
+        HttpResponse.json({}, { status: HTTP_STATUS_CODES.NOT_FOUND })
+      )
+    );
 
     await expect(ProjectService.detail(9999)).rejects.toThrow('404');
   });
@@ -144,7 +155,7 @@ describe('ProjectService.list', () => {
   });
 
   it('propagates a failure rather than returning an empty page', async () => {
-    interceptList(() => HttpResponse.json({}, { status: 500 }));
+    interceptList(() => HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR }));
 
     await expect(ProjectService.list({ limit: 9, offset: 0 })).rejects.toThrow('500');
   });

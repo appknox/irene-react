@@ -8,8 +8,8 @@ import {
   getAuthorizationHeader,
   getSignedInUserId,
   getStoredSession,
+  IRENE_AUTH_SESSION_KEY,
   isSignedIn,
-  SESSION_STORAGE_KEY,
   storeSession,
   type Session,
 } from '@irene/api/utils/session';
@@ -39,13 +39,13 @@ describe('getStoredSession', () => {
   });
 
   it('treats an unparseable entry as signed out', () => {
-    window.localStorage.setItem(SESSION_STORAGE_KEY, 'not json');
+    window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, 'not json');
 
     expect(getStoredSession()).toBeNull();
   });
 
   it('treats an entry of the wrong shape as signed out', () => {
-    window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ token: 'tok3n' }));
+    window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, JSON.stringify({ token: 'tok3n' }));
 
     expect(getStoredSession()).toBeNull();
   });
@@ -104,7 +104,7 @@ describe('getSignedInUserId', () => {
   });
 
   it('returns undefined when the stored entry is corrupt', () => {
-    window.localStorage.setItem(SESSION_STORAGE_KEY, '{"userId":"42"}');
+    window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, '{"userId":"42"}');
 
     expect(getSignedInUserId()).toBeUndefined();
   });

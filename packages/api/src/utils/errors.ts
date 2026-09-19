@@ -1,8 +1,9 @@
 import { isAxiosError } from 'axios';
 
-/** Per-field messages from a DRF 400, keyed by field name. */
-export type ApiFieldErrors = Record<string, string[]>;
+/** Per-field messages from a DRF error body, keyed by field name. */
+export type ApiFieldErrors<TFields extends string = string> = Partial<Record<TFields, string[]>>;
 
+/** DRF puts a form-wide complaint under `detail`; it is filed here instead. */
 const NON_FIELD = 'non_field_errors';
 
 /**
@@ -11,22 +12,32 @@ const NON_FIELD = 'non_field_errors';
  * @param value - A message string, a list of messages, or anything else.
  * @returns The messages, or an empty list when the value holds none.
  */
-const _asMessages = (value: unknown): string[] => {
+function _asMessages(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map(String);
   }
 
   return typeof value === 'string' ? [value] : [];
-};
+}
 
 /**
- * Parses a DRF error body into per-field messages. Form-wide messages under `detail` move to `non_field_errors`.
+ * Parses a body into per-field messages. A top-level array is a form-wide
+ * complaint, so it is filed under `non_field_errors`.
  *
- * @param payload - The response body, e.g. `{ username: ['Already taken'] }`.
- * @returns Messages keyed by field, or an empty object when the body is not a DRF error.
+ * A body that is one bare string is ignored: that is what a server returns when
+ * it hands back an HTML error page, and no user should be shown that.
+ *
+ * @param payload - The response body.
+ * @returns Messages keyed by field.
  */
-export function parseApiFieldErrors(payload: unknown) {
-  if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
+function _parseFieldErrors(payload: unknown): ApiFieldErrors {
+  if (Array.isArray(payload)) {
+    const formWide = _asMessages(payload);
+
+    return formWide.length > 0 ? { [NON_FIELD]: formWide } : {};
+  }
+
+  if (payload === null || typeof payload !== 'object') {
     return {};
   }
 
@@ -44,31 +55,73 @@ export function parseApiFieldErrors(payload: unknown) {
 }
 
 /**
- * Picks the first message to show from parsed field errors.
- *
- * @param errors - The output of `parseApiFieldErrors`.
- * @returns The first message, or undefined when there is none.
- */
-export function getFirstApiErrorMessage(errors: ApiFieldErrors) {
-  return Object.values(errors).flat()[0];
-}
-
-const UNKNOWN_ERROR_MESSAGE = 'Something went wrong';
-
-/**
- * Turns a failed request into a message to show the user.
+ * Whether the request never reached the server, so there is no response to read.
  *
  * @param error - Whatever the request rejected with.
- * @returns The API's own message, else the error's message, else a generic one.
+ * @returns Whether the failure was the network rather than the server.
  */
-export function getApiErrorMessage(error: unknown) {
+export function isNetworkError(error: unknown): boolean {
+  return isAxiosError(error) && !error.response;
+}
+
+/**
+ * Reads the HTTP status off a failed request.
+ *
+ * @param error - Whatever the request rejected with.
+ * @returns The status, or undefined when the request never reached the server.
+ */
+export function getApiErrorStatus(error: unknown): number | undefined {
+  return isAxiosError(error) ? error.status : undefined;
+}
+
+/**
+ * Reads the per-field messages off a failed request, so a form can put each
+ * complaint on the field it belongs to.
+ *
+ * @param error - Whatever the request rejected with.
+ * @returns Messages keyed by field, or an empty object when the body holds none.
+ * @example
+ * const errors = getApiFieldErrors<'username' | 'password'>(error);
+ * form.setError('username', { message: errors.username?.[0] });
+ */
+export function getApiFieldErrors<TFields extends string = string>(
+  error: unknown
+): ApiFieldErrors<TFields> {
+  return _parseFieldErrors(getApiErrorPayload(error)) as ApiFieldErrors<TFields>;
+}
+
+/**
+ * Turns a failed request into the one message worth showing.
+ *
+ * Returns nothing when the body explains nothing, so the caller picks its own
+ * wording rather than showing axios's own text to a user.
+ *
+ * @param error - Whatever the request rejected with, or nothing when it succeeded.
+ * @returns The server's own message, or undefined when it did not give one.
+ */
+export function getApiErrorMessage(error: unknown): string | undefined {
+  if (error === null || error === undefined) {
+    return undefined;
+  }
+
   if (typeof error === 'string') {
     return error;
   }
 
-  if (!isAxiosError(error)) {
-    return error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
-  }
+  return Object.values(getApiFieldErrors(error)).flat()[0];
+}
 
-  return getFirstApiErrorMessage(parseApiFieldErrors(error.response?.data)) ?? error.message;
+/**
+ * Reads the response body off a failed request.
+ *
+ * Use it for bodies that are not complaints — the MFA challenge, or the
+ * `lock_time` a 429 carries — which the other two would flatten into text.
+ *
+ * @param error - Whatever the request rejected with.
+ * @returns The body, or undefined when the request never reached the server.
+ * @example
+ * const challenge = getApiErrorPayload<ApiMfaRequirement>(error);
+ */
+export function getApiErrorPayload<TPayload = unknown>(error: unknown): TPayload | undefined {
+  return isAxiosError<TPayload>(error) ? error.response?.data : undefined;
 }

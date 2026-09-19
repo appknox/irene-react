@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
-import type { SsoCheck } from '@irene/api/types/sso';
+import type { ApiSsoCheck } from '@irene/api/services/auth';
 
-export const buildSsoCheck = (overrides: Partial<SsoCheck> = {}): SsoCheck => ({
+export const buildSsoCheck = (overrides: Partial<ApiSsoCheck> = {}): ApiSsoCheck => ({
   is_saml: false,
   is_sso_enforced: false,
   is_oidc: false,

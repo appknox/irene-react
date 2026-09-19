@@ -1,5 +1,5 @@
 /** The envelope DRF returns for any list endpoint. */
-export interface DrfPageResponse<T> {
+export interface ApiPageResponse<T> {
   count: number;
   next: string | null;
   previous: string | null;

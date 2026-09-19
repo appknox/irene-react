@@ -1,4 +1,4 @@
-import type { SessionResponse } from '@irene/api/types/session';
+import type { ApiSessionResponse } from '@irene/api/services/auth';
 
 /** Mirrors Ember Simple Auth's `ember_simple_auth-session`. */
 export interface Session {
@@ -7,7 +7,7 @@ export interface Session {
   b64token: string;
 }
 
-export const SESSION_STORAGE_KEY = 'appknox-session';
+export const IRENE_AUTH_SESSION_KEY = 'appknox-session';
 
 /**
  * Checks that a parsed value has the shape of a stored session.
@@ -30,9 +30,9 @@ const _isValidSession = (value: unknown): value is Session =>
  *
  * @returns The stored text, or null when nothing is stored or the browser blocks storage.
  */
-const _readStoredSessionText = (): string | null => {
+const _readStoredSessionText = () => {
   try {
-    return window.localStorage.getItem(SESSION_STORAGE_KEY);
+    return window.localStorage.getItem(IRENE_AUTH_SESSION_KEY);
   } catch {
     return null;
   }
@@ -58,7 +58,7 @@ const _parseJsonSafely = (text: string): unknown => {
  * @param value - The string to encode.
  * @returns The base64 encoding of the string's UTF-8 bytes.
  */
-export const encodeBase64Utf8 = (value: string): string =>
+export const encodeBase64Utf8 = (value: string) =>
   btoa(String.fromCodePoint(...new TextEncoder().encode(value)));
 
 /**
@@ -68,7 +68,7 @@ export const encodeBase64Utf8 = (value: string): string =>
  * @param token - The user's API token.
  * @returns The base64-encoded `userId:token` pair.
  */
-export const buildBasicCredential = (userId: number, token: string): string =>
+export const buildBasicCredential = (userId: number, token: string) =>
   encodeBase64Utf8(`${userId}:${token}`);
 
 /**
@@ -77,21 +77,19 @@ export const buildBasicCredential = (userId: number, token: string): string =>
  * @param response - The body returned by the login or check endpoint.
  * @returns The session, with its credential pre-built.
  */
-export const createSessionFromResponse = ({
-  token,
-  user_id: userId,
-}: SessionResponse): Session => ({
-  token,
-  userId,
-  b64token: buildBasicCredential(userId, token),
-});
+export const createSessionFromResponse = ({ token, user_id: userId }: ApiSessionResponse) =>
+  ({
+    token,
+    userId,
+    b64token: buildBasicCredential(userId, token),
+  }) as Session;
 
 /**
  * Reads the stored session. Blocked storage or a bad entry reads as signed out.
  *
  * @returns The session, or null when signed out.
  */
-export function getStoredSession(): Session | null {
+export function getStoredSession() {
   const stored = _readStoredSessionText();
   const parsed = stored ? _parseJsonSafely(stored) : null;
 
@@ -103,14 +101,14 @@ export function getStoredSession(): Session | null {
  *
  * @param session - The session to store.
  */
-export function storeSession(session: Session): void {
-  window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+export function storeSession(session: Session) {
+  window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, JSON.stringify(session));
 }
 
 /** Forgets the stored session. Safe to call when nothing is stored. */
-export function clearStoredSession(): void {
+export function clearStoredSession() {
   try {
-    window.localStorage.removeItem(SESSION_STORAGE_KEY);
+    window.localStorage.removeItem(IRENE_AUTH_SESSION_KEY);
   } catch {
     // Nothing stored means nothing to clear.
   }
@@ -121,22 +119,23 @@ export function clearStoredSession(): void {
  *
  * @returns Whether the user is signed in.
  */
-export const isSignedIn = (): boolean => getStoredSession() !== null;
+export const isSignedIn = () => getStoredSession() !== null;
 
 /**
  * Reads the signed-in user's id.
  *
  * @returns The user id, or undefined when signed out.
  */
-export const getSignedInUserId = (): number | undefined => getStoredSession()?.userId;
+export const getSignedInUserId = () => getStoredSession()?.userId;
 
 /**
  * Builds the Authorization header for the stored session.
  *
  * @returns `Basic <b64token>`, or undefined when signed out so no request carries an empty header.
  */
-export const getAuthorizationHeader = (): string | undefined => {
-  const b64token = getStoredSession()?.b64token;
+export const getAuthorizationHeader = () => {
+  const session = getStoredSession();
+  const b64token = session?.b64token;
 
-  return b64token ? `Basic ${b64token}` : undefined;
+  return b64token ? (`Basic ${b64token}` as const) : undefined;
 };

@@ -1,13 +1,16 @@
 import { isAxiosError } from 'axios';
 import { http, HttpResponse, type JsonBodyType } from 'msw';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { HTTP_STATUS_CODES } from '@irene/constants';
 import { ENUMS } from '@irene/enums';
 
 import { apiRequest, currentProduct, request } from '@irene/api/request';
-import { apiUrl, server } from '@tests/server';
+import { getApiErrorPayload, getApiErrorStatus } from '@irene/api/utils/errors';
+import { storeSession } from '@irene/api/utils/session';
+import { buildAPITestURL, server } from '@tests/server';
 
-const PING = apiUrl('api/ping');
+const PING = buildAPITestURL('api/ping');
 
 /** Captures what the client actually sent. */
 function intercept(
@@ -97,7 +100,7 @@ describe('host resolution', () => {
 
 describe('product header', () => {
   it('sends Appknox from any host but the Devknox one', async () => {
-    const fresh = await clientWith({ hostname: 'secure.appknox.com' });
+    const fresh = await clientWith({ hostname: 'dashboard.example.test' });
 
     expect(currentProduct()).toBe(ENUMS.PRODUCT.APPKNOX);
     expect(fresh.defaults.headers['X-Product']).toBe('0');
@@ -140,9 +143,9 @@ describe('request', () => {
 
     const error = await request({ url: 'api/ping' }).catch((reason: unknown) => reason);
 
-    expect(isAxiosError(error) ? error.status : undefined).toBe(403);
+    expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.FORBIDDEN);
     expect(isAxiosError(error) ? error.code : undefined).toBe('ERR_BAD_REQUEST');
-    expect(isAxiosError(error) ? error.response?.data : undefined).toEqual({ detail: 'Forbidden' });
+    expect(getApiErrorPayload(error)).toEqual({ detail: 'Forbidden' });
   });
 
   it('rejects with an Error that isAxiosError recognises', async () => {
@@ -194,5 +197,72 @@ describe('verb helpers', () => {
     intercept('delete', 500);
 
     await expect(apiRequest.delete('api/ping')).rejects.toThrow('500');
+  });
+});
+
+describe('the credential interceptor', () => {
+  const PING_URL = buildAPITestURL('api/ping');
+
+  /** Answer one request, recording the credential it carried. */
+  function interceptPing() {
+    const seen: { authorization: string | null } = { authorization: null };
+
+    server.use(
+      http.get(PING_URL, ({ request }) => {
+        seen.authorization = request.headers.get('Authorization');
+
+        return HttpResponse.json({});
+      })
+    );
+
+    return seen;
+  }
+
+  afterEach(() => {
+    window.localStorage.clear();
+  });
+
+  it('attaches the stored credential, so no call site has to', async () => {
+    storeSession({ token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' });
+
+    const seen = interceptPing();
+
+    await request({ url: 'api/ping' });
+
+    expect(seen.authorization).toBe('Basic NDI6dG9rM24=');
+  });
+
+  it('sends none when signed out, rather than an empty credential', async () => {
+    const seen = interceptPing();
+
+    await request({ url: 'api/ping' });
+
+    expect(seen.authorization).toBeNull();
+  });
+
+  it('leaves an explicit credential alone, for one not yet stored', async () => {
+    storeSession({ token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' });
+
+    const seen = interceptPing();
+
+    await request({ url: 'api/ping', headers: { Authorization: 'Basic OTk6b3RoZXI=' } });
+
+    expect(seen.authorization).toBe('Basic OTk6b3RoZXI=');
+  });
+
+  it('reads storage per request, so signing in mid-session is picked up', async () => {
+    const before = interceptPing();
+
+    await request({ url: 'api/ping' });
+
+    expect(before.authorization).toBeNull();
+
+    storeSession({ token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' });
+
+    const after = interceptPing();
+
+    await request({ url: 'api/ping' });
+
+    expect(after.authorization).toBe('Basic NDI6dG9rM24=');
   });
 });

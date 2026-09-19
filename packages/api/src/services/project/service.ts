@@ -1,6 +1,6 @@
 import { apiRequest } from '@irene/api/request';
-import type { ApiPage, DrfPageResponse } from '@irene/api/types/pagination';
-import type { Project, ProjectListParams } from '@irene/api/types/project';
+import type { ApiProject, ApiProjectListRequest } from '@irene/api/services/project';
+import type { ApiPage, ApiPageResponse } from '@irene/api/types/pagination';
 
 import { ProjectEndpoints } from './config';
 
@@ -12,8 +12,10 @@ export default class ProjectService {
    * @param params - The page size, offset and search text.
    * @returns The projects on the page, the total count, and whether more pages exist either side.
    */
-  public static readonly list = async (params: ProjectListParams): Promise<ApiPage<Project>> => {
-    const page = await apiRequest.get<DrfPageResponse<Project>>(ProjectEndpoints.list(), {
+  public static readonly list = async (
+    params: ApiProjectListRequest
+  ): Promise<ApiPage<ApiProject>> => {
+    const page = await apiRequest.get<ApiPageResponse<ApiProject>>(ProjectEndpoints.list(), {
       params,
     });
 
@@ -31,6 +33,6 @@ export default class ProjectService {
    * @param id - The project id.
    * @returns The project.
    */
-  public static readonly detail = (id: number | string): Promise<Project> =>
+  public static readonly detail = (id: number | string): Promise<ApiProject> =>
     apiRequest.get(ProjectEndpoints.detail(id));
 }
