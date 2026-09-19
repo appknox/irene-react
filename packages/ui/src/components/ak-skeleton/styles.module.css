@@ -1,0 +1,30 @@
+/*
+  The skeleton's own pulse. It belongs to this component rather than the theme:
+  nothing else animates this way, and a theme token is design vocabulary the
+  whole product draws on.
+
+  In the components layer, so a utility on the element still wins.
+*/
+@layer components {
+  .pulse {
+    animation: pulse 3s ease-in-out 0.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+
+    33% {
+      opacity: 0.45;
+    }
+
+    66% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+}
