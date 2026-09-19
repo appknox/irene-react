@@ -6,3 +6,9 @@ packages:
 # the platform binary Vite runs on.
 onlyBuiltDependencies:
   - esbuild
+
+# One pin per shared tool, so every package that declares it installs the same
+# copy. A second Vite in the tree breaks type-check across the workspace.
+catalog:
+  '@types/node': ^24.13.4
+  vite: ^8.3.0
