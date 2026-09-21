@@ -1,4 +1,5 @@
 import { isAxiosError } from 'axios';
+import { HTTP_STATUS_CODES } from '@irene/constants';
 
 /** Per-field messages from a DRF error body, keyed by field name. */
 export type ApiFieldErrors<TFields extends string = string> = Partial<Record<TFields, string[]>>;
@@ -124,4 +125,42 @@ export function getApiErrorMessage(error: unknown): string | undefined {
  */
 export function getApiErrorPayload<TPayload = unknown>(error: unknown): TPayload | undefined {
   return isAxiosError<TPayload>(error) ? error.response?.data : undefined;
+}
+
+/**
+ * Whether the request was refused because the account is rate limited.
+ *
+ * A caller should stay quiet about these: the countdown already tells the user
+ * what happened and how long it lasts, so a second message about the same
+ * refusal only contradicts it.
+ *
+ * @param error - The rejection.
+ * @returns Whether the server answered 429.
+ */
+export const isRateLimited = (error: unknown) =>
+  getApiErrorStatus(error) === HTTP_STATUS_CODES.TOO_MANY_REQUESTS;
+
+/**
+ * Wraps an error handler so it does nothing while the account is rate limited.
+ *
+ * The countdown already tells the user what happened and how long it lasts. A
+ * handler that also notifies, resets a form or navigates would talk over it,
+ * so the whole handler is skipped rather than only its message.
+ *
+ * @param handler - What to do about an error that is not a rate limit.
+ * @returns The same handler, quiet for the one refusal already accounted for.
+ *
+ * @example
+ * onError: unlessRateLimited(() => akNotify.error(akMT('pleaseTryAgain')))
+ */
+export function unlessRateLimited<TArgs extends [unknown, ...unknown[]]>(
+  handler: (...args: TArgs) => void
+) {
+  return (...args: TArgs) => {
+    const [error] = args;
+
+    if (!isRateLimited(error)) {
+      handler(...args);
+    }
+  };
 }

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { AxiosError, AxiosHeaders, type AxiosResponse } from 'axios';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   getApiErrorMessage,
@@ -8,6 +8,8 @@ import {
   getApiErrorStatus,
   getApiFieldErrors,
   isNetworkError,
+  isRateLimited,
+  unlessRateLimited,
 } from '@irene/api/utils/errors';
 
 import { HTTP_STATUS_CODES } from '@irene/constants';
@@ -191,5 +193,50 @@ describe('isNetworkError', () => {
   it('is false for something that is not an axios error', () => {
     expect(isNetworkError(new Error('boom'))).toBe(false);
     expect(isNetworkError(null)).toBe(false);
+  });
+});
+
+describe('isRateLimited', () => {
+  it('recognises the refusal the countdown speaks for', () => {
+    expect(isRateLimited(refusal(HTTP_STATUS_CODES.TOO_MANY_REQUESTS, {}))).toBe(true);
+  });
+
+  it('leaves every other refusal to its caller', () => {
+    expect(isRateLimited(refusal(HTTP_STATUS_CODES.UNAUTHORIZED, {}))).toBe(false);
+  });
+
+  it('is false for something that is not an API error at all', () => {
+    expect(isRateLimited(new Error('nope'))).toBe(false);
+  });
+});
+
+describe('unlessRateLimited', () => {
+  it('runs the handler for a refusal the caller still has to explain', () => {
+    const handler = vi.fn();
+
+    unlessRateLimited(handler)(refusal(HTTP_STATUS_CODES.BAD_REQUEST, {}));
+    expect(handler).toHaveBeenCalledOnce();
+  });
+
+  it('skips the whole handler while the account is locked', () => {
+    const handler = vi.fn();
+
+    unlessRateLimited(handler)(refusal(HTTP_STATUS_CODES.TOO_MANY_REQUESTS, {}));
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('passes every argument through, so a mutation handler keeps its variables', () => {
+    const handler = vi.fn();
+    const error = refusal(HTTP_STATUS_CODES.BAD_REQUEST, {});
+
+    unlessRateLimited(handler)(error, { username: 'jane' });
+    expect(handler).toHaveBeenCalledWith(error, { username: 'jane' });
+  });
+
+  it('runs the handler for something that is not an API error at all', () => {
+    const handler = vi.fn();
+
+    unlessRateLimited(handler)(new Error('nope'));
+    expect(handler).toHaveBeenCalledOnce();
   });
 });

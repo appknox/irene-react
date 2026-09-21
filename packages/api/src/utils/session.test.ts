@@ -11,10 +11,10 @@ import {
   IRENE_AUTH_SESSION_KEY,
   isSignedIn,
   storeSession,
-  type Session,
+  type IreneAuthSession,
 } from '@irene/api/utils/session';
 
-const session: Session = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
+const session: IreneAuthSession = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
 
 afterEach(() => {
   window.localStorage.clear();

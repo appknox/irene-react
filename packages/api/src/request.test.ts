@@ -1,16 +1,30 @@
 import { isAxiosError } from 'axios';
 import { http, HttpResponse, type JsonBodyType } from 'msw';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HTTP_STATUS_CODES } from '@irene/constants';
 import { ENUMS } from '@irene/enums';
 
-import { apiRequest, currentProduct, request } from '@irene/api/request';
+import {
+  apiRequest,
+  currentProduct,
+  request,
+  SELF_HANDLING_UNAUTHORIZED_API_ENDPOINTS,
+} from '@irene/api/request';
+
+import { AuthEndpoints } from '@irene/api/services/auth/endpoints';
+import { rateLimitStore } from '@irene/api/stores/rate-limit';
 import { getApiErrorPayload, getApiErrorStatus } from '@irene/api/utils/errors';
-import { storeSession } from '@irene/api/utils/session';
+import { getStoredSession, storeSession } from '@irene/api/utils/session';
 import { buildAPITestURL, server } from '@tests/server';
 
 const PING = buildAPITestURL('api/ping');
+const PROJECTS_PATH = 'api/v3/projects';
+
+/** ============================================================
+ * TEST HELPERS
+ * ============================================================
+ */
 
 /** Captures what the client actually sent. */
 function intercept(
@@ -62,6 +76,33 @@ async function clientWith(tiers: { injected?: string; baked?: string; hostname?:
 
   return (await import('@irene/api/request')).client;
 }
+
+/** A stored session for the interceptor to end. */
+function signIn() {
+  storeSession({ userId: 42, token: 'mock-t0ken', b64token: 'YmFzZTY0' });
+}
+
+/** Records where the browser is sent. jsdom will not let `replace` be spied on. */
+function watchNavigation() {
+  const replace = vi.fn();
+
+  Object.defineProperty(window, 'location', {
+    value: { ...realLocation, replace },
+    configurable: true,
+  });
+
+  return replace;
+}
+
+/** Answers one path with one status. */
+function refuse(path: string, status: number, body: JsonBodyType = {}) {
+  server.use(http.all(buildAPITestURL(path), () => HttpResponse.json(body, { status })));
+}
+
+/** ============================================================
+ * TEST START
+ * ============================================================
+ */
 
 describe('host resolution', () => {
   it('takes the host from the injected tier', async () => {
@@ -264,5 +305,108 @@ describe('the credential interceptor', () => {
     await request({ url: 'api/ping' });
 
     expect(after.authorization).toBe('Basic NDI6dG9rM24=');
+  });
+});
+
+describe('what every response passes through', () => {
+  beforeEach(() => {
+    rateLimitStore.getState().clearThrottle();
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', { value: realLocation, configurable: true });
+    vi.restoreAllMocks();
+  });
+
+  describe('a credential the server no longer accepts', () => {
+    it('ends the session and returns the user to login', async () => {
+      signIn();
+
+      const navigation = watchNavigation();
+
+      refuse(PROJECTS_PATH, HTTP_STATUS_CODES.UNAUTHORIZED, { detail: 'Invalid token' });
+
+      await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow();
+
+      expect(getStoredSession()).toBeNull();
+      expect(navigation).toHaveBeenCalledWith('/login?sessionExpired=true');
+    });
+
+    it('says the account is inactive when that is what the server said', async () => {
+      signIn();
+
+      const navigation = watchNavigation();
+
+      refuse(PROJECTS_PATH, HTTP_STATUS_CODES.UNAUTHORIZED, { detail: 'User account is inactive' });
+
+      await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow();
+
+      expect(navigation).toHaveBeenCalledWith('/login?userInactive=true');
+    });
+
+    it.each(SELF_HANDLING_UNAUTHORIZED_API_ENDPOINTS)(
+      'leaves %s to report its own 401',
+      async (path) => {
+        signIn();
+
+        const navigation = watchNavigation();
+
+        refuse(path, HTTP_STATUS_CODES.UNAUTHORIZED, { detail: 'Refused' });
+
+        await expect(apiRequest.post(path)).rejects.toThrow();
+
+        expect(navigation).not.toHaveBeenCalled();
+        expect(getStoredSession()).not.toBeNull();
+      }
+    );
+
+    it('leaves a reset link alone, which the recover path covers by prefix', async () => {
+      signIn();
+
+      const navigation = watchNavigation();
+      const path = AuthEndpoints.resetPassword('some-t0ken');
+
+      refuse(path, HTTP_STATUS_CODES.UNAUTHORIZED, { detail: 'Refused' });
+
+      await expect(apiRequest.put(path)).rejects.toThrow();
+
+      expect(navigation).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('an account the server has rate limited', () => {
+    it('starts the lock with the time the server named', async () => {
+      refuse(PROJECTS_PATH, HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 45 } });
+
+      await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow();
+
+      expect(rateLimitStore.getState()).toMatchObject({ isThrottled: true, secondsRemaining: 45 });
+    });
+
+    it('leaves an upload alone, since it is slow rather than abusive', async () => {
+      refuse('api/upload_app', HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 45 } });
+
+      await expect(apiRequest.post('api/upload_app', {})).rejects.toThrow();
+
+      expect(rateLimitStore.getState().isThrottled).toBe(false);
+    });
+
+    it('still rejects, so the caller sees what happened', async () => {
+      refuse(PROJECTS_PATH, HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 45 } });
+
+      await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow('429');
+    });
+  });
+
+  it('lets an unreachable server through untouched', async () => {
+    const navigation = watchNavigation();
+
+    server.use(http.get(buildAPITestURL(PROJECTS_PATH), () => HttpResponse.error()));
+
+    await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow();
+
+    expect(navigation).not.toHaveBeenCalled();
+    expect(rateLimitStore.getState().isThrottled).toBe(false);
   });
 });
