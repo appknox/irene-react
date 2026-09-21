@@ -12,10 +12,9 @@ import type { ApiSessionResponse } from '@irene/api/services/auth';
 
 /**
  * Records a session the app has just been granted: stored for the next visit,
- * and seeded into the cache so the route guards do not re-check what we just
- * learnt.
+ * and seeded into the cache, since the API granting it is confirmation enough.
  *
- * @param queryClient - The cache to seed.
+ * @param queryClient - The cache holding what was last confirmed.
  * @param response - The token and user id from a sign-in.
  * @returns The stored session.
  */

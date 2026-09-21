@@ -3,14 +3,15 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { queryClient } from '@irene/api/query-client';
 import { AuthEndpoints } from '@irene/api/services/auth';
-import { getStoredSession, storeSession, type IreneAuthSession } from '@irene/api/utils/session';
+import { getStoredSession, storeSession } from '@irene/api/utils/session';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 
 import { sessionCheckOptions } from '@/features/auth/queries/session';
+import { buildSession } from '@tests/factories';
 import { buildAPITestURL, server } from '@tests/server';
 
 const CHECK_URL = buildAPITestURL(AuthEndpoints.check());
-const session: IreneAuthSession = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
+const session = buildSession();
 
 afterEach(() => {
   window.localStorage.clear();
@@ -69,7 +70,7 @@ describe('sessionCheckOptions', () => {
       expect(getStoredSession()).toBeNull();
     });
 
-    it('rejects on a server error and keeps the stored session', async () => {
+    it('signs the user out when the check cannot be answered at all', async () => {
       storeSession(session);
 
       server.use(
@@ -78,11 +79,8 @@ describe('sessionCheckOptions', () => {
         )
       );
 
-      await expect(queryClient.query({ ...sessionCheckOptions(), retry: false })).rejects.toThrow(
-        '500'
-      );
-
-      expect(getStoredSession()).toEqual(session);
+      await expect(queryClient.query(sessionCheckOptions())).resolves.toBeNull();
+      expect(getStoredSession()).toBeNull();
     });
   });
 });

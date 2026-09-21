@@ -70,7 +70,7 @@ export function useSignedInElsewhere() {
   const onSessionChange = useCallback(
     (session: IreneAuthSession | null) => {
       if (session) {
-        queryClient.setQueryData(sessionCheckOptions().queryKey, session);
+        queryClient.removeQueries({ queryKey: sessionCheckOptions().queryKey });
         navigate({ to: '/' });
       }
     },

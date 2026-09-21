@@ -1,9 +1,21 @@
 import { Outlet } from '@tanstack/react-router';
+import { Fragment } from 'react';
+
+import { DocumentHead } from '@/components/document-head';
 import { useRateLimitNotice } from '@/hooks/use-rate-limit-notice';
+import { useThemeClass } from '@/hooks/use-theme-class';
 
 export function RootLayout() {
-  /** Every page, signed in or out: a rate limit can start from any request. */
+  /** The color scheme a deployment resolves to. */
+  useThemeClass();
+
+  /** Every page, signed in or out: a throttle can start from any request. */
   useRateLimitNotice();
 
-  return <Outlet />;
+  return (
+    <Fragment>
+      <DocumentHead />
+      <Outlet />
+    </Fragment>
+  );
 }
