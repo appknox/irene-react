@@ -25,7 +25,7 @@ describe('the wait while an identity provider signs a user in', () => {
   it('says what is happening rather than leaving the screen blank', async () => {
     holdTheExchange();
 
-    await renderAtRoute('/saml2/redirect?sso_token=tok3n', false);
+    await renderAtRoute('/saml2/redirect?sso_token=tok3n', { settle: false });
 
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: akMT('signingYouIn') })).toBeInTheDocument()
@@ -37,7 +37,7 @@ describe('the wait while an identity provider signs a user in', () => {
   it('announces the wait to a screen reader', async () => {
     holdTheExchange();
 
-    await renderAtRoute('/saml2/redirect?sso_token=tok3n', false);
+    await renderAtRoute('/saml2/redirect?sso_token=tok3n', { settle: false });
 
     await waitFor(() => expect(screen.getByRole('status')).toBeInTheDocument());
   });

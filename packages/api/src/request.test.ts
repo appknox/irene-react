@@ -16,6 +16,7 @@ import { AuthEndpoints } from '@irene/api/services/auth/endpoints';
 import { rateLimitStore } from '@irene/api/stores/rate-limit';
 import { getApiErrorPayload, getApiErrorStatus } from '@irene/api/utils/errors';
 import { getStoredSession, storeSession } from '@irene/api/utils/session';
+import { buildSession } from '@tests/factories';
 import { buildAPITestURL, server } from '@tests/server';
 
 const PING = buildAPITestURL('api/ping');
@@ -79,7 +80,7 @@ async function clientWith(tiers: { injected?: string; baked?: string; hostname?:
 
 /** A stored session for the interceptor to end. */
 function signIn() {
-  storeSession({ userId: 42, token: 'mock-t0ken', b64token: 'YmFzZTY0' });
+  storeSession(buildSession());
 }
 
 /** Records where the browser is sent. jsdom will not let `replace` be spied on. */
@@ -264,13 +265,15 @@ describe('the credential interceptor', () => {
   });
 
   it('attaches the stored credential, so no call site has to', async () => {
-    storeSession({ token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' });
+    const session = buildSession();
+
+    storeSession(session);
 
     const seen = interceptPing();
 
     await request({ url: 'api/ping' });
 
-    expect(seen.authorization).toBe('Basic NDI6dG9rM24=');
+    expect(seen.authorization).toBe(`Basic ${session.b64token}`);
   });
 
   it('sends none when signed out, rather than an empty credential', async () => {
@@ -282,7 +285,7 @@ describe('the credential interceptor', () => {
   });
 
   it('leaves an explicit credential alone, for one not yet stored', async () => {
-    storeSession({ token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' });
+    storeSession(buildSession());
 
     const seen = interceptPing();
 
@@ -298,13 +301,15 @@ describe('the credential interceptor', () => {
 
     expect(before.authorization).toBeNull();
 
-    storeSession({ token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' });
+    const session = buildSession();
+
+    storeSession(session);
 
     const after = interceptPing();
 
     await request({ url: 'api/ping' });
 
-    expect(after.authorization).toBe('Basic NDI6dG9rM24=');
+    expect(after.authorization).toBe(`Basic ${session.b64token}`);
   });
 });
 

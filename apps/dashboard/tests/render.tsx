@@ -14,6 +14,7 @@ import { TranslationsProvider } from '@irene/translations/provider';
 import { AkToaster } from '@irene/ui/ak-toaster';
 
 import { routeTree } from '@/routeTree.gen';
+import type { RootRouterContext } from '@/routes/__root';
 
 /** Renders inside the providers the app supplies, with a cache per test. */
 export function renderWithProviders(ui: ReactNode) {
@@ -29,22 +30,35 @@ export function renderWithProviders(ui: ReactNode) {
   };
 }
 
+/** What a route render may vary. */
+interface RenderAtRouteOptions {
+  settle?: boolean;
+  context?: RootRouterContext;
+}
+
 /**
  * Renders the app at one URL, through the real route tree. Use it for a page
  * that reads search params or navigates; `renderWithProviders` is enough for a
  * component that does neither.
  *
  * @param path - The URL to start at, e.g. `/login?unauthenticated=true`.
- * @param settle - Whether to wait for guards and loaders. Pass false to assert
- * what the route shows while its loader is still in flight.
+ * @param options.settle - Whether to wait for guards and loaders. Pass false to
+ * assert what the route shows while its loader is still in flight.
+ * @param options.context - Router context to start with. Defaults to the app's
+ * own cache; pass one to give a test a cache of its own.
  * @returns The testing-library result, plus the router and cache.
  */
-export async function renderAtRoute(path: string, settle = true) {
+export async function renderAtRoute(
+  path: string,
+  { settle = true, context }: RenderAtRouteOptions = {}
+) {
   queryClient.clear();
+
+  const routerContext = context ?? { queryClient };
 
   const router: AnyRouter = createRouter({
     routeTree,
-    context: { queryClient },
+    context: routerContext,
     history: createMemoryHistory({ initialEntries: [path] }),
   });
 
@@ -55,11 +69,11 @@ export async function renderAtRoute(path: string, settle = true) {
   }
 
   return {
-    queryClient,
+    queryClient: routerContext.queryClient,
     router,
     ...render(
       <TranslationsProvider>
-        <QueryClientProvider client={queryClient}>
+        <QueryClientProvider client={routerContext.queryClient}>
           <RouterProvider router={router} />
           <AkToaster />
         </QueryClientProvider>

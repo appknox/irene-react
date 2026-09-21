@@ -3,7 +3,9 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
 
+import { configurationStore } from '@irene/api/stores/configuration';
 import { akNotify } from '@irene/ui/notify';
+
 import { server } from '@tests/server';
 
 /*
@@ -14,14 +16,17 @@ import { server } from '@tests/server';
 window.scrollTo = () => undefined;
 
 /**
- * Both config tiers are globals, and a stored session outlives the DOM, so
- * anything one test leaves behind would reach the next. Clear them around
- * every case.
+ * Both config tiers are globals, a stored session outlives the DOM, and the
+ * configuration store settles once per tab, so anything one test leaves behind
+ * would reach the next. Clear them around every case.
  */
 const reset = () => {
   globalThis.__BUILD_CONFIG__ = {};
   delete window.runtimeGlobalConfig;
   window.localStorage.clear();
+
+  // Replaces rather than merges, so the store goes back to unsettled with its actions intact.
+  configurationStore.setState(configurationStore.getInitialState(), true);
 };
 
 // Modules read config at import, so the tiers must exist before they load.

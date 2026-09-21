@@ -4,13 +4,14 @@ import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
 import { AuthEndpoints } from '@irene/api/services/auth';
-import { getStoredSession, storeSession, type IreneAuthSession } from '@irene/api/utils/session';
+import { getStoredSession, storeSession } from '@irene/api/utils/session';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 
+import { buildSession } from '@tests/factories';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
-const session: IreneAuthSession = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
+const session = buildSession();
 
 /** Let the session check pass, so the home page is reachable. */
 const signedIn = () => {

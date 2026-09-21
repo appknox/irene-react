@@ -7,6 +7,7 @@ import { getStoredSession } from '@irene/api/utils/session';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
 
+import { buildSession } from '@tests/factories';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
@@ -31,7 +32,7 @@ describe('the SAML callback', () => {
     const { router } = await renderAtRoute('/saml2/redirect?sso_token=from-idp');
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/'));
-    expect(getStoredSession()).toEqual({ token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' });
+    expect(getStoredSession()).toEqual(buildSession({ userId: 42, token: 'tok3n' }));
   });
 
   it('lands the user in the dashboard without an error on the way', async () => {

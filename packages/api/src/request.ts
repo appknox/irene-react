@@ -136,7 +136,7 @@ export async function request<TData>(options: AxiosRequestConfig): Promise<TData
  * One helper per HTTP verb, each resolving to the response body.
  *
  * @example
- * const page = await apiRequest.get<ApiPageResponse<ApiProject>>('api/v3/projects', { params: { limit: 10 } });
+ * const page = await apiRequest.get<ApiPageEnvelope<ApiProject>>('api/v3/projects', { params: { limit: 10 } });
  */
 export const apiRequest = {
   get: <TData>(url: string, options?: RequestOptions) =>

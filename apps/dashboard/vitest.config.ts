@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import { defineConfig } from 'vitest/config';
 
 import { svgrPlugin } from '@irene/ui/vite';
@@ -6,7 +7,21 @@ import { svgrPlugin } from '@irene/ui/vite';
 const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
-  plugins: [svgrPlugin()],
+  plugins: [
+    /*
+      Regenerates routeTree.gen.ts before the run, so a route added without
+      starting the dev server is still the tree the tests exercise. Code
+      splitting is the dev and build concern, and off here.
+    */
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: false,
+      routeFileIgnorePattern: String.raw`\.test\.`,
+      disableLogging: true,
+    }),
+
+    svgrPlugin(),
+  ],
   define: {
     // The app freezes this into the bundle. Tests vary it per case, so here the
     // identifier has to resolve at runtime instead.
