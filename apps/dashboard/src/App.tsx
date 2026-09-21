@@ -6,13 +6,13 @@ import { TranslationsProvider } from '@irene/translations/provider';
 import { AkToaster } from '@irene/ui/ak-toaster';
 
 import { QueryDevtools } from '@/components/query-devtools';
-import { router } from '@/router';
+import { ireneDashboardRouter } from '@/router';
 
 export function App() {
   return (
     <TranslationsProvider>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <RouterProvider router={ireneDashboardRouter} />
         <QueryDevtools />
         <AkToaster />
       </QueryClientProvider>

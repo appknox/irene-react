@@ -1934,6 +1934,7 @@
   "reconnectGotoSettings": "integration failed. Something went wrong you can go to settings and reconnect by",
   "recover": "Recover",
   "recoverPassword": "Recover your password",
+  "recoverPasswordPageTitle": "Recover Password",
   "recordPerPage": "Records per page",
   "recurring": "recurring",
   "referenceLink": "Reference Link",

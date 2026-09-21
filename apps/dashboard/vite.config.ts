@@ -16,12 +16,22 @@ export default defineConfig({
   // __BUILD_CONFIG__ is undefined at runtime.
   define: buildConfigDefine(),
   plugins: [
-    // Generates routeTree.gen.ts. Must run before the React plugin.
-    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
+    /*
+      Generates routeTree.gen.ts. Must run before the React plugin. The ignore
+      pattern keeps a route's tests beside it: without it every `*.test.tsx`
+      under src/routes would be generated into the tree as a route.
+    */
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+      routeFileIgnorePattern: String.raw`\.test\.`,
+    }),
+
     // Generates the flat message files, and regenerates them when a translation file is saved.
     translationsPlugin(),
     react(),
     tailwindcss(),
+
     // Turns `@irene/ui/svgs/*.svg?react` imports into components.
     svgrPlugin(),
   ],
