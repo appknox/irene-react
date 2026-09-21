@@ -25,7 +25,7 @@ export default class AuthService {
    * Checks that the stored credential is still live. The client attaches it.
    * @returns Resolves on a 2xx; rejects with the `AxiosError` otherwise, 401 meaning refused.
    */
-  public static readonly check = () => apiRequest.post(AuthEndpoints.check(), {});
+  public static readonly checkSession = () => apiRequest.post(AuthEndpoints.check(), {});
 
   /**
    * Signs a user in with a username or email and password.
@@ -56,7 +56,7 @@ export default class AuthService {
    * @param username - The username or email to send the link to.
    * @returns Resolves once the request is accepted.
    */
-  public static readonly recover = (username: string) =>
+  public static readonly recoverPassword = (username: string) =>
     apiRequest.post(AuthEndpoints.recover(), { username });
 
   /**
@@ -64,7 +64,7 @@ export default class AuthService {
    * @param token - The token from the emailed link.
    * @returns The account the link belongs to; rejects when the link is spent or unknown.
    */
-  public static readonly verifyResetToken = (token: string): Promise<ApiResetTokenResponse> =>
+  public static readonly verifyResetToken = (token: string) =>
     apiRequest.get<ApiResetTokenResponse>(AuthEndpoints.resetPassword(token));
 
   /**
@@ -72,7 +72,7 @@ export default class AuthService {
    * @param request - The link's token, and the new password twice.
    * @returns Resolves once the password is changed.
    */
-  public static readonly resetPassword = (data: ApiResetPasswordRequest): Promise<void> => {
+  public static readonly resetPassword = (data: ApiResetPasswordRequest) => {
     const { token, password, confirmPassword } = data;
 
     return apiRequest.put(AuthEndpoints.resetPassword(token), {
@@ -86,7 +86,7 @@ export default class AuthService {
    * @param username - The username or email the user typed.
    * @returns Whether SAML or OIDC is available, whether SSO is enforced, and the token for the SSO redirect.
    */
-  public static readonly ssoCheck = (username: string) =>
+  public static readonly checkSso = (username: string) =>
     apiRequest.post<ApiSsoCheck>(AuthEndpoints.ssoCheck(), { username });
 
   /**

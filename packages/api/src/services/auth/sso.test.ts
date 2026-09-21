@@ -32,12 +32,12 @@ function interceptCheck(respond: () => Response) {
   return seen;
 }
 
-describe('AuthService.ssoCheck', () => {
+describe('AuthService.checkSso', () => {
   describe('when the organisation is found', () => {
     it('posts to the v2 sso check endpoint', async () => {
       const seen = interceptCheck(() => HttpResponse.json(buildSsoCheck()));
 
-      await AuthService.ssoCheck(USERNAME);
+      await AuthService.checkSso(USERNAME);
 
       expect(seen.method).toBe('POST');
     });
@@ -45,7 +45,7 @@ describe('AuthService.ssoCheck', () => {
     it('sends only the username', async () => {
       const seen = interceptCheck(() => HttpResponse.json(buildSsoCheck()));
 
-      await AuthService.ssoCheck(USERNAME);
+      await AuthService.checkSso(USERNAME);
 
       expect(seen.body).toEqual({ username: USERNAME });
     });
@@ -55,7 +55,7 @@ describe('AuthService.ssoCheck', () => {
 
       interceptCheck(() => HttpResponse.json(response));
 
-      await expect(AuthService.ssoCheck(USERNAME)).resolves.toEqual(response);
+      await expect(AuthService.checkSso(USERNAME)).resolves.toEqual(response);
     });
   });
 
@@ -68,7 +68,7 @@ describe('AuthService.ssoCheck', () => {
         )
       );
 
-      const error = await AuthService.ssoCheck('nope').catch((reason: unknown) => reason);
+      const error = await AuthService.checkSso('nope').catch((reason: unknown) => reason);
 
       expect(isAxiosError(error)).toBe(true);
       expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.BAD_REQUEST);
@@ -83,7 +83,7 @@ describe('AuthService.ssoCheck', () => {
         HttpResponse.json({ detail: 'Forbidden' }, { status: HTTP_STATUS_CODES.FORBIDDEN })
       );
 
-      await expect(AuthService.ssoCheck(USERNAME)).rejects.toThrow('403');
+      await expect(AuthService.checkSso(USERNAME)).rejects.toThrow('403');
     });
 
     it('propagates a server error', async () => {
@@ -91,7 +91,7 @@ describe('AuthService.ssoCheck', () => {
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
       );
 
-      await expect(AuthService.ssoCheck(USERNAME)).rejects.toThrow('500');
+      await expect(AuthService.checkSso(USERNAME)).rejects.toThrow('500');
     });
   });
 
@@ -99,7 +99,7 @@ describe('AuthService.ssoCheck', () => {
     it('sends an empty username rather than dropping the field', async () => {
       const seen = interceptCheck(() => HttpResponse.json(buildSsoCheck()));
 
-      await AuthService.ssoCheck('');
+      await AuthService.checkSso('');
 
       expect(seen.body).toEqual({ username: '' });
     });

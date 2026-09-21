@@ -42,14 +42,14 @@ function interceptCheck(respond: () => Response) {
   return seen;
 }
 
-describe('AuthService.check', () => {
+describe('AuthService.checkSession', () => {
   beforeEach(signedIn);
 
   describe('when the credential is live', () => {
     it('posts to the v1 check endpoint with the credential', async () => {
       const seen = interceptCheck(() => HttpResponse.json({}));
 
-      await AuthService.check();
+      await AuthService.checkSession();
 
       expect(seen.method).toBe('POST');
       expect(seen.authorization).toBe(`Basic ${B64TOKEN}`);
@@ -58,7 +58,7 @@ describe('AuthService.check', () => {
     it('sends an empty body, as irene does', async () => {
       const seen = interceptCheck(() => HttpResponse.json({}));
 
-      await AuthService.check();
+      await AuthService.checkSession();
 
       expect(seen.body).toEqual({});
     });
@@ -70,7 +70,7 @@ describe('AuthService.check', () => {
         HttpResponse.json({ detail: 'Invalid token.' }, { status: HTTP_STATUS_CODES.UNAUTHORIZED })
       );
 
-      const error = await AuthService.check().catch((reason: unknown) => reason);
+      const error = await AuthService.checkSession().catch((reason: unknown) => reason);
 
       expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.UNAUTHORIZED);
 
@@ -87,7 +87,7 @@ describe('AuthService.check', () => {
         )
       );
 
-      const error = await AuthService.check().catch((reason: unknown) => reason);
+      const error = await AuthService.checkSession().catch((reason: unknown) => reason);
 
       expect(getApiErrorPayload(error)).toEqual({
         detail: 'User inactive or deleted.',
@@ -99,7 +99,7 @@ describe('AuthService.check', () => {
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
       );
 
-      await expect(AuthService.check()).rejects.toThrow('500');
+      await expect(AuthService.checkSession()).rejects.toThrow('500');
     });
   });
 
@@ -109,7 +109,7 @@ describe('AuthService.check', () => {
 
       const seen = interceptCheck(() => HttpResponse.json({}));
 
-      await AuthService.check();
+      await AuthService.checkSession();
 
       expect(seen.authorization).toBeNull();
     });
@@ -222,7 +222,7 @@ describe('AuthService.logout', () => {
   });
 });
 
-describe('AuthService.recover', () => {
+describe('AuthService.recoverPassword', () => {
   const RECOVER_URL = buildAPITestURL(AuthEndpoints.recover());
 
   it('posts the username to the v2 forgot password endpoint', async () => {
@@ -240,7 +240,7 @@ describe('AuthService.recover', () => {
       })
     );
 
-    await AuthService.recover(RECOVER_USERNAME);
+    await AuthService.recoverPassword(RECOVER_USERNAME);
 
     expect(seen.body).toEqual({ username: RECOVER_USERNAME });
 
@@ -258,7 +258,9 @@ describe('AuthService.recover', () => {
       )
     );
 
-    const error = await AuthService.recover(UNKNOWN_USERNAME).catch((reason: unknown) => reason);
+    const error = await AuthService.recoverPassword(UNKNOWN_USERNAME).catch(
+      (reason: unknown) => reason
+    );
 
     expect(getApiErrorPayload(error)).toEqual({
       username: ['No account uses that address'],

@@ -33,7 +33,7 @@ export function RecoverPage() {
   const usernameFieldIsEmpty = useRequiredField<RecoverFormSchema>('username', recoverForm);
 
   const recover = useMutation({
-    mutationFn: ({ username }: RecoverFormSchema) => AuthService.recover(username),
+    mutationFn: ({ username }: RecoverFormSchema) => AuthService.recoverPassword(username),
     onError: unlessRateLimited((error) => {
       const messages = getApiFieldErrors<'username'>(error);
       const usernameMessage = messages.username?.[0];
