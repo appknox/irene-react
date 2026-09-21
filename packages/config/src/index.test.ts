@@ -5,8 +5,8 @@ import {
   getConfig,
   getConfigFlag,
   getConfigValue,
-  isAppknoxBranded,
   isPluginEnabled,
+  isWhitelabelEnabled,
   type ConfigKey,
 } from '@irene/config';
 
@@ -216,26 +216,26 @@ describe('isPluginEnabled', () => {
   });
 });
 
-describe('isAppknoxBranded', () => {
+describe('isWhitelabelEnabled', () => {
   it('reads as Appknox when no deployment claims otherwise', () => {
-    expect(isAppknoxBranded()).toBe(true);
+    expect(isWhitelabelEnabled()).toBe(false);
   });
 
   it('reads as whitelabelled when the build sets the flag', () => {
     atBuild({ WHITELABEL_ENABLED: 'true' });
 
-    expect(isAppknoxBranded()).toBe(false);
+    expect(isWhitelabelEnabled()).toBe(true);
   });
 
   it('reads as whitelabelled when a server injects the flag at runtime', () => {
     injected({ WHITELABEL_ENABLED: 'true' });
 
-    expect(isAppknoxBranded()).toBe(false);
+    expect(isWhitelabelEnabled()).toBe(true);
   });
 
   it('reads as Appknox when a deployment explicitly turns whitelabelling off', () => {
     atBuild({ WHITELABEL_ENABLED: 'false' });
 
-    expect(isAppknoxBranded()).toBe(true);
+    expect(isWhitelabelEnabled()).toBe(false);
   });
 });

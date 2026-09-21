@@ -1,6 +1,6 @@
-import { isAppknoxBranded } from '@irene/config';
 import { APPKNOX_SUPPORT_EMAIL } from '@irene/constants';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
+import { useWhitelabel } from '@/hooks/use-whitelabel';
 import type { LoginFailure } from '@/features/auth/utils/login-error';
 
 /**
@@ -33,12 +33,13 @@ export function LoginRefusalMessage({ failure }: Readonly<LoginRefusalMessagePro
 
 /** Tells the user their account is locked and where to get help. */
 function AccountLocked() {
+  const { isAppknoxUrl } = useWhitelabel();
+
   return (
     <span data-test-account-locked-message>
       <AkMessageTranslate id="lockedAccount" />
 
-      {/* Only Appknox answers its own support address; a whitelabel routes its own. */}
-      {isAppknoxBranded() ? (
+      {isAppknoxUrl ? (
         <a
           href={`mailto:${APPKNOX_SUPPORT_EMAIL}`}
           target="_blank"

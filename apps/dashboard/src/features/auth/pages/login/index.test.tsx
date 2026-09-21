@@ -11,7 +11,7 @@ import {
 } from '@irene/api/services/auth';
 
 import { formatWaitTime, rateLimitStore } from '@irene/api/stores/rate-limit';
-import { HTTP_STATUS_CODES } from '@irene/constants';
+import { APPKNOX_SUPPORT_EMAIL, HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
 
 import { buildSsoCheck } from '@tests/factories/sso';
@@ -39,10 +39,20 @@ const { CREDENTIALS_REJECTED, ACCOUNT_LOCKED } = API_LOGIN_REFUSAL_MESSAGES;
 /* Trimmed: the message ends in a space, which the DOM text does not keep. */
 const LOCKED_MESSAGE = akMT('lockedAccount').trim();
 
-/** Turn the deployment's whitelabel branding on, as an operator's config would. */
-function whitelabelled() {
-  globalThis.__BUILD_CONFIG__ = { WHITELABEL_ENABLED: 'true' };
+const realLocation = window.location;
+
+/** Put the tab on Appknox's own host, which is where Appknox answers its support. */
+function onAppknoxHost() {
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: { ...realLocation, href: 'https://secure.appknox.com/login' },
+  });
 }
+
+// The stub above outlives the render, so put the real location back.
+afterEach(() => {
+  Object.defineProperty(window, 'location', { configurable: true, value: realLocation });
+});
 
 const usernameField = () => screen.getByLabelText(akMT('usernameEmailIdTextLabel'));
 const passwordField = () => screen.getByLabelText(akMT('password'));
@@ -208,17 +218,17 @@ describe('LoginPage', () => {
       expect(passwordField()).toHaveAttribute('aria-invalid', 'true');
     });
 
-    it('links support on an Appknox deployment, where Appknox answers it', async () => {
+    it('links support on an Appknox host, where Appknox answers it', async () => {
+      onAppknoxHost();
       await lockOut();
 
       expect(screen.getByRole('link', { name: akMT('contactSupport') })).toHaveAttribute(
         'href',
-        'mailto:support@appknox.com'
+        `mailto:${APPKNOX_SUPPORT_EMAIL}`
       );
     });
 
-    it('leaves support as plain text on a whitelabel deployment, which routes its own', async () => {
-      whitelabelled();
+    it('leaves support as plain text anywhere else, which routes its own', async () => {
       await lockOut();
 
       expect(screen.queryByRole('link', { name: akMT('contactSupport') })).not.toBeInTheDocument();
