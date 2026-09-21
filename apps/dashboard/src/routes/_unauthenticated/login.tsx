@@ -7,7 +7,9 @@ import { sessionCheckOptions } from '@/features/auth/queries/session';
 export const Route = createFileRoute('/_unauthenticated/login')({
   validateSearch: z.object({
     unauthenticated: z.boolean().optional(),
-    sso_login_error: z.string().optional(),
+    ssoLoginError: z.string().optional(),
+    sessionExpired: z.boolean().optional(),
+    userInactive: z.boolean().optional(),
   }),
 
   /**

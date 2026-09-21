@@ -6,7 +6,7 @@ import {
   getStoredSession,
   IRENE_AUTH_SESSION_KEY,
   storeSession,
-  type Session,
+  type IreneAuthSession,
 } from '@irene/api/utils/session';
 
 import { AuthEndpoints } from '@irene/api/services/auth';
@@ -16,7 +16,7 @@ import { authKeys } from '@/features/auth/queries/keys';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
-const session: Session = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
+const session: IreneAuthSession = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
 
 /** Sign in and reach the dashboard. */
 async function signedIn() {

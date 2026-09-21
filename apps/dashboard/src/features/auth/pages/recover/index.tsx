@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 
 import { AuthService } from '@irene/api/services/auth';
-import { getApiFieldErrors } from '@irene/api/utils/errors';
+import { getApiFieldErrors, unlessRateLimited } from '@irene/api/utils/errors';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
@@ -34,7 +34,7 @@ export function RecoverPage() {
 
   const recover = useMutation({
     mutationFn: ({ username }: RecoverFormSchema) => AuthService.recover(username),
-    onError: (error) => {
+    onError: unlessRateLimited((error) => {
       const messages = getApiFieldErrors<'username'>(error);
       const usernameMessage = messages.username?.[0];
 
@@ -43,7 +43,7 @@ export function RecoverPage() {
       } else {
         akNotify.error(akMT('somethingWentWrong'));
       }
-    },
+    }),
   });
 
   return (

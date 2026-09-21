@@ -20,6 +20,12 @@ const unreachable = () =>
   new AxiosError('Network Error', AxiosError.ERR_NETWORK, { headers: new AxiosHeaders() });
 
 describe('getLoginFailure', () => {
+  it('says nothing about a rate limit, since the countdown already has', () => {
+    const error = refusal(HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 60 } });
+
+    expect(getLoginFailure(error)).toBeUndefined();
+  });
+
   it('reports nothing while the sign-in has not failed', () => {
     expect(getLoginFailure(null)).toBeUndefined();
     expect(getLoginFailure(undefined)).toBeUndefined();

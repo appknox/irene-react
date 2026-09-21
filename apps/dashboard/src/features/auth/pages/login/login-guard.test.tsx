@@ -3,13 +3,13 @@ import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { AuthEndpoints } from '@irene/api/services/auth';
-import { storeSession, type Session } from '@irene/api/utils/session';
+import { storeSession, type IreneAuthSession } from '@irene/api/utils/session';
 import { akMT } from '@irene/translations/intl';
 
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
-const session: Session = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
+const session: IreneAuthSession = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
 
 /** Let the session check pass, so the app reads as signed in. */
 const signedIn = () => {

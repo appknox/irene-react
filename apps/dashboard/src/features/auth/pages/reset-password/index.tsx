@@ -2,9 +2,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
+import { useStore } from 'zustand';
+
+import {
+  getApiErrorStatus,
+  getApiFieldErrors,
+  isRateLimited,
+  unlessRateLimited,
+} from '@irene/api/utils/errors';
 
 import { AuthService } from '@irene/api/services/auth';
-import { getApiFieldErrors } from '@irene/api/utils/errors';
+import { rateLimitStore } from '@irene/api/stores/rate-limit';
+import { HTTP_STATUS_CODES } from '@irene/constants';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
@@ -34,9 +43,11 @@ const resetRoute = getRouteApi('/_unauthenticated/reset/$token');
  */
 export function ResetPasswordPage() {
   const { token } = resetRoute.useParams();
-
   const navigate = useNavigate();
-  const link = useQuery(resetTokenOptions(token));
+  const rateLimitIsActive = useStore(rateLimitStore, (lock) => lock.isThrottled);
+
+  // Token check query
+  const tokenCheckRes = useQuery(resetTokenOptions(token));
 
   const resetForm = useForm<ResetPasswordFormSchema>({
     resolver: zodResolver(buildResetPasswordSchema()),
@@ -44,9 +55,16 @@ export function ResetPasswordPage() {
     reValidateMode: 'onSubmit',
   });
 
+  // Token check query errors
+  const tokenCheckBrokeTheServer =
+    (getApiErrorStatus(tokenCheckRes.error) ?? 0) >= HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
+
+  const tokenCheckWasRateLimited = isRateLimited(tokenCheckRes.error);
+  const tokenCheckNeverRan = tokenCheckWasRateLimited || tokenCheckBrokeTheServer;
   const hasNoPassword = useRequiredField<ResetPasswordFormSchema>('password', resetForm);
   const hasNoConfirmation = useRequiredField<ResetPasswordFormSchema>('confirmPassword', resetForm);
 
+  // Password reset mutation
   const reset = useMutation({
     mutationFn: (values: ResetPasswordFormSchema) =>
       AuthService.resetPassword({ token, ...values }),
@@ -56,7 +74,7 @@ export function ResetPasswordPage() {
       akNotify.success(akMT('passwordIsReset'));
     },
 
-    onError: (error) => {
+    onError: unlessRateLimited((error) => {
       const messages = getApiFieldErrors<'password'>(error);
       const passwordMessage = messages.password?.[0];
 
@@ -65,24 +83,42 @@ export function ResetPasswordPage() {
       } else {
         akNotify.error(akMT('somethingWentWrong'));
       }
-    },
+    }),
   });
 
   return (
     <AuthLayout footer={<BackToLogin />}>
-      <AkTypography tag="h1" variant="h4" fontWeight="bold" className="mb-5 text-xl">
+      <AkTypography tag="h1" variant="h4" fontWeight="bold" className="mb-3 text-xl">
         <AkMessageTranslate id="resetPasswordLabel" />
       </AkTypography>
 
-      {link.isPending && <ResetFormSkeleton />}
+      {tokenCheckRes.isPending && <ResetFormSkeleton />}
 
-      {link.isError && (
+      {tokenCheckRes.isError && !tokenCheckNeverRan && (
         <AkTypography fontWeight="medium" data-test-invalid-reset-link>
           <AkMessageTranslate id="invalidPasswordResetLink" />
         </AkTypography>
       )}
 
-      {link.isSuccess && (
+      {tokenCheckRes.isError && tokenCheckNeverRan && (
+        <div className="flex flex-col items-start gap-4" data-test-reset-link-uncheckable>
+          <AkTypography color="textSecondary">
+            {tokenCheckWasRateLimited ? akMT('resetLinkRateLimited') : akMT('somethingWentWrong')}
+          </AkTypography>
+
+          <AkButton
+            className="w-full"
+            onClick={() => tokenCheckRes.refetch()}
+            loading={tokenCheckRes.isFetching}
+            disabled={rateLimitIsActive}
+            data-test-reset-link-retry-button
+          >
+            <AkMessageTranslate id="retry" />
+          </AkButton>
+        </div>
+      )}
+
+      {tokenCheckRes.isSuccess && (
         <AkFormProvider {...resetForm}>
           <form
             noValidate

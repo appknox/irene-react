@@ -1,5 +1,11 @@
+import {
+  getApiErrorMessage,
+  getApiErrorPayload,
+  isNetworkError,
+  isRateLimited,
+} from '@irene/api/utils/errors';
+
 import { API_LOGIN_REFUSAL_MESSAGES, type ApiMfaRequirement } from '@irene/api/services/auth';
-import { getApiErrorMessage, getApiErrorPayload, isNetworkError } from '@irene/api/utils/errors';
 import { akMT } from '@irene/translations/intl';
 
 /**
@@ -52,6 +58,11 @@ function _readMfaRequirement(payload: unknown): ApiMfaRequirement | undefined {
  */
 export function getLoginFailure(error: unknown): LoginFailure | undefined {
   if (error === null || error === undefined) {
+    return undefined;
+  }
+
+  // The countdown speaks for this one, so the field and the toast stay quiet.
+  if (isRateLimited(error)) {
     return undefined;
   }
 

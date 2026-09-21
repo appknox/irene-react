@@ -2,7 +2,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect } from 'react';
 
-import { getStoredSession, IRENE_AUTH_SESSION_KEY, type Session } from '@irene/api/utils/session';
+import {
+  getStoredSession,
+  IRENE_AUTH_SESSION_KEY,
+  type IreneAuthSession,
+} from '@irene/api/utils/session';
 
 import { endSession } from '@/features/auth/actions/session';
 import { sessionCheckOptions } from '@/features/auth/queries/session';
@@ -16,7 +20,7 @@ import { sessionCheckOptions } from '@/features/auth/queries/session';
  *
  * @param onChange - Given the session as it now stands, or null when it is gone.
  */
-function useStoredSessionChange(onSessionChange: (session: Session | null) => void) {
+function useStoredSessionChange(onSessionChange: (session: IreneAuthSession | null) => void) {
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
       // A null key means the whole store was cleared, which takes ours with it.
@@ -43,7 +47,7 @@ export function useSessionWatch() {
 
   // Handles the session change event.
   const onSessionChange = useCallback(
-    (session: Session | null) => {
+    (session: IreneAuthSession | null) => {
       if (!session) {
         endSession(queryClient);
         navigate({ to: '/login', search: { unauthenticated: true } });
@@ -64,7 +68,7 @@ export function useSignedInElsewhere() {
   const queryClient = useQueryClient();
 
   const onSessionChange = useCallback(
-    (session: Session | null) => {
+    (session: IreneAuthSession | null) => {
       if (session) {
         queryClient.setQueryData(sessionCheckOptions().queryKey, session);
         navigate({ to: '/' });

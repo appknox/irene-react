@@ -4,7 +4,7 @@ import {
   clearStoredSession,
   createSessionFromResponse,
   storeSession,
-  type Session,
+  type IreneAuthSession,
 } from '@irene/api/utils/session';
 
 import { sessionCheckOptions } from '@/features/auth/queries/session';
@@ -19,7 +19,10 @@ import type { ApiSessionResponse } from '@irene/api/services/auth';
  * @param response - The token and user id from a sign-in.
  * @returns The stored session.
  */
-export function startSession(queryClient: QueryClient, response: ApiSessionResponse): Session {
+export function startSession(
+  queryClient: QueryClient,
+  response: ApiSessionResponse
+): IreneAuthSession {
   const session = createSessionFromResponse(response);
 
   storeSession(session);

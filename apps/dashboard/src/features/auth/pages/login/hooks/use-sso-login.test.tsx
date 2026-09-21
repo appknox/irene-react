@@ -5,6 +5,8 @@ import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthEndpoints, type ApiSsoCheck } from '@irene/api/services/auth';
+import { formatWaitTime, rateLimitStore } from '@irene/api/stores/rate-limit';
+import { HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
 
 import { buildSsoCheck } from '@tests/factories/sso';
@@ -147,5 +149,51 @@ describe('useSsoLogin', () => {
 
     expect(await screen.findByText(akMT('pleaseTryAgain'))).toBeInTheDocument();
     expect(assignedHref).toBeUndefined();
+  });
+
+  describe('an account the server has throttled', () => {
+    // The lock is app-wide and outlives a render.
+    afterEach(() => rateLimitStore.getState().clearThrottle());
+
+    it('counts the wait down instead of telling the user to try again now', async () => {
+      checkReturns({ is_saml: true, is_sso_enforced: true, token: 'check-token' });
+
+      server.use(
+        http.get(buildAPITestURL(AuthEndpoints.samlStart()), () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await submitUsername();
+      await userEvent.click(await screen.findByRole('button', { name: akMT('ssoLogin') }));
+
+      expect(
+        await screen.findByText(`${akMT('rateLimitExceeded')} ${formatWaitTime(30)}`)
+      ).toBeInTheDocument();
+
+      expect(screen.queryByText(akMT('pleaseTryAgain'))).not.toBeInTheDocument();
+    });
+
+    it('leaves the user on the login page rather than sending them anywhere', async () => {
+      checkReturns({ is_saml: true, is_sso_enforced: true, token: 'check-token' });
+
+      server.use(
+        http.get(buildAPITestURL(AuthEndpoints.samlStart()), () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await submitUsername();
+      await userEvent.click(await screen.findByRole('button', { name: akMT('ssoLogin') }));
+      await screen.findByText(`${akMT('rateLimitExceeded')} ${formatWaitTime(30)}`);
+
+      expect(assignedHref).toBeUndefined();
+    });
   });
 });

@@ -3,14 +3,14 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { queryClient } from '@irene/api/query-client';
 import { AuthEndpoints } from '@irene/api/services/auth';
-import { getStoredSession, storeSession, type Session } from '@irene/api/utils/session';
+import { getStoredSession, storeSession, type IreneAuthSession } from '@irene/api/utils/session';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 
 import { sessionCheckOptions } from '@/features/auth/queries/session';
 import { buildAPITestURL, server } from '@tests/server';
 
 const CHECK_URL = buildAPITestURL(AuthEndpoints.check());
-const session: Session = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
+const session: IreneAuthSession = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
 
 afterEach(() => {
   window.localStorage.clear();

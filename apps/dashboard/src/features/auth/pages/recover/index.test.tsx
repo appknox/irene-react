@@ -2,9 +2,10 @@ import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { AuthEndpoints } from '@irene/api/services/auth';
+import { formatWaitTime, rateLimitStore } from '@irene/api/stores/rate-limit';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
 
@@ -118,5 +119,44 @@ describe('RecoverPage', () => {
 
     await userEvent.click(screen.getByRole('link', { name: akMT('login') }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+  });
+
+  describe('an account the server has throttled', () => {
+    // The lock is app-wide and outlives a render.
+    afterEach(() => rateLimitStore.getState().clearThrottle());
+
+    /** Refuses the request the way a rate limiter does. */
+    function throttle() {
+      server.use(
+        http.post(RECOVER_API_URL, () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+    }
+
+    it('counts the wait down', async () => {
+      throttle();
+
+      await renderAtRoute('/recover');
+      await requestLink();
+
+      expect(
+        await screen.findByText(`${akMT('rateLimitExceeded')} ${formatWaitTime(30)}`)
+      ).toBeInTheDocument();
+    });
+
+    it('does not also claim something went wrong, which says nothing useful', async () => {
+      throttle();
+
+      await renderAtRoute('/recover');
+      await requestLink();
+
+      await screen.findByText(`${akMT('rateLimitExceeded')} ${formatWaitTime(30)}`);
+
+      expect(screen.queryByText(akMT('somethingWentWrong'))).not.toBeInTheDocument();
+    });
   });
 });

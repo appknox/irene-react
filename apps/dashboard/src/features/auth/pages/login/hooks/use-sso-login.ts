@@ -1,8 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 
 import { AuthService, type ApiSsoCheck } from '@irene/api/services/auth';
+import { unlessRateLimited } from '@irene/api/utils/errors';
 import { akMT } from '@irene/translations/intl';
 import { akNotify } from '@irene/ui/notify';
+
 import { getSSOReturnUrl } from '@/features/auth/utils/sso';
 
 /**
@@ -30,7 +32,7 @@ export function useSsoLogin(check: ApiSsoCheck) {
         window.location.href = ssoUrl;
       }
     },
-    onError: () => akNotify.error(akMT('pleaseTryAgain')),
+    onError: unlessRateLimited(() => akNotify.error(akMT('pleaseTryAgain'))),
   });
 
   return {

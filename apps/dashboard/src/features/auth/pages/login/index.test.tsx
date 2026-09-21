@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   API_LOGIN_REFUSAL_MESSAGES,
@@ -10,6 +10,8 @@ import {
   type ApiSsoCheck,
 } from '@irene/api/services/auth';
 
+import { formatWaitTime, rateLimitStore } from '@irene/api/stores/rate-limit';
+import { HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
 
 import { buildSsoCheck } from '@tests/factories/sso';
@@ -309,9 +311,83 @@ describe('LoginPage', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/recover'));
   });
 
-  it('says why the user was sent here when a guard redirected them', async () => {
-    await renderAtRoute('/login?unauthenticated=true');
+  describe('an account the server has throttled', () => {
+    // The lock is app-wide and outlives a render, so it cannot leak into the
+    // cases below.
+    afterEach(() => rateLimitStore.getState().clearThrottle());
 
-    expect(screen.getByText(akMT('pleaseLogin'))).toBeInTheDocument();
+    it('counts the wait down on the login page, which no signed-in layout wraps', async () => {
+      checkReturns({});
+
+      server.use(
+        http.post(LOGIN_URL, () =>
+          HttpResponse.json(
+            { detail: { lock_time: 45 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await renderAtRoute('/login');
+      await attemptLogin();
+
+      expect(
+        await screen.findByText(`${akMT('rateLimitExceeded')} ${formatWaitTime(45)}`)
+      ).toBeInTheDocument();
+    });
+
+    it('does not also blame the credentials, which were never the problem', async () => {
+      checkReturns({});
+
+      server.use(
+        http.post(LOGIN_URL, () =>
+          HttpResponse.json(
+            { detail: { lock_time: 45 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await renderAtRoute('/login');
+      await attemptLogin();
+      await screen.findByText(`${akMT('rateLimitExceeded')} ${formatWaitTime(45)}`);
+
+      expect(screen.queryByText(akMT('pleaseEnterValidAccountDetail'))).not.toBeInTheDocument();
+    });
+  });
+
+  describe('saying why the user is here rather than on the dashboard', () => {
+    it('explains a guard turning them away', async () => {
+      await renderAtRoute('/login?unauthenticated=true');
+
+      expect(screen.getByText(akMT('pleaseLogin'))).toBeInTheDocument();
+    });
+
+    it('explains a credential the server stopped accepting', async () => {
+      await renderAtRoute('/login?sessionExpired=true');
+
+      expect(screen.getByText(akMT('pleaseLoginAgain'))).toBeInTheDocument();
+    });
+
+    it('sends a deactivated account to their admin, not back around the login loop', async () => {
+      await renderAtRoute('/login?userInactive=true');
+
+      expect(screen.getByText(akMT('loginFailed'))).toBeInTheDocument();
+    });
+
+    it('says nothing when the user simply came to sign in', async () => {
+      await renderAtRoute('/login');
+
+      expect(screen.queryByText(akMT('pleaseLogin'))).not.toBeInTheDocument();
+      expect(screen.queryByText(akMT('pleaseLoginAgain'))).not.toBeInTheDocument();
+      expect(screen.queryByText(akMT('loginFailed'))).not.toBeInTheDocument();
+    });
+
+    it('leads with the deactivated account when a stale link also says expired', async () => {
+      await renderAtRoute('/login?sessionExpired=true&userInactive=true');
+
+      expect(screen.getByText(akMT('loginFailed'))).toBeInTheDocument();
+      expect(screen.queryByText(akMT('pleaseLoginAgain'))).not.toBeInTheDocument();
+    });
   });
 });

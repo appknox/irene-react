@@ -1,9 +1,10 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { AuthEndpoints } from '@irene/api/services/auth';
+import { formatWaitTime, rateLimitStore } from '@irene/api/stores/rate-limit';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
 
@@ -184,5 +185,130 @@ describe('ResetPasswordPage', () => {
     expect(await screen.findByLabelText(akMT('newPassword'))).toHaveAttribute('type', 'password');
     expect(confirmPassword()).toHaveAttribute('type', 'password');
     expect(newPassword()).toHaveAttribute('autocomplete', 'new-password');
+  });
+
+  describe('an account the server has throttled', () => {
+    // The lock is app-wide and outlives a render.
+    afterEach(() => rateLimitStore.getState().clearThrottle());
+
+    it('counts the wait down when the new password is refused', async () => {
+      linkIsLive();
+
+      server.use(
+        http.put(RESET_URL, () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await renderAtRoute(PAGE);
+      await submitPasswords('a-new-passw0rd');
+
+      expect(
+        await screen.findByText(`${akMT('rateLimitExceeded')} ${formatWaitTime(30)}`)
+      ).toBeInTheDocument();
+
+      expect(screen.queryByText(akMT('somethingWentWrong'))).not.toBeInTheDocument();
+    });
+
+    it('does not call a good link invalid when it simply could not check', async () => {
+      server.use(
+        http.get(RESET_URL, () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await renderAtRoute(PAGE);
+
+      expect(await screen.findByText(akMT('resetLinkRateLimited'))).toBeInTheDocument();
+      expect(screen.queryByText(INVALID_LINK_MESSAGE)).not.toBeInTheDocument();
+    });
+
+    it('offers no retry while the lock is still running, since it would be refused', async () => {
+      server.use(
+        http.get(RESET_URL, () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await renderAtRoute(PAGE);
+
+      expect(await screen.findByRole('button', { name: akMT('retry') })).toBeDisabled();
+    });
+  });
+
+  describe('a link the page could not check', () => {
+    it.each([HTTP_STATUS_CODES.BAD_REQUEST, HTTP_STATUS_CODES.NOT_FOUND, HTTP_STATUS_CODES.GONE])(
+      'calls the link invalid when the check fails with %i',
+      async (status) => {
+        server.use(http.get(RESET_URL, () => HttpResponse.json({}, { status })));
+
+        await renderAtRoute(PAGE);
+
+        expect(await screen.findByText(INVALID_LINK_MESSAGE)).toBeInTheDocument();
+        expect(screen.queryByText(akMT('resetLinkRateLimited'))).not.toBeInTheDocument();
+      }
+    );
+
+    it('blames the server, not the link, when the check breaks', async () => {
+      server.use(
+        http.get(RESET_URL, () =>
+          HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
+        )
+      );
+
+      await renderAtRoute(PAGE);
+
+      expect(await screen.findByText(akMT('somethingWentWrong'))).toBeInTheDocument();
+      expect(screen.queryByText(INVALID_LINK_MESSAGE)).not.toBeInTheDocument();
+    });
+
+    it('offers a retry after a server error, which is not disabled by any lock', async () => {
+      server.use(
+        http.get(RESET_URL, () =>
+          HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
+        )
+      );
+
+      await renderAtRoute(PAGE);
+
+      expect(await screen.findByRole('button', { name: akMT('retry') })).toBeEnabled();
+    });
+
+    it('offers the form once a retry succeeds', async () => {
+      let attempts = 0;
+
+      server.use(
+        http.get(RESET_URL, () => {
+          attempts += 1;
+
+          return attempts === 1
+            ? HttpResponse.json(
+                { detail: { lock_time: 30 } },
+                { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+              )
+            : HttpResponse.json({ username: 'jane' });
+        })
+      );
+
+      await renderAtRoute(PAGE);
+
+      const retry = await screen.findByRole('button', { name: akMT('retry') });
+
+      // Inside act: lifting the lock re-enables the button the click needs.
+      act(() => rateLimitStore.getState().clearThrottle());
+
+      await userEvent.click(retry);
+
+      expect(await screen.findByLabelText(akMT('newPassword'))).toBeInTheDocument();
+    });
   });
 });
