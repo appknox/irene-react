@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -123,7 +123,8 @@ describe('RecoverPage', () => {
 
   describe('an account the server has throttled', () => {
     // The lock is app-wide and outlives a render.
-    afterEach(() => rateLimitStore.getState().clearThrottle());
+    // Wrapped: ending the wait updates whatever is still mounted.
+    afterEach(() => act(() => rateLimitStore.getState().clearThrottle()));
 
     /** Refuses the request the way a rate limiter does. */
     function throttle() {

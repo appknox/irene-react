@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -23,7 +23,10 @@ async function signedIn() {
 
 /** What the browser dispatches when another tab writes to storage. */
 function storageChangedElsewhere(key: string | null) {
-  window.dispatchEvent(new StorageEvent('storage', { key, storageArea: window.localStorage }));
+  // Wrapped: the watcher navigates on this, which repaints the page.
+  act(() => {
+    window.dispatchEvent(new StorageEvent('storage', { key, storageArea: window.localStorage }));
+  });
 }
 
 afterEach(() => {

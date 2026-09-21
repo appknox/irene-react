@@ -189,7 +189,8 @@ describe('ResetPasswordPage', () => {
 
   describe('an account the server has throttled', () => {
     // The lock is app-wide and outlives a render.
-    afterEach(() => rateLimitStore.getState().clearThrottle());
+    // Wrapped: ending the wait updates whatever is still mounted.
+    afterEach(() => act(() => rateLimitStore.getState().clearThrottle()));
 
     it('counts the wait down when the new password is refused', async () => {
       linkIsLive();

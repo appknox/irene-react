@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -153,7 +153,8 @@ describe('useSsoLogin', () => {
 
   describe('an account the server has throttled', () => {
     // The lock is app-wide and outlives a render.
-    afterEach(() => rateLimitStore.getState().clearThrottle());
+    // Wrapped: ending the wait updates whatever is still mounted.
+    afterEach(() => act(() => rateLimitStore.getState().clearThrottle()));
 
     it('counts the wait down instead of telling the user to try again now', async () => {
       checkReturns({ is_saml: true, is_sso_enforced: true, token: 'check-token' });

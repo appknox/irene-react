@@ -17,15 +17,10 @@ export default defineConfig({
   define: buildConfigDefine(),
   plugins: [
     /*
-      Generates routeTree.gen.ts. Must run before the React plugin. The ignore
-      pattern keeps a route's tests beside it: without it every `*.test.tsx`
-      under src/routes would be generated into the tree as a route.
+      Generates routeTree.gen.ts from tsr.config.json, which `tsr generate`
+      reads too. Must run before the React plugin.
     */
-    tanstackRouter({
-      target: 'react',
-      autoCodeSplitting: true,
-      routeFileIgnorePattern: String.raw`\.test\.`,
-    }),
+    tanstackRouter({ autoCodeSplitting: true }),
 
     // Generates the flat message files, and regenerates them when a translation file is saved.
     translationsPlugin(),

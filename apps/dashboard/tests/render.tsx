@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-router';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 
 import { queryClient } from '@irene/api';
@@ -68,16 +68,20 @@ export async function renderAtRoute(
     await router.load();
   }
 
-  return {
-    queryClient: routerContext.queryClient,
-    router,
-    ...render(
-      <TranslationsProvider>
-        <QueryClientProvider client={routerContext.queryClient}>
-          <RouterProvider router={router} />
-          <AkToaster />
-        </QueryClientProvider>
-      </TranslationsProvider>
-    ),
-  };
+  const rendered = render(
+    <TranslationsProvider>
+      <QueryClientProvider client={routerContext.queryClient}>
+        <RouterProvider router={router} />
+        <AkToaster />
+      </QueryClientProvider>
+    </TranslationsProvider>
+  );
+
+  /*
+    A guard that redirects finishes after the first paint, so let the queue
+    drain here rather than having React report it as an update outside a test.
+  */
+  await act(async () => undefined);
+
+  return { queryClient: routerContext.queryClient, router, ...rendered };
 }

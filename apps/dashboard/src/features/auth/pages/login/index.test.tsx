@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -324,7 +324,8 @@ describe('LoginPage', () => {
   describe('an account the server has throttled', () => {
     // The lock is app-wide and outlives a render, so it cannot leak into the
     // cases below.
-    afterEach(() => rateLimitStore.getState().clearThrottle());
+    // Wrapped: ending the wait updates whatever is still mounted.
+    afterEach(() => act(() => rateLimitStore.getState().clearThrottle()));
 
     it('counts the wait down on the login page, which no signed-in layout wraps', async () => {
       checkReturns({});

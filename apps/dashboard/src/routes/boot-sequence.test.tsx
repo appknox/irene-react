@@ -1,4 +1,4 @@
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -71,8 +71,9 @@ describe('the boot sequence', () => {
 
     const { router } = await renderAtRoute('/');
 
-    await router.navigate({ to: '/login' });
-    await router.navigate({ to: '/' });
+    // Wrapped: each navigation repaints whatever the new route renders.
+    await act(() => router.navigate({ to: '/login' }));
+    await act(() => router.navigate({ to: '/' }));
 
     const checks = requested.filter((path) => path === `/${AuthEndpoints.check()}`);
 
