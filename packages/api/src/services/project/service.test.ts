@@ -32,13 +32,13 @@ describe('ProjectService.list', () => {
     it('gets the v3 projects endpoint', async () => {
       interceptList(() => HttpResponse.json(buildDrfPage([buildProject()])));
 
-      await expect(ProjectService.list({ limit: 9, offset: 0 })).resolves.toBeDefined();
+      await expect(ProjectService.getProjects({ limit: 9, offset: 0 })).resolves.toBeDefined();
     });
 
     it('sends limit and offset as query params', async () => {
       const seen = interceptList(() => HttpResponse.json(buildDrfPage([])));
 
-      await ProjectService.list({ limit: 9, offset: 18 });
+      await ProjectService.getProjects({ limit: 9, offset: 18 });
 
       expect(seen.params.get('limit')).toBe('9');
       expect(seen.params.get('offset')).toBe('18');
@@ -46,26 +46,27 @@ describe('ProjectService.list', () => {
 
     it('sends q only when a search term is given', async () => {
       const withoutTerm = interceptList(() => HttpResponse.json(buildDrfPage([])));
-      await ProjectService.list({ limit: 9, offset: 0 });
+      await ProjectService.getProjects({ limit: 9, offset: 0 });
       expect(withoutTerm.params.has('q')).toBe(false);
 
       const withTerm = interceptList(() => HttpResponse.json(buildDrfPage([])));
-      await ProjectService.list({ limit: 9, offset: 0, q: 'appknox' });
+      await ProjectService.getProjects({ limit: 9, offset: 0, q: 'appknox' });
       expect(withTerm.params.get('q')).toBe('appknox');
     });
 
-    it('unwraps the envelope into items and count', async () => {
+    it('transforms the response into the page shape the app reads', async () => {
       const projects = [buildProject()];
+      const next = '/api/v3/projects?offset=9';
 
-      interceptList(() =>
-        HttpResponse.json(buildDrfPage(projects, { count: 40, next: '/api/v3/projects?offset=9' }))
-      );
+      interceptList(() => HttpResponse.json(buildDrfPage(projects, { count: 40, next })));
 
-      await expect(ProjectService.list({ limit: 9, offset: 0 })).resolves.toEqual({
+      await expect(ProjectService.getProjects({ limit: 9, offset: 0 })).resolves.toEqual({
         items: projects,
         count: 40,
         hasNext: true,
         hasPrevious: false,
+        nextUrl: next,
+        previousUrl: null,
       });
     });
   });
@@ -76,7 +77,7 @@ describe('ProjectService.list', () => {
         HttpResponse.json({ detail: 'Forbidden' }, { status: HTTP_STATUS_CODES.FORBIDDEN })
       );
 
-      const error = await ProjectService.list({ limit: 9, offset: 0 }).catch(
+      const error = await ProjectService.getProjects({ limit: 9, offset: 0 }).catch(
         (reason: unknown) => reason
       );
 
@@ -88,7 +89,7 @@ describe('ProjectService.list', () => {
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
       );
 
-      await expect(ProjectService.list({ limit: 9, offset: 0 })).rejects.toThrow('500');
+      await expect(ProjectService.getProjects({ limit: 9, offset: 0 })).rejects.toThrow('500');
     });
   });
 });
@@ -99,14 +100,14 @@ describe('ProjectService.detail', () => {
 
     server.use(http.get(detailUrl('42'), () => HttpResponse.json(project)));
 
-    await expect(ProjectService.detail(42)).resolves.toEqual(project);
+    await expect(ProjectService.getProject(42)).resolves.toEqual(project);
   });
 
   it('encodes an id that needs escaping', async () => {
     // The builder escapes it, exactly as the service does.
     server.use(http.get(detailUrl('a/b'), () => HttpResponse.json(buildProject())));
 
-    await expect(ProjectService.detail('a/b')).resolves.toBeDefined();
+    await expect(ProjectService.getProject('a/b')).resolves.toBeDefined();
   });
 
   it('propagates a 404 for a project that does not exist', async () => {
@@ -116,7 +117,7 @@ describe('ProjectService.detail', () => {
       )
     );
 
-    await expect(ProjectService.detail(9999)).rejects.toThrow('404');
+    await expect(ProjectService.getProject(9999)).rejects.toThrow('404');
   });
 });
 
@@ -126,7 +127,7 @@ describe('ProjectService.list', () => {
 
     interceptList(() => HttpResponse.json(buildDrfPage(projects, { count: 40 })));
 
-    const page = await ProjectService.list({ limit: 9, offset: 0 });
+    const page = await ProjectService.getProjects({ limit: 9, offset: 0 });
 
     expect(page.items).toEqual(projects);
     expect(page.count).toBe(40);
@@ -139,7 +140,7 @@ describe('ProjectService.list', () => {
       )
     );
 
-    const page = await ProjectService.list({ limit: 9, offset: 0 });
+    const page = await ProjectService.getProjects({ limit: 9, offset: 0 });
 
     expect(page.hasNext).toBe(true);
     expect(page.hasPrevious).toBe(false);
@@ -148,7 +149,7 @@ describe('ProjectService.list', () => {
   it('returns an empty page when the backend sends no results', async () => {
     interceptList(() => HttpResponse.json(buildDrfPage([])));
 
-    const page = await ProjectService.list({ limit: 9, offset: 0 });
+    const page = await ProjectService.getProjects({ limit: 9, offset: 0 });
 
     expect(page.items).toEqual([]);
     expect(page.count).toBe(0);
@@ -157,6 +158,6 @@ describe('ProjectService.list', () => {
   it('propagates a failure rather than returning an empty page', async () => {
     interceptList(() => HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR }));
 
-    await expect(ProjectService.list({ limit: 9, offset: 0 })).rejects.toThrow('500');
+    await expect(ProjectService.getProjects({ limit: 9, offset: 0 })).rejects.toThrow('500');
   });
 });
