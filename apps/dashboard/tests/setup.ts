@@ -44,6 +44,14 @@ Element.prototype.releasePointerCapture ??= () => {};
 
 Element.prototype.scrollIntoView ??= () => {};
 
+/*
+  React Tanstack Query retries keep their real behaviour, but wait no time between attempts. A 500 is
+  retried twice, and the backoff between those attempts is seconds of a test run
+  spent asleep.
+*/
+const defaults = queryClient.getDefaultOptions();
+queryClient.setDefaultOptions({ ...defaults, queries: { ...defaults.queries, retryDelay: 0 } });
+
 /**
  * Both config tiers are globals, a stored session outlives the DOM, and the
  * configuration store settles once per tab, so anything one test leaves behind
