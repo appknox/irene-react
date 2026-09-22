@@ -6,6 +6,7 @@ export const configurationKeys = {
   all: () => ['configuration'] as const,
   frontend: () => [...configurationKeys.all(), 'frontend'] as const,
   server: () => [...configurationKeys.all(), 'server'] as const,
+  dashboard: () => [...configurationKeys.all(), 'dashboard'] as const,
 };
 
 /**
@@ -36,4 +37,19 @@ export const serverConfigurationOptions = () =>
     queryFn: () => ConfigurationService.getServerConfiguration(),
     staleTime: Infinity,
     retry: false,
+  });
+
+/**
+ * Builds the query for the hosts this organization links out to.
+ *
+ * Answers only for a signed-in account, so it runs with the session setup
+ * rather than at boot with the other two.
+ *
+ * @returns Query options resolving to the dashboard and device farm URLs.
+ */
+export const dashboardConfigurationOptions = () =>
+  queryOptions({
+    queryKey: configurationKeys.dashboard(),
+    queryFn: () => ConfigurationService.getDashboardConfiguration(),
+    staleTime: Infinity,
   });

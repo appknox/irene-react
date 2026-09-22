@@ -1,12 +1,21 @@
 import { createRouter, type ResolveParams } from '@tanstack/react-router';
 
 import { queryClient } from '@irene/api';
-
-import { RouteError } from '@/components/route-error';
 import { RouteNotFound } from '@/components/route-not-found';
-import { RoutePending } from '@/components/route-pending';
 import { routeTree } from '@/routeTree.gen';
 import type { RootRouterContext } from '@/routes/__root';
+
+/**
+ * What every router built from this tree shows for a URL it does not have.
+ * Shared with the test router, so a test sees the same screens as a browser.
+ *
+ * Waiting and failing are not here: the signed-in routes declare their own,
+ * since they are the ones that fetch before they can render.
+ */
+export const IRENE_DASHBOARD_ROUTER_DEFAULTS = {
+  routeTree,
+  defaultNotFoundComponent: RouteNotFound,
+} as const;
 
 /**
  * =============================================
@@ -15,11 +24,8 @@ import type { RootRouterContext } from '@/routes/__root';
  */
 
 export const ireneDashboardRouter = createRouter({
-  routeTree,
+  ...IRENE_DASHBOARD_ROUTER_DEFAULTS,
   context: { queryClient },
-  defaultPendingComponent: RoutePending,
-  defaultErrorComponent: RouteError,
-  defaultNotFoundComponent: RouteNotFound,
   scrollRestoration: true,
 });
 

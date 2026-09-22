@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouter } from '@tanstack/react-router';
 import { useCallback, useEffect } from 'react';
 
 import {
@@ -44,16 +44,18 @@ function useStoredSessionChange(onSessionChange: (session: IreneAuthSession | nu
 export function useSessionWatch() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   // Handles the session change event.
   const onSessionChange = useCallback(
-    (session: IreneAuthSession | null) => {
+    async (session: IreneAuthSession | null) => {
       if (!session) {
         endSession(queryClient);
-        navigate({ to: '/login', search: { unauthenticated: true } });
+        await navigate({ to: '/login', search: { unauthenticated: true } });
+        router.clearCache();
       }
     },
-    [navigate, queryClient]
+    [navigate, queryClient, router]
   );
 
   useStoredSessionChange(onSessionChange);

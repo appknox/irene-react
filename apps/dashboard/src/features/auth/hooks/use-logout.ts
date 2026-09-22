@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouter } from '@tanstack/react-router';
 
 import { AuthService } from '@irene/api/services/auth';
 import { getStoredSession } from '@irene/api/utils/session';
@@ -16,6 +16,7 @@ import { endSession } from '@/features/auth/actions/session';
 export function useLogout() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async () => {
@@ -28,6 +29,13 @@ export function useLogout() {
     onSettled: async () => {
       endSession(queryClient);
       await navigate({ to: '/login' });
+
+      /*
+        Drops the cached route matches, so the next sign-in re-runs the loaders
+        instead of rendering the previous account's data. Runs after the
+        navigation, since clearCache only removes matches that are unmounted.
+      */
+      router.clearCache();
     },
   });
 }

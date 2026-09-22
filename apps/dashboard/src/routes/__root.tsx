@@ -2,15 +2,12 @@ import { createRootRouteWithContext } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 
 import { configurationStore } from '@irene/api/stores/configuration';
+import { getLocale, setLocale } from '@irene/translations/intl';
+import { getStoredLocale } from '@irene/translations/locale';
 
-import type {
-  ApiFrontendConfiguration,
-  ApiServerConfiguration,
-} from '@irene/api/services/configuration';
-
+import { loadConfiguration } from '@/actions/load-configuration';
 import { sessionCheckOptions } from '@/features/auth/queries/session';
 import { RootLayout } from '@/layouts/root-layout';
-import { frontendConfigurationOptions, serverConfigurationOptions } from '@/queries/configuration';
 
 /**
  * This context is passed to every route, whatever its depth.
@@ -27,7 +24,14 @@ export interface RootRouterContext {
 
 export const Route = createRootRouteWithContext<RootRouterContext>()({
   beforeLoad: async ({ context }) => {
+    // The language this browser chose, until an account with one of its own signs in.
+    const storedLocale = getStoredLocale();
     const configuration = configurationStore.getState();
+
+    // Set the language to the browser's choice, if it is not the default.
+    if (storedLocale && storedLocale !== getLocale()) {
+      await setLocale(storedLocale);
+    }
 
     // Confirm the session token is still valid
     await context.queryClient.query(sessionCheckOptions());
@@ -37,26 +41,13 @@ export const Route = createRootRouteWithContext<RootRouterContext>()({
       return;
     }
 
-    // Asked for together: neither describes the other, so neither waits for it.
-    const [frontendConfigResult, serverConfigResult] = await Promise.allSettled([
-      context.queryClient.query(frontendConfigurationOptions()),
-      context.queryClient.query(serverConfigurationOptions()),
-    ]);
-
-    configuration.setFrontendConfiguration(resolveConfigResult(frontendConfigResult));
-    configuration.setServerConfiguration(resolveConfigResult(serverConfigResult));
+    /*
+      Started, not awaited. The page is fetched and rendered while the
+      configuration requests are in flight, rather than after them: the
+      components that read the configuration reserve space until it resolves.
+    */
+    loadConfiguration(context.queryClient);
   },
 
   component: RootLayout,
 });
-
-/**
- * Resolves a configuration result to a configuration object or null.
- * @param status - The result of a configuration query.
- * @returns The configuration object or null.
- */
-function resolveConfigResult<T extends ApiFrontendConfiguration | ApiServerConfiguration>(
-  status: PromiseSettledResult<T>
-): T | null {
-  return status.status === 'fulfilled' ? status.value : null;
-}
