@@ -3,6 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
 
+import { queryClient } from '@irene/api/query-client';
 import { configurationStore } from '@irene/api/stores/configuration';
 import { akNotify } from '@irene/ui/notify';
 
@@ -14,6 +15,34 @@ import { server } from '@tests/server';
   A no-op keeps that noise out of the run.
 */
 window.scrollTo = () => undefined;
+
+/*
+  The router warns for every route it catches an error in, which several tests
+  cause on purpose. Its own message is dropped; anything else still surfaces.
+*/
+const ROUTER_ERROR_WARNING = 'Warning: Error in route match';
+const warn = console.warn.bind(console);
+
+console.warn = (...args: unknown[]) => {
+  if (typeof args[0] === 'string' && args[0].startsWith(ROUTER_ERROR_WARNING)) {
+    return;
+  }
+
+  warn(...args);
+};
+
+/*
+  jsdom implements no layout and no pointer capture, both of which Radix uses to
+  position and drive its popovers. Without these a Select never opens and the
+  failure looks like a component bug rather than a missing browser API.
+*/
+Element.prototype.hasPointerCapture ??= () => false;
+
+Element.prototype.setPointerCapture ??= () => {};
+
+Element.prototype.releasePointerCapture ??= () => {};
+
+Element.prototype.scrollIntoView ??= () => {};
 
 /**
  * Both config tiers are globals, a stored session outlives the DOM, and the
@@ -27,6 +56,9 @@ const reset = () => {
 
   // Replaces rather than merges, so the store goes back to unsettled with its actions intact.
   configurationStore.setState(configurationStore.getInitialState(), true);
+
+  // The cache is a module singleton, so an answer from one file would be read by the next.
+  queryClient.clear();
 };
 
 // Modules read config at import, so the tiers must exist before they load.

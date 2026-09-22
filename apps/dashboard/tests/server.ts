@@ -3,9 +3,21 @@ import { setupServer } from 'msw/node';
 
 import { AuthEndpoints } from '@irene/api/services/auth/endpoints';
 import { ConfigurationEndpoints } from '@irene/api/services/configuration/endpoints';
+import { OrganizationEndpoints } from '@irene/api/services/organization/endpoints';
+import { UserEndpoints } from '@irene/api/services/user/endpoints';
+import { VulnerabilityEndpoints } from '@irene/api/services/vulnerability/endpoints';
 import { getConfigValue } from '@irene/config';
 
-import { buildFrontendConfiguration, buildServerConfiguration } from '@tests/factories';
+import {
+  buildDashboardConfig,
+  buildFrontendConfiguration,
+  buildOrganization,
+  buildOrganizationMe,
+  buildOrganizationMembership,
+  buildServerConfiguration,
+  buildUserResponse,
+  buildVulnerabilityListResponse,
+} from '@tests/factories';
 
 /**
  * The host the client resolves to, rather than a copy of the fallback. Read on
@@ -32,5 +44,29 @@ export const server = setupServer(
   http.get(`*/${ConfigurationEndpoints.server()}`, () =>
     HttpResponse.json(buildServerConfiguration())
   ),
-  http.post(`*/${AuthEndpoints.check()}`, () => HttpResponse.json({}))
+  http.get(`*/${ConfigurationEndpoints.dashboard()}`, () =>
+    HttpResponse.json(buildDashboardConfig())
+  ),
+  http.post(`*/${AuthEndpoints.check()}`, () => HttpResponse.json({})),
+
+  /*
+    The signed-in pages load an organization and an account on the way in, so
+    every one of them is answered by default. StoreKnox is not: most
+    deployments do not have it, and the loader is written to carry on.
+  */
+  http.get(`*/${OrganizationEndpoints.list()}`, () =>
+    HttpResponse.json({ count: 1, next: null, previous: null, results: [buildOrganization()] })
+  ),
+  http.get(`*/${OrganizationEndpoints.me('*')}`, () => HttpResponse.json(buildOrganizationMe())),
+  http.get(`*/${OrganizationEndpoints.member('*', '*')}`, () =>
+    HttpResponse.json(buildOrganizationMembership())
+  ),
+  http.get(`*/${VulnerabilityEndpoints.list()}`, () =>
+    HttpResponse.json(buildVulnerabilityListResponse())
+  ),
+
+  http.get(`*/${OrganizationEndpoints.storeknoxOrganization()}`, () =>
+    HttpResponse.json({ detail: 'Not found.' }, { status: 404 })
+  ),
+  http.get(`*/${UserEndpoints.detail('*')}`, () => HttpResponse.json(buildUserResponse()))
 );

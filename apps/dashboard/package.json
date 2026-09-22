@@ -21,6 +21,7 @@
     "@irene/enums": "workspace:*",
     "@irene/translations": "workspace:*",
     "@irene/ui": "workspace:*",
+    "@tanem/react-nprogress": "^7.1.3",
     "@tanstack/react-query": "^5.102.8",
     "@tanstack/react-router": "^1.170.35",
     "react": "^19.3.0",

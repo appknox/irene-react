@@ -44,6 +44,8 @@ export default defineConfig([
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      curly: ['error', 'all'],
+      'nonblock-statement-body-position': ['error', 'below'],
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       // Runtime namespaces stay banned; `declare global` augmentations of library types are allowed.
       '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }],

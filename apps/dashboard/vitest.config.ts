@@ -25,6 +25,13 @@ export default defineConfig({
   resolve: { alias: { '@': resolvePath('./src'), '@tests': resolvePath('./tests') } },
   test: {
     environment: 'jsdom',
+
+    /*
+      One jsdom per worker rather than one per file, which the files were
+      spending most of the run creating. The setup file clears the module
+      state that then outlives a file: storage, the stores and the handlers.
+    */
+    isolate: false,
     globals: true,
     setupFiles: ['./tests/setup.ts'],
     coverage: { provider: 'v8', reporter: ['text', 'html'] },
