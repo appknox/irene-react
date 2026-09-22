@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
@@ -10,10 +10,12 @@ import {
   type ApiSsoCheck,
 } from '@irene/api/services/auth';
 
+import { ConfigurationEndpoints } from '@irene/api/services/configuration/endpoints';
 import { formatWaitTime, rateLimitStore } from '@irene/api/stores/rate-limit';
 import { APPKNOX_SUPPORT_EMAIL, HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
 
+import { buildFrontendConfiguration } from '@tests/factories';
 import { buildSsoCheck } from '@tests/factories/sso';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
@@ -400,5 +402,38 @@ describe('LoginPage', () => {
       expect(screen.getByText(akMT('loginFailed'))).toBeInTheDocument();
       expect(screen.queryByText(akMT('pleaseLoginAgain'))).not.toBeInTheDocument();
     });
+  });
+
+  it('reserves the logo and footer space while the frontend configuration loads', async () => {
+    server.use(
+      http.get(buildAPITestURL(ConfigurationEndpoints.frontend()), async () => {
+        await delay('infinite');
+
+        return HttpResponse.json(buildFrontendConfiguration());
+      })
+    );
+
+    await renderAtRoute('/login');
+
+    expect(document.querySelector('[data-test-app-logo-pending]')).toBeInTheDocument();
+    expect(document.querySelector('[data-test-registration-footer-pending]')).toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.queryByText(akMT('dontHaveAccount'))).not.toBeInTheDocument();
+  });
+
+  it('renders the registration link once the frontend configuration resolves', async () => {
+    server.use(
+      http.get(buildAPITestURL(ConfigurationEndpoints.frontend()), () =>
+        HttpResponse.json(buildFrontendConfiguration({ registration_enabled: true }))
+      )
+    );
+
+    await renderAtRoute('/login');
+
+    expect(await screen.findByText(akMT('dontHaveAccount'))).toBeInTheDocument();
+
+    expect(
+      document.querySelector('[data-test-registration-footer-pending]')
+    ).not.toBeInTheDocument();
   });
 });

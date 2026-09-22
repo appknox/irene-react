@@ -6,15 +6,23 @@ import {
 } from '@tanstack/react-router';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { act, render } from '@testing-library/react';
+import { act, render, type RenderOptions } from '@testing-library/react';
 import type { ReactNode } from 'react';
 
 import { queryClient } from '@irene/api';
 import { TranslationsProvider } from '@irene/translations/provider';
 import { AkToaster } from '@irene/ui/ak-toaster';
 
-import { routeTree } from '@/routeTree.gen';
+import { BootOverlay } from '@/components/boot-overlay';
+import { IRENE_DASHBOARD_ROUTER_DEFAULTS } from '@/router';
 import type { RootRouterContext } from '@/routes/__root';
+
+/*
+  A route failure is the subject of several tests, and the router's own boundary
+  reports it on screen. React still logs every error a boundary caught, which
+  would fill the run with stack traces for failures the tests asked for.
+*/
+const RENDER_OPTIONS: RenderOptions = { onCaughtError: () => undefined };
 
 /** Renders inside the providers the app supplies, with a cache per test. */
 export function renderWithProviders(ui: ReactNode) {
@@ -25,7 +33,8 @@ export function renderWithProviders(ui: ReactNode) {
     ...render(
       <TranslationsProvider>
         <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-      </TranslationsProvider>
+      </TranslationsProvider>,
+      RENDER_OPTIONS
     ),
   };
 }
@@ -57,7 +66,7 @@ export async function renderAtRoute(
   const routerContext = context ?? { queryClient };
 
   const router: AnyRouter = createRouter({
-    routeTree,
+    ...IRENE_DASHBOARD_ROUTER_DEFAULTS,
     context: routerContext,
     history: createMemoryHistory({ initialEntries: [path] }),
   });
@@ -72,9 +81,11 @@ export async function renderAtRoute(
     <TranslationsProvider>
       <QueryClientProvider client={routerContext.queryClient}>
         <RouterProvider router={router} />
+        <BootOverlay router={router} />
         <AkToaster />
       </QueryClientProvider>
-    </TranslationsProvider>
+    </TranslationsProvider>,
+    RENDER_OPTIONS
   );
 
   /*

@@ -13,7 +13,7 @@ describe('AkSkeleton', () => {
   it('fills its container and one line of text by default', () => {
     const { container } = render(<AkSkeleton />);
 
-    expect(skeleton(container)?.style.width).toBe('auto');
+    expect(skeleton(container)?.style.width).toBe('100%');
     expect(skeleton(container)?.style.height).toBe('1.2rem');
   });
 

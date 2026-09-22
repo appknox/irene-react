@@ -1,0 +1,53 @@
+/*
+  The wash a navigation casts over the page while the next one loads: strongest
+  at the top, where the spinner sits, and gone well before the middle.
+
+  Fades in quickly so a slow navigation is acknowledged at once, and out more
+  slowly so it lingers a moment over the page that has just arrived.
+
+  In the components layer, so a utility on the element still wins.
+*/
+@layer components {
+  .wash {
+    background: radial-gradient(
+      ellipse 70% 45% at 50% 0%,
+      color-mix(in oklab, var(--color-primary) 14%, transparent),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+  }
+
+  .wash[data-active] {
+    opacity: 1;
+    transition-duration: 150ms;
+  }
+
+  .spinner {
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
+
+  .spinner[data-active] {
+    opacity: 1;
+  }
+
+  /* The line across the top, which fades in and out on the same timing as the wash. */
+  .bar {
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+  }
+
+  .bar[data-active] {
+    opacity: 1;
+    transition-duration: 150ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wash,
+    .spinner,
+    .bar {
+      transition: none;
+    }
+  }
+}

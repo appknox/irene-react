@@ -19,7 +19,6 @@ import { LoginViaPassword } from '@/features/auth/components/login-via-password'
 import { LoginViaSso } from '@/features/auth/components/login-via-sso';
 import { RegistrationFooter } from '@/features/auth/components/registration-footer';
 import { resolveLoginSchema, type LoginFormSchema } from '@/features/auth/schemas/login';
-import { useWhitelabel } from '@/hooks/use-whitelabel';
 import { AuthLayout } from '@/layouts/auth-layout';
 
 const loginRoute = getRouteApi('/_unauthenticated/login');
@@ -30,9 +29,7 @@ const loginRoute = getRouteApi('/_unauthenticated/login');
  */
 export function LoginPage() {
   const [mfaRequirement, setMfaRequirement] = useState<ApiMfaRequirement | null>(null);
-
   const { unauthenticated, ssoLoginError, sessionExpired, userInactive } = loginRoute.useSearch();
-  const { showRegistrationLink } = useWhitelabel();
   const navigate = useNavigate();
 
   const ssoCheck = useMutation({
@@ -70,7 +67,7 @@ export function LoginPage() {
   };
 
   return (
-    <AuthLayout footer={showRegistrationLink && <RegistrationFooter />}>
+    <AuthLayout footer={<RegistrationFooter />}>
       {notSignedInReason && (
         <div className="mb-5">
           <AkAlert
