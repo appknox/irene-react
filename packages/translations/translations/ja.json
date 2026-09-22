@@ -250,6 +250,7 @@
   "company": "Company",
   "complianceInsights": "Compliance Insights",
   "companyName": "会社名",
+  "companyNameRequired": "Company name is required",
   "compare": "比較",
   "completed": "完了しました",
   "completeRegistration": "Complete Registration",
