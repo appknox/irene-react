@@ -3,6 +3,7 @@ import { createStore } from 'zustand/vanilla';
 import { getConfigValue } from '@irene/config';
 
 import type {
+  ApiDashboardConfig,
   ApiFrontendConfiguration,
   ApiFrontendImages,
   ApiFrontendIntegrations,
@@ -33,8 +34,11 @@ type FrontendData = Omit<ApiFrontendConfiguration, 'images' | 'theme' | 'integra
  * @property {object} imageData - The logos and favicon, as they arrived.
  * @property {object} integrationData - The third-party keys, as they arrived.
  * @property {object} serverData - Where the install keeps its services, as it arrived.
+ * @property {object} dashboardData - Where this organization's services live, as it arrived.
  * @property {function} setFrontendConfiguration - Stores the frontend response, or marks it unavailable with null.
  * @property {function} setServerConfiguration - Stores the server response, or marks it unavailable with null.
+ * @property {function} setDashboardConfiguration - Stores the dashboard response, or marks it unavailable with null.
+ * @property {function} clear - Forgets everything the install and the organization answered, for signing out.
  * @property {function} name - The product name.
  * @property {function} theme - The colour scheme to render in.
  * @property {function} favicon - The tab icon.
@@ -45,19 +49,24 @@ type FrontendData = Omit<ApiFrontendConfiguration, 'images' | 'theme' | 'integra
  * @property {function} isEnterprise - Whether this install is self-hosted, which suppresses every upsell.
  * @property {function} socketHost - The host the realtime connection opens against.
  * @property {function} deviceFarmUrl - The host device farm sessions run on.
+ * @property {function} dashboardUrl - Where this organization's dashboard lives.
  */
 interface ConfigurationStore {
   hasFetchedFrontend: boolean;
   hasFetchedServer: boolean;
+  hasFetchedDashboard: boolean;
 
   frontendData: FrontendData;
   themeData: ApiFrontendTheme;
   imageData: ApiFrontendImages;
   integrationData: ApiFrontendIntegrations;
   serverData: ApiServerConfiguration;
+  dashboardData: ApiDashboardConfig;
 
   setFrontendConfiguration: (configuration: ApiFrontendConfiguration | null) => void;
   setServerConfiguration: (configuration: ApiServerConfiguration | null) => void;
+  setDashboardConfiguration: (configuration: ApiDashboardConfig | null) => void;
+  clear: () => void;
 
   name: () => string;
   theme: () => WhitelabelTheme;
@@ -69,6 +78,7 @@ interface ConfigurationStore {
   isEnterprise: () => boolean;
   socketHost: () => string;
   deviceFarmUrl: () => string;
+  dashboardUrl: () => string;
 }
 
 const EXTERNAL_LINK = /^https?:\/\//i;
@@ -121,29 +131,43 @@ const EMPTY_SERVER_DATA: ApiServerConfiguration = {
   enterprise: false,
 };
 
+const EMPTY_DASHBOARD_DATA: ApiDashboardConfig = {
+  dashboard_url: '',
+  devicefarm_url: '',
+};
+
+/** Default configuration data, when nothing has been fetched yet. */
+const DEFAULT_CONFIGURATION_DATA = {
+  hasFetchedFrontend: false,
+  hasFetchedServer: false,
+  hasFetchedDashboard: false,
+  frontendData: EMPTY_FRONTEND_DATA,
+  themeData: EMPTY_THEME_DATA,
+  imageData: EMPTY_IMAGE_DATA,
+  integrationData: EMPTY_INTEGRATION_DATA,
+  serverData: EMPTY_SERVER_DATA,
+  dashboardData: EMPTY_DASHBOARD_DATA,
+};
+
 /**
- * What this install told the app about itself at boot.
+ * All configuration data about the deployment, organization, and client.
  *
  * Lives outside React because the document title and favicon are set from it,
  * and because the realtime connection and the device farm client are opened
  * from plain modules rather than from a component.
  */
 export const configurationStore = createStore<ConfigurationStore>((set, get) => ({
-  hasFetchedFrontend: false,
-  hasFetchedServer: false,
-
-  frontendData: EMPTY_FRONTEND_DATA,
-  themeData: EMPTY_THEME_DATA,
-  imageData: EMPTY_IMAGE_DATA,
-  integrationData: EMPTY_INTEGRATION_DATA,
-  serverData: EMPTY_SERVER_DATA,
+  ...DEFAULT_CONFIGURATION_DATA,
 
   name: () => get().frontendData.name || WHITELABEL_DEFAULTS.name,
   registrationLink: () => get().frontendData.registration_link,
   isAppknoxUrl: () => APPKNOX_HOSTS.some((host) => window.location.href.includes(host)),
   isEnterprise: () => Boolean(get().serverData.enterprise),
   socketHost: () => get().serverData.websocket || getConfigValue('IRENE_API_HOST') || SAME_ORIGIN,
-  deviceFarmUrl: () => get().serverData.devicefarm_url,
+  dashboardUrl: () => get().dashboardData.dashboard_url,
+
+  /* The organization's own device farm where it has one, the install's otherwise. */
+  deviceFarmUrl: () => get().dashboardData.devicefarm_url || get().serverData.devicefarm_url,
   favicon: () => get().imageData.favicon || WHITELABEL_DEFAULTS.favicon,
 
   // Anything but an explicit light scheme is dark.
@@ -193,4 +217,14 @@ export const configurationStore = createStore<ConfigurationStore>((set, get) => 
   // Server configuration updater
   setServerConfiguration: (configuration) =>
     set({ hasFetchedServer: true, serverData: configuration ?? EMPTY_SERVER_DATA }),
+
+  // Dashboard configuration updater, which answers per organization rather than per install
+  setDashboardConfiguration: (configuration) =>
+    set({ hasFetchedDashboard: true, dashboardData: configuration ?? EMPTY_DASHBOARD_DATA }),
+
+  /*
+    Back to nothing asked for. The next page load asks the install about itself
+    again, so a tab that changes hands carries none of the previous answers.
+  */
+  clear: () => set(DEFAULT_CONFIGURATION_DATA),
 }));

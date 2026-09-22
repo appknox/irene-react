@@ -1,7 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import {
+  buildDashboardConfig,
+  buildFrontendConfiguration,
+  buildServerConfiguration,
+} from '@tests/factories';
+
 import { configurationStore, WHITELABEL_THEMES } from '@irene/api/stores/configuration';
-import { buildFrontendConfiguration, buildServerConfiguration } from '@tests/factories';
 
 const BUILD_API_HOST = 'https://api.appknox.test';
 
@@ -154,6 +159,61 @@ describe('what this install told the app about itself', () => {
       expect(configuration().isEnterprise()).toBe(false);
       expect(configuration().socketHost()).toBe(BUILD_API_HOST);
       expect(configuration().hasFetchedServer).toBe(true);
+    });
+  });
+
+  describe('where this organization keeps its services', () => {
+    it('takes the dashboard host it named', () => {
+      const answer = buildDashboardConfig();
+
+      configuration().setDashboardConfiguration(answer);
+
+      expect(configuration().dashboardUrl()).toBe(answer.dashboard_url);
+      expect(configuration().hasFetchedDashboard).toBe(true);
+    });
+
+    it("prefers the organization's own device farm over the install's", () => {
+      configuration().setServerConfiguration(
+        buildServerConfiguration({ devicefarm_url: 'https://farm.install.test' })
+      );
+
+      configuration().setDashboardConfiguration(
+        buildDashboardConfig({ devicefarm_url: 'https://farm.organization.test' })
+      );
+
+      expect(configuration().deviceFarmUrl()).toBe('https://farm.organization.test');
+    });
+
+    it("falls back to the install's device farm when the organization names none", () => {
+      configuration().setServerConfiguration(
+        buildServerConfiguration({ devicefarm_url: 'https://farm.install.test' })
+      );
+
+      configuration().setDashboardConfiguration(buildDashboardConfig({ devicefarm_url: '' }));
+
+      expect(configuration().deviceFarmUrl()).toBe('https://farm.install.test');
+    });
+
+    it('leaves the hosts empty when the request failed', () => {
+      configuration().setDashboardConfiguration(null);
+
+      expect(configuration().dashboardUrl()).toBe('');
+      expect(configuration().hasFetchedDashboard).toBe(true);
+    });
+
+    it('resets every slice and flag on clear', () => {
+      configuration().setFrontendConfiguration(buildFrontendConfiguration({ name: 'Securely' }));
+      configuration().setServerConfiguration(buildServerConfiguration({ enterprise: true }));
+      configuration().setDashboardConfiguration(buildDashboardConfig());
+
+      configuration().clear();
+
+      expect(configuration().hasFetchedFrontend).toBe(false);
+      expect(configuration().hasFetchedServer).toBe(false);
+      expect(configuration().hasFetchedDashboard).toBe(false);
+      expect(configuration().name()).toBe('Appknox');
+      expect(configuration().isEnterprise()).toBe(false);
+      expect(configuration().dashboardUrl()).toBe('');
     });
   });
 });

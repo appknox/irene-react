@@ -1,5 +1,6 @@
 import { apiRequest } from '@irene/api/request';
-import type { ApiUser } from '@irene/api/services/user';
+import { transformUserResponse } from '@irene/api/utils/transforms';
+import type { ApiUserResponse } from '@irene/api/services/user';
 
 import { UserEndpoints } from './endpoints';
 
@@ -7,9 +8,16 @@ import { UserEndpoints } from './endpoints';
 export default class UserService {
   /**
    * Fetches the signed-in account.
+   *
+   * The endpoint answers with the asking account whichever id it is given, and
+   * withholds the private half of the fields unless the id is that account's.
+   *
    * @param id - The user id, which the session already carries.
    * @returns The account.
    */
-  public static readonly getUser = (id: number | string) =>
-    apiRequest.get<ApiUser>(UserEndpoints.detail(id));
+  public static readonly getUser = async (id: number | string) => {
+    const response = await apiRequest.get<ApiUserResponse>(UserEndpoints.detail(id));
+
+    return transformUserResponse(response);
+  };
 }

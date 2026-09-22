@@ -10,4 +10,7 @@ export const ConfigurationEndpoints = {
 
   /** What the backend itself provides, such as where the socket lives. */
   server: () => `${API_NAMESPACES.v2}/server_configuration` as const,
+
+  /** Where this organization's own services live, such as its device farm. */
+  dashboard: () => `${API_NAMESPACES.v2}/dashboard_configuration` as const,
 };

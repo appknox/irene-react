@@ -1,10 +1,11 @@
 import { apiRequest } from '@irene/api/request';
-import { transformPaginatedResponse, type ApiPageEnvelope } from '@irene/api/utils/pagination';
+import { transformPaginatedResponse } from '@irene/api/utils/transforms';
+import type { ApiPageEnvelope } from '@irene/api/utils/pagination';
 
 import type {
-  ApiDashboardConfig,
   ApiOrganization,
   ApiOrganizationMe,
+  ApiOrganizationMembership,
   ApiStoreknoxOrganization,
 } from '@irene/api/services/organization';
 
@@ -34,16 +35,22 @@ export default class OrganizationService {
     apiRequest.get<ApiOrganizationMe>(OrganizationEndpoints.me(organizationId));
 
   /**
+   * Fetches one account's membership of an organization.
+   *
+   * @param organizationId - The organization the membership is in.
+   * @param userId - The account whose membership to read.
+   * @returns Their role, and when they joined and were last seen.
+   */
+  public static readonly getOrganizationMembership = (
+    organizationId: number | string,
+    userId: number | string
+  ) =>
+    apiRequest.get<ApiOrganizationMembership>(OrganizationEndpoints.member(organizationId, userId));
+
+  /**
    * Fetches the StoreKnox organization.
    * @returns The StoreKnox organization; rejects on a deployment without one.
    */
   public static readonly getStoreknoxOrganization = () =>
     apiRequest.get<ApiStoreknoxOrganization>(OrganizationEndpoints.storeknoxOrganization());
-
-  /**
-   * Fetches the hosts the product links out to.
-   * @returns The dashboard and device farm URLs, either of which may be absent.
-   */
-  public static readonly getDashboardConfig = () =>
-    apiRequest.get<ApiDashboardConfig>(OrganizationEndpoints.dashboardConfig());
 }

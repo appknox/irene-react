@@ -1,6 +1,7 @@
 import { apiRequest } from '@irene/api/request';
 
 import type {
+  ApiDashboardConfig,
   ApiFrontendConfiguration,
   ApiServerConfiguration,
 } from '@irene/api/services/configuration';
@@ -10,8 +11,9 @@ import { ConfigurationEndpoints } from './endpoints';
 /**
  * Talks to the endpoints describing the deployment.
  *
- * Both run at boot, before the first page paints and before anyone has signed
- * in, because a whitelabel deployment's login page is branded too.
+ * The first two run at application boot, before the first page paints and before anyone
+ * has signed in, because a whitelabel deployment's login page is branded too.
+ * The third describes one organization, so it waits for a session.
  */
 export default class ConfigurationService {
   /**
@@ -27,4 +29,11 @@ export default class ConfigurationService {
    */
   public static readonly getServerConfiguration = () =>
     apiRequest.get<ApiServerConfiguration>(ConfigurationEndpoints.server());
+
+  /**
+   * Fetches the hosts this organization's product links out to.
+   * @returns The dashboard and device farm URLs.
+   */
+  public static readonly getDashboardConfiguration = () =>
+    apiRequest.get<ApiDashboardConfig>(ConfigurationEndpoints.dashboard());
 }

@@ -54,3 +54,15 @@ export interface ApiServerConfiguration {
   devicefarm_url: string;
   enterprise: boolean;
 }
+
+/**
+ * ============================================================
+ * DASHBOARD CONFIGURATION
+ * ============================================================
+ */
+
+// Loads the dashboard and device farm URLs for the organization the account works in
+export interface ApiDashboardConfig {
+  dashboard_url: string;
+  devicefarm_url: string;
+}

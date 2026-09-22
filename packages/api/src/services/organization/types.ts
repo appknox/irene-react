@@ -18,7 +18,6 @@ export interface ApiOrganizationFeatures {
   privacy: boolean;
   upload_via_url: boolean;
   cyod: boolean;
-  fake_app_detection: boolean;
   member_override_request: boolean;
   offensive_security: boolean;
 }
@@ -45,7 +44,6 @@ export interface ApiOrganization {
   mandatory_mfa: boolean;
   cyod_registration_enabled: boolean;
   show_subscription: boolean;
-  knoxiq_automated_trigger: boolean;
   projects_count: number;
   namespaces_count: number;
   teams_count: number;
@@ -70,24 +68,42 @@ export interface ApiOrganizationMe {
 }
 
 /**
+ * One account's membership of an organization: how they joined it, rather than
+ * what they may do in it. `member` is the account's own id.
+ */
+export interface ApiOrganizationMembership {
+  member: number;
+  role: number;
+  role_display: string;
+  is_admin: boolean;
+  is_active: boolean;
+  created_on: string;
+  last_logged_in: string | null;
+}
+
+/**
  * ============================================================
  * STOREKNOX
  * ============================================================
  */
 
+/** The StoreKnox features an organization is entitled to. */
+export interface ApiStoreknoxFeatures {
+  inventory: boolean;
+  drift_detection: boolean;
+  fake_app_detection: boolean;
+  use_ai_validation: boolean;
+  third_party_scanning: boolean;
+}
+
 /** Absent on a deployment without StoreKnox, which is not an error. */
 export interface ApiStoreknoxOrganization {
   id: number;
-}
-
-/**
- * ============================================================
- * DASHBOARD CONFIG
- * ============================================================
- */
-
-/** Hosts the product links out to. A missing key leaves the existing default alone. */
-export interface ApiDashboardConfig {
-  dashboard_url?: string;
-  devicefarm_url?: string;
+  organization: number;
+  created_on: string;
+  updated_on: string;
+  add_appknox_project_to_inventory_by_default: boolean;
+  autodiscovery_onboarding_done: boolean;
+  auto_discovery_enabled: boolean;
+  sk_features: ApiStoreknoxFeatures;
 }

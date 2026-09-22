@@ -4,9 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 
 import {
-  buildDashboardConfig,
   buildOrganization,
   buildOrganizationMe,
+  buildOrganizationMembership,
   buildStoreknoxOrganization,
 } from '@tests/factories';
 
@@ -16,6 +16,7 @@ import { buildAPITestURL, server } from '@tests/server';
 import { buildDrfPage } from '@tests/utils';
 
 const ORGANIZATION_ID = 42;
+const USER_ID = 7;
 
 describe('OrganizationService.getOrganizations', () => {
   it('unwraps the page envelope', async () => {
@@ -78,6 +79,26 @@ describe('OrganizationService.getOrganizationMe', () => {
   });
 });
 
+describe('OrganizationService.getOrganizationMembership', () => {
+  it('returns how the account came to be a member', async () => {
+    const membership = buildOrganizationMembership({ role_display: 'Owner' });
+
+    server.use(
+      http.get(buildAPITestURL(OrganizationEndpoints.member(ORGANIZATION_ID, USER_ID)), () =>
+        HttpResponse.json(membership)
+      )
+    );
+
+    await expect(
+      OrganizationService.getOrganizationMembership(ORGANIZATION_ID, USER_ID)
+    ).resolves.toEqual(membership);
+  });
+
+  it('asks the organization about the account it was given', () => {
+    expect(OrganizationEndpoints.member(7, 42)).toBe('api/organizations/7/members/42');
+  });
+});
+
 describe('OrganizationService.getStoreknoxOrganization', () => {
   it('returns the organization on a deployment that has one', async () => {
     const storeknox = buildStoreknoxOrganization();
@@ -103,29 +124,5 @@ describe('OrganizationService.getStoreknoxOrganization', () => {
     );
 
     expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.NOT_FOUND);
-  });
-});
-
-describe('OrganizationService.getDashboardConfig', () => {
-  it('returns the hosts the product links out to', async () => {
-    const config = buildDashboardConfig();
-
-    server.use(
-      http.get(buildAPITestURL(OrganizationEndpoints.dashboardConfig()), () =>
-        HttpResponse.json(config)
-      )
-    );
-
-    await expect(OrganizationService.getDashboardConfig()).resolves.toEqual(config);
-  });
-
-  it('tolerates a body naming neither host', async () => {
-    server.use(
-      http.get(buildAPITestURL(OrganizationEndpoints.dashboardConfig()), () =>
-        HttpResponse.json({})
-      )
-    );
-
-    await expect(OrganizationService.getDashboardConfig()).resolves.toEqual({});
   });
 });

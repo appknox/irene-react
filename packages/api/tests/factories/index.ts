@@ -1,17 +1,20 @@
 export { buildSession } from '@tests/factories/session';
 
 export {
+  buildDashboardConfig,
   buildFrontendConfiguration,
   buildServerConfiguration,
 } from '@tests/factories/configuration';
 
 export {
-  buildDashboardConfig,
   buildOrganization,
   buildOrganizationMe,
+  buildOrganizationMembership,
   buildStoreknoxOrganization,
 } from '@tests/factories/organization';
 
 export { buildProject } from '@tests/factories/project';
 export { buildSsoCheck } from '@tests/factories/sso';
-export { buildUser } from '@tests/factories/user';
+export { buildUser, buildUserResponse } from '@tests/factories/user';
+
+export { buildVulnerability, buildVulnerabilityListResponse } from '@tests/factories/vulnerability';

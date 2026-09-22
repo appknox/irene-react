@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { transformPaginatedResponse, type ApiPageEnvelope } from '@irene/api/utils/pagination';
+
+import {
+  transformPaginatedResponse,
+  transformUserResponse,
+  transformVulnerabilityListResponse,
+} from '@irene/api/utils/transforms';
+
+import {
+  buildUser,
+  buildUserResponse,
+  buildVulnerability,
+  buildVulnerabilityListResponse,
+} from '@tests/factories';
+
+import type { ApiPageEnvelope } from '@irene/api/utils/pagination';
 
 /** A list response as the server sends it. */
 const respondWith = (overrides = {}) => ({
@@ -54,5 +68,52 @@ describe('transformPaginatedResponse', () => {
 
     expect(page.items).toEqual([]);
     expect(page.count).toBe(0);
+  });
+});
+
+describe('transformUserResponse', () => {
+  it('names the kebab-case attributes the way the rest of the API names its fields', () => {
+    const user = buildUser({ first_name: 'Ada', last_name: 'Lovelace', lang: 'ja' });
+
+    expect(transformUserResponse(buildUserResponse(user))).toEqual(user);
+  });
+
+  it('reads a withheld field as nothing rather than as an empty value', () => {
+    const { data } = buildUserResponse();
+
+    const withheld = {
+      data: {
+        ...data,
+        attributes: {
+          uuid: data.attributes.uuid,
+          username: data.attributes.username,
+          'first-name': data.attributes['first-name'],
+          'last-name': data.attributes['last-name'],
+          lang: data.attributes.lang,
+        },
+      },
+    };
+
+    expect(transformUserResponse(withheld)).toMatchObject({
+      email: null,
+      mfa_method: null,
+      freshchat_hash: null,
+      is_trial: false,
+      can_disable_mfa: false,
+    });
+  });
+});
+
+describe('transformVulnerabilityListResponse', () => {
+  it('returns every entry with the envelope taken off', () => {
+    const vulnerability = buildVulnerability({ name: 'Insecure storage' });
+
+    expect(
+      transformVulnerabilityListResponse(buildVulnerabilityListResponse([vulnerability]))
+    ).toEqual([vulnerability]);
+  });
+
+  it('returns nothing for a catalogue with no entries', () => {
+    expect(transformVulnerabilityListResponse({ data: [] })).toEqual([]);
   });
 });

@@ -5,7 +5,7 @@ import { HTTP_STATUS_CODES } from '@irene/constants';
 
 import { UserEndpoints, UserService } from '@irene/api/services/user';
 import { getApiErrorStatus } from '@irene/api/utils/errors';
-import { buildUser } from '@tests/factories';
+import { buildUser, buildUserResponse } from '@tests/factories';
 import { buildAPITestURL, server } from '@tests/server';
 
 const USER_ID = 42;
@@ -15,7 +15,7 @@ describe('UserService.getUser', () => {
   it('returns the account', async () => {
     const user = buildUser({ lang: 'ja' });
 
-    server.use(http.get(detailUrl(USER_ID), () => HttpResponse.json(user)));
+    server.use(http.get(detailUrl(USER_ID), () => HttpResponse.json(buildUserResponse(user))));
 
     await expect(UserService.getUser(USER_ID)).resolves.toEqual(user);
   });
@@ -27,7 +27,7 @@ describe('UserService.getUser', () => {
       http.get(detailUrl(USER_ID), ({ request }) => {
         asked = new URL(request.url).pathname;
 
-        return HttpResponse.json(buildUser());
+        return HttpResponse.json(buildUserResponse());
       })
     );
 

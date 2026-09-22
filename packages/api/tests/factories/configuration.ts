@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 import type {
+  ApiDashboardConfig,
   ApiFrontendConfiguration,
   ApiServerConfiguration,
 } from '@irene/api/services/configuration';
@@ -51,5 +52,13 @@ export const buildServerConfiguration = (
   websocket: `wss://${faker.internet.domainName()}`,
   devicefarm_url: faker.internet.url(),
   enterprise: false,
+  ...overrides,
+});
+
+export const buildDashboardConfig = (
+  overrides: Partial<ApiDashboardConfig> = {}
+): ApiDashboardConfig => ({
+  dashboard_url: faker.internet.url(),
+  devicefarm_url: faker.internet.url(),
   ...overrides,
 });
