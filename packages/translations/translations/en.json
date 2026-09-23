@@ -487,6 +487,7 @@
     "dastResults": "DAST Results"
   },
   "dastResultsInfo": "The issues detected for each test cases is cumulative data of all the DAST scan done so far.",
+  "dashboardHome": "Dashboard Home",
   "date": "DATE",
   "dateCreated": "Date Created",
   "dateUpdated": "Date Updated",
@@ -1209,6 +1210,7 @@
   "loadingTheDashboard": "Loading the dashboard",
   "lockedAccount": "Your account has been locked out. Please reset the password to regain access. If you face any issues, kindly ",
   "login": "Login",
+  "loginAgain": "Login again",
   "loginFailed": "Login failed: Invalid User. Please contact your admin.",
   "loginTitle": "Login to your account",
   "logout": "Logout",
@@ -1587,7 +1589,8 @@
   "oidcDesc": "OpenID Connect (OIDC) based single sign-on (SSO) allows users to securely access the app using an identity provider (IdP) that supports OIDC. Set up with providers like Google, Azure AD, Okta, Auth0, or your custom OIDC-compliant solution.",
   "oidcModule": {
     "permissionHeading": "{applicationName} requires the following permissions",
-    "errorHelperText": "Not sure what to do? Try Logging in again from start.",
+    "errorHelperTextSignedIn": "Start the request again from the application, or login again.",
+    "errorHelperTextSignedOut": "Login to your account, then start the request again from the application.",
     "openIdConnectAuthorize": "Open ID Connect Authorize"
   },
   "ok": "Ok",
