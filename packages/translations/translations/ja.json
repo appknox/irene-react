@@ -1677,6 +1677,7 @@
   "packageName": "パッケージ名",
   "page": "ページ",
   "pageNotFound": "ページが見つかりません",
+  "pageNotFoundHint": "The link may be broken, or the page may have moved.",
   "paid": "有料",
   "partner": "Partner",
   "partnerPrivilege": {

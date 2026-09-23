@@ -1,7 +1,13 @@
 import type { QueryClient } from '@tanstack/react-query';
 
+import {
+  dashboardConfigurationOptions,
+  frontendConfigurationOptions,
+  serverConfigurationOptions,
+} from '@/queries/configuration';
+
 import { configurationStore } from '@irene/api/stores/configuration';
-import { frontendConfigurationOptions, serverConfigurationOptions } from '@/queries/configuration';
+import { getStoredSession } from '@irene/api/utils/session';
 
 /**
  * Reads a settled configuration request, returning null when it rejected.
@@ -34,4 +40,27 @@ export async function loadConfiguration(queryClient: QueryClient) {
 
   configuration.setFrontendConfiguration(_resolveConfig(frontendResult));
   configuration.setServerConfiguration(_resolveConfig(serverResult));
+}
+
+/**
+ * Fetches the organization's own configuration and writes it to the store.
+ *
+ * Answered only for a signed-in account, so it is skipped without a session
+ * rather than requested and refused. A page outside the authenticated guard
+ * calls this when it needs a host the organization may override, since the
+ * signed-in setup that normally loads it has not run.
+ *
+ * @param queryClient - The cache to load through.
+ */
+export async function loadDashboardConfiguration(queryClient: QueryClient) {
+  if (getStoredSession()) {
+    const configStore = configurationStore.getState();
+
+    try {
+      const configuration = await queryClient.query(dashboardConfigurationOptions());
+      configStore.setDashboardConfiguration(configuration);
+    } catch {
+      configStore.setDashboardConfiguration(null);
+    }
+  }
 }
