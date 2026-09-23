@@ -436,4 +436,41 @@ describe('LoginPage', () => {
       document.querySelector('[data-test-registration-footer-pending]')
     ).not.toBeInTheDocument();
   });
+
+  describe('a sign-in a guard interrupted', () => {
+    /* A sign-in that succeeds, so the navigation afterwards is what is under test. */
+    const signsIn = () => {
+      checkReturns({});
+      server.use(http.post(LOGIN_URL, () => HttpResponse.json({ token: 'tok3n', user_id: 42 })));
+    };
+
+    /* Each case signs in from a `/login` URL and names where the router lands. */
+    const REDIRECT_CASES = [
+      {
+        destination: 'the path the guard came from',
+        loginUrl: '/login?redirectTo=%2Fdashboard%2Foidc%2Fredirect%3Foidc_token%3Dabc',
+        pathname: '/dashboard/oidc/redirect',
+      },
+      {
+        destination: 'the dashboard when no path was asked for',
+        loginUrl: '/login',
+        pathname: '/',
+      },
+      {
+        destination: 'the dashboard when the path would leave the app',
+        loginUrl: '/login?redirectTo=https%3A%2F%2Fevil.example.test',
+        pathname: '/',
+      },
+    ];
+
+    it.each(REDIRECT_CASES)('returns to $destination', async ({ loginUrl, pathname }) => {
+      signsIn();
+
+      const { router } = await renderAtRoute(loginUrl);
+
+      await attemptLogin();
+
+      await waitFor(() => expect(router.state.location.pathname).toBe(pathname));
+    });
+  });
 });
