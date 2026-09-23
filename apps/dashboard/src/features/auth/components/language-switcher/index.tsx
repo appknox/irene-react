@@ -41,7 +41,7 @@ export function LanguageSwitcher({ className }: Readonly<{ className?: string }>
     <AkSelect value={currentLocale} onValueChange={(value) => chooseLocale(value as Locale)}>
       <AkSelectTrigger
         aria-label={akMT('language')}
-        className={cn('w-42', className)}
+        className={cn('w-28', className)}
         data-test-language-switcher
       >
         <AkSelectValue />

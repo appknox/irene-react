@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { AkDivider } from '@irene/ui/ak-divider';
+import { cn } from '@irene/ui/cn';
 import { AppLogo } from '@/components/app-logo';
 import { LanguageSwitcher } from '@/features/auth/components/language-switcher';
 
@@ -11,18 +12,21 @@ import { LanguageSwitcher } from '@/features/auth/components/language-switcher';
  *
  * @param props.children - The page.
  * @param props.footer - Sits below the card's divider, e.g. the registration link.
+ * @param props.cardClassName - Overrides the card, for a page that needs a wider one.
  */
 export function AuthLayout({
   children,
   footer,
-}: Readonly<{ children: ReactNode; footer?: ReactNode }>) {
+  cardClassName,
+}: Readonly<{ children: ReactNode; footer?: ReactNode; cardClassName?: string }>) {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="absolute top-4 right-4">
-        <LanguageSwitcher />
-      </div>
-
-      <div className="w-full max-w-105 overflow-hidden rounded-sm border border-border bg-background shadow-3">
+      <div
+        className={cn(
+          'w-full max-w-105 overflow-hidden rounded-sm border border-border bg-background shadow-3',
+          cardClassName
+        )}
+      >
         <div className="flex justify-center px-6 pt-5 pb-3.5">
           <AppLogo className="max-h-11 max-w-42" />
         </div>
@@ -36,6 +40,10 @@ export function AuthLayout({
             {footer}
           </div>
         )}
+      </div>
+
+      <div className="mt-8">
+        <LanguageSwitcher />
       </div>
     </main>
   );

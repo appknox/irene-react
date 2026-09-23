@@ -29,13 +29,7 @@ export function useLogout() {
     onSettled: async () => {
       endSession(queryClient);
       await navigate({ to: '/login' });
-
-      /*
-        Drops the cached route matches, so the next sign-in re-runs the loaders
-        instead of rendering the previous account's data. Runs after the
-        navigation, since clearCache only removes matches that are unmounted.
-      */
-      router.clearCache();
+      router.clearCache(); // Clears the cached route matches.
     },
   });
 }

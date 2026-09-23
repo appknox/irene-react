@@ -1,4 +1,4 @@
-import { useQueryErrorResetBoundary } from '@tanstack/react-query';
+import { useMutation, useQueryErrorResetBoundary } from '@tanstack/react-query';
 import { useRouter, type ErrorComponentProps } from '@tanstack/react-router';
 import { useState } from 'react';
 
@@ -27,18 +27,20 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
   const queryErrors = useQueryErrorResetBoundary();
   const logout = useLogout();
 
-  /* The failed answers are cached, so they are dropped before the route reruns. */
-  const retry = async () => {
-    setIsRetrying(true);
-    queryErrors.reset();
-    reset();
+  // The failed answers are cached, so they are dropped before the route reruns.
+  const retry = useMutation({
+    mutationFn: async () => {
+      setIsRetrying(true);
+      queryErrors.reset();
+      reset();
 
-    try {
-      await router.invalidate();
-    } finally {
-      setIsRetrying(false);
-    }
-  };
+      try {
+        await router.invalidate();
+      } finally {
+        setIsRetrying(false);
+      }
+    },
+  });
 
   return (
     <main
@@ -58,7 +60,7 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
         </AkTypography>
 
         <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-          <AkButton loading={isRetrying} onClick={retry} data-test-route-error-retry>
+          <AkButton loading={isRetrying} onClick={() => retry.mutate()} data-test-route-error-retry>
             {akMT('retry')}
           </AkButton>
 

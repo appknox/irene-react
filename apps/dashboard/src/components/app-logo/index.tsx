@@ -1,4 +1,6 @@
 import { Link } from '@tanstack/react-router';
+
+import { AkSkeleton } from '@irene/ui/ak-skeleton';
 import { useWhitelabel } from '@/hooks/use-whitelabel';
 
 /**
@@ -18,6 +20,6 @@ export function AppLogo({ className }: Readonly<{ className?: string }>) {
     );
   }
 
-  // Holds the logo's height, so the card does not jump when it arrives.
-  return <div className="h-10" data-test-app-logo-pending />;
+  // Stands in at the logo's own size, so the card does not jump when it arrives.
+  return <AkSkeleton height="40px" className="w-full max-w-42.5" data-test-app-logo-pending />;
 }
