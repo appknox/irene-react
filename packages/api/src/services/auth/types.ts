@@ -53,7 +53,7 @@ export interface ApiResetTokenResponse {
 export interface ApiResetPasswordRequest {
   token: string;
   password: string;
-  confirmPassword: string;
+  confirm_password: string;
 }
 
 /**

@@ -4,6 +4,8 @@ import type { ApiSessionResponse } from '@irene/api/services/auth';
 import type {
   ApiInvitedRegistration,
   ApiInvitedRegistrationRequest,
+  ApiOrganizationInvitation,
+  ApiOrganizationInvitationResponse,
   ApiRegistrationRequest,
 } from '@irene/api/services/registration';
 
@@ -38,4 +40,30 @@ export default class RegistrationService {
    */
   public static readonly registerViaInvite = (registration: ApiInvitedRegistrationRequest) =>
     apiRequest.post<ApiSessionResponse>(RegistrationEndpoints.invite(), registration);
+
+  /**
+   * Reads an organization's invitation. Answered 404 when the token is not a
+   * uuid, names no invitation, or names one already redeemed, so a refusal
+   * never says which.
+   *
+   * @param token - The invitation's uuid from the link.
+   * @returns The address and organization to open the form with, and whether it takes a password.
+   */
+  public static readonly getOrganizationInvitation = (token: string) =>
+    apiRequest.get<ApiOrganizationInvitation>(RegistrationEndpoints.organizationInvite(token));
+
+  /**
+   * Redeems an organization's invitation.
+   *
+   * Answered 204 and grants no session, so the account signs in afterwards
+   * rather than arriving in the dashboard.
+   *
+   * @param request.token - The invitation's uuid from the link.
+   * @param request.account - The account to open with it.
+   */
+  public static readonly acceptOrganizationInvitation = ({
+    token,
+    account,
+  }: ApiOrganizationInvitationResponse) =>
+    apiRequest.post<void>(RegistrationEndpoints.organizationInvite(token), account);
 }

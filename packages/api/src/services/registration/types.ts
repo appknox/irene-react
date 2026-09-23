@@ -63,3 +63,58 @@ export interface ApiInvitedRegistrationRequest {
   last_name: string;
   terms_accepted: boolean;
 }
+
+/**
+ * What an organization's invitation fixes about the account it opens.
+ *
+ * The address and the organization are the invitation's own and cannot be
+ * changed. `is_sso_enforced` decides the form: an organization that enforces
+ * SSO takes no password, since the provider holds the credential.
+ *
+ * @interface ApiOrganizationInvitation
+ * @property {string} token - The invitation's uuid, echoed back.
+ * @property {string} email - The address the invitation was sent to.
+ * @property {string} company - The organization that raised it.
+ * @property {boolean} is_sso_enforced - Whether the organization signs its people in through SSO only.
+ */
+export interface ApiOrganizationInvitation {
+  token: string;
+  email: string;
+  company: string;
+  is_sso_enforced: boolean;
+}
+
+/**
+ * The account an organization's invitation is redeemed for.
+ *
+ * `password` and `confirm_password` are left out when the organization enforces
+ * SSO, which is the only shape the API accepts in that case.
+ *
+ * @interface ApiOrganizationInvitationRequest
+ * @property {string} username - The name the account signs in with, at least 3 characters.
+ * @property {string} first_name - Given name.
+ * @property {string} last_name - Family name.
+ * @property {boolean} terms_accepted - Whether the terms were accepted, which the API requires.
+ * @property {string} [password] - The password to set, at least 10 characters.
+ * @property {string} [confirm_password] - The same password again.
+ */
+export interface ApiOrganizationInvitationRequest {
+  username: string;
+  first_name: string;
+  last_name: string;
+  terms_accepted: boolean;
+  password?: string;
+  confirm_password?: string;
+}
+
+/**
+ * The account an organization's invitation is redeemed for.
+ *
+ * @interface ApiOrganizationInvitationResponse
+ * @property {string} token - The invitation's uuid, echoed back.
+ * @property {ApiOrganizationInvitationRequest} account - The account to open with it.
+ */
+export interface ApiOrganizationInvitationResponse {
+  token: string;
+  account: ApiOrganizationInvitationRequest;
+}

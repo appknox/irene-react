@@ -72,14 +72,8 @@ export default class AuthService {
    * @param request - The link's token, and the new password twice.
    * @returns Resolves once the password is changed.
    */
-  public static readonly resetPassword = (data: ApiResetPasswordRequest) => {
-    const { token, password, confirmPassword } = data;
-
-    return apiRequest.put(AuthEndpoints.resetPassword(token), {
-      password,
-      confirm_password: confirmPassword,
-    });
-  };
+  public static readonly resetPassword = ({ token, ...password }: ApiResetPasswordRequest) =>
+    apiRequest.put<void>(AuthEndpoints.resetPassword(token), password);
 
   /**
    * Asks how a user signs in. Runs before the user has any credential.

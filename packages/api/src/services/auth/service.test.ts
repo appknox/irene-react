@@ -363,7 +363,7 @@ describe('AuthService reset password', () => {
     await AuthService.resetPassword({
       token: TOKEN,
       password: 'correct-horse',
-      confirmPassword: 'correct-horse',
+      confirm_password: 'correct-horse',
     });
 
     expect(body).toEqual({ password: 'correct-horse', confirm_password: 'correct-horse' });
