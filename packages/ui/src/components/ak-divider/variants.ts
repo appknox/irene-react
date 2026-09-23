@@ -30,7 +30,7 @@ export const akDividerVariants = cva('shrink-0 border-solid', {
 
   defaultVariants: {
     direction: 'horizontal',
-    color: 'light',
+    color: 'dark',
     variant: 'fullWidth',
   },
 });

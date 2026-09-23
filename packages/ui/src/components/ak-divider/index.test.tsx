@@ -29,14 +29,14 @@ describe('AkDivider', () => {
     expect(screen.getByRole('separator')).toHaveAttribute('aria-orientation', 'vertical');
   });
 
-  it('is faint by default and stronger when asked', () => {
+  it('renders the color variants correctly', () => {
     const { container, rerender } = render(<AkDivider />);
 
-    expect(divider(container)).toHaveClass('border-divider');
-
-    rerender(<AkDivider color="dark" />);
-
     expect(divider(container)).toHaveClass('border-divider-strong');
+
+    rerender(<AkDivider color="light" />);
+
+    expect(divider(container)).toHaveClass('border-divider');
   });
 
   it('puts the border on the bottom when flat and the left when upright', () => {

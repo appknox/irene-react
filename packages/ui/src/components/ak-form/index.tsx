@@ -3,6 +3,7 @@ import { useId, useMemo, type ComponentProps, type ReactNode } from 'react';
 import { FormProvider, useController, type FieldPath, type FieldValues } from 'react-hook-form';
 
 import { FormFieldContext, FormItemContext, useAkFormField } from '@irene/ui/ak-form/context';
+import { AkIcon } from '@irene/ui/ak-icon';
 import { AkLabel } from '@irene/ui/ak-label';
 import { cn } from '@irene/ui/cn';
 
@@ -84,9 +85,12 @@ function AkFormMessage({ className, children, ...props }: ComponentProps<'p'>) {
       data-slot="form-message"
       id={formMessageId}
       aria-live="polite"
-      className={cn('text-sm text-destructive empty:hidden', className)}
+      className={cn('flex items-start gap-1 text-sm text-destructive empty:hidden', className)}
       {...props}
     >
+      {/* Marks the message as a complaint, the same way a field's own error does. */}
+      {error && <AkIcon name="material-symbols:cancel" className="mt-0.5 size-3.5 shrink-0" />}
+
       {body}
     </p>
   );
