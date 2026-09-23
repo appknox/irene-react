@@ -5,7 +5,7 @@ import { Fragment, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { RegistrationService } from '@irene/api/services/registration';
-import { getApiFieldErrors, unlessRateLimited } from '@irene/api/utils/errors';
+import { unlessRateLimited } from '@irene/api/utils/errors';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
@@ -21,25 +21,25 @@ import {
 } from '@/features/auth/schemas/register-via-invite';
 
 import { startSession } from '@/features/auth/actions/session';
-import { RegisterViaInviteInvalid } from '@/features/auth/components/register-via-invite-invalid';
-import { RegisterViaInviteReadOnlyField } from '@/features/auth/components/register-via-invite-read-only-field';
-import { RegisterViaInviteFormSkeleton } from '@/features/auth/components/register-via-invite-skeleton';
+import { RegisterInvitationFormSkeleton } from '@/features/auth/components/register-invitation-form-skeleton';
+import { RegisterInvitationInvalid } from '@/features/auth/components/register-invitation-invalid';
+import { RegisterInvitationReadOnlyField } from '@/features/auth/components/register-invitation-read-only-field';
 import { AuthLayout } from '@/layouts/auth-layout';
 import { invitedRegistrationOptions } from '@/queries/registration';
+import { setFormFieldErrors, toFormFieldErrors } from '@/utils/form-field-errors';
 
 const inviteRoute = getRouteApi('/_unauthenticated/register-via-invite/$token');
 
-/** The fields the API reports errors against, whichever of them it names. */
-type InviteFieldError = 'username' | 'password' | 'confirm_password' | 'company' | 'terms_accepted';
-
-/** Which form field each of those belongs to. */
-const FORM_FIELD_BY_API_NAME = [
-  ['username', 'username'],
-  ['password', 'password'],
-  ['confirm_password', 'confirmPassword'],
-  ['company', 'company'],
-  ['terms_accepted', 'termsAccepted'],
-] as const satisfies ReadonlyArray<readonly [InviteFieldError, keyof RegisterViaInviteFormSchema]>;
+/** Nothing is filled in until the invitation has been read. */
+const EMPTY_FORM: RegisterViaInviteFormSchema = {
+  company: '',
+  first_name: '',
+  last_name: '',
+  username: '',
+  password: '',
+  confirm_password: '',
+  terms_accepted: false,
+};
 
 /**
  * Opens the account an invitation was raised for, and signs it in.
@@ -54,9 +54,11 @@ export function RegisterViaInvitePage() {
   const queryClient = useQueryClient();
   const invitation = useQuery(invitedRegistrationOptions(token));
 
+  const inviteSchema = buildRegisterViaInviteSchema();
+
   const inviteForm = useForm<RegisterViaInviteFormSchema>({
-    resolver: zodResolver(buildRegisterViaInviteSchema()),
-    defaultValues: Object.fromEntries(FORM_FIELD_BY_API_NAME.map(([, field]) => [field, ''])),
+    resolver: zodResolver(inviteSchema),
+    defaultValues: EMPTY_FORM,
     reValidateMode: 'onChange',
   });
 
@@ -68,16 +70,7 @@ export function RegisterViaInvitePage() {
   // Register the user via the API
   const register = useMutation({
     mutationFn: (values: RegisterViaInviteFormSchema) =>
-      RegistrationService.registerViaInvite({
-        token,
-        username: values.username,
-        password: values.password,
-        confirm_password: values.confirmPassword,
-        company: values.company,
-        first_name: values.firstName,
-        last_name: values.lastName,
-        terms_accepted: values.termsAccepted,
-      }),
+      RegistrationService.registerViaInvite({ token, ...values }),
 
     /* The API answers with a session, so the account is signed in where it stands. */
     onSuccess: async (session) => {
@@ -87,16 +80,13 @@ export function RegisterViaInvitePage() {
 
     // Show the errors in the form fields or notify user
     onError: unlessRateLimited((error) => {
-      const messages = getApiFieldErrors<InviteFieldError>(error);
-      const namedErrors = FORM_FIELD_BY_API_NAME.filter(([apiName]) => messages[apiName]?.length);
-
       /* A complaint about no field in particular — a spent token, or a 500. */
-      if (namedErrors.length > 0) {
-        namedErrors.forEach(([apiName, field]) => {
-          inviteForm.setError(field, { message: messages[apiName]?.[0] });
-        });
-      } else {
+      const fieldErrors = toFormFieldErrors<RegisterViaInviteFormSchema>(inviteSchema, error);
+
+      if (fieldErrors.length === 0) {
         akNotify.error(akMT('somethingWentWrong'));
+      } else {
+        setFormFieldErrors(inviteForm, fieldErrors);
       }
     }),
   });
@@ -106,22 +96,21 @@ export function RegisterViaInvitePage() {
     if (invitedRegistration) {
       resetForm({
         company: invitedRegistration.company,
-        firstName: invitedRegistration.first_name,
-        lastName: invitedRegistration.last_name,
+        first_name: invitedRegistration.first_name,
+        last_name: invitedRegistration.last_name,
         username: '',
         password: '',
-        confirmPassword: '',
-        termsAccepted: false,
+        confirm_password: '',
+        terms_accepted: false,
       });
     }
   }, [invitedRegistration, resetForm]);
 
+  // If the registration is not successful, show the registration form.
   return (
-    /* Wider than the other signed-out pages, since this form asks for the most. */
     <AuthLayout cardClassName="max-w-111.5">
-      {invitation.isPending && <RegisterViaInviteFormSkeleton />}
-
-      {invitation.isError && <RegisterViaInviteInvalid />}
+      {invitation.isPending && <RegisterInvitationFormSkeleton />}
+      {invitation.isError && <RegisterInvitationInvalid />}
 
       {invitation.isSuccess && (
         <Fragment>
@@ -135,14 +124,14 @@ export function RegisterViaInvitePage() {
               className="flex flex-col gap-3.5"
               onSubmit={inviteForm.handleSubmit((values) => register.mutate(values))}
             >
-              <RegisterViaInviteReadOnlyField
+              <RegisterInvitationReadOnlyField
                 id="invited-email"
                 label={akMT('emailId')}
                 value={invitedEmail ?? ''}
               />
 
               {invitedCompany ? (
-                <RegisterViaInviteReadOnlyField
+                <RegisterInvitationReadOnlyField
                   id="invited-company"
                   label={akMT('companyName')}
                   value={invitedCompany}
@@ -158,7 +147,7 @@ export function RegisterViaInvitePage() {
               )}
 
               <div className="flex gap-3.5">
-                <AkFormField name="firstName" label={akMT('firstName')} className="flex-1">
+                <AkFormField name="first_name" label={akMT('firstName')} className="flex-1">
                   <AkInput
                     autoComplete="given-name"
                     placeholder={akMT('firstName')}
@@ -166,7 +155,7 @@ export function RegisterViaInvitePage() {
                   />
                 </AkFormField>
 
-                <AkFormField name="lastName" label={akMT('lastName')} className="flex-1">
+                <AkFormField name="last_name" label={akMT('lastName')} className="flex-1">
                   <AkInput
                     autoComplete="family-name"
                     placeholder={akMT('lastName')}
@@ -192,7 +181,7 @@ export function RegisterViaInvitePage() {
                 />
               </AkFormField>
 
-              <AkFormField name="confirmPassword" label={akMT('confirmPassword')}>
+              <AkFormField name="confirm_password" label={akMT('confirmPassword')}>
                 <AkInput
                   type="password"
                   autoComplete="new-password"
@@ -201,7 +190,7 @@ export function RegisterViaInvitePage() {
                 />
               </AkFormField>
 
-              <AkFormField name="termsAccepted" className="gap-2">
+              <AkFormField name="terms_accepted" className="gap-2">
                 <div className="flex items-center gap-2">
                   <AkCheckbox color="success" data-test-invite-terms-checkbox />
 

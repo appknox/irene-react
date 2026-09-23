@@ -57,12 +57,12 @@ const submitButton = () => screen.getByRole('button', { name: akMT('register') }
 async function redeemInvitation({
   username = USERNAME,
   password = PASSWORD,
-  confirmPassword = PASSWORD,
+  confirm_password = PASSWORD,
   acceptTerms = true,
 } = {}) {
   await userEvent.type(usernameField(), username);
   await userEvent.type(passwordField(), password);
-  await userEvent.type(confirmPasswordField(), confirmPassword);
+  await userEvent.type(confirmPasswordField(), confirm_password);
 
   if (acceptTerms) {
     await userEvent.click(termsCheckbox());
@@ -191,7 +191,7 @@ describe('RegisterViaInvitePage', () => {
   it('rejects a password shorter than ten characters', async () => {
     await openInvitation();
     await screen.findByLabelText(akMT('username'));
-    await redeemInvitation({ password: 'short', confirmPassword: 'short' });
+    await redeemInvitation({ password: 'short', confirm_password: 'short' });
 
     expect(await screen.findByText(akMT('passwordMinLengthError'))).toBeInTheDocument();
   });
@@ -199,7 +199,7 @@ describe('RegisterViaInvitePage', () => {
   it('rejects a confirmation that does not match', async () => {
     await openInvitation();
     await screen.findByLabelText(akMT('username'));
-    await redeemInvitation({ confirmPassword: 'something else entirely' });
+    await redeemInvitation({ confirm_password: 'something else entirely' });
 
     expect(await screen.findByText(akMT('passwordMatchError'))).toBeInTheDocument();
   });

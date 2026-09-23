@@ -26,12 +26,12 @@ const linkIsSpent = () =>
   );
 
 const newPassword = () => screen.getByLabelText(akMT('newPassword'));
-const confirmPassword = () => screen.getByLabelText(akMT('confirmPassword'));
+const confirm_password = () => screen.getByLabelText(akMT('confirmPassword'));
 
 /** Fill both fields and submit. */
 async function submitPasswords(password: string, confirmation = password) {
   await userEvent.type(await screen.findByLabelText(akMT('newPassword')), password);
-  await userEvent.type(confirmPassword(), confirmation);
+  await userEvent.type(confirm_password(), confirmation);
   await userEvent.click(screen.getByRole('button', { name: akMT('reset') }));
 }
 
@@ -67,7 +67,7 @@ describe('ResetPasswordPage', () => {
     await renderAtRoute(PAGE);
 
     expect(await screen.findByLabelText(akMT('newPassword'))).toBeInTheDocument();
-    expect(confirmPassword()).toBeInTheDocument();
+    expect(confirm_password()).toBeInTheDocument();
     expect(screen.queryByText(INVALID_LINK_MESSAGE)).not.toBeInTheDocument();
   });
 
@@ -183,7 +183,7 @@ describe('ResetPasswordPage', () => {
     await renderAtRoute(PAGE);
 
     expect(await screen.findByLabelText(akMT('newPassword'))).toHaveAttribute('type', 'password');
-    expect(confirmPassword()).toHaveAttribute('type', 'password');
+    expect(confirm_password()).toHaveAttribute('type', 'password');
     expect(newPassword()).toHaveAttribute('autocomplete', 'new-password');
   });
 

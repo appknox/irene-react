@@ -18,6 +18,7 @@ import { BackToLogin } from '@/features/auth/components/back-to-login';
 import { RegisterCompanyFooter } from '@/features/auth/components/register-company-footer';
 import { buildRegisterSchema, type RegisterFormSchema } from '@/features/auth/schemas/register';
 import { AuthLayout } from '@/layouts/auth-layout';
+import { setFormFieldErrors, toFormFieldErrors } from '@/utils/form-field-errors';
 
 /** The fields the API reports errors against. */
 type RegisterFieldError = 'email' | 'company' | 'recaptcha';
@@ -28,9 +29,6 @@ const RECAPTCHA_ACTION = 'registration';
 // What the backend accepts in place of a token where the check is switched off.
 const RECAPTCHA_DISABLED = 'notenabled';
 
-// The fields the form has, and so the only ones an error can be rendered against.
-const FORM_FIELDS = ['email', 'company'] as const;
-
 /**
  * Opens an account, which the backend confirms by email.
  *
@@ -39,13 +37,15 @@ const FORM_FIELDS = ['email', 'company'] as const;
  */
 export function RegisterPage() {
   const { executeRecaptcha } = useGoogleReCaptcha();
+  const registerSchema = buildRegisterSchema();
 
   const registerForm = useForm<RegisterFormSchema>({
-    resolver: zodResolver(buildRegisterSchema()),
+    resolver: zodResolver(registerSchema),
     defaultValues: { email: '', company: '' },
     reValidateMode: 'onSubmit',
   });
 
+  // Mutation to register the account.
   const register = useMutation<void, Error, RegisterFormSchema>({
     mutationFn: async ({ email, company }) => {
       /* Scores the visit rather than asking anything, so the token is issued as the form is sent. */
@@ -75,19 +75,18 @@ export function RegisterPage() {
         return;
       }
 
-      // Set the errors on the form fields
-      const failedFields = FORM_FIELDS.filter((field) => messages[field]?.length);
+      /* A complaint about no field in particular — registration switched off, or a 500. */
+      const fieldErrors = toFormFieldErrors<RegisterFormSchema>(registerSchema, error);
 
-      if (failedFields.length > 0) {
-        failedFields.forEach((field) => {
-          registerForm.setError(field, { message: messages[field]?.[0] });
-        });
-      } else {
+      if (fieldErrors.length === 0) {
         akNotify.error(akMT('somethingWentWrong'));
+      } else {
+        setFormFieldErrors(registerForm, fieldErrors);
       }
     }),
   });
 
+  // If the registration is successful, show the confirmation page.
   if (register.isSuccess) {
     return (
       <AuthLayout footer={<BackToLogin />}>
@@ -104,6 +103,7 @@ export function RegisterPage() {
     );
   }
 
+  // If the registration is not successful, show the registration form.
   return (
     <AuthLayout footer={<RegisterCompanyFooter />}>
       <AkTypography tag="h1" variant="h4" fontWeight="bold" className="mb-5 text-xl">

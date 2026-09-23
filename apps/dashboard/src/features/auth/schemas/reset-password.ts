@@ -11,11 +11,11 @@ export const buildResetPasswordSchema = () =>
   z
     .object({
       password: z.string().min(1, akMT('enterNewPassword')),
-      confirmPassword: z.string().min(1, akMT('enterConfirmPassword')),
+      confirm_password: z.string().min(1, akMT('enterConfirmPassword')),
     })
-    .refine((values) => values.password === values.confirmPassword, {
+    .refine((values) => values.password === values.confirm_password, {
       message: akMT('passwordMatchError'),
-      path: ['confirmPassword'],
+      path: ['confirm_password'],
     });
 
 export type ResetPasswordFormSchema = z.infer<ReturnType<typeof buildResetPasswordSchema>>;

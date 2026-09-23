@@ -2,13 +2,13 @@ import { AkInput } from '@irene/ui/ak-input';
 import { AkLabel } from '@irene/ui/ak-label';
 
 /**
- * A value the invitation fixed, shown in the form's own shape but not asked for.
+ * A value an invitation fixed, shown in the form's own shape but not asked for.
  *
  * @param props.id - Ties the label to the field.
  * @param props.label - What the value is.
  * @param props.value - The value itself.
  */
-export function RegisterViaInviteReadOnlyField({
+export function RegisterInvitationReadOnlyField({
   id,
   label,
   value,

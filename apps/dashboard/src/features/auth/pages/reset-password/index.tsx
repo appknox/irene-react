@@ -4,15 +4,9 @@ import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { useStore } from 'zustand';
 
-import {
-  getApiErrorStatus,
-  getApiFieldErrors,
-  isRateLimited,
-  unlessRateLimited,
-} from '@irene/api/utils/errors';
-
 import { AuthService } from '@irene/api/services/auth';
 import { rateLimitStore } from '@irene/api/stores/rate-limit';
+import { getApiErrorStatus, isRateLimited, unlessRateLimited } from '@irene/api/utils/errors';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
@@ -32,6 +26,7 @@ import { BackToLogin } from '@/features/auth/components/back-to-login';
 import { useRequiredField } from '@/features/auth/hooks/use-required-field';
 import { resetTokenOptions } from '@/features/auth/queries/reset-token';
 import { AuthLayout } from '@/layouts/auth-layout';
+import { setFormFieldErrors, toFormFieldErrors } from '@/utils/form-field-errors';
 
 const resetRoute = getRouteApi('/_unauthenticated/reset/$token');
 
@@ -45,13 +40,13 @@ export function ResetPasswordPage() {
   const { token } = resetRoute.useParams();
   const navigate = useNavigate();
   const rateLimitIsActive = useStore(rateLimitStore, (lock) => lock.isThrottled);
-
-  // Token check query
   const tokenCheckRes = useQuery(resetTokenOptions(token));
+  const resetSchema = buildResetPasswordSchema();
 
+  // Form to reset the password.
   const resetForm = useForm<ResetPasswordFormSchema>({
-    resolver: zodResolver(buildResetPasswordSchema()),
-    defaultValues: { password: '', confirmPassword: '' },
+    resolver: zodResolver(resetSchema),
+    defaultValues: { password: '', confirm_password: '' },
     reValidateMode: 'onSubmit',
   });
 
@@ -62,7 +57,11 @@ export function ResetPasswordPage() {
   const tokenCheckWasRateLimited = isRateLimited(tokenCheckRes.error);
   const tokenCheckNeverRan = tokenCheckWasRateLimited || tokenCheckBrokeTheServer;
   const hasNoPassword = useRequiredField<ResetPasswordFormSchema>('password', resetForm);
-  const hasNoConfirmation = useRequiredField<ResetPasswordFormSchema>('confirmPassword', resetForm);
+
+  const hasNoConfirmation = useRequiredField<ResetPasswordFormSchema>(
+    'confirm_password',
+    resetForm
+  );
 
   // Password reset mutation
   const reset = useMutation({
@@ -75,17 +74,17 @@ export function ResetPasswordPage() {
     },
 
     onError: unlessRateLimited((error) => {
-      const messages = getApiFieldErrors<'password'>(error);
-      const passwordMessage = messages.password?.[0];
+      const fieldErrors = toFormFieldErrors<ResetPasswordFormSchema>(resetSchema, error);
 
-      if (passwordMessage) {
-        resetForm.setError('password', { message: passwordMessage });
-      } else {
+      if (fieldErrors.length === 0) {
         akNotify.error(akMT('somethingWentWrong'));
+      } else {
+        setFormFieldErrors(resetForm, fieldErrors);
       }
     }),
   });
 
+  // If the password is reset, show the login page.
   return (
     <AuthLayout footer={<BackToLogin />}>
       <AkTypography tag="h1" variant="h4" fontWeight="bold" className="mb-3 text-xl">
@@ -135,7 +134,7 @@ export function ResetPasswordPage() {
               />
             </AkFormField>
 
-            <AkFormField name="confirmPassword" label={akMT('confirmPassword')}>
+            <AkFormField name="confirm_password" label={akMT('confirmPassword')}>
               <AkInput
                 type="password"
                 autoComplete="new-password"

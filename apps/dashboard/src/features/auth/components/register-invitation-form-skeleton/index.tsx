@@ -22,7 +22,7 @@ function FieldSkeleton() {
  * Holds the invitation form's shape while the invitation is read, so nothing
  * jumps when it arrives.
  */
-export function RegisterViaInviteFormSkeleton() {
+export function RegisterInvitationFormSkeleton() {
   return (
     <div className="flex flex-col gap-3.5" aria-busy data-test-invite-form-skeleton>
       <span className="sr-only">{akMT('loading')}</span>
