@@ -8,6 +8,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 import maxComponentLines from './eslint/rules/max-component-lines.js';
+import noConditionalMessageId from './eslint/rules/no-conditional-message-id.js';
 
 const MULTILINE_STATEMENTS = [
   'multiline-const',
@@ -117,10 +118,25 @@ export default defineConfig([
   },
 
   {
+    // The rules written for this repo, in eslint/rules.
+    files: ['**/*.{ts,tsx}'],
+    plugins: {
+      irene: {
+        rules: {
+          'max-component-lines': maxComponentLines,
+          'no-conditional-message-id': noConditionalMessageId,
+        },
+      },
+    },
+
+    // A message id chosen by a ternary hides both ids from the reader and the extractor.
+    rules: { 'irene/no-conditional-message-id': 'error' },
+  },
+
+  {
     // A component past 350 lines of code does too much; the error says how to split it.
     files: ['**/*.tsx'],
     ignores: ['**/*.test.tsx', '**/*.stories.tsx'],
-    plugins: { irene: { rules: { 'max-component-lines': maxComponentLines } } },
     rules: { 'irene/max-component-lines': ['error', { max: 350 }] },
   },
 
