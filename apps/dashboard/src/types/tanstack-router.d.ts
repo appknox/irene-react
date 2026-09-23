@@ -1,4 +1,4 @@
-import type { router, RouterPageTitleContext } from '@/router';
+import type { ireneDashboardRouter, RouterPageTitleContext } from '@/router';
 
 /**
  * What this app adds to the router's own types.
@@ -9,7 +9,7 @@ import type { router, RouterPageTitleContext } from '@/router';
 declare module '@tanstack/react-router' {
   /** Types every `Link`, `useSearch` and `getRouteApi` against our own tree. */
   interface Register {
-    router: typeof router;
+    router: typeof ireneDashboardRouter;
   }
 
   /**

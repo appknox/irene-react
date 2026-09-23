@@ -125,7 +125,7 @@ describe('RouteTransitionIndicator, wash variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/second' });
+      router.history.push('/second');
     });
 
     expect(await screen.findByRole('status', { name: akMT('loading') })).toBeInTheDocument();
@@ -137,7 +137,7 @@ describe('RouteTransitionIndicator, wash variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/second' });
+      router.history.push('/second');
     });
 
     await waitFor(() => expect(wash()).toHaveAttribute('data-active', 'true'));
@@ -149,7 +149,7 @@ describe('RouteTransitionIndicator, wash variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/second' });
+      router.history.push('/second');
     });
 
     await screen.findByRole('status', { name: akMT('loading') });
@@ -163,7 +163,7 @@ describe('RouteTransitionIndicator, wash variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/second' });
+      router.history.push('/second');
     });
 
     await screen.findByRole('status', { name: akMT('loading') });
@@ -183,7 +183,7 @@ describe('RouteTransitionIndicator, wash variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/third' });
+      router.history.push('/third');
     });
 
     expect(await screen.findByText('Third page')).toBeInTheDocument();
@@ -209,7 +209,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/second' });
+      router.history.push('/second');
     });
 
     await waitFor(() => expect(barValue()).toBeGreaterThan(0));
@@ -227,7 +227,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/second' });
+      router.history.push('/second');
     });
 
     await waitFor(() => expect(barValue()).toBeGreaterThan(0));
@@ -240,7 +240,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     const finished = document.querySelector('[data-slot="progress-linear"]');
 
     act(() => {
-      router.navigate({ to: '/third' });
+      router.history.push('/third');
     });
 
     await waitFor(() => expect(barValue()).toBeLessThan(100));
@@ -254,7 +254,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/second' });
+      router.history.push('/second');
     });
 
     await waitFor(() => expect(barValue()).toBeGreaterThan(0));
@@ -272,7 +272,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/second' });
+      router.history.push('/second');
     });
 
     await waitFor(() => expect(bar()).toHaveAttribute('data-active', 'true'));
@@ -284,7 +284,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/third' });
+      router.history.push('/third');
     });
 
     expect(await screen.findByText('Third page')).toBeInTheDocument();
@@ -298,7 +298,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     await screen.findByText('First page');
 
     act(() => {
-      router.navigate({ to: '/second' });
+      router.history.push('/second');
     });
 
     await waitFor(() => expect(bar()).toHaveAttribute('data-active', 'true'));

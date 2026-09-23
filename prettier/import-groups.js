@@ -27,14 +27,39 @@ import { importGroupOf, importOrderFor, ownPatternsFor } from './import-order.js
 const MERGED_GROUPS = { 1: 1, 2: 2, 3: 2, 4: 4, 5: 4 };
 
 /**
+ * Whether Prettier keeps this import on one line however long it is.
+ *
+ * Prettier only breaks the braces of a named import list with more than one
+ * specifier. A default import, a namespace import and a single named specifier
+ * are printed on one line and simply overflow printWidth.
+ *
+ * @param {import('typescript').ImportDeclaration} statement - The import.
+ * @returns {boolean} Whether Prettier cannot break it.
+ */
+function _printsOnOneLine(statement) {
+  const bindings = statement.importClause?.namedBindings;
+
+  if (!bindings || !ts.isNamedImports(bindings)) {
+    return true;
+  }
+
+  return bindings.elements.length < 2;
+}
+
+/**
  * Estimates whether Prettier will break an import across lines, by printing it on one line.
  *
- * @param {string} statement - The import statement.
+ * @param {import('typescript').ImportDeclaration} statement - The import.
+ * @param {string} text - The import statement's source text.
  * @param {number} printWidth - The configured print width.
- * @returns {boolean} Whether it is too long for one line.
+ * @returns {boolean} Whether Prettier breaks it across lines.
  */
-function _isMultiline(statement, printWidth) {
-  const oneLine = statement
+function _isMultiline(statement, text, printWidth) {
+  if (_printsOnOneLine(statement)) {
+    return false;
+  }
+
+  const oneLine = text
     .replace(/\s+/g, ' ')
     .replace(/\{ ?/, '{ ')
     .replace(/,? ?\}/, ' }');
@@ -115,7 +140,7 @@ function _readImports(code, options) {
       text,
       group,
       isType: _importsOnlyTypes(statement.importClause),
-      isMultiline: _isMultiline(statement.getText(sourceFile), options.printWidth),
+      isMultiline: _isMultiline(statement, statement.getText(sourceFile), options.printWidth),
       isBarrier: !statement.importClause && group !== 5,
     };
   });
