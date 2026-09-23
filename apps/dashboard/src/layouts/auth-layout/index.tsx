@@ -5,6 +5,14 @@ import { cn } from '@irene/ui/cn';
 import { AppLogo } from '@/components/app-logo';
 import { LanguageSwitcher } from '@/features/auth/components/language-switcher';
 
+// Props for the AuthLayout component.
+type AuthLayoutProps = {
+  children: ReactNode;
+  footer?: ReactNode;
+  cardClassName?: string;
+  noPadding?: boolean;
+};
+
 /**
  * The card the signed-out pages share: logo, a divider, then the page. The
  * language sits in the page's corner, since nobody has signed in to have one
@@ -13,12 +21,14 @@ import { LanguageSwitcher } from '@/features/auth/components/language-switcher';
  * @param props.children - The page.
  * @param props.footer - Sits below the card's divider, e.g. the registration link.
  * @param props.cardClassName - Overrides the card, for a page that needs a wider one.
+ * @param props.noPadding - Hands the padding to the calling page
  */
 export function AuthLayout({
   children,
   footer,
   cardClassName,
-}: Readonly<{ children: ReactNode; footer?: ReactNode; cardClassName?: string }>) {
+  noPadding = false,
+}: Readonly<AuthLayoutProps>) {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center p-4">
       <div
@@ -33,7 +43,7 @@ export function AuthLayout({
 
         <AkDivider />
 
-        <div className="p-10 pt-6">{children}</div>
+        <div className={cn(!noPadding && 'px-10 pt-6 pb-10')}>{children}</div>
 
         {footer && (
           <div className="border-t border-border bg-neutral-100 p-3.5 text-center empty:hidden">
