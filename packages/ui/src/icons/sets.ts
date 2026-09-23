@@ -135,6 +135,7 @@ export const materialSymbols = [
   'lock',
   'lock-open',
   'lock-open-outline',
+  'login',
   'logout',
   'mail',
   'menu',
