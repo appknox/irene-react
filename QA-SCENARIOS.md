@@ -1,108 +1,117 @@
 # QA scenarios
 
-Every state we have built and exercised with mocked API responses, so QA can
-reproduce them without waiting for the backend to produce each one.
-
+Everything built and verified since the React migration started, by screen.
 Updated at the end of each milestone.
 
-## How the mocks work
+Some states are hard to produce against a real backend (a held request, a 429, a
+spent invitation). Those were exercised with MSW scenarios named in the URL —
+`?mock=register:rate-limited` — which are added while a milestone is tested and
+removed once it is signed off. Ask for them to be restored when you need them.
 
-Scenarios run through [MSW](https://mswjs.io) in the browser, started from
-`apps/dashboard/src/main.tsx` behind `import.meta.env.DEV` — they are never part
-of a production build. A scenario is named in the URL:
+## Login
 
-```
-/register-via-invite/any-token?mock=invite:username-taken
-```
+| Scenario                      | How to get there                    | Expected                                                           |
+| ----------------------------- | ----------------------------------- | ------------------------------------------------------------------ |
+| Sign in with a password       | `/login`                            | Lands on the dashboard                                             |
+| Wrong password                | Wrong credentials                   | Message under the password field                                   |
+| Locked account                | Too many attempts                   | Message under the field, with a password reset link                |
+| Rate limited                  | Repeated attempts                   | Countdown notice, form disabled until it ends                      |
+| Request never reaches the API | Offline                             | "Network error" notification                                       |
+| Session expired               | `/login?sessionExpired=true`        | Alert above the form                                               |
+| Deactivated account           | `/login?userInactive=true`          | Alert takes priority over the expiry one                           |
+| Signed out from another tab   | `/login?unauthenticated=true`       | Alert above the form                                               |
+| SSO only                      | Organisation allows nothing but SSO | Password field hidden, SSO button submits                          |
+| SAML sign-in                  | SSO account                         | Leaves for the provider, returns to `/saml2/redirect` and signs in |
+| OIDC sign-in                  | SSO account on OIDC                 | Same, via `/sso/oidc/redirect`                                     |
+| Registration link             | Configuration enables it            | Footer offers "Register today"                                     |
 
-`?mock=` takes a comma-separated list. Each scenario also answers
-`GET api/v2/frontend_configuration` and `GET api/v2/server_configuration`, so it
-runs with no backend at all.
+## Two-factor
 
-The harness is added when a milestone is being tested and removed once it is
-signed off, to keep it out of the shipped bundle. To bring back the scenarios
-below, restore `apps/dashboard/src/mocks/` and `public/mockServiceWorker.js` from
-the commit named in each section, or ask for them to be re-added.
+| Scenario           | How to get there           | Expected                                    |
+| ------------------ | -------------------------- | ------------------------------------------- |
+| Authenticator code | Account with an app factor | Code step replaces the password step        |
+| Emailed code       | Account with email factor  | Same, worded for email                      |
+| Mandatory 2FA      | Organisation mandates it   | Notice says so rather than looking optional |
+| Optional 2FA       | User chose it themselves   | No mandate notice                           |
+| Wrong code         | Bad code                   | Message on the code field                   |
+| Too many codes     | Repeated wrong codes       | Password reset offered                      |
 
-Status values: **Passed** — exercised in the browser against the mock;
-**Untested** — implemented but not yet walked through.
+## Session
 
-## Milestone: app boot, route loading and failure
+| Scenario                  | How to get there                | Expected                                              |
+| ------------------------- | ------------------------------- | ----------------------------------------------------- |
+| Restore a session         | Reload while signed in          | Stays signed in, one check per load                   |
+| Credential refused        | Token no longer valid           | Stored session cleared, back to login                 |
+| Sign out                  | Logout                          | Session cleared, back to login                        |
+| Sign out in another tab   | Clear the session elsewhere     | This tab follows to login                             |
+| Sign in in another tab    | Sign in elsewhere               | This tab follows into the dashboard                   |
+| Second sign-in in one tab | Sign in, log out, sign in again | Loading screen appears again, not just the first time |
 
-Removed after sign-off. Restore from `88bc923`.
+## Forgotten password
 
-| Scenario                  | Where              | What it stubs                             | Expected                                            | Status |
-| ------------------------- | ------------------ | ----------------------------------------- | --------------------------------------------------- | ------ |
-| Cold boot with a session  | `/`                | Holds `POST api/v1/check`                 | Boot overlay covers the app, its bar advances       | Passed |
-| Configuration in flight   | `/`                | Holds `GET api/v2/frontend_configuration` | Boot overlay stays up while the branding loads      | Passed |
-| Signed-in setup in flight | `/`                | Holds `GET api/organizations`             | Boot overlay covers the organization fetch          | Passed |
-| Setup fails               | `/`                | 500 on `GET api/organizations`            | Failure card: retry, email support, logout          | Passed |
-| Retry succeeds            | `/`                | 500 then 200 on `GET api/organizations`   | Retry rebuilds the route and the page renders       | Passed |
-| Retry fails again         | `/`                | 500 on every attempt                      | Failure card stays, no duplicate messages           | Passed |
-| Second sign-in in one tab | `/` → logout → `/` | Organization list held on the second pass | Boot overlay appears again, not just the first time | Passed |
+| Scenario                | How to get there         | Expected                                            |
+| ----------------------- | ------------------------ | --------------------------------------------------- |
+| Request a link          | `/recover`               | Same confirmation whether or not the account exists |
+| Rate limited            | Repeated requests        | Countdown notice                                    |
+| Open a valid link       | `/reset/<token>`         | Password form                                       |
+| Spent or unknown link   | Bad token                | "Invalid link" message, no form                     |
+| Link check fails        | 500 or 429 on the check  | Message with a retry button                         |
+| Mismatched confirmation | Two different passwords  | Message under the confirmation, no API call         |
+| Password rejected       | Password the API refuses | Message under the password field                    |
+| Reset succeeds          | Valid password           | Back to login with a confirmation                   |
 
-## Milestone: registration
+## Registration
 
-Removed after sign-off. Restore from `6e911e0`.
+| Scenario                      | How to get there             | Expected                                                   |
+| ----------------------------- | ---------------------------- | ---------------------------------------------------------- |
+| Register                      | `/register`                  | "Registration has been initiated." and check-your-email    |
+| Address already registered    | Known address                | Identical screen — never reveals who has an account        |
+| Invalid address or company    | Bad values                   | Message under the field named by the API                   |
+| reCAPTCHA refused             | Low score                    | Notification with the API's message, form keeps its values |
+| Registration switched off     | Deployment disables it       | Generic "Something went wrong" notification                |
+| Server error                  | 500                          | Same notification                                          |
+| Rate limited                  | Repeated attempts            | Countdown notice                                           |
+| Slow response                 | Held request                 | Submit button holds its loading state                      |
+| Registration hosted elsewhere | External `registration_link` | `/register` leaves for that URL                            |
+| Registration disabled         | No link, not enabled         | Login card shows no footer                                 |
 
-| Scenario                      | URL                                   | What it stubs                                       | Expected                                                     | Status |
-| ----------------------------- | ------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------ | ------ |
-| Registered                    | `/register?mock=register:success`     | 204 on `POST api/v2/registration`                   | Confirmation screen: "Registration has been initiated."      | Passed |
-| Address already registered    | `?mock=register:existing`             | 204, as the API answers for a known address         | Identical screen — the page never reveals who has an account | Passed |
-| Invalid address               | `?mock=register:invalid-email`        | 400 `{"email": [...]}`                              | Message under the email field                                | Passed |
-| Invalid company               | `?mock=register:invalid-company`      | 400 `{"company": [...]}`                            | Message under the company field                              | Passed |
-| reCAPTCHA refused             | `?mock=register:recaptcha-failed`     | 400 `{"recaptcha": [...]}`                          | Notification with the API's message, form keeps its values   | Passed |
-| Registration switched off     | `?mock=register:disabled`             | 404 `{"detail": "Not found."}`                      | Generic "Something went wrong" notification                  | Passed |
-| Server error                  | `?mock=register:server-error`         | 500                                                 | Same generic notification                                    | Passed |
-| Throttled                     | `?mock=register:rate-limited`         | 429 with `lock_time: 30`                            | Countdown notice, nothing else talks over it                 | Passed |
-| Slow response                 | `?mock=register:slow`                 | 204 after 3s                                        | Submit button holds its loading state                        | Passed |
-| Registration hosted elsewhere | `?mock=config:registration-external`  | Configuration names an external `registration_link` | Route leaves the app for that URL                            | Passed |
-| Registration disabled         | `/login?mock=config:registration-off` | `registration_enabled: false`, no link              | Login card shows no footer                                   | Passed |
+reCAPTCHA is never mocked: the widget loads from recaptcha.net and issues a real
+token; only the request carrying it is answered by a scenario.
 
-reCAPTCHA is never stubbed: the widget loads from recaptcha.net and issues a
-real token, and only the request carrying it is answered by the mock.
+## Invite registration
 
-## Milestone: invite registration
+| Scenario                        | How to get there                    | Expected                                                               |
+| ------------------------------- | ----------------------------------- | ---------------------------------------------------------------------- |
+| Redeem an invitation            | `/register-via-invite/<token>`      | Email and company prefilled and read-only, submit signs the account in |
+| Invitation loading              | Slow read                           | Skeleton in the form's shape                                           |
+| Link no longer valid            | Spent, unknown or expired token     | Illustration, "Something went wrong", support link, no form            |
+| Support link on an Appknox host | Appknox-hosted                      | Support word links to support@appknox.com                              |
+| Support link, whitelabelled     | Whitelabelled deployment            | Support word is plain text                                             |
+| Username taken                  | Existing username                   | Message under the username field                                       |
+| Password rejected               | Short or common password            | Message under the password field                                       |
+| Confirmation mismatch           | Two different passwords             | Message under the confirmation                                         |
+| Terms not accepted              | Leave the box unticked              | Message under the checkbox                                             |
+| Link spent while filling in     | Redeemed elsewhere first            | Generic notification                                                   |
+| Client-side rules               | Username under 3, password under 10 | Message appears on submit, clears as the field is corrected            |
 
-Removed after sign-off. Restore from the commit that adds
-`apps/dashboard/src/features/auth/pages/register-via-invite`.
+## App boot and route failures
 
-All at `/register-via-invite/<any-token>?mock=<name>`.
+| Scenario                  | How to get there              | Expected                                                   |
+| ------------------------- | ----------------------------- | ---------------------------------------------------------- |
+| Cold boot with a session  | Reload signed in              | Loading screen covers the app, its bar advances to the end |
+| Configuration in flight   | Slow configuration            | Logo and footer hold their space until it arrives          |
+| Signed-in setup in flight | Slow organization fetch       | Loading screen stays up                                    |
+| Setup fails               | 500 on the organization fetch | Failure card: retry, email support, log out                |
+| Retry succeeds            | Fix the API, press retry      | Page renders                                               |
+| Retry fails again         | Still failing                 | Failure card stays, no duplicate messages                  |
+| Page navigation           | Move between pages            | Thin progress bar at the top, no full-screen cover         |
 
-| Scenario                    | Name                                 | What it stubs                                   | Expected                                                     | Status   |
-| --------------------------- | ------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------ | -------- |
-| Invitation redeemed         | `invite:success`                     | 200 prefill, then `{token, user_id}`            | Form prefilled, submit signs the account in and lands on `/` | Passed   |
-| Invitation loading          | `invite:slow`                        | Prefill after 3s                                | Form skeleton: heading, seven fields, terms row, button      | Passed   |
-| Link no longer valid        | `invite:invalid-token`               | 400 `{"token": ["Invalid Token"]}` on the read  | Illustration, "Something went wrong", support link, no form  | Passed   |
-| Support link, Appknox host  | `invite:invalid-token-on-appknox`    | As above, `isAppknoxUrl` true                   | Support word renders in the Appknox-hosted branch            | Untested |
-| Support link, whitelabelled | `invite:invalid-token-whitelabelled` | As above, `isAppknoxUrl` false                  | Support word renders in the whitelabelled branch             | Untested |
-| Username taken              | `invite:username-taken`              | 400 `{"username": ["Username already exists"]}` | Message under the username field                             | Passed   |
-| Password rejected           | `invite:weak-password`               | 400 `{"password": [too short, too common]}`     | First message under the password field                       | Passed   |
-| Confirmation mismatch       | `invite:password-mismatch`           | 400 `{"confirm_password": [...]}`               | Message under the confirmation field                         | Passed   |
-| Terms refused by the API    | `invite:terms-refused`               | 400 `{"terms_accepted": [...]}`                 | Message under the checkbox                                   | Passed   |
-| Link spent while filling in | `invite:token-spent`                 | 400 `{"token": ["Invalid Token"]}` on submit    | Generic notification — no field owns that error              | Passed   |
-| Server error                | `invite:server-error`                | 500                                             | Same generic notification                                    | Passed   |
+## Language and branding
 
-Worth walking through on any of these, without a mock: username under three
-characters, password under ten, mismatched confirmation, unticked terms. Each
-message clears as the field is corrected, since the form revalidates on change.
-
-## Backend responses these mirror
-
-Confirmed by calling mycroft directly rather than reading its code.
-
-| Endpoint                              | Case                                  | Response                                                                  |
-| ------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------- |
-| `POST api/v2/registration`            | New address, known address, repeat    | 204, no body — identical in all three                                     |
-|                                       | Invalid or blank email                | 400 `{"email": ["Enter a valid email address."]}`                         |
-|                                       | Missing recaptcha                     | 400 `{"recaptcha": ["This field is required."]}`                          |
-|                                       | Registration disabled                 | 404 `{"detail": "Not found."}`                                            |
-|                                       | company, first_name, last_name        | Optional server-side; the form requires a company                         |
-| `GET api/v2/registration-via-invite`  | Valid token                           | 200 `{email, company, first_name, last_name}`                             |
-|                                       | Unknown, garbled, expired or redeemed | 400 `{"token": ["Invalid Token"]}`                                        |
-|                                       | No token                              | 400 `{"token": ["This field is required."]}`                              |
-| `POST api/v2/registration-via-invite` | Valid                                 | 200 `{token, user_id}` — the account is signed in at once                 |
-|                                       | Username under 3, non-ASCII, or taken | 400 `{"username": [...]}`                                                 |
-|                                       | Password below Django's rules         | 400 `{"password": [one or more messages]}`                                |
-|                                       | Confirmation mismatch                 | 400 `{"confirm_password": ["Password and Confirm Password don't match"]}` |
-|                                       | Terms not accepted                    | 400 `{"terms_accepted": ["Please accept terms & conditions to proceed"]}` |
+| Scenario               | How to get there                      | Expected                                      |
+| ---------------------- | ------------------------------------- | --------------------------------------------- |
+| Switch language        | Selector below the auth card          | Page, labels and tab title follow immediately |
+| Language persists      | Switch, then reload                   | Same language after the reload                |
+| Account language       | Sign in with a Japanese account       | Dashboard opens in Japanese                   |
+| Whitelabel branding    | Deployment with its own configuration | Its name, logo, favicon and colours           |
+| No branding configured | Plain deployment                      | Appknox name and logo                         |
