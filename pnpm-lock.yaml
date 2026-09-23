@@ -273,6 +273,9 @@ importers:
       '@irene/enums':
         specifier: workspace:*
         version: link:../enums
+      '@irene/translations':
+        specifier: workspace:*
+        version: link:../translations
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

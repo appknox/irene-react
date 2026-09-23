@@ -107,3 +107,55 @@ describe('errors', () => {
     expect(screen.getByRole('textbox')).toHaveClass('h-12');
   });
 });
+
+describe('the reveal control on a password field', () => {
+  const revealButton = () => screen.getByRole('button', { name: 'Show password' });
+
+  it('renders no control on an ordinary field', () => {
+    render(<AkInput type="text" />);
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('hides what is typed until the control is pressed', () => {
+    render(<AkInput type="password" defaultValue="hunter2" />);
+
+    expect(document.querySelector('[data-slot="input"]')).toHaveAttribute('type', 'password');
+  });
+
+  it('shows what is typed once the control is pressed', async () => {
+    render(<AkInput type="password" defaultValue="hunter2" />);
+
+    await userEvent.click(revealButton());
+
+    expect(document.querySelector('[data-slot="input"]')).toHaveAttribute('type', 'text');
+  });
+
+  it('hides it again on a second press', async () => {
+    render(<AkInput type="password" defaultValue="hunter2" />);
+
+    await userEvent.click(revealButton());
+    await userEvent.click(screen.getByRole('button', { name: 'Hide password' }));
+
+    expect(document.querySelector('[data-slot="input"]')).toHaveAttribute('type', 'password');
+  });
+
+  it('names its own state to assistive technology', async () => {
+    render(<AkInput type="password" />);
+
+    expect(revealButton()).toHaveAttribute('aria-pressed', 'false');
+
+    await userEvent.click(revealButton());
+
+    expect(screen.getByRole('button', { name: 'Hide password' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+
+  it('cannot be pressed while the field is disabled', () => {
+    render(<AkInput type="password" disabled />);
+
+    expect(revealButton()).toBeDisabled();
+  });
+});
