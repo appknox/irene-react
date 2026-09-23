@@ -45,6 +45,16 @@ Element.prototype.releasePointerCapture ??= () => {};
 Element.prototype.scrollIntoView ??= () => {};
 
 /*
+  jsdom implements no layout, so it has no ResizeObserver either. Radix measures
+  with one wherever a control can change size, and throws without it.
+*/
+globalThis.ResizeObserver ??= class {
+  observe() {} // NOSONAR
+  unobserve() {} // NOSONAR
+  disconnect() {} // NOSONAR
+};
+
+/*
   React Tanstack Query retries keep their real behaviour, but wait no time between attempts. A 500 is
   retried twice, and the backoff between those attempts is seconds of a test run
   spent asleep.

@@ -1,5 +1,11 @@
 import { apiRequest } from '@irene/api/request';
-import type { ApiRegistrationRequest } from '@irene/api/services/registration';
+import type { ApiSessionResponse } from '@irene/api/services/auth';
+
+import type {
+  ApiInvitedRegistration,
+  ApiInvitedRegistrationRequest,
+  ApiRegistrationRequest,
+} from '@irene/api/services/registration';
 
 import { RegistrationEndpoints } from './endpoints';
 
@@ -14,4 +20,22 @@ export default class RegistrationService {
    */
   public static readonly register = (registrationData: ApiRegistrationRequest) =>
     apiRequest.post<void>(RegistrationEndpoints.register(), registrationData);
+
+  /**
+   * Reads what an invitation knows about the person it was sent to.
+   *
+   * @param token - The signed invitation from the link.
+   * @returns The address, company and name to open the form with.
+   */
+  public static readonly getInvitedRegistration = (token: string) =>
+    apiRequest.get<ApiInvitedRegistration>(RegistrationEndpoints.invite(), { params: { token } });
+
+  /**
+   * Redeems an invitation, which opens the account and signs it in at once.
+   *
+   * @param registration - The invitation and the account to open with it.
+   * @returns The token and user id to build a session from.
+   */
+  public static readonly registerViaInvite = (registration: ApiInvitedRegistrationRequest) =>
+    apiRequest.post<ApiSessionResponse>(RegistrationEndpoints.invite(), registration);
 }
