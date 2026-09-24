@@ -6,7 +6,7 @@ import { RICH_TEXT_TAG_NAMES } from '../shared/rich-text-tags.ts';
 import { RICH_TEXT_TAGS } from './rich-text.tsx';
 
 describe('RICH_TEXT_TAGS', () => {
-  it('has a renderer for exactly the supported tag names', () => {
+  it('declares a renderer for each supported tag name', () => {
     expect(Object.keys(RICH_TEXT_TAGS).sort((a, b) => a.localeCompare(b))).toEqual(
       [...RICH_TEXT_TAG_NAMES].sort((a, b) => a.localeCompare(b))
     );

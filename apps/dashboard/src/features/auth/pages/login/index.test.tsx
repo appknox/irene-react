@@ -20,6 +20,9 @@ import { buildSsoCheck } from '@tests/factories/sso';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
+/** Where a signed-in account lands, after the home page hands it its one product. */
+const SIGNED_IN_LANDING = '/dashboard/projects';
+
 const USERNAME = faker.internet.email();
 const PASSWORD = faker.internet.password();
 
@@ -73,7 +76,7 @@ async function attemptLogin(password = PASSWORD) {
 }
 
 describe('LoginPage', () => {
-  it('asks only for the username until the check says how the account signs in', async () => {
+  it('renders only the username field until api/check_login answers', async () => {
     await renderAtRoute('/login');
 
     expect(usernameField()).toBeInTheDocument();
@@ -81,7 +84,7 @@ describe('LoginPage', () => {
     expect(screen.getByRole('button', { name: akMT('next') })).toBeInTheDocument();
   });
 
-  it('cannot run the check without a username, and does not nag about it', async () => {
+  it('disables the submit button and shows no error while the username is empty', async () => {
     await renderAtRoute('/login');
 
     expect(screen.getByRole('button', { name: akMT('next') })).toBeDisabled();
@@ -91,7 +94,7 @@ describe('LoginPage', () => {
     expect(usernameField()).toHaveAttribute('aria-invalid', 'false');
   });
 
-  it('enables the check once a username is typed', async () => {
+  it('enables the submit button once a username is typed', async () => {
     checkReturns({});
     await renderAtRoute('/login');
 
@@ -100,7 +103,7 @@ describe('LoginPage', () => {
     expect(screen.getByRole('button', { name: akMT('next') })).toBeEnabled();
   });
 
-  it('stops complaining when a typed password is deleted again', async () => {
+  it('clears the required-field error when the password is typed and deleted again', async () => {
     checkReturns({});
     loginRefusedWith(CREDENTIALS_REJECTED);
     await renderAtRoute('/login');
@@ -116,7 +119,7 @@ describe('LoginPage', () => {
     expect(screen.getByRole('button', { name: akMT('login') })).toBeDisabled();
   });
 
-  it('keeps the user on the first step and warns when the check fails', async () => {
+  it('keeps the username step and shows a notification when api/check_login fails', async () => {
     server.use(http.post(CHECK_URL, () => HttpResponse.error()));
     await renderAtRoute('/login');
 
@@ -126,7 +129,7 @@ describe('LoginPage', () => {
     expect(screen.queryByLabelText(akMT('password'))).not.toBeInTheDocument();
   });
 
-  it('asks for a password when the account has no identity provider', async () => {
+  it('renders the password field when the account has no identity provider', async () => {
     checkReturns({});
     await renderAtRoute('/login');
 
@@ -136,7 +139,7 @@ describe('LoginPage', () => {
     expect(screen.queryByRole('button', { name: akMT('ssoLogin') })).not.toBeInTheDocument();
   });
 
-  it('offers both ways in when the account has an identity provider it may skip', async () => {
+  it('renders the password field and the SSO button when the account may use either', async () => {
     checkReturns({ is_saml: true });
     await renderAtRoute('/login');
 
@@ -146,7 +149,7 @@ describe('LoginPage', () => {
     expect(screen.getByRole('button', { name: akMT('ssoLogin') })).toBeInTheDocument();
   });
 
-  it('drops the password when the organisation allows nothing but SSO', async () => {
+  it('renders no password field when the organization enforces SSO', async () => {
     checkReturns({ is_oidc: true, is_sso_enforced: true });
     await renderAtRoute('/login');
 
@@ -160,7 +163,7 @@ describe('LoginPage', () => {
     expect(screen.queryByRole('button', { name: akMT('next') })).not.toBeInTheDocument();
   });
 
-  it('shows one step at a time, never the check alongside what replaced it', async () => {
+  it('removes the username step from the DOM once the password step renders', async () => {
     checkReturns({});
     await renderAtRoute('/login');
 
@@ -171,7 +174,7 @@ describe('LoginPage', () => {
     expect(screen.getAllByLabelText(akMT('usernameEmailIdTextLabel'))).toHaveLength(1);
   });
 
-  it('marks both fields and names the problem when the password is wrong', async () => {
+  it('marks the username and password fields and renders the error when the password is wrong', async () => {
     checkReturns({});
     loginRefusedWith(CREDENTIALS_REJECTED);
     await renderAtRoute('/login');
@@ -184,7 +187,7 @@ describe('LoginPage', () => {
     expect(passwordField()).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it('clears a wrong-password message as soon as the password is edited', async () => {
+  it('clears the wrong-password error when the user edits the password', async () => {
     checkReturns({});
     loginRefusedWith(CREDENTIALS_REJECTED);
     await renderAtRoute('/login');
@@ -213,14 +216,14 @@ describe('LoginPage', () => {
       return rendered;
     }
 
-    it('explains the lock and marks the field', async () => {
+    it('renders the account-locked message and marks the password field', async () => {
       await lockOut();
 
       expect(screen.getByText(LOCKED_MESSAGE, { exact: false })).toBeInTheDocument();
       expect(passwordField()).toHaveAttribute('aria-invalid', 'true');
     });
 
-    it('links support on an Appknox host, where Appknox answers it', async () => {
+    it('renders the support address as a mailto link on an Appknox host', async () => {
       onAppknoxHost();
       await lockOut();
 
@@ -230,13 +233,13 @@ describe('LoginPage', () => {
       );
     });
 
-    it('leaves support as plain text anywhere else, which routes its own', async () => {
+    it('renders the support address as plain text on a whitelabel host', async () => {
       await lockOut();
 
       expect(screen.queryByRole('link', { name: akMT('contactSupport') })).not.toBeInTheDocument();
     });
 
-    it('offers a password reset instead of another attempt', async () => {
+    it('renders a password reset link in place of the submit button', async () => {
       const { router } = await lockOut();
 
       const reset = screen.getByRole('link', { name: akMT('resetPassword') });
@@ -250,7 +253,7 @@ describe('LoginPage', () => {
       expect(screen.queryByRole('link', { name: akMT('forgotPassword') })).not.toBeInTheDocument();
     });
 
-    it('holds the message while the password is edited, since retyping cannot help', async () => {
+    it('keeps the account-locked message while the user edits the password', async () => {
       await lockOut();
 
       await userEvent.type(passwordField(), 'x');
@@ -258,7 +261,7 @@ describe('LoginPage', () => {
       expect(screen.getByText(LOCKED_MESSAGE, { exact: false })).toBeInTheDocument();
     });
 
-    it('does not also nag about the empty field once the password is cleared', async () => {
+    it('renders no required-field error after the password is cleared', async () => {
       await lockOut();
 
       await userEvent.clear(passwordField());
@@ -267,7 +270,7 @@ describe('LoginPage', () => {
       expect(screen.queryByText(akMT('passwordPlaceholder'))).not.toBeInTheDocument();
     });
 
-    it('lifts once a different username is entered', async () => {
+    it('clears the account-locked message when a different username is entered', async () => {
       await lockOut();
 
       await userEvent.type(usernameField(), 'x');
@@ -280,7 +283,7 @@ describe('LoginPage', () => {
     });
   });
 
-  it('raises any other refusal from the server as a toast', async () => {
+  it('renders a notification for a login error the fields cannot carry', async () => {
     checkReturns({});
     loginRefusedWith('Your organisation has been suspended', 403);
     await renderAtRoute('/login');
@@ -291,7 +294,7 @@ describe('LoginPage', () => {
     expect(passwordField()).not.toHaveAttribute('aria-invalid', 'true');
   });
 
-  it('reports an unreachable server rather than blaming the credentials', async () => {
+  it('renders the network error notification when the login request never reaches the server', async () => {
     checkReturns({});
     server.use(http.post(LOGIN_URL, () => HttpResponse.error()));
     await renderAtRoute('/login');
@@ -301,7 +304,7 @@ describe('LoginPage', () => {
     expect(await screen.findByText(akMT('networkError'))).toBeInTheDocument();
   });
 
-  it('signs the user in and leaves the login page', async () => {
+  it('stores the session and navigates away from /login on a successful sign-in', async () => {
     checkReturns({});
     server.use(http.post(LOGIN_URL, () => HttpResponse.json({ token: 'tok3n', user_id: 42 })));
 
@@ -309,10 +312,10 @@ describe('LoginPage', () => {
 
     await attemptLogin();
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/'));
+    await waitFor(() => expect(router.state.location.pathname).toBe(SIGNED_IN_LANDING));
   });
 
-  it('sends a user who forgot their password to the recover page', async () => {
+  it('navigates to /recover when the user clicks the forgotten-password link', async () => {
     checkReturns({});
 
     const { router } = await renderAtRoute('/login');
@@ -329,7 +332,7 @@ describe('LoginPage', () => {
     // Wrapped: ending the wait updates whatever is still mounted.
     afterEach(() => act(() => rateLimitStore.getState().clearThrottle()));
 
-    it('counts the wait down on the login page, which no signed-in layout wraps', async () => {
+    it('renders the rate-limit countdown on the login page', async () => {
       checkReturns({});
 
       server.use(
@@ -349,7 +352,7 @@ describe('LoginPage', () => {
       ).toBeInTheDocument();
     });
 
-    it('does not also blame the credentials, which were never the problem', async () => {
+    it('renders no password error while the account is rate limited', async () => {
       checkReturns({});
 
       server.use(
@@ -369,26 +372,26 @@ describe('LoginPage', () => {
     });
   });
 
-  describe('saying why the user is here rather than on the dashboard', () => {
-    it('explains a guard turning them away', async () => {
+  describe('the alert explaining why the user was sent to /login', () => {
+    it('renders the unauthenticated alert for ?unauthenticated=true', async () => {
       await renderAtRoute('/login?unauthenticated=true');
 
       expect(screen.getByText(akMT('pleaseLogin'))).toBeInTheDocument();
     });
 
-    it('explains a credential the server stopped accepting', async () => {
+    it('renders the session-expired alert for ?sessionExpired=true', async () => {
       await renderAtRoute('/login?sessionExpired=true');
 
       expect(screen.getByText(akMT('pleaseLoginAgain'))).toBeInTheDocument();
     });
 
-    it('sends a deactivated account to their admin, not back around the login loop', async () => {
+    it('renders the deactivated-account alert for ?userInactive=true', async () => {
       await renderAtRoute('/login?userInactive=true');
 
       expect(screen.getByText(akMT('loginFailed'))).toBeInTheDocument();
     });
 
-    it('says nothing when the user simply came to sign in', async () => {
+    it('renders no alert when the URL carries no reason', async () => {
       await renderAtRoute('/login');
 
       expect(screen.queryByText(akMT('pleaseLogin'))).not.toBeInTheDocument();
@@ -396,7 +399,17 @@ describe('LoginPage', () => {
       expect(screen.queryByText(akMT('loginFailed'))).not.toBeInTheDocument();
     });
 
-    it('leads with the deactivated account when a stale link also says expired', async () => {
+    it('removes the reason from the URL when the user dismisses the alert', async () => {
+      const { router } = await renderAtRoute('/login?sessionExpired=true');
+
+      await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+      await waitFor(() => expect(router.state.location.search).toEqual({}));
+
+      expect(screen.queryByText(akMT('pleaseLoginAgain'))).not.toBeInTheDocument();
+    });
+
+    it('renders the deactivated-account alert when the URL also carries sessionExpired', async () => {
       await renderAtRoute('/login?sessionExpired=true&userInactive=true');
 
       expect(screen.getByText(akMT('loginFailed'))).toBeInTheDocument();
@@ -404,7 +417,7 @@ describe('LoginPage', () => {
     });
   });
 
-  it('reserves the logo and footer space while the frontend configuration loads', async () => {
+  it('reserves the logo and footer space while the frontend configuration request is in flight', async () => {
     server.use(
       http.get(buildAPITestURL(ConfigurationEndpoints.frontend()), async () => {
         await delay('infinite');
@@ -437,7 +450,7 @@ describe('LoginPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  describe('a sign-in a guard interrupted', () => {
+  describe('returning to the path the guard blocked', () => {
     /* A sign-in that succeeds, so the navigation afterwards is what is under test. */
     const signsIn = () => {
       checkReturns({});
@@ -454,12 +467,12 @@ describe('LoginPage', () => {
       {
         destination: 'the dashboard when no path was asked for',
         loginUrl: '/login',
-        pathname: '/',
+        pathname: SIGNED_IN_LANDING,
       },
       {
         destination: 'the dashboard when the path would leave the app',
         loginUrl: '/login?redirectTo=https%3A%2F%2Fevil.example.test',
-        pathname: '/',
+        pathname: SIGNED_IN_LANDING,
       },
     ];
 

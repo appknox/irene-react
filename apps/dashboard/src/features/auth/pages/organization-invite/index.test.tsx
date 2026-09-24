@@ -85,7 +85,7 @@ async function acceptInvitation({
 }
 
 describe('OrganizationInvitePage', () => {
-  it('renders the address and organization the invitation fixes, read-only', async () => {
+  it('renders the invited email and organization as read-only fields', async () => {
     invitationIs();
 
     await openInvitation();
@@ -94,7 +94,7 @@ describe('OrganizationInvitePage', () => {
     expect(screen.getByDisplayValue(INVITATION.company)).toBeDisabled();
   });
 
-  it('renders the skeleton while the invitation is being read', async () => {
+  it('renders the skeleton while the invitation request is in flight', async () => {
     server.use(http.get(inviteUrl, () => new Promise(() => undefined)));
 
     await openInvitation();
@@ -102,7 +102,7 @@ describe('OrganizationInvitePage', () => {
     expect(screen.queryByRole('button', { name: akMT('register') })).not.toBeInTheDocument();
   });
 
-  it('renders the invalid state when the token names no open invitation', async () => {
+  it('renders the invalid-invitation state when the token matches no open invitation', async () => {
     invitationIsGone();
 
     await openInvitation();
@@ -111,7 +111,7 @@ describe('OrganizationInvitePage', () => {
     expect(screen.queryByRole('button', { name: akMT('register') })).not.toBeInTheDocument();
   });
 
-  it('sends the account to the invitation endpoint', async () => {
+  it('posts the account fields to the invitation endpoint', async () => {
     invitationIs();
 
     let sent: Record<string, unknown> | undefined;
@@ -140,7 +140,7 @@ describe('OrganizationInvitePage', () => {
     );
   });
 
-  it('asks the account to sign in once the invitation is redeemed', async () => {
+  it('renders the confirmation asking the user to sign in once the invitation is accepted', async () => {
     invitationIs();
 
     server.use(
@@ -157,7 +157,7 @@ describe('OrganizationInvitePage', () => {
   });
 
   describe('an organization that enforces SSO', () => {
-    it('asks for no password, since the provider holds the credential', async () => {
+    it('renders no password fields when the organization enforces SSO', async () => {
       invitationIs({ is_sso_enforced: true });
 
       await openInvitation();
@@ -167,7 +167,7 @@ describe('OrganizationInvitePage', () => {
       expect(screen.queryByLabelText(akMT('confirmPassword'))).not.toBeInTheDocument();
     });
 
-    it('sends no password, which is the only shape the API accepts', async () => {
+    it('posts no password fields when the organization enforces SSO', async () => {
       invitationIs({ is_sso_enforced: true });
 
       let sent: Record<string, unknown> | undefined;
@@ -195,8 +195,8 @@ describe('OrganizationInvitePage', () => {
     });
   });
 
-  describe('rules the form applies before calling the API', () => {
-    it('refuses a username under three characters', async () => {
+  describe('validation the form applies before sending the request', () => {
+    it('rejects a username under three characters', async () => {
       invitationIs();
 
       await openInvitation();
@@ -206,7 +206,7 @@ describe('OrganizationInvitePage', () => {
       expect(await screen.findByText(akMT('usernameMinLengthError'))).toBeInTheDocument();
     });
 
-    it('refuses a password under ten characters', async () => {
+    it('rejects a password under ten characters', async () => {
       invitationIs();
 
       await openInvitation();
@@ -216,7 +216,7 @@ describe('OrganizationInvitePage', () => {
       expect(await screen.findByText(akMT('passwordMinLengthError'))).toBeInTheDocument();
     });
 
-    it('refuses a confirmation that differs from the password', async () => {
+    it('rejects a confirmation that differs from the password', async () => {
       invitationIs();
 
       await openInvitation();
@@ -226,7 +226,7 @@ describe('OrganizationInvitePage', () => {
       expect(await screen.findByText(akMT('passwordMatchError'))).toBeInTheDocument();
     });
 
-    it('refuses an unticked terms box', async () => {
+    it('rejects the form while the terms box is unticked', async () => {
       invitationIs();
 
       await openInvitation();
@@ -237,8 +237,8 @@ describe('OrganizationInvitePage', () => {
     });
   });
 
-  describe('refusals the API reports', () => {
-    it('puts a refused username under its own field', async () => {
+  describe('errors the API returns', () => {
+    it('renders a username error under the username field', async () => {
       invitationIs();
       acceptanceFailsWith({ username: ['A user with that username already exists.'] });
 
@@ -251,7 +251,7 @@ describe('OrganizationInvitePage', () => {
       ).toBeInTheDocument();
     });
 
-    it('notifies when the refusal names no field, such as a token spent while filling in', async () => {
+    it('renders a notification when the error names no field', async () => {
       invitationIs();
       acceptanceFailsWith({ detail: ['Not found.'] }, HTTP_STATUS_CODES.NOT_FOUND);
 

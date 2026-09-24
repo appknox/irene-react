@@ -7,7 +7,7 @@ const bar = (container: HTMLElement) =>
   container.querySelector<HTMLProgressElement>('[data-slot="progress-linear"]');
 
 describe('AkProgressLinear', () => {
-  it('reports how far along it is', () => {
+  it('renders aria-valuenow from the value', () => {
     const { container, getByRole } = render(<AkProgressLinear value={40} />);
 
     expect(getByRole('progressbar')).toBeInTheDocument();
@@ -15,13 +15,13 @@ describe('AkProgressLinear', () => {
     expect(bar(container)?.max).toBe(100);
   });
 
-  it('runs on its own when nothing knows the length, naming no value', () => {
+  it('renders no aria-valuenow when no value is given', () => {
     const { container } = render(<AkProgressLinear />);
 
     expect(bar(container)?.hasAttribute('value')).toBe(false);
   });
 
-  it('keeps a value outside the scale within it', () => {
+  it('clamps a value outside 0 to 100 into the range', () => {
     const { container, rerender } = render(<AkProgressLinear value={140} />);
 
     expect(bar(container)?.value).toBe(100);

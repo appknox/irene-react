@@ -31,21 +31,21 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
-describe('the boot sequence', () => {
-  it('asks the install about itself, whoever is looking', async () => {
+describe('the app boot sequence', () => {
+  it('requests the frontend and server configuration on a signed-out page', async () => {
     await renderAtRoute('/login');
 
     expect(requested).toContain(`/${ConfigurationEndpoints.frontend()}`);
     expect(requested).toContain(`/${ConfigurationEndpoints.server()}`);
   });
 
-  it('asks nothing about a session nobody stored', async () => {
+  it('sends no api/check request when no session is stored', async () => {
     await renderAtRoute('/login');
 
     expect(requested).not.toContain(`/${AuthEndpoints.check()}`);
   });
 
-  it('confirms a stored token before asking anything else', async () => {
+  it('sends api/check as the first request when a session is stored', async () => {
     storeSession(session);
     server.use(http.post(buildAPITestURL(AuthEndpoints.check()), () => HttpResponse.json({})));
 
@@ -54,7 +54,7 @@ describe('the boot sequence', () => {
     expect(requested.indexOf(`/${AuthEndpoints.check()}`)).toBe(0);
   });
 
-  it('confirms a stored token even on a signed-out page, which then turns the user away', async () => {
+  it('sends api/check on /login and redirects the signed-in user to /dashboard/projects', async () => {
     storeSession(session);
     server.use(http.post(buildAPITestURL(AuthEndpoints.check()), () => HttpResponse.json({})));
 
@@ -62,10 +62,10 @@ describe('the boot sequence', () => {
 
     expect(requested).toContain(`/${AuthEndpoints.check()}`);
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/'));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/dashboard/projects'));
   });
 
-  it('checks it once, however many guards ask', async () => {
+  it('sends api/check once across navigations between / and /login', async () => {
     storeSession(session);
     server.use(http.post(buildAPITestURL(AuthEndpoints.check()), () => HttpResponse.json({})));
 
@@ -80,7 +80,7 @@ describe('the boot sequence', () => {
     expect(checks).toHaveLength(1);
   });
 
-  it('signs out a credential the API no longer accepts', async () => {
+  it('clears the stored session and redirects to /login when api/check answers 401', async () => {
     storeSession(session);
 
     server.use(

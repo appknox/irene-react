@@ -4,13 +4,13 @@ import { describe, expect, it } from 'vitest';
 import { AkSpinner } from '@irene/ui/ak-spinner';
 
 describe('AkSpinner', () => {
-  it('announces itself as a loading status', () => {
+  it('renders with the status role', () => {
     render(<AkSpinner />);
 
     expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
   });
 
-  it('spins at the default size', () => {
+  it('renders at the default size', () => {
     render(<AkSpinner />);
 
     const spinner = screen.getByRole('status');
@@ -19,7 +19,7 @@ describe('AkSpinner', () => {
     expect(spinner).toHaveClass('size-4');
   });
 
-  it('takes a size from the caller', () => {
+  it('renders at the size the caller sets', () => {
     render(<AkSpinner className="size-8" />);
 
     const spinner = screen.getByRole('status');

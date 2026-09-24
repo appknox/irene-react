@@ -6,7 +6,7 @@ import { AkAlert, AkAlertDescription, AkAlertTitle } from '@irene/ui/ak-alert';
 import { akAlertVariants } from '@irene/ui/ak-alert/variants';
 
 describe('rendering', () => {
-  it('announces itself as an alert', () => {
+  it('renders with the alert role', () => {
     render(
       <AkAlert>
         <AkAlertTitle>Scan failed</AkAlertTitle>
@@ -28,7 +28,7 @@ describe('rendering', () => {
     expect(screen.getByText('The binary could not be read.')).toBeInTheDocument();
   });
 
-  it('marks each part for styling hooks', () => {
+  it('renders a data attribute on each part', () => {
     render(
       <AkAlert>
         <AkAlertTitle>Scan failed</AkAlertTitle>
@@ -43,13 +43,13 @@ describe('rendering', () => {
 });
 
 describe('dismissing', () => {
-  it('has no close button unless it can be dismissed', () => {
+  it('renders no close button without onDismiss', () => {
     render(<AkAlert>Body</AkAlert>);
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
-  it('shows a close button when given an onDismiss', () => {
+  it('renders a close button when onDismiss is given', () => {
     render(<AkAlert onDismiss={vi.fn()}>Body</AkAlert>);
 
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe('dismissing', () => {
     expect(onDismiss).toHaveBeenCalledOnce();
   });
 
-  it('takes its own label, for a translated one', () => {
+  it('renders the close label the caller passes', () => {
     render(
       <AkAlert onDismiss={vi.fn()} dismissLabel="閉じる">
         Body
@@ -74,7 +74,7 @@ describe('dismissing', () => {
     expect(screen.getByRole('button', { name: '閉じる' })).toBeInTheDocument();
   });
 
-  it('centres the button on the top-right corner', () => {
+  it('renders the close button centred on the top-right corner', () => {
     render(<AkAlert onDismiss={vi.fn()}>Body</AkAlert>);
 
     const button = screen.getByRole('button', { name: 'Close' });
@@ -86,7 +86,7 @@ describe('dismissing', () => {
 });
 
 describe('variants', () => {
-  it('defaults to the neutral surface', () => {
+  it('renders the neutral variant by default', () => {
     render(<AkAlert>Body</AkAlert>);
 
     expect(screen.getByRole('alert')).toHaveClass('bg-background');
@@ -103,7 +103,7 @@ describe('variants', () => {
     expect(screen.getByRole('alert')).toHaveClass(surface);
   });
 
-  it('produces classes without rendering', () => {
+  it('returns the variant classes without rendering a component', () => {
     expect(akAlertVariants({ variant: 'error' })).toContain('text-danger');
   });
 });

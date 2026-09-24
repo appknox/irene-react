@@ -112,14 +112,14 @@ const wash = () =>
   document.querySelector('[data-test-route-transition-indicator] > div:first-child');
 
 describe('RouteTransitionIndicator, wash variant', () => {
-  it('renders no spinner on the first load', async () => {
+  it('renders no spinner on the first page load', async () => {
     renderPages();
 
     expect(await screen.findByText('First page')).toBeInTheDocument();
     expect(spinner()).not.toBeInTheDocument();
   });
 
-  it('renders the spinner while the next page loads', async () => {
+  it('renders the spinner while the next route loads', async () => {
     const { router } = renderPages();
 
     await screen.findByText('First page');
@@ -131,7 +131,7 @@ describe('RouteTransitionIndicator, wash variant', () => {
     expect(await screen.findByRole('status', { name: akMT('loading') })).toBeInTheDocument();
   });
 
-  it('marks the wash active while the next page loads', async () => {
+  it('marks the wash active while the next route loads', async () => {
     const { router } = renderPages();
 
     await screen.findByText('First page');
@@ -143,7 +143,7 @@ describe('RouteTransitionIndicator, wash variant', () => {
     await waitFor(() => expect(wash()).toHaveAttribute('data-active', 'true'));
   });
 
-  it('keeps the previous page on screen while the next one loads', async () => {
+  it('keeps the previous route on screen while the next one loads', async () => {
     const { router } = renderPages();
 
     await screen.findByText('First page');
@@ -157,7 +157,7 @@ describe('RouteTransitionIndicator, wash variant', () => {
     expect(screen.getByText('First page')).toBeInTheDocument();
   });
 
-  it('hides the spinner and the wash shortly after the next page renders', async () => {
+  it('hides the spinner and the wash shortly after the next route renders', async () => {
     const { router, finishLoading } = renderPages();
 
     await screen.findByText('First page');
@@ -177,7 +177,7 @@ describe('RouteTransitionIndicator, wash variant', () => {
     expect(wash()).not.toHaveAttribute('data-active');
   });
 
-  it('renders the spinner while the page fetches, not only while it navigates', async () => {
+  it('renders the spinner while the route refetches, not only while it navigates', async () => {
     const { router } = renderPages();
 
     await screen.findByText('First page');
@@ -195,7 +195,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
   const bar = () => document.querySelector('[data-test-route-transition-indicator]');
   const barValue = () => screen.getByRole<HTMLProgressElement>('progressbar').value;
 
-  it('renders the bar idle once the first page has loaded', async () => {
+  it('renders the bar idle once the first route has loaded', async () => {
     renderPages({ variant: 'bar' });
 
     expect(await screen.findByText('First page')).toBeInTheDocument();
@@ -203,7 +203,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     expect(bar()).toHaveAttribute('aria-hidden', 'true');
   });
 
-  it('advances the bar while the next page loads, without reaching the end', async () => {
+  it('advances the bar while the next route loads, stopping short of 100 percent', async () => {
     const { router } = renderPages({ variant: 'bar' });
 
     await screen.findByText('First page');
@@ -221,7 +221,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     expect(barValue()).toBeLessThan(100);
   });
 
-  it('starts the next stretch of work from the beginning, never from the end', async () => {
+  it('restarts the bar from zero on the next navigation', async () => {
     const { router, finishLoading } = renderPages({ variant: 'bar' });
 
     await screen.findByText('First page');
@@ -248,7 +248,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     expect(document.querySelector('[data-slot="progress-linear"]')).not.toBe(finished);
   });
 
-  it('completes the bar once the next page renders', async () => {
+  it('advances the bar to 100 percent once the next route renders', async () => {
     const { router, finishLoading } = renderPages({ variant: 'bar' });
 
     await screen.findByText('First page');
@@ -266,7 +266,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     await waitFor(() => expect(barValue()).toBe(100));
   });
 
-  it('marks the bar active while the next page loads', async () => {
+  it('marks the bar active while the next route loads', async () => {
     const { router } = renderPages({ variant: 'bar' });
 
     await screen.findByText('First page');
@@ -278,7 +278,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     await waitFor(() => expect(bar()).toHaveAttribute('data-active', 'true'));
   });
 
-  it('marks the bar active while the page fetches', async () => {
+  it('marks the bar active while the route refetches', async () => {
     const { router } = renderPages({ variant: 'bar' });
 
     await screen.findByText('First page');
@@ -292,7 +292,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     await waitFor(() => expect(bar()).toHaveAttribute('data-active', 'true'));
   });
 
-  it('marks the bar idle shortly after the next page renders', async () => {
+  it('marks the bar idle shortly after the next route renders', async () => {
     const { router, finishLoading } = renderPages({ variant: 'bar' });
 
     await screen.findByText('First page');
@@ -310,7 +310,7 @@ describe('RouteTransitionIndicator, bar variant', () => {
     await waitFor(() => expect(bar()).not.toHaveAttribute('data-active'));
   });
 
-  it('reports on a signed-out page too, since either side can be waiting', async () => {
+  it('renders on an unauthenticated route as well', async () => {
     clearStoredSession();
 
     server.use(

@@ -54,7 +54,7 @@ describe('ProjectService.list', () => {
       expect(withTerm.params.get('q')).toBe('appknox');
     });
 
-    it('transforms the response into the page shape the app reads', async () => {
+    it('returns the results as items with a count', async () => {
       const projects = [buildProject()];
       const next = '/api/v3/projects?offset=9';
 
@@ -72,7 +72,7 @@ describe('ProjectService.list', () => {
   });
 
   describe('when the request fails', () => {
-    it('propagates a 403 for an organisation the user cannot see', async () => {
+    it('rejects with a 403 for an organization the account cannot see', async () => {
       interceptList(() =>
         HttpResponse.json({ detail: 'Forbidden' }, { status: HTTP_STATUS_CODES.FORBIDDEN })
       );
@@ -84,7 +84,7 @@ describe('ProjectService.list', () => {
       expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.FORBIDDEN);
     });
 
-    it('propagates a server error', async () => {
+    it('rejects on a 500', async () => {
       interceptList(() =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
       );
@@ -103,14 +103,14 @@ describe('ProjectService.detail', () => {
     await expect(ProjectService.getProject(42)).resolves.toEqual(project);
   });
 
-  it('encodes an id that needs escaping', async () => {
+  it('encodes an id that would otherwise change the path', async () => {
     // The builder escapes it, exactly as the service does.
     server.use(http.get(detailUrl('a/b'), () => HttpResponse.json(buildProject())));
 
     await expect(ProjectService.getProject('a/b')).resolves.toBeDefined();
   });
 
-  it('propagates a 404 for a project that does not exist', async () => {
+  it('rejects with a 404 for a project that does not exist', async () => {
     server.use(
       http.get(detailUrl('9999'), () =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.NOT_FOUND })
@@ -122,7 +122,7 @@ describe('ProjectService.detail', () => {
 });
 
 describe('ProjectService.list', () => {
-  it('unwraps results into items and count', async () => {
+  it('returns the results as items with a count', async () => {
     const projects = [buildProject(), buildProject()];
 
     interceptList(() => HttpResponse.json(buildDrfPage(projects, { count: 40 })));
@@ -133,7 +133,7 @@ describe('ProjectService.list', () => {
     expect(page.count).toBe(40);
   });
 
-  it('reports hasNext from the next cursor', async () => {
+  it('reports hasNext from the next URL', async () => {
     interceptList(() =>
       HttpResponse.json(
         buildDrfPage([buildProject()], { next: '/api/v3/projects?offset=9', previous: null })
@@ -146,7 +146,7 @@ describe('ProjectService.list', () => {
     expect(page.hasPrevious).toBe(false);
   });
 
-  it('returns an empty page when the backend sends no results', async () => {
+  it('returns an empty page when the response carries no results', async () => {
     interceptList(() => HttpResponse.json(buildDrfPage([])));
 
     const page = await ProjectService.getProjects({ limit: 9, offset: 0 });
@@ -155,7 +155,7 @@ describe('ProjectService.list', () => {
     expect(page.count).toBe(0);
   });
 
-  it('propagates a failure rather than returning an empty page', async () => {
+  it('rejects rather than returning an empty page', async () => {
     interceptList(() => HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR }));
 
     await expect(ProjectService.getProjects({ limit: 9, offset: 0 })).rejects.toThrow('500');

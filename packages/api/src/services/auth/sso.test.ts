@@ -33,7 +33,7 @@ function interceptCheck(respond: () => Response) {
 }
 
 describe('AuthService.checkSso', () => {
-  describe('when the organisation is found', () => {
+  describe('when the organization is found', () => {
     it('posts to the v2 sso check endpoint', async () => {
       const seen = interceptCheck(() => HttpResponse.json(buildSsoCheck()));
 
@@ -42,7 +42,7 @@ describe('AuthService.checkSso', () => {
       expect(seen.method).toBe('POST');
     });
 
-    it('sends only the username', async () => {
+    it('posts the username as the only field', async () => {
       const seen = interceptCheck(() => HttpResponse.json(buildSsoCheck()));
 
       await AuthService.checkSso(USERNAME);
@@ -60,7 +60,7 @@ describe('AuthService.checkSso', () => {
   });
 
   describe('when the request fails', () => {
-    it('keeps the status and the field errors from a 400', async () => {
+    it('rejects with the status and field errors of a 400', async () => {
       interceptCheck(() =>
         HttpResponse.json(
           { username: ['Enter a valid email address.'] },
@@ -78,7 +78,7 @@ describe('AuthService.checkSso', () => {
       });
     });
 
-    it('rejects rather than resolving undefined on a 403', async () => {
+    it('rejects on a 403', async () => {
       interceptCheck(() =>
         HttpResponse.json({ detail: 'Forbidden' }, { status: HTTP_STATUS_CODES.FORBIDDEN })
       );
@@ -86,7 +86,7 @@ describe('AuthService.checkSso', () => {
       await expect(AuthService.checkSso(USERNAME)).rejects.toThrow('403');
     });
 
-    it('propagates a server error', async () => {
+    it('rejects on a 500', async () => {
       interceptCheck(() =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
       );
@@ -95,8 +95,8 @@ describe('AuthService.checkSso', () => {
     });
   });
 
-  describe('edge cases', () => {
-    it('sends an empty username rather than dropping the field', async () => {
+  describe('an empty username', () => {
+    it('posts the username field with an empty value', async () => {
       const seen = interceptCheck(() => HttpResponse.json(buildSsoCheck()));
 
       await AuthService.checkSso('');
@@ -112,7 +112,7 @@ const OIDC_START_URL = buildAPITestURL(AuthEndpoints.oidcStart());
 const OIDC_CALLBACK_URL = buildAPITestURL(AuthEndpoints.oidcCallback());
 
 describe('AuthService.startSaml', () => {
-  it('asks the v1 saml endpoint where to send the user, carrying the token and return URL', async () => {
+  it('posts the check token and return URL to the v1 saml endpoint', async () => {
     let query: URLSearchParams | undefined;
 
     server.use(
@@ -133,7 +133,7 @@ describe('AuthService.startSaml', () => {
     expect(query?.get('return_to')).toBe(`${ORIGIN}/saml2/redirect`);
   });
 
-  it('propagates a refusal rather than sending the user nowhere', async () => {
+  it('rejects when the request is refused', async () => {
     server.use(
       http.get(SAML_START_URL, () =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.BAD_REQUEST })
@@ -147,7 +147,7 @@ describe('AuthService.startSaml', () => {
 });
 
 describe('AuthService.loginWithSaml', () => {
-  it('trades the provider token for a session', async () => {
+  it('exchanges the provider token for a session', async () => {
     let body: unknown;
 
     server.use(
@@ -166,7 +166,7 @@ describe('AuthService.loginWithSaml', () => {
     expect(body).toEqual({ token: 'sso-token' });
   });
 
-  it('propagates a rejected token', async () => {
+  it('rejects when the provider token is refused', async () => {
     server.use(
       http.post(SAML_LOGIN_URL, () =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.FORBIDDEN })
@@ -180,7 +180,7 @@ describe('AuthService.loginWithSaml', () => {
 });
 
 describe('AuthService.startOidc', () => {
-  it('posts the username and the return URL under the name the API expects', async () => {
+  it('posts the username and return URL under the field names the API expects', async () => {
     let body: unknown;
 
     server.use(
@@ -206,7 +206,7 @@ describe('AuthService.startOidc', () => {
 });
 
 describe('AuthService.completeOidc', () => {
-  it('exchanges the code and state for the signed-in user', async () => {
+  it('posts the code and state and returns the session', async () => {
     let body: unknown;
 
     server.use(
@@ -229,7 +229,7 @@ describe('AuthService.completeOidc', () => {
     expect(body).toEqual({ code: 'abc', state: 'xyz' });
   });
 
-  it('propagates a code the provider will not honour', async () => {
+  it('rejects when the code exchange is refused', async () => {
     server.use(
       http.post(OIDC_CALLBACK_URL, () =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.BAD_REQUEST })

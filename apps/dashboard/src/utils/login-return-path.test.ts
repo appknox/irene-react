@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { returnPathFor, returnPathSchema } from '@/utils/login-return-path';
 
 describe('returnPathSchema', () => {
-  it('accepts a path inside the app', () => {
+  it('accepts a path within the app', () => {
     expect(returnPathSchema.parse('/dashboard/oidc/redirect?oidc_token=abc')).toBe(
       '/dashboard/oidc/redirect?oidc_token=abc'
     );
   });
 
-  it('accepts nothing at all', () => {
+  it('accepts an undefined value', () => {
     expect(returnPathSchema.parse(undefined)).toBeUndefined();
   });
 
@@ -23,13 +23,13 @@ describe('returnPathSchema', () => {
 });
 
 describe('returnPathFor', () => {
-  it('joins the path and the query the guard interrupted', () => {
+  it('joins the pathname and the query string of the blocked location', () => {
     expect(
       returnPathFor({ pathname: '/dashboard/oidc/redirect', searchStr: '?oidc_token=abc' })
     ).toBe('/dashboard/oidc/redirect?oidc_token=abc');
   });
 
-  it('returns the path alone when there is no query', () => {
+  it('returns the pathname alone when the location carries no query', () => {
     expect(returnPathFor({ pathname: '/projects', searchStr: '' })).toBe('/projects');
   });
 });

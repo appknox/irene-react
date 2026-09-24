@@ -25,22 +25,22 @@ const respondWith = (overrides = {}) => ({
 });
 
 describe('transformPaginatedResponse', () => {
-  it('renames the rows to something a caller would guess', () => {
+  it('renames results to items', () => {
     expect(transformPaginatedResponse(respondWith()).items).toEqual([{ id: 1 }, { id: 2 }]);
   });
 
-  it('keeps the total, which counts every row rather than this page', () => {
+  it('keeps count as the total across pages, not the rows on this one', () => {
     expect(transformPaginatedResponse(respondWith({ count: 97 })).count).toBe(97);
   });
 
-  it('says there is more either side, without a caller reading a URL', () => {
+  it('reports hasNext and hasPrevious from the next and previous URLs', () => {
     const page = transformPaginatedResponse(respondWith());
 
     expect(page.hasNext).toBe(true);
     expect(page.hasPrevious).toBe(false);
   });
 
-  it('keeps the page links, so a cursor endpoint is not locked out later', () => {
+  it('keeps the next and previous URLs', () => {
     const response = respondWith({ previous: 'https://api.example.test/prev' });
     const page = transformPaginatedResponse(response);
 
@@ -48,14 +48,14 @@ describe('transformPaginatedResponse', () => {
     expect(page.previousUrl).toBe(response.previous);
   });
 
-  it('reads a last page as having nothing after it', () => {
+  it('reports hasNext false on the last page', () => {
     const page = transformPaginatedResponse(respondWith({ next: null }));
 
     expect(page.hasNext).toBe(false);
     expect(page.nextUrl).toBeNull();
   });
 
-  it('survives a body missing the rows entirely', () => {
+  it('returns an empty items list when the body carries no results', () => {
     // The server has answered a list with no `results` key, which the types do not admit.
     const bodyWithoutRows: ApiPageEnvelope<{ id: number }> = {
       count: 0,
@@ -72,13 +72,13 @@ describe('transformPaginatedResponse', () => {
 });
 
 describe('transformUserResponse', () => {
-  it('names the kebab-case attributes the way the rest of the API names its fields', () => {
+  it('renames the kebab-case attributes to snake_case fields', () => {
     const user = buildUser({ first_name: 'Ada', last_name: 'Lovelace', lang: 'ja' });
 
     expect(transformUserResponse(buildUserResponse(user))).toEqual(user);
   });
 
-  it('reads a withheld field as nothing rather than as an empty value', () => {
+  it('reads an omitted attribute as null', () => {
     const { data } = buildUserResponse();
 
     const withheld = {
@@ -105,7 +105,7 @@ describe('transformUserResponse', () => {
 });
 
 describe('transformVulnerabilityListResponse', () => {
-  it('returns every entry with the envelope taken off', () => {
+  it('returns every entry without the envelope', () => {
     const vulnerability = buildVulnerability({ name: 'Insecure storage' });
 
     expect(
@@ -113,7 +113,7 @@ describe('transformVulnerabilityListResponse', () => {
     ).toEqual([vulnerability]);
   });
 
-  it('returns nothing for a catalogue with no entries', () => {
+  it('returns an empty list for a response with no entries', () => {
     expect(transformVulnerabilityListResponse({ data: [] })).toEqual([]);
   });
 });

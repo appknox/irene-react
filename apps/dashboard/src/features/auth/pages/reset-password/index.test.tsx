@@ -36,7 +36,7 @@ async function submitPasswords(password: string, confirmation = password) {
 }
 
 describe('ResetPasswordPage', () => {
-  it('holds the form shape while the link is being checked', async () => {
+  it('reserves the form layout while the link check is in flight', async () => {
     let release: (() => void) | undefined;
 
     server.use(
@@ -62,7 +62,7 @@ describe('ResetPasswordPage', () => {
     expect(skeleton()).not.toBeInTheDocument();
   });
 
-  it('offers the form once the link checks out', async () => {
+  it('renders the password form once the link checks out', async () => {
     linkIsLive();
     await renderAtRoute(PAGE);
 
@@ -71,7 +71,7 @@ describe('ResetPasswordPage', () => {
     expect(screen.queryByText(INVALID_LINK_MESSAGE)).not.toBeInTheDocument();
   });
 
-  it('says the link is no good rather than offering a form that cannot work', async () => {
+  it('renders the invalid-link message and no form when the link is spent or unknown', async () => {
     linkIsSpent();
     await renderAtRoute(PAGE);
 
@@ -79,7 +79,7 @@ describe('ResetPasswordPage', () => {
     expect(screen.queryByLabelText(akMT('newPassword'))).not.toBeInTheDocument();
   });
 
-  it('refuses a confirmation that does not match, without calling the API', async () => {
+  it('rejects a confirmation that differs from the password without sending a request', async () => {
     linkIsLive();
 
     let calls = 0;
@@ -99,7 +99,7 @@ describe('ResetPasswordPage', () => {
     expect(calls).toBe(0);
   });
 
-  it('sends both fields under the names the API expects', async () => {
+  it('posts password and confirm_password under the names the API expects', async () => {
     linkIsLive();
 
     let body: unknown;
@@ -120,7 +120,7 @@ describe('ResetPasswordPage', () => {
     );
   });
 
-  it('returns the user to login and says the password changed', async () => {
+  it('navigates to /login and renders the password-changed confirmation', async () => {
     linkIsLive();
     server.use(http.put(RESET_URL, () => HttpResponse.json({})));
 
@@ -132,7 +132,7 @@ describe('ResetPasswordPage', () => {
     expect(await screen.findByText(akMT('passwordIsReset'))).toBeInTheDocument();
   });
 
-  it("puts the API's complaint on the password field", async () => {
+  it("renders the API's error on the password field", async () => {
     linkIsLive();
 
     server.use(
@@ -152,7 +152,7 @@ describe('ResetPasswordPage', () => {
     expect(router.state.location.pathname).toBe(PAGE);
   });
 
-  it('toasts a failure that names no field', async () => {
+  it('renders a notification when the error names no field', async () => {
     linkIsLive();
 
     server.use(
@@ -167,7 +167,7 @@ describe('ResetPasswordPage', () => {
     expect(await screen.findByText(akMT('somethingWentWrong'))).toBeInTheDocument();
   });
 
-  it('offers the way back to login whether or not the link is good', async () => {
+  it('renders the back-to-login link for both a valid and an invalid link', async () => {
     linkIsSpent();
 
     const { router } = await renderAtRoute(PAGE);
@@ -178,7 +178,7 @@ describe('ResetPasswordPage', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
   });
 
-  it('keeps the new password out of the DOM, since it is typed in the clear otherwise', async () => {
+  it('renders the password inputs with type password', async () => {
     linkIsLive();
     await renderAtRoute(PAGE);
 
@@ -187,12 +187,12 @@ describe('ResetPasswordPage', () => {
     expect(newPassword()).toHaveAttribute('autocomplete', 'new-password');
   });
 
-  describe('an account the server has throttled', () => {
+  describe('a rate-limited account', () => {
     // The lock is app-wide and outlives a render.
     // Wrapped: ending the wait updates whatever is still mounted.
     afterEach(() => act(() => rateLimitStore.getState().clearThrottle()));
 
-    it('counts the wait down when the new password is refused', async () => {
+    it('renders the rate-limit countdown when the reset request is throttled', async () => {
       linkIsLive();
 
       server.use(
@@ -214,7 +214,7 @@ describe('ResetPasswordPage', () => {
       expect(screen.queryByText(akMT('somethingWentWrong'))).not.toBeInTheDocument();
     });
 
-    it('does not call a good link invalid when it simply could not check', async () => {
+    it('renders no invalid-link message when the check request fails', async () => {
       server.use(
         http.get(RESET_URL, () =>
           HttpResponse.json(
@@ -230,7 +230,7 @@ describe('ResetPasswordPage', () => {
       expect(screen.queryByText(INVALID_LINK_MESSAGE)).not.toBeInTheDocument();
     });
 
-    it('offers no retry while the lock is still running, since it would be refused', async () => {
+    it('disables the retry button while the rate limit is still running', async () => {
       server.use(
         http.get(RESET_URL, () =>
           HttpResponse.json(
@@ -246,7 +246,7 @@ describe('ResetPasswordPage', () => {
     });
   });
 
-  describe('a link the page could not check', () => {
+  describe('a link the check request could not verify', () => {
     it.each([HTTP_STATUS_CODES.BAD_REQUEST, HTTP_STATUS_CODES.NOT_FOUND, HTTP_STATUS_CODES.GONE])(
       'calls the link invalid when the check fails with %i',
       async (status) => {
@@ -259,7 +259,7 @@ describe('ResetPasswordPage', () => {
       }
     );
 
-    it('blames the server, not the link, when the check breaks', async () => {
+    it('renders the server-error message rather than the invalid-link message when the check answers 500', async () => {
       server.use(
         http.get(RESET_URL, () =>
           HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
@@ -272,7 +272,7 @@ describe('ResetPasswordPage', () => {
       expect(screen.queryByText(INVALID_LINK_MESSAGE)).not.toBeInTheDocument();
     });
 
-    it('offers a retry after a server error, which is not disabled by any lock', async () => {
+    it('renders an enabled retry button after a server error', async () => {
       server.use(
         http.get(RESET_URL, () =>
           HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
@@ -284,7 +284,7 @@ describe('ResetPasswordPage', () => {
       expect(await screen.findByRole('button', { name: akMT('retry') })).toBeEnabled();
     });
 
-    it('offers the form once a retry succeeds', async () => {
+    it('renders the password form once a retry succeeds', async () => {
       let attempts = 0;
 
       server.use(

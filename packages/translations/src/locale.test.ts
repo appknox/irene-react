@@ -9,7 +9,7 @@ import {
 } from '@irene/translations/locale';
 
 describe('locale', () => {
-  it('ships English and Japanese, defaulting to English', () => {
+  it('supports en and ja, defaulting to en', () => {
     expect(LOCALES).toEqual(['en', 'ja']);
     expect(DEFAULT_LOCALE).toBe('en');
   });
@@ -39,7 +39,7 @@ afterEach(() => {
 });
 
 describe('the stored locale', () => {
-  it('returns null before one is stored', () => {
+  it('returns null before a locale is stored', () => {
     expect(getStoredLocale()).toBeNull();
   });
 

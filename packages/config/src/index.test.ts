@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  buildConfigDefine,
   CONFIG_KEYS,
   getConfig,
   getConfigFlag,
@@ -40,7 +41,7 @@ describe('tier resolution', () => {
     expect(getConfig('IRENE_API_HOST')).toBe('https://injected.test');
   });
 
-  it('uses an injected value even when it is empty', () => {
+  it('uses an injected value even when it is an empty string', () => {
     atBuild({ WHITELABEL_NAME: 'Build' });
     injected({ WHITELABEL_NAME: '' });
 
@@ -69,13 +70,13 @@ describe('IRENE_API_HOST normalisation', () => {
     expect(getConfig('IRENE_API_HOST')).toBe('');
   });
 
-  it('leaves other hosts untouched', () => {
+  it('leaves any other host unchanged', () => {
     atBuild({ IRENE_API_HOST: 'https://api.appknox.com/' });
 
     expect(getConfig('IRENE_API_HOST')).toBe('https://api.appknox.com/');
   });
 
-  it('normalises only the host key', () => {
+  it('normalises IRENE_API_HOST and no other key', () => {
     atBuild({ WHITELABEL_LOGO: '/' });
 
     expect(getConfig('WHITELABEL_LOGO')).toBe('/');
@@ -97,17 +98,17 @@ describe('WHITELABEL_FAVICON has no default', () => {
 });
 
 describe('unregistered keys', () => {
-  it('throws rather than resolving', () => {
+  it('throws for a key no tier carries', () => {
     expect(() => getConfig('NOT_A_KEY' as ConfigKey)).toThrow('ENV: NOT_A_KEY not registered');
   });
 
-  it('throws even when a tier carries the key', () => {
+  it('throws for an unregistered key even when a tier carries it', () => {
     injected({ NOT_A_KEY: 'value' });
 
     expect(() => getConfig('NOT_A_KEY' as ConfigKey)).toThrow('ENV: NOT_A_KEY not registered');
   });
 
-  it('registers exactly thirteen keys', () => {
+  it('registers thirteen keys', () => {
     expect(CONFIG_KEYS).toHaveLength(13);
   });
 });
@@ -128,13 +129,13 @@ describe('boolean handling', () => {
     expect(getConfigFlag('ENTERPRISE')).toBe(expected);
   });
 
-  it('normalises a shell-style boolean', () => {
+  it("reads the string 'true' as the boolean true", () => {
     atBuild({ ENTERPRISE: 'True' });
 
     expect(getConfigFlag('ENTERPRISE')).toBe(true);
   });
 
-  it('treats an unset boolean key as its default', () => {
+  it('falls back to the default for an unset boolean key', () => {
     expect(getConfigFlag('WHITELABEL_ENABLED')).toBe(false);
   });
 });
@@ -144,19 +145,19 @@ describe('getConfigValue', () => {
     expect(getConfigValue('WHITELABEL_FAVICON')).toBe('');
   });
 
-  it('stringifies a boolean default', () => {
+  it('returns a boolean default as a string', () => {
     expect(getConfigValue('ENTERPRISE')).toBe('false');
   });
 });
 
-describe('a key counts as configured only when a tier carries it', () => {
-  it('ignores a value that comes from the default', () => {
+describe('wasSetByDeployment', () => {
+  it('is false for a value that comes from the default', () => {
     // ENTERPRISE defaults to false, but that must not drive the plugin
     // fallback — only an explicitly set ENTERPRISE does.
     expect(isPluginEnabled('IRENE_ENABLE_PENDO')).toBe(false);
   });
 
-  it('counts an injected ENTERPRISE, not only a build one', () => {
+  it('is true for an injected ENTERPRISE as well as a build one', () => {
     injected({ ENTERPRISE: 'false' });
 
     expect(isPluginEnabled('IRENE_ENABLE_PENDO')).toBe(true);
@@ -168,7 +169,7 @@ describe('isPluginEnabled', () => {
   // same inputs.
   const plugins: ConfigKey[] = ['IRENE_ENABLE_PENDO', 'IRENE_ENABLE_MARKETPLACE'];
 
-  it('falls back to its own default when nothing is set', () => {
+  it('falls back to the plugin default when neither key is set', () => {
     for (const key of plugins) {
       expect(isPluginEnabled(key)).toBe(false);
     }
@@ -182,7 +183,7 @@ describe('isPluginEnabled', () => {
     }
   });
 
-  it('is off on an enterprise deployment', () => {
+  it('is false when ENTERPRISE is set', () => {
     atBuild({ ENTERPRISE: 'true' });
 
     for (const key of plugins) {
@@ -190,52 +191,69 @@ describe('isPluginEnabled', () => {
     }
   });
 
-  it('lets an explicit plugin key beat ENTERPRISE', () => {
+  it('prefers an explicit plugin key over ENTERPRISE', () => {
     atBuild({ ENTERPRISE: 'true', IRENE_ENABLE_PENDO: 'true' });
 
     expect(isPluginEnabled('IRENE_ENABLE_PENDO')).toBe(true);
     expect(isPluginEnabled('IRENE_ENABLE_MARKETPLACE')).toBe(false);
   });
 
-  it('lets an explicit false beat a non-enterprise ENTERPRISE', () => {
+  it('prefers an explicit false over a non-enterprise ENTERPRISE', () => {
     atBuild({ ENTERPRISE: 'false', IRENE_ENABLE_PENDO: 'false' });
 
     expect(isPluginEnabled('IRENE_ENABLE_PENDO')).toBe(false);
     expect(isPluginEnabled('IRENE_ENABLE_MARKETPLACE')).toBe(true);
   });
 
-  it('reads an injected plugin key, not only a build one', () => {
+  it('reads an injected plugin key as well as a build one', () => {
     injected({ IRENE_ENABLE_PENDO: 'true' });
 
     expect(isPluginEnabled('IRENE_ENABLE_PENDO')).toBe(true);
     expect(isPluginEnabled('IRENE_ENABLE_MARKETPLACE')).toBe(false);
   });
 
-  it('rejects an unregistered key', () => {
+  it('throws for an unregistered plugin key', () => {
     expect(() => isPluginEnabled('NOPE' as ConfigKey)).toThrow('ENV: NOPE not registered');
   });
 });
 
 describe('isWhitelabelEnabled', () => {
-  it('reads as Appknox when no deployment claims otherwise', () => {
+  it('is false when no tier sets WHITELABEL_ENABLED', () => {
     expect(isWhitelabelEnabled()).toBe(false);
   });
 
-  it('reads as whitelabelled when the build sets the flag', () => {
+  it('is true when the build tier sets WHITELABEL_ENABLED', () => {
     atBuild({ WHITELABEL_ENABLED: 'true' });
 
     expect(isWhitelabelEnabled()).toBe(true);
   });
 
-  it('reads as whitelabelled when a server injects the flag at runtime', () => {
+  it('is true when the injected tier sets WHITELABEL_ENABLED', () => {
     injected({ WHITELABEL_ENABLED: 'true' });
 
     expect(isWhitelabelEnabled()).toBe(true);
   });
 
-  it('reads as Appknox when a deployment explicitly turns whitelabelling off', () => {
+  it('is false when a tier sets WHITELABEL_ENABLED to false', () => {
     atBuild({ WHITELABEL_ENABLED: 'false' });
 
     expect(isWhitelabelEnabled()).toBe(false);
+  });
+});
+
+describe('buildConfigDefine', () => {
+  it('emits only the registered keys', () => {
+    const define = buildConfigDefine({
+      IRENE_API_HOST: 'https://api.test',
+      AWS_SECRET_ACCESS_KEY: 'must-not-ship',
+    });
+
+    expect(JSON.parse(define.__BUILD_CONFIG__ ?? '{}')).toEqual({
+      IRENE_API_HOST: 'https://api.test',
+    });
+  });
+
+  it('reads process.env when given no source', () => {
+    expect(buildConfigDefine()).toHaveProperty('__BUILD_CONFIG__');
   });
 });

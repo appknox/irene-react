@@ -6,7 +6,7 @@ import xmlIcon from '@irene/ui/images/xml.svg';
 const images = import.meta.glob('./*.{png,svg}', { eager: true, query: '?url', import: 'default' });
 
 describe('images', () => {
-  it('ports every image irene uses from its public folder, minus the whitelabel defaults', () => {
+  it('bundles 23 image files', () => {
     expect(Object.keys(images)).toHaveLength(23);
   });
 
@@ -14,7 +14,7 @@ describe('images', () => {
     expect(url).toBeTypeOf('string');
   });
 
-  it('gives an image a url a component can use as a src', () => {
+  it('resolves each import to a URL carrying the file name', () => {
     expect(slackIcon).toContain('slack-icon');
     expect(xmlIcon).toContain('xml');
   });

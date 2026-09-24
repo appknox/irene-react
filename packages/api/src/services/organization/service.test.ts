@@ -19,7 +19,7 @@ const ORGANIZATION_ID = 42;
 const USER_ID = 7;
 
 describe('OrganizationService.getOrganizations', () => {
-  it('unwraps the page envelope', async () => {
+  it('returns the results as items with a count', async () => {
     const organization = buildOrganization({ name: 'Acme' });
 
     server.use(
@@ -34,7 +34,7 @@ describe('OrganizationService.getOrganizations', () => {
     });
   });
 
-  it('reads an empty account as no organizations rather than failing', async () => {
+  it('returns an empty items list when the account belongs to none', async () => {
     server.use(
       http.get(buildAPITestURL(OrganizationEndpoints.list()), () =>
         HttpResponse.json(buildDrfPage([]))
@@ -49,7 +49,7 @@ describe('OrganizationService.getOrganizations', () => {
 });
 
 describe('OrganizationService.getOrganizationMe', () => {
-  it('asks the endpoint for the organization it was given', async () => {
+  it('gets the me endpoint for the organization id it was given', async () => {
     let asked = '';
 
     server.use(
@@ -65,7 +65,7 @@ describe('OrganizationService.getOrganizationMe', () => {
     expect(asked).toContain(`/organizations/${ORGANIZATION_ID}/me`);
   });
 
-  it('returns the permissions the dashboard branches on', async () => {
+  it('returns is_admin, is_owner and has_security_permission', async () => {
     server.use(
       http.get(buildAPITestURL(OrganizationEndpoints.me(ORGANIZATION_ID)), () =>
         HttpResponse.json(buildOrganizationMe({ has_security_permission: true, is_admin: true }))
@@ -80,7 +80,7 @@ describe('OrganizationService.getOrganizationMe', () => {
 });
 
 describe('OrganizationService.getOrganizationMembership', () => {
-  it('returns how the account came to be a member', async () => {
+  it('returns the role, join date and last login', async () => {
     const membership = buildOrganizationMembership({ role_display: 'Owner' });
 
     server.use(
@@ -94,13 +94,13 @@ describe('OrganizationService.getOrganizationMembership', () => {
     ).resolves.toEqual(membership);
   });
 
-  it('asks the organization about the account it was given', () => {
+  it('gets the member endpoint for the organization and user ids it was given', () => {
     expect(OrganizationEndpoints.member(7, 42)).toBe('api/organizations/7/members/42');
   });
 });
 
 describe('OrganizationService.getStoreknoxOrganization', () => {
-  it('returns the organization on a deployment that has one', async () => {
+  it('returns the StoreKnox organization when the deployment has one', async () => {
     const storeknox = buildStoreknoxOrganization();
 
     server.use(
@@ -112,7 +112,7 @@ describe('OrganizationService.getStoreknoxOrganization', () => {
     await expect(OrganizationService.getStoreknoxOrganization()).resolves.toEqual(storeknox);
   });
 
-  it('rejects where there is none, leaving the caller to carry on without it', async () => {
+  it('rejects when the deployment has no StoreKnox organization', async () => {
     server.use(
       http.get(buildAPITestURL(OrganizationEndpoints.storeknoxOrganization()), () =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.NOT_FOUND })

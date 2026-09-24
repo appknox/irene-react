@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AkInput } from '@irene/ui/ak-input';
 
 describe('rendering', () => {
-  it('renders a text box', () => {
+  it('renders an input with the textbox role', () => {
     render(<AkInput aria-label="ApiProject name" />);
 
     expect(screen.getByRole('textbox', { name: 'ApiProject name' })).toBeInTheDocument();
@@ -17,7 +17,7 @@ describe('rendering', () => {
     expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'password');
   });
 
-  it('marks itself for styling hooks', () => {
+  it('renders a data attribute on the input', () => {
     render(<AkInput aria-label="Search" />);
 
     expect(screen.getByRole('textbox')).toHaveAttribute('data-slot', 'input');
@@ -34,7 +34,7 @@ describe('behaviour', () => {
     expect(input).toHaveValue('irene');
   });
 
-  it('does not accept input when disabled', async () => {
+  it('accepts no typed text when disabled', async () => {
     const onChange = vi.fn();
     render(<AkInput disabled onChange={onChange} aria-label="ApiProject name" />);
 
@@ -44,7 +44,7 @@ describe('behaviour', () => {
     expect(screen.getByRole('textbox')).toBeDisabled();
   });
 
-  it('reports an invalid value to assistive technology', () => {
+  it('renders aria-invalid when the value is invalid', () => {
     render(<AkInput aria-invalid aria-label="ApiProject name" />);
 
     expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'true');
@@ -63,7 +63,7 @@ describe('class handling', () => {
 });
 
 describe('errors', () => {
-  it('colours the border from hasError alone', () => {
+  it('renders the error border classes from hasError alone', () => {
     render(<AkInput hasError />);
 
     const input = screen.getByRole('textbox');
@@ -72,13 +72,13 @@ describe('errors', () => {
     expect(input).toHaveClass('aria-invalid:border-danger');
   });
 
-  it('shows no message for hasError alone', () => {
+  it('renders no message from hasError alone', () => {
     const { container } = render(<AkInput hasError />);
 
     expect(container.querySelector('[data-slot="input-error"]')).toBeNull();
   });
 
-  it('shows the message under the field, with its icon', () => {
+  it('renders the error message and icon under the field', () => {
     const { container } = render(<AkInput errorMessage="Account Locked Out" />);
 
     const message = container.querySelector('[data-slot="input-error"]');
@@ -87,20 +87,20 @@ describe('errors', () => {
     expect(message?.querySelector('svg')).toBeInTheDocument();
   });
 
-  it('marks the field invalid from the message alone', () => {
+  it('renders aria-invalid from the error message alone', () => {
     render(<AkInput errorMessage="Account Locked Out" />);
 
     expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it('stays valid with neither prop', () => {
+  it('renders no aria-invalid with neither prop set', () => {
     const { container } = render(<AkInput />);
 
     expect(screen.getByRole('textbox')).not.toHaveAttribute('aria-invalid', 'true');
     expect(container.querySelector('[data-slot="input-error"]')).toBeNull();
   });
 
-  it('takes classes for the wrapper separately from the field', () => {
+  it('applies wrapperClassName to the wrapper and className to the input', () => {
     const { container } = render(<AkInput wrapperClassName="gap-4" className="h-12" />);
 
     expect(container.firstChild).toHaveClass('gap-4');
@@ -108,22 +108,22 @@ describe('errors', () => {
   });
 });
 
-describe('the reveal control on a password field', () => {
+describe('the password reveal control', () => {
   const revealButton = () => screen.getByRole('button', { name: 'Show password' });
 
-  it('renders no control on an ordinary field', () => {
+  it('renders no control on a field of any other type', () => {
     render(<AkInput type="text" />);
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
-  it('hides what is typed until the control is pressed', () => {
+  it('renders the input with type password until the control is clicked', () => {
     render(<AkInput type="password" defaultValue="hunter2" />);
 
     expect(document.querySelector('[data-slot="input"]')).toHaveAttribute('type', 'password');
   });
 
-  it('shows what is typed once the control is pressed', async () => {
+  it('renders the input with type text once the control is clicked', async () => {
     render(<AkInput type="password" defaultValue="hunter2" />);
 
     await userEvent.click(revealButton());
@@ -131,7 +131,7 @@ describe('the reveal control on a password field', () => {
     expect(document.querySelector('[data-slot="input"]')).toHaveAttribute('type', 'text');
   });
 
-  it('hides it again on a second press', async () => {
+  it('renders the input with type password again on a second click', async () => {
     render(<AkInput type="password" defaultValue="hunter2" />);
 
     await userEvent.click(revealButton());
@@ -140,7 +140,7 @@ describe('the reveal control on a password field', () => {
     expect(document.querySelector('[data-slot="input"]')).toHaveAttribute('type', 'password');
   });
 
-  it('names its own state to assistive technology', async () => {
+  it('renders the Show password and Hide password labels for each state', async () => {
     render(<AkInput type="password" />);
 
     expect(revealButton()).toHaveAttribute('aria-pressed', 'false');
@@ -153,7 +153,7 @@ describe('the reveal control on a password field', () => {
     );
   });
 
-  it('cannot be pressed while the field is disabled', () => {
+  it('renders the control disabled while the field is disabled', () => {
     render(<AkInput type="password" disabled />);
 
     expect(revealButton()).toBeDisabled();

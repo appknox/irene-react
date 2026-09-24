@@ -23,25 +23,25 @@ function Probe({ initial = '' }: { initial?: string }) {
 const button = () => screen.getByRole('button', { name: 'Verify' });
 
 describe('useRequiredField', () => {
-  it('reads an untouched field as empty', () => {
+  it('reports an untouched field as empty', () => {
     render(<Probe />);
 
     expect(button()).toBeDisabled();
   });
 
-  it('reads a filled field as complete', () => {
+  it('reports a field with a value as filled', () => {
     render(<Probe initial="123456" />);
 
     expect(button()).toBeEnabled();
   });
 
-  it('reads whitespace as empty, so a space does not count as filled', () => {
+  it('reports a field holding only whitespace as empty', () => {
     render(<Probe initial="   " />);
 
     expect(button()).toBeDisabled();
   });
 
-  it('treats a typed zero as filled, since an input reports a string', async () => {
+  it("reports a field holding the string '0' as filled", async () => {
     render(<Probe />);
 
     await userEvent.type(screen.getByLabelText('Code'), '0');
@@ -49,7 +49,7 @@ describe('useRequiredField', () => {
     expect(button()).toBeEnabled();
   });
 
-  it('goes back to empty when the value is deleted', async () => {
+  it('reports the field as empty again once the value is deleted', async () => {
     render(<Probe initial="123456" />);
 
     await userEvent.clear(screen.getByLabelText('Code'));

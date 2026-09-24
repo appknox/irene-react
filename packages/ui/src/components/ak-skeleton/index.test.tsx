@@ -10,7 +10,7 @@ const skeleton = (container: HTMLElement) =>
   container.querySelector<HTMLSpanElement>('[data-slot="skeleton"]');
 
 describe('AkSkeleton', () => {
-  it('fills its container and one line of text by default', () => {
+  it('renders full width and one line of height by default', () => {
     const { container } = render(<AkSkeleton />);
 
     expect(skeleton(container)?.style.width).toBe('100%');
@@ -24,7 +24,7 @@ describe('AkSkeleton', () => {
     expect(skeleton(container)?.style.height).toBe('2.25rem');
   });
 
-  it('is rounded by default, as most placeholders stand in for text', () => {
+  it('renders rounded corners by default', () => {
     const { container } = render(<AkSkeleton />);
 
     expect(skeleton(container)).toHaveClass('rounded-sm');
@@ -45,13 +45,13 @@ describe('AkSkeleton', () => {
     }
   });
 
-  it('pulses, so it reads as waiting rather than broken', () => {
+  it('renders the pulse animation', () => {
     const { container } = render(<AkSkeleton />);
 
     expect(skeleton(container)).toHaveClass(styles.pulse);
   });
 
-  it('stays out of the accessibility tree, leaving the region to announce the wait', () => {
+  it('renders aria-hidden, leaving the surrounding live region to announce the wait', () => {
     const { container } = render(<AkSkeleton />);
 
     expect(skeleton(container)).toHaveAttribute('aria-hidden', 'true');
@@ -64,7 +64,7 @@ describe('AkSkeleton', () => {
     expect(skeleton(container)).not.toHaveClass('rounded-sm');
   });
 
-  it('keeps a style a caller sets alongside the size', () => {
+  it('keeps an inline style the caller sets alongside the size', () => {
     const { container } = render(<AkSkeleton width="4rem" style={{ marginTop: '8px' }} />);
 
     expect(skeleton(container)?.style.width).toBe('4rem');

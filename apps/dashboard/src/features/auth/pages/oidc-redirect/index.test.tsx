@@ -78,7 +78,7 @@ describe('OidcRedirectPage', () => {
     vi.restoreAllMocks();
   });
 
-  it('sends the token to the validate endpoint', async () => {
+  it('posts the oidc_token from the URL to the validate endpoint', async () => {
     let sent: Record<string, unknown> | undefined;
 
     server.use(
@@ -94,7 +94,7 @@ describe('OidcRedirectPage', () => {
     await waitFor(() => expect(sent).toEqual({ oidc_token: TOKEN }));
   });
 
-  it('moves on to the consent screen once the token passes', async () => {
+  it('navigates to the authorize screen once the token validates', async () => {
     server.use(
       http.post(validateUrl, () =>
         HttpResponse.json({ valid: true, redirect_url: null, error: null })
@@ -106,7 +106,7 @@ describe('OidcRedirectPage', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/dashboard/oidc/authorize'));
   });
 
-  it("follows the client's callback when the refusal carries one", async () => {
+  it("redirects to the client's callback URL when the refusal carries one", async () => {
     validationFailsWith({
       valid: false,
       redirect_url: CLIENT_CALLBACK,
@@ -118,7 +118,7 @@ describe('OidcRedirectPage', () => {
     await waitFor(() => expect(assignedHref).toBe(CLIENT_CALLBACK));
   });
 
-  it("renders the API's own wording when the refusal names no callback", async () => {
+  it("renders the API's error message when the refusal carries no callback URL", async () => {
     validationFailsWith({
       valid: false,
       redirect_url: null,
@@ -131,7 +131,7 @@ describe('OidcRedirectPage', () => {
     expect(screen.getByText(akMT('oidcModule.errorHelperTextSignedIn'))).toBeInTheDocument();
   });
 
-  it('falls back to the generic message when the refusal explains nothing', async () => {
+  it('renders the generic invalid-token message when the refusal carries no message', async () => {
     validationFailsWith({ valid: false, redirect_url: null, error: null });
 
     await openRedirect();

@@ -5,19 +5,19 @@ import * as constants from './index.ts';
 import { HTTP_STATUS_CODES } from './status-codes.ts';
 
 describe('constants', () => {
-  it('carries the hosts and addresses Appknox runs itself', () => {
+  it('carries the Appknox hosts and support addresses', () => {
     expect(DEVKNOX_HOSTNAME).toBe('secure.devknox.io');
     expect(APPKNOX_SUPPORT_EMAIL).toBe('support@appknox.com');
   });
 
-  it('re-exports every domain from the barrel, so either import path works', () => {
+  it('re-exports every domain constant from the barrel', () => {
     expect(constants.DEVKNOX_HOSTNAME).toBe(DEVKNOX_HOSTNAME);
     expect(constants.APPKNOX_SUPPORT_EMAIL).toBe(APPKNOX_SUPPORT_EMAIL);
   });
 });
 
 describe('http status codes', () => {
-  it('names the successful statuses', () => {
+  it('carries the 2xx statuses', () => {
     expect(HTTP_STATUS_CODES.OK).toBe(200);
     expect(HTTP_STATUS_CODES.CREATED).toBe(201);
     expect(HTTP_STATUS_CODES.ACCEPTED).toBe(202);
@@ -26,7 +26,7 @@ describe('http status codes', () => {
     expect(HTTP_STATUS_CODES.NOT_MODIFIED).toBe(304);
   });
 
-  it('names the statuses the app branches on', () => {
+  it('carries the error statuses the app branches on', () => {
     expect(HTTP_STATUS_CODES.BAD_REQUEST).toBe(400);
     expect(HTTP_STATUS_CODES.UNAUTHORIZED).toBe(401);
     expect(HTTP_STATUS_CODES.FORBIDDEN).toBe(403);
@@ -40,7 +40,7 @@ describe('http status codes', () => {
     expect(HTTP_STATUS_CODES.GATEWAY_TIMEOUT).toBe(504);
   });
 
-  it('re-exports from the barrel, so either import path works', () => {
+  it('re-exports the status codes from the barrel', () => {
     expect(constants.HTTP_STATUS_CODES).toBe(HTTP_STATUS_CODES);
   });
 });

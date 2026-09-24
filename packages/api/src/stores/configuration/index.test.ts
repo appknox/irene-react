@@ -12,7 +12,7 @@ const BUILD_API_HOST = 'https://api.appknox.test';
 
 const configuration = () => configurationStore.getState();
 
-describe('what this install told the app about itself', () => {
+describe('configurationStore', () => {
   beforeEach(() => {
     globalThis.__BUILD_CONFIG__ = { IRENE_API_HOST: BUILD_API_HOST };
   });
@@ -21,8 +21,8 @@ describe('what this install told the app about itself', () => {
     configurationStore.setState(configurationStore.getInitialState(), true);
   });
 
-  describe('how the deployment presents itself', () => {
-    it('takes the name, favicon and logo it named', () => {
+  describe('the frontend configuration slice', () => {
+    it('stores the name, favicon and logo from the response', () => {
       configuration().setFrontendConfiguration(
         buildFrontendConfiguration({
           name: 'Securely',
@@ -39,7 +39,7 @@ describe('what this install told the app about itself', () => {
       expect(configuration().logo()).toBe('/brand/dark.png');
     });
 
-    it('renders dark for any scheme but an explicit light one', () => {
+    it('resolves the theme to dark for any scheme but an explicit light one', () => {
       configuration().setFrontendConfiguration(
         buildFrontendConfiguration({
           theme: { ...buildFrontendConfiguration().theme, scheme: 'something-else' },
@@ -49,7 +49,18 @@ describe('what this install told the app about itself', () => {
       expect(configuration().theme()).toBe(WHITELABEL_THEMES.dark);
     });
 
-    it('takes the light logo when the deployment asks for light', () => {
+    it('falls back to the Appknox light logo when a light deployment names none', () => {
+      configuration().setFrontendConfiguration(
+        buildFrontendConfiguration({
+          images: { favicon: '', logo_on_darkbg: '', logo_on_lightbg: '' },
+          theme: { ...buildFrontendConfiguration().theme, scheme: 'light' },
+        })
+      );
+
+      expect(configuration().logo()).toBe('/images/logo.png');
+    });
+
+    it('resolves the light logo when the scheme is light', () => {
       configuration().setFrontendConfiguration(
         buildFrontendConfiguration({
           theme: { ...buildFrontendConfiguration().theme, scheme: 'light' },
@@ -61,7 +72,7 @@ describe('what this install told the app about itself', () => {
       expect(configuration().logo()).toBe('/light.png');
     });
 
-    it('falls back to the Appknox branding for anything it did not name', () => {
+    it('falls back to the Appknox branding for any image the response omits', () => {
       configuration().setFrontendConfiguration(buildFrontendConfiguration());
 
       expect(configuration().name()).toBe('Appknox');
@@ -69,7 +80,7 @@ describe('what this install told the app about itself', () => {
       expect(configuration().logo()).toBe('/images/logo-white.png');
     });
 
-    it('shows the Appknox branding when the request failed', () => {
+    it('falls back to the Appknox branding when the request fails', () => {
       configuration().setFrontendConfiguration(null);
 
       expect(configuration().name()).toBe('Appknox');
@@ -77,8 +88,8 @@ describe('what this install told the app about itself', () => {
     });
   });
 
-  describe('whether the login page offers registration', () => {
-    it('offers it on a deployment that signs people up itself', () => {
+  describe('showRegistrationLink', () => {
+    it('is true when registration_enabled is set', () => {
       configuration().setFrontendConfiguration(
         buildFrontendConfiguration({ registration_enabled: true })
       );
@@ -86,15 +97,16 @@ describe('what this install told the app about itself', () => {
       expect(configuration().showRegistrationLink()).toBe(true);
     });
 
-    it('offers it on a deployment that points somewhere else to sign up', () => {
+    it('is true when registration_link names an absolute URL', () => {
       configuration().setFrontendConfiguration(
         buildFrontendConfiguration({ registration_link: 'https://appknox.com/signup' })
       );
 
       expect(configuration().showRegistrationLink()).toBe(true);
+      expect(configuration().registrationLink()).toBe('https://appknox.com/signup');
     });
 
-    it('withholds it when a relative link is all that is set', () => {
+    it('is false when registration_link is relative', () => {
       configuration().setFrontendConfiguration(
         buildFrontendConfiguration({ registration_link: '/register' })
       );
@@ -102,29 +114,29 @@ describe('what this install told the app about itself', () => {
       expect(configuration().showRegistrationLink()).toBe(false);
     });
 
-    it('withholds it on a deployment that says nothing about registering', () => {
+    it('is false when the response sets neither field', () => {
       configuration().setFrontendConfiguration(buildFrontendConfiguration());
 
       expect(configuration().showRegistrationLink()).toBe(false);
     });
 
-    it('withholds it when the request failed', () => {
+    it('is false when the request fails', () => {
       configuration().setFrontendConfiguration(null);
 
       expect(configuration().showRegistrationLink()).toBe(false);
     });
   });
 
-  describe('whether the tab is on an Appknox host', () => {
-    it('reads the address bar, not the configuration', () => {
+  describe('isAppknoxUrl', () => {
+    it('reads window.location, not the configuration response', () => {
       window.history.replaceState({}, '', '/login');
 
       expect(configuration().isAppknoxUrl()).toBe(false);
     });
   });
 
-  describe('where the install keeps its services', () => {
-    it('takes the socket and device farm hosts it named', () => {
+  describe('the server configuration slice', () => {
+    it('stores the socket and device farm hosts from the response', () => {
       const answer = buildServerConfiguration();
 
       configuration().setServerConfiguration(answer);
@@ -133,19 +145,19 @@ describe('what this install told the app about itself', () => {
       expect(configuration().deviceFarmUrl()).toBe(answer.devicefarm_url);
     });
 
-    it('marks a self-hosted install as enterprise', () => {
+    it('reports isEnterprise for a self-hosted install', () => {
       configuration().setServerConfiguration(buildServerConfiguration({ enterprise: true }));
 
       expect(configuration().isEnterprise()).toBe(true);
     });
 
-    it('falls back to the API host when it names no socket', () => {
+    it('falls back to the API host when the response names no socket', () => {
       configuration().setServerConfiguration(buildServerConfiguration({ websocket: '' }));
 
       expect(configuration().socketHost()).toBe(BUILD_API_HOST);
     });
 
-    it('opens against the same origin when nothing names a socket at all', () => {
+    it('falls back to the same origin when nothing names a socket', () => {
       globalThis.__BUILD_CONFIG__ = { IRENE_API_HOST: '/' };
 
       configuration().setServerConfiguration(buildServerConfiguration({ websocket: '' }));
@@ -153,7 +165,7 @@ describe('what this install told the app about itself', () => {
       expect(configuration().socketHost()).toBe('/');
     });
 
-    it('keeps the install sellable when the request failed', () => {
+    it('reports isEnterprise false when the request fails', () => {
       configuration().setServerConfiguration(null);
 
       expect(configuration().isEnterprise()).toBe(false);
@@ -162,8 +174,8 @@ describe('what this install told the app about itself', () => {
     });
   });
 
-  describe('where this organization keeps its services', () => {
-    it('takes the dashboard host it named', () => {
+  describe('the dashboard configuration slice', () => {
+    it('stores the dashboard host from the response', () => {
       const answer = buildDashboardConfig();
 
       configuration().setDashboardConfiguration(answer);
@@ -172,7 +184,7 @@ describe('what this install told the app about itself', () => {
       expect(configuration().hasFetchedDashboard).toBe(true);
     });
 
-    it("prefers the organization's own device farm over the install's", () => {
+    it('resolves the device farm host from the dashboard configuration over the server one', () => {
       configuration().setServerConfiguration(
         buildServerConfiguration({ devicefarm_url: 'https://farm.install.test' })
       );
@@ -184,7 +196,7 @@ describe('what this install told the app about itself', () => {
       expect(configuration().deviceFarmUrl()).toBe('https://farm.organization.test');
     });
 
-    it("falls back to the install's device farm when the organization names none", () => {
+    it('falls back to the server configuration device farm when the dashboard one is empty', () => {
       configuration().setServerConfiguration(
         buildServerConfiguration({ devicefarm_url: 'https://farm.install.test' })
       );
@@ -194,14 +206,14 @@ describe('what this install told the app about itself', () => {
       expect(configuration().deviceFarmUrl()).toBe('https://farm.install.test');
     });
 
-    it('leaves the hosts empty when the request failed', () => {
+    it('leaves the hosts empty when the request fails', () => {
       configuration().setDashboardConfiguration(null);
 
       expect(configuration().dashboardUrl()).toBe('');
       expect(configuration().hasFetchedDashboard).toBe(true);
     });
 
-    it('resets every slice and flag on clear', () => {
+    it('resets every slice and fetched flag on clear', () => {
       configuration().setFrontendConfiguration(buildFrontendConfiguration({ name: 'Securely' }));
       configuration().setServerConfiguration(buildServerConfiguration({ enterprise: true }));
       configuration().setDashboardConfiguration(buildDashboardConfig());

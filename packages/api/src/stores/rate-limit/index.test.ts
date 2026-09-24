@@ -14,7 +14,7 @@ function recordCountdown(lockSeconds: number, runForMs: number): number[] {
   return seen;
 }
 
-describe('the lock a 429 puts on the account', () => {
+describe('rateLimitStore', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -24,14 +24,14 @@ describe('the lock a 429 puts on the account', () => {
     vi.useRealTimers();
   });
 
-  describe('reading how long the lock lasts', () => {
-    it('takes the time the server named', () => {
+  describe('reading the wait from the response', () => {
+    it('takes the seconds the body names', () => {
       rateLimitStore.getState().throttle({ detail: { lock_time: 90 } });
 
       expect(rateLimitStore.getState().secondsRemaining).toBe(90);
     });
 
-    it('rounds a fractional time up, so the wait is never understated', () => {
+    it('rounds a fractional wait up', () => {
       rateLimitStore.getState().throttle({ detail: { lock_time: 30.2 } });
 
       expect(rateLimitStore.getState().secondsRemaining).toBe(31);
@@ -47,8 +47,8 @@ describe('the lock a 429 puts on the account', () => {
     );
   });
 
-  describe('counting down', () => {
-    it('starts locked for the time the server named', () => {
+  describe('the countdown', () => {
+    it('starts with the seconds the body named', () => {
       rateLimitStore.getState().throttle({ detail: { lock_time: 30 } });
 
       expect(rateLimitStore.getState()).toMatchObject({
@@ -58,7 +58,7 @@ describe('the lock a 429 puts on the account', () => {
       });
     });
 
-    it('lifts the lock once the time runs out', () => {
+    it('unlocks once the countdown reaches zero', () => {
       rateLimitStore.getState().throttle({ detail: { lock_time: 5 } });
 
       vi.advanceTimersByTime(5000);
@@ -66,11 +66,11 @@ describe('the lock a 429 puts on the account', () => {
       expect(rateLimitStore.getState().isThrottled).toBe(false);
     });
 
-    it('counts every second, so the wait reads as a countdown', () => {
+    it('decrements the remaining seconds each second', () => {
       expect(recordCountdown(5, 5000)).toEqual([5, 4, 3, 2, 1, 0]);
     });
 
-    it('ignores a second refusal, so a burst of requests cannot restart the clock', () => {
+    it('ignores a second 429 while a countdown is running', () => {
       rateLimitStore.getState().throttle({ detail: { lock_time: 30 } });
 
       vi.advanceTimersByTime(10_000);
@@ -79,7 +79,7 @@ describe('the lock a 429 puts on the account', () => {
       expect(rateLimitStore.getState().secondsRemaining).toBeLessThan(30);
     });
 
-    it('stops ticking once cleared', () => {
+    it('stops the countdown on clear', () => {
       rateLimitStore.getState().throttle({ detail: { lock_time: 30 } });
       rateLimitStore.getState().clearThrottle();
 
@@ -91,7 +91,7 @@ describe('the lock a 429 puts on the account', () => {
       expect(rateLimitStore.getState().isThrottled).toBe(false);
     });
 
-    it('can be locked again after one lock has lifted', () => {
+    it('starts a new countdown once the previous one has ended', () => {
       rateLimitStore.getState().throttle({ detail: { lock_time: 5 } });
 
       vi.advanceTimersByTime(5000);
@@ -101,8 +101,8 @@ describe('the lock a 429 puts on the account', () => {
     });
   });
 
-  describe('the requests a lock leaves alone', () => {
-    it('exempts an upload, which is slow by nature', () => {
+  describe('the requests the rate limit exempts', () => {
+    it('exempts an upload request', () => {
       expect(isRateLimitExempt('api/upload_app')).toBe(true);
     });
 
@@ -110,12 +110,12 @@ describe('the lock a 429 puts on the account', () => {
       expect(isRateLimitExempt('api/v2/projects')).toBe(false);
     });
 
-    it('does not exempt a request with no URL to judge', () => {
+    it('does not exempt a request with no URL', () => {
       expect(isRateLimitExempt(undefined)).toBe(false);
     });
   });
 
-  describe('saying the wait out loud', () => {
+  describe('the wait message', () => {
     it.each([
       [45, '45s'],
       [60, '1m 0s'],

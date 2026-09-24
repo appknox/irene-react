@@ -127,13 +127,13 @@ describe('host resolution', () => {
     expect(fresh.defaults.baseURL).toBe('https://injected.example.com');
   });
 
-  it('falls back to the resolver default', async () => {
+  it('falls back to the default host when neither tier carries one', async () => {
     const fresh = await clientWith({});
 
     expect(fresh.defaults.baseURL).toBe('https://api.appknox.com');
   });
 
-  it('reads a host of / as same origin', async () => {
+  it('turns a host of / into an empty baseURL', async () => {
     const fresh = await clientWith({ injected: '/' });
 
     expect(fresh.defaults.baseURL).toBe('');
@@ -141,20 +141,20 @@ describe('host resolution', () => {
 });
 
 describe('product header', () => {
-  it('sends Appknox from any host but the Devknox one', async () => {
+  it('sends the Appknox product header from any host but the Devknox one', async () => {
     const fresh = await clientWith({ hostname: 'dashboard.example.test' });
 
     expect(currentProduct()).toBe(ENUMS.PRODUCT.APPKNOX);
     expect(fresh.defaults.headers['X-Product']).toBe('0');
   });
 
-  it('sends Devknox from the Devknox host', async () => {
+  it('sends the Devknox product header from the Devknox host', async () => {
     const fresh = await clientWith({ hostname: 'secure.devknox.io' });
 
     expect(fresh.defaults.headers['X-Product']).toBe('1');
   });
 
-  it('puts it on every request', async () => {
+  it('sends the product header on every request', async () => {
     Object.defineProperty(window, 'location', { value: realLocation, configurable: true });
 
     const seen = intercept('get');
@@ -166,13 +166,13 @@ describe('product header', () => {
 });
 
 describe('request', () => {
-  it('unwraps the response to its data', async () => {
+  it('resolves to the response data', async () => {
     intercept('get', 200, { id: 7 });
 
     await expect(request({ url: 'api/ping' })).resolves.toEqual({ id: 7 });
   });
 
-  it('sends the body exactly as written', async () => {
+  it('sends the request body unchanged', async () => {
     const seen = intercept('post');
 
     await request({ url: 'api/ping', method: 'POST', data: { is_active: true } });
@@ -190,7 +190,7 @@ describe('request', () => {
     expect(getApiErrorPayload(error)).toEqual({ detail: 'Forbidden' });
   });
 
-  it('rejects with an Error that isAxiosError recognises', async () => {
+  it('rejects with an error isAxiosError recognises', async () => {
     intercept('get', 500);
 
     const error = await request({ url: 'api/ping' }).catch((reason: unknown) => reason);
@@ -264,7 +264,7 @@ describe('the credential interceptor', () => {
     window.localStorage.clear();
   });
 
-  it('attaches the stored credential, so no call site has to', async () => {
+  it('sets the Authorization header from the stored session', async () => {
     const session = buildSession();
 
     storeSession(session);
@@ -276,7 +276,7 @@ describe('the credential interceptor', () => {
     expect(seen.authorization).toBe(`Basic ${session.b64token}`);
   });
 
-  it('sends none when signed out, rather than an empty credential', async () => {
+  it('sends no Authorization header when no session is stored', async () => {
     const seen = interceptPing();
 
     await request({ url: 'api/ping' });
@@ -284,7 +284,7 @@ describe('the credential interceptor', () => {
     expect(seen.authorization).toBeNull();
   });
 
-  it('leaves an explicit credential alone, for one not yet stored', async () => {
+  it('keeps an Authorization header the caller set', async () => {
     storeSession(buildSession());
 
     const seen = interceptPing();
@@ -294,7 +294,7 @@ describe('the credential interceptor', () => {
     expect(seen.authorization).toBe('Basic OTk6b3RoZXI=');
   });
 
-  it('reads storage per request, so signing in mid-session is picked up', async () => {
+  it('reads the stored session on each request, so a mid-session sign-in is picked up', async () => {
     const before = interceptPing();
 
     await request({ url: 'api/ping' });
@@ -313,7 +313,7 @@ describe('the credential interceptor', () => {
   });
 });
 
-describe('what every response passes through', () => {
+describe('the response interceptor', () => {
   beforeEach(() => {
     rateLimitStore.getState().clearThrottle();
     localStorage.clear();
@@ -324,8 +324,8 @@ describe('what every response passes through', () => {
     vi.restoreAllMocks();
   });
 
-  describe('a credential the server no longer accepts', () => {
-    it('ends the session and returns the user to login', async () => {
+  describe('a 401 response', () => {
+    it('clears the stored session and navigates to /login', async () => {
       signIn();
 
       const navigation = watchNavigation();
@@ -338,7 +338,7 @@ describe('what every response passes through', () => {
       expect(navigation).toHaveBeenCalledWith('/login?sessionExpired=true');
     });
 
-    it('says the account is inactive when that is what the server said', async () => {
+    it('navigates to /login with userInactive when the body reports an inactive account', async () => {
       signIn();
 
       const navigation = watchNavigation();
@@ -366,7 +366,7 @@ describe('what every response passes through', () => {
       }
     );
 
-    it('leaves a reset link alone, which the recover path covers by prefix', async () => {
+    it('does not navigate for a 401 on the password reset endpoints', async () => {
       signIn();
 
       const navigation = watchNavigation();
@@ -380,8 +380,8 @@ describe('what every response passes through', () => {
     });
   });
 
-  describe('an account the server has rate limited', () => {
-    it('starts the lock with the time the server named', async () => {
+  describe('a 429 response', () => {
+    it('starts the rate-limit countdown with the seconds the body names', async () => {
       refuse(PROJECTS_PATH, HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 45 } });
 
       await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow();
@@ -389,7 +389,7 @@ describe('what every response passes through', () => {
       expect(rateLimitStore.getState()).toMatchObject({ isThrottled: true, secondsRemaining: 45 });
     });
 
-    it('leaves an upload alone, since it is slow rather than abusive', async () => {
+    it('starts no countdown for a 429 on an upload request', async () => {
       refuse('api/upload_app', HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 45 } });
 
       await expect(apiRequest.post('api/upload_app', {})).rejects.toThrow();
@@ -397,14 +397,14 @@ describe('what every response passes through', () => {
       expect(rateLimitStore.getState().isThrottled).toBe(false);
     });
 
-    it('still rejects, so the caller sees what happened', async () => {
+    it('still rejects, so the caller handles the failure', async () => {
       refuse(PROJECTS_PATH, HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 45 } });
 
       await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow('429');
     });
   });
 
-  it('lets an unreachable server through untouched', async () => {
+  it('rejects a request that never reached the server without touching the session', async () => {
     const navigation = watchNavigation();
 
     server.use(http.get(buildAPITestURL(PROJECTS_PATH), () => HttpResponse.error()));

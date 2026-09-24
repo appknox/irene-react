@@ -47,8 +47,8 @@ afterEach(() => {
   queryClient.clear();
 });
 
-describe('what the signed-in pages are given', () => {
-  it('works in the first organization the account belongs to', async () => {
+describe('setupUserAndOrgContext', () => {
+  it('selects the first organization the account belongs to', async () => {
     const first = buildOrganization();
 
     organizationsAre(first, buildOrganization());
@@ -58,7 +58,7 @@ describe('what the signed-in pages are given', () => {
     expect(organizationStore.getState().selected).toEqual(first);
   });
 
-  it('records what the account may do there, which gates the dashboard', async () => {
+  it('stores the account permissions returned by the organization me endpoint', async () => {
     const me = buildOrganizationMe({ has_security_permission: true });
 
     server.use(
@@ -70,7 +70,7 @@ describe('what the signed-in pages are given', () => {
     expect(organizationStore.getState().me).toEqual(me);
   });
 
-  it('carries on when the deployment has no StoreKnox organization', async () => {
+  it('resolves when the StoreKnox organization request fails', async () => {
     server.use(
       http.get(buildAPITestURL(OrganizationEndpoints.storeknoxOrganization()), () =>
         HttpResponse.json({ detail: 'Not found.' }, { status: 404 })
@@ -82,7 +82,7 @@ describe('what the signed-in pages are given', () => {
     });
   });
 
-  it('renders the interface in the language the account reads', async () => {
+  it('sets the locale to the language the account carries', async () => {
     server.use(
       http.get(buildAPITestURL(UserEndpoints.detail(USER_ID)), () =>
         HttpResponse.json(buildUserResponse({ lang: 'ja' }))
@@ -94,7 +94,7 @@ describe('what the signed-in pages are given', () => {
     expect(getLocale()).toBe('ja');
   });
 
-  it('leaves an account with no organization unselected rather than failing', async () => {
+  it('leaves the organization unselected when the account belongs to none', async () => {
     organizationsAre();
 
     await setupUserAndOrgContext(queryClient, USER_ID);
@@ -102,7 +102,7 @@ describe('what the signed-in pages are given', () => {
     expect(organizationStore.getState().selected).toBeNull();
   });
 
-  it('asks for everything a signed-in page needs, the membership included', async () => {
+  it('requests the organizations, dashboard configuration, vulnerabilities, membership and account', async () => {
     const organization = buildOrganization();
     const asked: string[] = [];
 
@@ -129,7 +129,7 @@ describe('what the signed-in pages are given', () => {
     );
   });
 
-  it('holds the hosts this organization links out to, for the pages that open them', async () => {
+  it('stores the hosts from the dashboard configuration', async () => {
     const hosts = buildDashboardConfig();
 
     server.use(
@@ -142,7 +142,7 @@ describe('what the signed-in pages are given', () => {
     expect(configurationStore.getState().deviceFarmUrl()).toBe(hosts.devicefarm_url);
   });
 
-  it('loads the catalogue every finding is described by', async () => {
+  it('stores the vulnerability catalogue', async () => {
     const vulnerability = buildVulnerability({ name: 'Insecure storage' });
 
     server.use(
@@ -157,7 +157,7 @@ describe('what the signed-in pages are given', () => {
     expect(vulnerabilityStore.getState().find(vulnerability.id)).toEqual(vulnerability);
   });
 
-  it("stores the account's language, so the next signed-out page opens in it", async () => {
+  it("writes the account's language to localStorage", async () => {
     server.use(
       http.get(buildAPITestURL(UserEndpoints.detail(USER_ID)), () =>
         HttpResponse.json(buildUserResponse({ lang: 'ja' }))
@@ -169,7 +169,7 @@ describe('what the signed-in pages are given', () => {
     expect(getStoredLocale()).toBe('ja');
   });
 
-  it('leaves the locale alone for an account whose language is not supported', async () => {
+  it('leaves the locale unchanged when the account language is not supported', async () => {
     await setLocale('ja');
 
     server.use(

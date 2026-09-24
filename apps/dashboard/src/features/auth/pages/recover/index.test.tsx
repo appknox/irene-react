@@ -25,14 +25,14 @@ async function requestLink(username = USERNAME) {
 }
 
 describe('RecoverPage', () => {
-  it('asks which account to reset', async () => {
+  it('renders the username field', async () => {
     await renderAtRoute('/recover');
 
     expect(screen.getByRole('heading', { name: akMT('resetPasswordLabel') })).toBeInTheDocument();
     expect(usernameField()).toBeInTheDocument();
   });
 
-  it('does not call the API on an empty username', async () => {
+  it('sends no request while the username is empty', async () => {
     let calls = 0;
 
     server.use(
@@ -49,7 +49,7 @@ describe('RecoverPage', () => {
     expect(calls).toBe(0);
   });
 
-  it('sends the username and tells the user to go and read their email', async () => {
+  it('posts the username and renders the check-your-email confirmation', async () => {
     let body: unknown;
 
     server.use(
@@ -70,7 +70,7 @@ describe('RecoverPage', () => {
     expect(screen.queryByRole('button', { name: akMT('resetPassword') })).not.toBeInTheDocument();
   });
 
-  it('drops the way back once the link is sent, since the page is done', async () => {
+  it('removes the back-to-login link once the reset link is sent', async () => {
     server.use(http.post(RECOVER_API_URL, () => HttpResponse.json({})));
 
     await renderAtRoute('/recover');
@@ -83,7 +83,7 @@ describe('RecoverPage', () => {
     expect(screen.queryByRole('link', { name: akMT('login') })).not.toBeInTheDocument();
   });
 
-  it("puts the API's complaint on the field it is about", async () => {
+  it("renders the API's error on the field it names", async () => {
     server.use(
       http.post(RECOVER_API_URL, () =>
         HttpResponse.json(
@@ -100,7 +100,7 @@ describe('RecoverPage', () => {
     expect(screen.queryByText(SENT_MESSAGE)).not.toBeInTheDocument();
   });
 
-  it('toasts a failure that names no field', async () => {
+  it('renders a notification when the error names no field', async () => {
     server.use(
       http.post(RECOVER_API_URL, () =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
@@ -114,14 +114,14 @@ describe('RecoverPage', () => {
     expect(screen.queryByText(SENT_MESSAGE)).not.toBeInTheDocument();
   });
 
-  it('takes the user back to login', async () => {
+  it('navigates to /login when the user clicks the back link', async () => {
     const { router } = await renderAtRoute('/recover');
 
     await userEvent.click(screen.getByRole('link', { name: akMT('login') }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
   });
 
-  describe('an account the server has throttled', () => {
+  describe('a rate-limited account', () => {
     // The lock is app-wide and outlives a render.
     // Wrapped: ending the wait updates whatever is still mounted.
     afterEach(() => act(() => rateLimitStore.getState().clearThrottle()));
@@ -138,7 +138,7 @@ describe('RecoverPage', () => {
       );
     }
 
-    it('counts the wait down', async () => {
+    it('renders the rate-limit countdown', async () => {
       throttle();
 
       await renderAtRoute('/recover');
@@ -149,7 +149,7 @@ describe('RecoverPage', () => {
       ).toBeInTheDocument();
     });
 
-    it('does not also claim something went wrong, which says nothing useful', async () => {
+    it('renders no generic error alongside the countdown', async () => {
       throttle();
 
       await renderAtRoute('/recover');

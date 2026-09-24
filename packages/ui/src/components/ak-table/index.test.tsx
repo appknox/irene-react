@@ -27,33 +27,33 @@ const renderTable = (props: Partial<React.ComponentProps<typeof AkTable<Finding>
   render(<AkTable columns={COLUMNS} data={FINDINGS} {...props} />);
 
 describe('rendering', () => {
-  it('renders a table a screen reader can read as one', () => {
+  it('renders an element with the table role and the caption as its name', () => {
     renderTable({ caption: 'Findings' });
 
     expect(screen.getByRole('table', { name: 'Findings' })).toBeInTheDocument();
   });
 
-  it('heads each column from its definition', () => {
+  it('renders a column header per column definition', () => {
     renderTable();
 
     expect(screen.getByRole('columnheader', { name: 'Title' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Severity' })).toBeInTheDocument();
   });
 
-  it('renders one row per entry, plus the header', () => {
+  it('renders one row per data entry plus the header row', () => {
     renderTable();
 
     expect(screen.getAllByRole('row')).toHaveLength(3);
   });
 
-  it('reads each cell from the row it belongs to', () => {
+  it('renders each cell from its own row data', () => {
     renderTable();
 
     expect(screen.getByRole('cell', { name: 'Hardcoded secret' })).toBeInTheDocument();
     expect(screen.getByRole('cell', { name: 'Low' })).toBeInTheDocument();
   });
 
-  it('renders whatever a column returns, not only text', async () => {
+  it('renders the element a column cell returns, not only text', async () => {
     const withAction = column.columns([
       column.display({
         id: 'open',
@@ -69,19 +69,19 @@ describe('rendering', () => {
 });
 
 describe('empty data', () => {
-  it('shows the empty state in place of the rows', () => {
+  it('renders the empty state in place of the rows when data is empty', () => {
     renderTable({ data: [], emptyState: 'No findings' });
 
     expect(screen.getByText('No findings')).toBeInTheDocument();
   });
 
-  it('spans the empty state across every column', () => {
+  it('spans the empty state cell across every column', () => {
     renderTable({ data: [], emptyState: 'No findings' });
 
     expect(screen.getByRole('cell', { name: 'No findings' })).toHaveAttribute('colspan', '2');
   });
 
-  it('renders only the header when no empty state was given', () => {
+  it('renders only the header row when no empty state is given', () => {
     renderTable({ data: [] });
 
     expect(screen.getAllByRole('row')).toHaveLength(1);
@@ -89,19 +89,19 @@ describe('empty data', () => {
 });
 
 describe('variants', () => {
-  it('draws rules between rows by default', () => {
+  it('renders a bottom border on each row by default', () => {
     renderTable();
 
     expect(screen.getByRole('table')).toHaveAttribute('data-variant', 'semi-bordered');
   });
 
-  it('boxes every cell when asked to', () => {
+  it('renders a border on every cell with the full-bordered variant', () => {
     renderTable({ variant: 'full-bordered' });
 
     expect(screen.getByRole('table')).toHaveAttribute('data-variant', 'full-bordered');
   });
 
-  it('drops the first row top border, which the header already draws', () => {
+  it('renders no top border on the first row, which the header already draws', () => {
     renderTable({ variant: 'full-bordered' });
 
     expect(screen.getByRole('table')).toHaveClass('[&_tbody_tr:first-child_td]:border-t-0');
@@ -116,7 +116,7 @@ describe('variants', () => {
 });
 
 describe('rows', () => {
-  it('identifies a row by what the caller says identifies it', () => {
+  it('keys each row with the id getRowId returns', () => {
     const getRowId = vi.fn((finding: Finding) => finding.id);
 
     renderTable({ getRowId });
@@ -124,7 +124,7 @@ describe('rows', () => {
     expect(getRowId).toHaveBeenCalled();
   });
 
-  it('keeps a cell interactive, since a column may render a control', async () => {
+  it('leaves a control inside a cell clickable', async () => {
     const onOpen = vi.fn();
 
     const withAction = column.columns([
@@ -148,14 +148,14 @@ describe('rows', () => {
 });
 
 describe('column widths', () => {
-  it('lays out automatically when no column asks for a width', () => {
+  it('renders table-layout auto when no column sets a width', () => {
     renderTable();
 
     expect(document.querySelector('colgroup')).not.toBeInTheDocument();
     expect(screen.getByRole('table')).not.toHaveClass('table-fixed');
   });
 
-  it('declares each width on a col, which is where a table carries them', () => {
+  it('renders each column width on a col element', () => {
     const sized = column.columns([
       column.accessor('title', { header: 'Title', meta: { width: '70%' } }),
       column.accessor('severity', { header: 'Severity', meta: { width: '30%' } }),
@@ -170,7 +170,7 @@ describe('column widths', () => {
     expect(cols[1]).toHaveStyle({ width: '30%' });
   });
 
-  it('lays out fixed once any width is set, so the widths are honoured exactly', () => {
+  it('renders table-layout fixed once any column sets a width', () => {
     const sized = column.columns([
       column.accessor('title', { header: 'Title', meta: { width: '70%' } }),
       column.accessor('severity', { header: 'Severity' }),
@@ -179,5 +179,37 @@ describe('column widths', () => {
     render(<AkTable columns={sized} data={FINDINGS} />);
 
     expect(screen.getByRole('table')).toHaveClass('table-fixed');
+  });
+});
+
+describe('grouped columns', () => {
+  const GROUPED = column.columns([
+    column.group({
+      id: 'finding',
+      header: 'Finding',
+      columns: column.columns([
+        column.group({
+          id: 'what',
+          header: 'What',
+          columns: column.columns([column.accessor('title', { header: 'Title' })]),
+        }),
+      ]),
+    }),
+
+    /* One level shallower, so the row beside 'What' holds a placeholder cell. */
+    column.group({
+      id: 'severity',
+      header: 'Severity',
+      columns: column.columns([column.accessor('severity', { header: 'Rating' })]),
+    }),
+  ]);
+
+  it('renders an empty header cell above a column that belongs to no group', () => {
+    render(<AkTable columns={GROUPED} data={FINDINGS} />);
+
+    const [groupRow] = screen.getAllByRole('row');
+
+    expect(groupRow?.textContent).toBe('FindingSeverity');
+    expect(screen.getAllByRole('columnheader', { name: '' })).not.toHaveLength(0);
   });
 });

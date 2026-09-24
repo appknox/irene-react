@@ -24,7 +24,7 @@ const renderSvg = (Svg: SvgModule['default'], props: ComponentProps<'svg'> = {})
  *
  * */
 describe('svgs', () => {
-  it('ports every SVG irene uses', () => {
+  it('bundles 103 SVG files', () => {
     expect(svgs).toHaveLength(103);
   });
 
@@ -35,7 +35,7 @@ describe('svgs', () => {
     expect(svg).toHaveAttribute('viewBox');
   });
 
-  it('passes props through to the <svg>, as irene did with ...attributes', () => {
+  it('passes className, width and aria-hidden through to the <svg>', () => {
     const svg = renderSvg(NoResult, { className: 'size-10', width: 40, 'aria-hidden': true });
 
     expect(svg).toHaveClass('size-10');
@@ -43,7 +43,7 @@ describe('svgs', () => {
     expect(svg).toHaveAttribute('aria-hidden', 'true');
   });
 
-  it('gives each file its own ids, so two different SVGs on a page cannot clash', () => {
+  it('gives each file its own element ids, so two SVGs on one page cannot clash', () => {
     const owners = new Map<string, string>();
 
     for (const [file, { default: Svg }] of svgs) {

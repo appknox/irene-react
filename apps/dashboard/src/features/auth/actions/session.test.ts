@@ -30,13 +30,13 @@ const signedInContext = () => {
 };
 
 describe('startSession', () => {
-  it('stores the session, so the next visit restores it', () => {
+  it('writes the session to localStorage', () => {
     startSession(queryClient, { token: 'tok3n', user_id: 42 });
 
     expect(getStoredSession()).toEqual(buildSession({ userId: 42, token: 'tok3n' }));
   });
 
-  it('seeds the cache, so a guard does not re-check what was just granted', () => {
+  it('seeds the session query cache, so the next guard sends no api/check', () => {
     const session = startSession(queryClient, { token: 'tok3n', user_id: 42 });
 
     expect(queryClient.getQueryData(sessionCheckOptions().queryKey)).toEqual(session);
@@ -44,7 +44,7 @@ describe('startSession', () => {
 });
 
 describe('endSession', () => {
-  it('forgets the stored session', () => {
+  it('removes the session from localStorage', () => {
     startSession(queryClient, { token: 'tok3n', user_id: 42 });
 
     endSession(queryClient);
@@ -52,7 +52,7 @@ describe('endSession', () => {
     expect(getStoredSession()).toBeNull();
   });
 
-  it('empties the cache, so a guard does not read a session that is gone', () => {
+  it('clears the query cache', () => {
     startSession(queryClient, { token: 'tok3n', user_id: 42 });
 
     endSession(queryClient);
@@ -60,12 +60,12 @@ describe('endSession', () => {
     expect(queryClient.getQueryData(sessionCheckOptions().queryKey)).toBeNull();
   });
 
-  it('is safe when there was no session to begin with', () => {
+  it('throws nothing when no session is stored', () => {
     expect(() => endSession(queryClient)).not.toThrow();
     expect(getStoredSession()).toBeNull();
   });
 
-  it('clears the organization, vulnerability and dashboard state', () => {
+  it('resets the organization, vulnerability and dashboard stores', () => {
     startSession(queryClient, { token: 'tok3n', user_id: 42 });
     signedInContext();
 
@@ -78,7 +78,7 @@ describe('endSession', () => {
     expect(configurationStore.getState().hasFetchedDashboard).toBe(false);
   });
 
-  it('clears the frontend and server configuration too', () => {
+  it('resets the frontend and server configuration stores', () => {
     signedInContext();
 
     endSession(queryClient);

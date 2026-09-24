@@ -31,7 +31,7 @@ describe('conflict resolution, last one wins', () => {
     expect(cn(first, second)).toBe(second);
   });
 
-  it('leaves classes that target different properties alone', () => {
+  it('keeps classes that target different properties', () => {
     expect(cn('p-4', 'text-sm')).toBe('p-4 text-sm');
   });
 });
@@ -52,7 +52,7 @@ describe('the custom theme', () => {
     expect(cn('text-sm', 'text-primary')).toBe('text-sm text-primary');
   });
 
-  it('fails if the shadow scale drifts from the theme', () => {
+  it('covers every shadow step the theme declares', () => {
     const theme = readFileSync(join(packageRoot, 'styles/theme.css'), 'utf8');
     const declared = [...theme.matchAll(/--shadow-([\w-]+):/g)].map((m) => m[1]);
 

@@ -3,6 +3,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ReactNode } from 'react';
 
 import { ConfigurationEndpoints } from '@irene/api/services/configuration/endpoints';
 import { RegistrationEndpoints } from '@irene/api/services/registration/endpoints';
@@ -12,6 +13,20 @@ import { akMT } from '@irene/translations/intl';
 import { buildFrontendConfiguration } from '@tests/factories';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
+
+/*
+  The widget's script never loads in a test environment, so the real hook hands
+  back no `executeRecaptcha` and the page sends its disabled placeholder. Held
+  here so a test can put a score in its place.
+*/
+const recaptcha: { score?: string } = {};
+
+vi.mock('react-google-recaptcha-v3', () => ({
+  GoogleReCaptchaProvider: ({ children }: { children: ReactNode }) => children,
+  useGoogleReCaptcha: () => ({
+    executeRecaptcha: recaptcha.score ? () => Promise.resolve(recaptcha.score) : undefined,
+  }),
+}));
 
 const registrationUrl = buildAPITestURL(RegistrationEndpoints.register());
 
@@ -43,6 +58,29 @@ describe('RegisterPage', () => {
     server.use(http.post(registrationUrl, () => new HttpResponse(null, { status: 204 })));
   });
 
+  afterEach(() => {
+    delete recaptcha.score;
+  });
+
+  it('posts the token the reCAPTCHA widget issued', async () => {
+    recaptcha.score = 'recaptcha-score-token';
+
+    let sent: Record<string, string> | undefined;
+
+    server.use(
+      http.post(registrationUrl, async ({ request }) => {
+        sent = (await request.json()) as Record<string, string>;
+
+        return new HttpResponse(null, { status: 204 });
+      })
+    );
+
+    await renderAtRoute('/register');
+    await register();
+
+    await waitFor(() => expect(sent?.recaptcha).toBe('recaptcha-score-token'));
+  });
+
   it('renders the email and company fields', async () => {
     await renderAtRoute('/register');
 
@@ -53,7 +91,7 @@ describe('RegisterPage', () => {
     expect(screen.getByRole('button', { name: akMT('register') })).toBeEnabled();
   });
 
-  it('sends the address, the company and a reCAPTCHA token', async () => {
+  it('posts email, company and the reCAPTCHA token', async () => {
     let sent: Record<string, string> | undefined;
 
     server.use(
@@ -78,7 +116,7 @@ describe('RegisterPage', () => {
     });
   });
 
-  it('tells the user to read their email once the account is registered', async () => {
+  it('renders the check-your-email confirmation once registration succeeds', async () => {
     await renderAtRoute('/register');
     await register();
 
@@ -86,14 +124,14 @@ describe('RegisterPage', () => {
     expect(screen.getByText(akMT('checkEmail'))).toBeInTheDocument();
   });
 
-  it('rejects an address that is not one', async () => {
+  it('rejects a value that is not an email address', async () => {
     await renderAtRoute('/register');
     await register({ email: 'not-an-address' });
 
     expect(await screen.findByText(akMT('invalidEmailAddress'))).toBeInTheDocument();
   });
 
-  it('rejects a blank company', async () => {
+  it('rejects an empty company field', async () => {
     await renderAtRoute('/register');
 
     await userEvent.type(emailField(), EMAIL);
@@ -102,7 +140,7 @@ describe('RegisterPage', () => {
     expect(await screen.findByText(akMT('companyNameRequired'))).toBeInTheDocument();
   });
 
-  it("renders the API's own message against the field it names", async () => {
+  it("renders the API's error on the field it names", async () => {
     registrationFailsWith({ email: ['This email is already registered.'] });
 
     await renderAtRoute('/register');
@@ -111,7 +149,7 @@ describe('RegisterPage', () => {
     expect(await screen.findByText('This email is already registered.')).toBeInTheDocument();
   });
 
-  it('raises a notification when the reCAPTCHA check fails', async () => {
+  it('renders a notification when the API refuses the reCAPTCHA token', async () => {
     registrationFailsWith({ recaptcha: ['Error verifying reCAPTCHA, please try again.'] });
 
     await renderAtRoute('/register');
@@ -122,7 +160,7 @@ describe('RegisterPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('raises a notification when the deployment registers nobody', async () => {
+  it('renders a notification when the deployment has registration disabled', async () => {
     server.use(
       http.post(registrationUrl, () =>
         HttpResponse.json({ detail: 'Not found.' }, { status: HTTP_STATUS_CODES.NOT_FOUND })
@@ -135,7 +173,7 @@ describe('RegisterPage', () => {
     expect(await screen.findByText(akMT('somethingWentWrong'))).toBeInTheDocument();
   });
 
-  it('raises a notification when the request fails for no stated reason', async () => {
+  it('renders a notification when the register request fails with no field errors', async () => {
     server.use(
       http.post(registrationUrl, () =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
@@ -148,7 +186,7 @@ describe('RegisterPage', () => {
     expect(await screen.findByText(akMT('somethingWentWrong'))).toBeInTheDocument();
   });
 
-  describe('a deployment that registers people elsewhere', () => {
+  describe('a deployment with an external registration link', () => {
     let assignedHref: string | undefined;
 
     beforeEach(() => {
@@ -169,7 +207,7 @@ describe('RegisterPage', () => {
       vi.restoreAllMocks();
     });
 
-    it('sends the browser to the registration link it names', async () => {
+    it('navigates to the registration link the configuration names', async () => {
       server.use(
         http.get(buildAPITestURL(ConfigurationEndpoints.frontend()), () =>
           HttpResponse.json(

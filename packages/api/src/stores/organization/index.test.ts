@@ -10,7 +10,7 @@ describe('organizationStore', () => {
     organization().clear();
   });
 
-  it('starts with no organization and no permissions', () => {
+  it('starts with selected and me both null', () => {
     expect(organization().selected).toBeNull();
     expect(organization().me).toBeNull();
   });
@@ -25,7 +25,7 @@ describe('organizationStore', () => {
     expect(organization().me).toEqual(me);
   });
 
-  it('nulls both on clear', () => {
+  it('sets selected and me to null on clear', () => {
     organization().select(buildOrganization(), buildOrganizationMe({ is_admin: true }));
     organization().clear();
 
@@ -33,7 +33,7 @@ describe('organizationStore', () => {
     expect(organization().me).toBeNull();
   });
 
-  it('notifies subscribers on select and clear', () => {
+  it('notifies subscribers on select and on clear', () => {
     const seen: (number | null)[] = [];
     const stop = organizationStore.subscribe((state) => seen.push(state.selected?.id ?? null));
 

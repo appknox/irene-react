@@ -11,7 +11,7 @@ describe('AkCheckbox', () => {
     expect(screen.getByRole('checkbox')).toBeInTheDocument();
   });
 
-  it('reports the new state when clicked', async () => {
+  it('calls onCheckedChange with the new state when clicked', async () => {
     const onCheckedChange = vi.fn();
 
     render(<AkCheckbox onCheckedChange={onCheckedChange} />);
@@ -27,14 +27,14 @@ describe('AkCheckbox', () => {
     expect(screen.getByRole('checkbox')).toHaveAttribute('data-state', 'checked');
   });
 
-  it('renders the part-ticked mark when indeterminate', () => {
+  it('renders the indeterminate mark when checked is indeterminate', () => {
     render(<AkCheckbox checked="indeterminate" />);
 
     expect(screen.getByRole('checkbox')).toHaveAttribute('data-state', 'indeterminate');
     expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'mixed');
   });
 
-  it('ticks a part-ticked box when clicked', async () => {
+  it('moves an indeterminate box to checked when clicked', async () => {
     const onCheckedChange = vi.fn();
 
     render(<AkCheckbox checked="indeterminate" onCheckedChange={onCheckedChange} />);
@@ -44,13 +44,13 @@ describe('AkCheckbox', () => {
     expect(onCheckedChange).toHaveBeenCalledWith(true);
   });
 
-  it('takes the colour it is given once ticked', () => {
+  it('applies the color classes once checked', () => {
     render(<AkCheckbox checked color="error" />);
 
     expect(screen.getByRole('checkbox')).toHaveClass('data-[state=checked]:bg-danger');
   });
 
-  it('reports nothing when clicked while disabled', async () => {
+  it('calls no handler when clicked while disabled', async () => {
     const onCheckedChange = vi.fn();
 
     render(<AkCheckbox disabled onCheckedChange={onCheckedChange} />);

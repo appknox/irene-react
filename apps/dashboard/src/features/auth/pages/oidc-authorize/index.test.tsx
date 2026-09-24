@@ -87,7 +87,7 @@ describe('OidcAuthorizePage', () => {
     vi.restoreAllMocks();
   });
 
-  it('names the client and the scopes it is asking for', async () => {
+  it('renders the client name and the scopes it requests', async () => {
     await openAuthorize();
 
     expect(
@@ -98,7 +98,7 @@ describe('OidcAuthorizePage', () => {
     expect(screen.getByText('email scope')).toBeInTheDocument();
   });
 
-  it('sends allow true and follows the callback when the account authorizes', async () => {
+  it("posts allow true and redirects to the client's callback URL when the user authorizes", async () => {
     let sent: Record<string, unknown> | undefined;
 
     server.use(
@@ -116,7 +116,7 @@ describe('OidcAuthorizePage', () => {
     await waitFor(() => expect(assignedHref).toBe(GRANTED_CALLBACK));
   });
 
-  it("follows the client's callback when the account cancels", async () => {
+  it("posts allow false and redirects to the client's callback URL when the user cancels", async () => {
     server.use(
       http.post(authorizeUrl, () =>
         HttpResponse.json(
@@ -136,7 +136,7 @@ describe('OidcAuthorizePage', () => {
     await waitFor(() => expect(assignedHref).toBe(DENIED_CALLBACK));
   });
 
-  it('authorizes without asking when the client needs no approval', async () => {
+  it('posts allow true without rendering the consent screen when the client skips authorization', async () => {
     clientAsksFor({ authorizationNeeded: false });
 
     let sent: Record<string, unknown> | undefined;
@@ -156,7 +156,7 @@ describe('OidcAuthorizePage', () => {
     expect(screen.queryByRole('button', { name: akMT('authorize') })).not.toBeInTheDocument();
   });
 
-  it("renders the API's own wording when the request is refused", async () => {
+  it("renders the API's error message when the authorize request is refused", async () => {
     server.use(
       http.post(authorizationUrl, () =>
         HttpResponse.json(
@@ -178,7 +178,7 @@ describe('OidcAuthorizePage', () => {
     expect(await screen.findByText('Invalid Client ID Parameter')).toBeInTheDocument();
   });
 
-  it('raises a notification when a decision fails with no callback', async () => {
+  it('renders a notification when the decision request fails and carries no callback URL', async () => {
     server.use(
       http.post(authorizeUrl, () =>
         HttpResponse.json(
@@ -196,5 +196,38 @@ describe('OidcAuthorizePage', () => {
     await userEvent.click(await screen.findByRole('button', { name: akMT('authorize') }));
 
     expect(await screen.findByText('Invalid Client ID Parameter')).toBeInTheDocument();
+  });
+
+  it('does not navigate when the decision response carries no callback URL', async () => {
+    server.use(
+      http.post(authorizeUrl, () =>
+        HttpResponse.json({ valid: true, redirect_url: null, error: null })
+      )
+    );
+
+    await openAuthorize();
+    await userEvent.click(await screen.findByRole('button', { name: akMT('authorize') }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: akMT('authorize') })).toBeInTheDocument()
+    );
+
+    expect(assignedHref).toBeUndefined();
+  });
+
+  it('renders the generic error message when the refusal carries no message', async () => {
+    server.use(
+      http.post(authorizeUrl, () =>
+        HttpResponse.json(
+          { valid: false, redirect_url: null, error: null },
+          { status: HTTP_STATUS_CODES.BAD_REQUEST }
+        )
+      )
+    );
+
+    await openAuthorize();
+    await userEvent.click(await screen.findByRole('button', { name: akMT('authorize') }));
+
+    expect(await screen.findByText(akMT('somethingWentWrong'))).toBeInTheDocument();
   });
 });

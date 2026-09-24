@@ -18,7 +18,7 @@ const waitSeconds = (seconds: number) => act(() => vi.advanceTimersByTime(second
 const lastMessage = (notify: typeof akNotify.error) =>
   vi.mocked(notify).mock.calls.at(-1)?.[0] as string | undefined;
 
-describe('telling the user their account is rate limited', () => {
+describe('useRateLimitNotice', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.spyOn(akNotify, 'error').mockReturnValue('');
@@ -34,14 +34,14 @@ describe('telling the user their account is rate limited', () => {
     vi.restoreAllMocks();
   });
 
-  it('says nothing to a user who has not been locked out', () => {
+  it('renders no notification while no rate limit is running', () => {
     renderHook(() => useRateLimitNotice());
 
     expect(akNotify.error).not.toHaveBeenCalled();
     expect(akNotify.info).not.toHaveBeenCalled();
   });
 
-  it('names the wait as soon as the lock starts', () => {
+  it('renders the remaining seconds as soon as the rate limit starts', () => {
     renderHook(() => useRateLimitNotice());
 
     lockFor(90);
@@ -49,7 +49,7 @@ describe('telling the user their account is rate limited', () => {
     expect(lastMessage(akNotify.error)).toBe(`${akMT('rateLimitExceeded')} ${formatWaitTime(90)}`);
   });
 
-  it('counts the wait down as the clock runs', () => {
+  it('updates the remaining seconds each tick', () => {
     renderHook(() => useRateLimitNotice());
 
     lockFor(120);
@@ -58,7 +58,7 @@ describe('telling the user their account is rate limited', () => {
     expect(lastMessage(akNotify.error)).toBe(`${akMT('rateLimitExceeded')} ${formatWaitTime(100)}`);
   });
 
-  it('keeps one message rather than stacking a new toast per tick', () => {
+  it('updates one notification rather than adding one per tick', () => {
     renderHook(() => useRateLimitNotice());
 
     lockFor(120);
@@ -69,7 +69,7 @@ describe('telling the user their account is rate limited', () => {
     expect(new Set(ids).size).toBe(1);
   });
 
-  it('holds the message on screen rather than letting it expire mid-wait', () => {
+  it('keeps the notification on screen until the rate limit lifts', () => {
     renderHook(() => useRateLimitNotice());
 
     lockFor(90);
@@ -79,7 +79,7 @@ describe('telling the user their account is rate limited', () => {
     });
   });
 
-  it('says the lock has lifted once the wait is over', () => {
+  it('renders the rate-limit-lifted message once the wait ends', () => {
     renderHook(() => useRateLimitNotice());
 
     lockFor(5);
@@ -88,7 +88,7 @@ describe('telling the user their account is rate limited', () => {
     expect(lastMessage(akNotify.info)).toBe(akMT('rateLimitLifted'));
   });
 
-  it('announces a second lock after the first has lifted', () => {
+  it('renders a new countdown for a second rate limit', () => {
     renderHook(() => useRateLimitNotice());
 
     lockFor(5);

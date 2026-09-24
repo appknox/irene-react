@@ -32,25 +32,25 @@ describe('getStoredSession', () => {
     expect(getStoredSession()).toBeNull();
   });
 
-  it('returns what storeSession wrote', () => {
+  it('returns the session storeSession wrote', () => {
     storeSession(session);
 
     expect(getStoredSession()).toEqual(session);
   });
 
-  it('treats an unparseable entry as signed out', () => {
+  it('returns null for an entry that is not valid JSON', () => {
     window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, 'not json');
 
     expect(getStoredSession()).toBeNull();
   });
 
-  it('treats an entry of the wrong shape as signed out', () => {
+  it('returns null for an entry of the wrong shape', () => {
     window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, JSON.stringify({ token: 'tok3n' }));
 
     expect(getStoredSession()).toBeNull();
   });
 
-  it('treats blocked storage as signed out', () => {
+  it('returns null when localStorage throws', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('storage disabled');
     });
@@ -60,7 +60,7 @@ describe('getStoredSession', () => {
 });
 
 describe('storeSession', () => {
-  it('surfaces a storage failure rather than losing the session quietly', () => {
+  it('rethrows when localStorage refuses the write', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('quota exceeded');
     });
@@ -77,13 +77,13 @@ describe('clearStoredSession', () => {
     expect(getStoredSession()).toBeNull();
   });
 
-  it('does nothing when there is no session', () => {
+  it('throws nothing when no session is stored', () => {
     expect(() => clearStoredSession()).not.toThrow();
   });
 });
 
 describe('isSignedIn', () => {
-  it('is false with no session and true with one', () => {
+  it('is false with no session stored and true with one', () => {
     expect(isSignedIn()).toBe(false);
 
     storeSession(session);
@@ -99,11 +99,11 @@ describe('getSignedInUserId', () => {
     expect(getSignedInUserId()).toBe(42);
   });
 
-  it('returns undefined when signed out', () => {
+  it('returns undefined when no session is stored', () => {
     expect(getSignedInUserId()).toBeUndefined();
   });
 
-  it('returns undefined when the stored entry is corrupt', () => {
+  it('returns undefined when the stored entry is unreadable', () => {
     window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, '{"userId":"42"}');
 
     expect(getSignedInUserId()).toBeUndefined();
@@ -117,11 +117,11 @@ describe('getAuthorizationHeader', () => {
     expect(getAuthorizationHeader()).toBe(`Basic ${session.b64token}`);
   });
 
-  it('returns undefined when signed out rather than an empty Basic header', () => {
+  it('returns undefined when no session is stored', () => {
     expect(getAuthorizationHeader()).toBeUndefined();
   });
 
-  it('returns undefined when storage is blocked', () => {
+  it('returns undefined when localStorage throws', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('storage disabled');
     });
@@ -157,7 +157,7 @@ describe('buildBasicCredential', () => {
     expect(buildBasicCredential(42, 'tok3n')).toBe('NDI6dG9rM24=');
   });
 
-  it('matches a hand-built credential', () => {
+  it('matches a credential built with btoa', () => {
     expect(buildBasicCredential(1, 'abc')).toBe(encodeBase64Utf8('1:abc'));
   });
 });

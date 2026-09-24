@@ -87,7 +87,7 @@ beforeEach(() => {
 });
 
 describe('SystemStatusPage', () => {
-  it('names every system it reports on', async () => {
+  it('renders the heading and a row for storage, the device farm and the API server', async () => {
     everySystemIsUp();
 
     await openStatus();
@@ -98,7 +98,7 @@ describe('SystemStatusPage', () => {
     expect(screen.getByText(`${akMT('api')} ${akMT('server')}`)).toBeInTheDocument();
   });
 
-  it('reports a system that answered as operational', async () => {
+  it('renders Operational for a system that answered its check', async () => {
     everySystemIsUp();
 
     await openStatus();
@@ -108,7 +108,7 @@ describe('SystemStatusPage', () => {
     );
   });
 
-  it('counts a 404 from the object store as reachable, since the object never exists', async () => {
+  it('renders Operational for storage when the pre-signed URL answers 404', async () => {
     everySystemIsUp();
 
     await openStatus();
@@ -116,7 +116,7 @@ describe('SystemStatusPage', () => {
     await waitFor(() => expect(rowFor(akMT('storage'))).toHaveTextContent(akMT('operational')));
   });
 
-  it('reports a system that never answered as unreachable', async () => {
+  it('renders Unreachable for the device farm when its ping does not answer', async () => {
     everySystemIsUp();
     setDeviceFarmReach({ reachable: false });
 
@@ -125,7 +125,7 @@ describe('SystemStatusPage', () => {
     await waitFor(() => expect(rowFor(akMT('devicefarm'))).toHaveTextContent(akMT('unreachable')));
   });
 
-  it('suggests the proxy when the object store is the system that failed', async () => {
+  it('renders the proxy hint in the storage row when storage is unreachable', async () => {
     everySystemIsUp();
     setStorageReach({ reachable: false });
 
@@ -134,7 +134,7 @@ describe('SystemStatusPage', () => {
     await waitFor(() => expect(rowFor(akMT('storage'))).toHaveTextContent(akMT('proxyWarning')));
   });
 
-  it('leaves the other systems answering when one is down', async () => {
+  it('renders Unreachable for the API and Operational for storage when only the API is down', async () => {
     everySystemIsUp();
     setApiReach({ reachable: false });
 
@@ -147,7 +147,7 @@ describe('SystemStatusPage', () => {
     expect(rowFor(akMT('storage'))).toHaveTextContent(akMT('operational'));
   });
 
-  it('is reachable signed out, since signing in may be what is broken', async () => {
+  it('renders at /dashboard/status with no session stored', async () => {
     everySystemIsUp();
 
     const { router } = await openStatus();
@@ -155,7 +155,7 @@ describe('SystemStatusPage', () => {
     expect(router.state.location.pathname).toBe('/dashboard/status');
   });
 
-  it('keeps the address the page used to live at working', async () => {
+  it('redirects /status to /dashboard/status', async () => {
     everySystemIsUp();
 
     const { router } = await renderAtRoute('/status');
@@ -164,8 +164,8 @@ describe('SystemStatusPage', () => {
   });
 });
 
-describe('the table the page is built from', () => {
-  it('names itself for a screen reader, which reads a caption before the rows', async () => {
+describe('the status table markup', () => {
+  it('renders the table with an accessible name of System status', async () => {
     everySystemIsUp();
 
     await openStatus();
@@ -173,7 +173,7 @@ describe('the table the page is built from', () => {
     expect(await screen.findByRole('table', { name: akMT('systemStatus') })).toBeInTheDocument();
   });
 
-  it('heads the columns the rows are read against', async () => {
+  it('renders the System and Status column headers', async () => {
     everySystemIsUp();
 
     await openStatus();
@@ -182,7 +182,7 @@ describe('the table the page is built from', () => {
     expect(screen.getByRole('columnheader', { name: akMT('status') })).toBeInTheDocument();
   });
 
-  it('renders one row per system, plus the header', async () => {
+  it('renders three system rows plus the header row', async () => {
     everySystemIsUp();
 
     await openStatus();
@@ -191,8 +191,8 @@ describe('the table the page is built from', () => {
   });
 });
 
-describe('where the device farm is checked', () => {
-  it('reads the host from the deployment configuration when signed out', async () => {
+describe('the device farm host the check uses', () => {
+  it('pings the host from the server configuration when no session is stored', async () => {
     everySystemIsUp();
 
     await openStatus();
@@ -200,7 +200,7 @@ describe('where the device farm is checked', () => {
     await waitFor(() => expect(rowFor(akMT('devicefarm'))).toHaveTextContent(akMT('operational')));
   });
 
-  it("prefers the organization's own host when there is a session to read it with", async () => {
+  it('pings the host from the dashboard configuration when a session is stored', async () => {
     const ORGANIZATION_DEVICE_FARM = 'https://devicefarm.acme.example.test';
 
     storeSession(buildSession());
@@ -226,7 +226,7 @@ describe('where the device farm is checked', () => {
   });
 });
 
-describe('checking again when the window is focused', () => {
+describe('re-checking when the window regains focus', () => {
   /** Leaves and returns to the tab, which is what a refocus is to the query cache. */
   const refocusTheWindow = async () => {
     await act(async () => {
@@ -235,7 +235,7 @@ describe('checking again when the window is focused', () => {
     });
   };
 
-  it('asks every system again', async () => {
+  it('sends a second api/ping request after the window regains focus', async () => {
     let apiChecks = 0;
 
     everySystemIsUp();
@@ -257,7 +257,7 @@ describe('checking again when the window is focused', () => {
     await waitFor(() => expect(apiChecks).toBe(2));
   });
 
-  it('shows what is true now, not what was true when the page opened', async () => {
+  it('replaces Operational with Unreachable when the API stops answering before the refocus', async () => {
     everySystemIsUp();
 
     await openStatus();
@@ -275,8 +275,8 @@ describe('checking again when the window is focused', () => {
   });
 });
 
-describe('a deployment that names no device farm', () => {
-  it('falls back to the API host, which is where it runs when none is named', async () => {
+describe('a deployment whose configuration names no device farm', () => {
+  it('pings the API host instead', async () => {
     everySystemIsUp();
     deploymentDeviceFarmIs('');
 
@@ -292,8 +292,8 @@ describe('a deployment that names no device farm', () => {
   });
 });
 
-describe('what counts as the API answering', () => {
-  it('takes any answer, since the endpoint being reachable is the question', async () => {
+describe('what the API check accepts as an answer', () => {
+  it('renders Operational when api/ping answers a body other than pong', async () => {
     everySystemIsUp();
     server.use(http.get(pingUrl, () => HttpResponse.json({ status: 'ok' })));
 

@@ -83,7 +83,7 @@ describe('RegisterViaInvitePage', () => {
     );
   });
 
-  it('renders the invited address, which cannot be changed', async () => {
+  it('renders the invited email as a read-only field', async () => {
     await openInvitation();
 
     const email = await screen.findByLabelText(akMT('emailId'));
@@ -92,14 +92,14 @@ describe('RegisterViaInvitePage', () => {
     expect(email).toBeDisabled();
   });
 
-  it('fills the name the invitation already knows', async () => {
+  it('prefills the first and last name from the invitation', async () => {
     await openInvitation();
 
     expect(await screen.findByLabelText(akMT('firstName'))).toHaveValue(INVITED.first_name);
     expect(screen.getByLabelText(akMT('lastName'))).toHaveValue(INVITED.last_name);
   });
 
-  it('renders the invited company, which cannot be changed', async () => {
+  it('renders the invited company as a read-only field', async () => {
     await openInvitation();
 
     const company = await screen.findByLabelText(akMT('companyName'));
@@ -108,7 +108,7 @@ describe('RegisterViaInvitePage', () => {
     expect(company).toBeDisabled();
   });
 
-  it('asks for a company when the invitation names none', async () => {
+  it('renders an editable company field when the invitation names no company', async () => {
     invitationIs({ ...INVITED, company: '' });
 
     await openInvitation();
@@ -119,7 +119,7 @@ describe('RegisterViaInvitePage', () => {
     expect(company).toHaveValue('');
   });
 
-  it('renders no way back to the login page', async () => {
+  it('renders no back-to-login link', async () => {
     await openInvitation();
 
     await screen.findByLabelText(akMT('username'));
@@ -127,7 +127,7 @@ describe('RegisterViaInvitePage', () => {
     expect(screen.queryByRole('link', { name: akMT('login') })).not.toBeInTheDocument();
   });
 
-  it('sends the token, the account and the accepted terms', async () => {
+  it('posts the token, the account fields and the accepted terms', async () => {
     let sent: Record<string, unknown> | undefined;
 
     server.use(
@@ -156,7 +156,7 @@ describe('RegisterViaInvitePage', () => {
     });
   });
 
-  it('stores the session the API answers with', async () => {
+  it('stores the session the API returns', async () => {
     await openInvitation();
     await screen.findByLabelText(akMT('username'));
     await redeemInvitation();
@@ -170,7 +170,7 @@ describe('RegisterViaInvitePage', () => {
     );
   });
 
-  it('says so when the invitation is spent or unknown', async () => {
+  it('renders the invalid-invitation state when the token is spent or unknown', async () => {
     invitationIsInvalid();
 
     await openInvitation();
@@ -180,7 +180,7 @@ describe('RegisterViaInvitePage', () => {
     expect(screen.queryByLabelText(akMT('username'))).not.toBeInTheDocument();
   });
 
-  it('rejects a username shorter than three characters', async () => {
+  it('rejects a username under three characters', async () => {
     await openInvitation();
     await screen.findByLabelText(akMT('username'));
     await redeemInvitation({ username: 'ab' });
@@ -188,7 +188,7 @@ describe('RegisterViaInvitePage', () => {
     expect(await screen.findByText(akMT('usernameMinLengthError'))).toBeInTheDocument();
   });
 
-  it('rejects a password shorter than ten characters', async () => {
+  it('rejects a password under ten characters', async () => {
     await openInvitation();
     await screen.findByLabelText(akMT('username'));
     await redeemInvitation({ password: 'short', confirm_password: 'short' });
@@ -196,7 +196,7 @@ describe('RegisterViaInvitePage', () => {
     expect(await screen.findByText(akMT('passwordMinLengthError'))).toBeInTheDocument();
   });
 
-  it('rejects a confirmation that does not match', async () => {
+  it('rejects a confirmation that differs from the password', async () => {
     await openInvitation();
     await screen.findByLabelText(akMT('username'));
     await redeemInvitation({ confirm_password: 'something else entirely' });
@@ -204,7 +204,7 @@ describe('RegisterViaInvitePage', () => {
     expect(await screen.findByText(akMT('passwordMatchError'))).toBeInTheDocument();
   });
 
-  it('rejects the form until the terms are accepted', async () => {
+  it('rejects the form while the terms box is unticked', async () => {
     await openInvitation();
     await screen.findByLabelText(akMT('username'));
     await redeemInvitation({ acceptTerms: false });
@@ -212,7 +212,7 @@ describe('RegisterViaInvitePage', () => {
     expect(await screen.findByText(akMT('acceptTermsError'))).toBeInTheDocument();
   });
 
-  it('clears a complaint as the field is corrected', async () => {
+  it('clears a field error once the user corrects the field', async () => {
     await openInvitation();
     await screen.findByLabelText(akMT('username'));
     await redeemInvitation({ username: 'ab' });
@@ -226,7 +226,7 @@ describe('RegisterViaInvitePage', () => {
     );
   });
 
-  it("renders the API's own message against the field it names", async () => {
+  it("renders the API's error on the field it names", async () => {
     registrationFailsWith({ username: ['Username already exists'] });
 
     await openInvitation();
@@ -236,7 +236,7 @@ describe('RegisterViaInvitePage', () => {
     expect(await screen.findByText('Username already exists')).toBeInTheDocument();
   });
 
-  it('raises a notification when the request fails for no stated reason', async () => {
+  it('renders a notification when the request fails with no field errors', async () => {
     server.use(
       http.post(inviteUrl, () =>
         HttpResponse.json(

@@ -10,6 +10,9 @@ import { buildSession } from '@tests/factories';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
+/** Where a signed-in account lands, after the home page hands it its one product. */
+const SIGNED_IN_LANDING = '/dashboard/projects';
+
 const session = buildSession();
 
 /** Let the session check pass, so the app reads as signed in. */
@@ -23,15 +26,15 @@ afterEach(() => {
 });
 
 describe('the login guard', () => {
-  it('turns a signed-in user away from the login page', async () => {
+  it('redirects a signed-in user away from /login', async () => {
     signedIn();
 
     const { router } = await renderAtRoute('/login');
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/'));
+    await waitFor(() => expect(router.state.location.pathname).toBe(SIGNED_IN_LANDING));
   });
 
-  it('lets a signed-out user in, without calling the API', async () => {
+  it('renders /login for a signed-out user without sending api/check', async () => {
     // No handler registered: any request would fail the run.
     const { router } = await renderAtRoute('/login');
 
@@ -40,8 +43,8 @@ describe('the login guard', () => {
   });
 });
 
-describe('the other signed-out pages', () => {
-  it('lets a signed-in user reset a password from an emailed link', async () => {
+describe('the other unauthenticated routes', () => {
+  it('renders /reset/:token for a signed-in user', async () => {
     signedIn();
 
     server.use(
@@ -54,7 +57,7 @@ describe('the other signed-out pages', () => {
     expect(router.state.location.pathname).toBe('/reset/tok');
   });
 
-  it('lets a signed-in user ask for a reset link', async () => {
+  it('renders /recover for a signed-in user', async () => {
     signedIn();
 
     const { router } = await renderAtRoute('/recover');
@@ -63,7 +66,7 @@ describe('the other signed-out pages', () => {
     expect(router.state.location.pathname).toBe('/recover');
   });
 
-  it('does not interfere with an identity provider sending a user back', async () => {
+  it('renders the SSO redirect route for a signed-in user', async () => {
     signedIn();
 
     server.use(
@@ -74,6 +77,6 @@ describe('the other signed-out pages', () => {
 
     const { router } = await renderAtRoute('/saml2/redirect?sso_token=from-idp');
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/'));
+    await waitFor(() => expect(router.state.location.pathname).toBe(SIGNED_IN_LANDING));
   });
 });

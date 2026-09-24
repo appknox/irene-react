@@ -38,7 +38,7 @@ describe('akNotify', () => {
     expect(alert).toHaveTextContent('Invalid username or password.');
   });
 
-  it('renders a translated node, not just a string', async () => {
+  it('renders a React node as the message', async () => {
     akNotify.info(<span data-testid="translated">ログイン</span>);
 
     expect(await screen.findByTestId('translated')).toBeInTheDocument();
@@ -63,7 +63,7 @@ describe('akNotify', () => {
     await waitFor(() => expect(screen.queryByText('Second')).not.toBeInTheDocument());
   });
 
-  it('closes a message from its close button', async () => {
+  it('closes a message when the user clicks its close button', async () => {
     akNotify.warning('Trial ends in 3 days');
 
     await screen.findByText('Trial ends in 3 days');
@@ -72,7 +72,7 @@ describe('akNotify', () => {
     await waitFor(() => expect(screen.queryByText('Trial ends in 3 days')).not.toBeInTheDocument());
   });
 
-  it('keeps a message until dismissed when asked', async () => {
+  it('keeps a message on screen until dismissed when duration is Infinity', async () => {
     akNotify.error('Rate limit reached', { duration: Infinity });
 
     await screen.findByText('Rate limit reached');
@@ -83,7 +83,7 @@ describe('akNotify', () => {
     expect(screen.getByText('Rate limit reached')).toBeInTheDocument();
   });
 
-  it('lets a caller override how long a message stays', async () => {
+  it('applies the duration the caller sets', async () => {
     akNotify.info('Brief', { duration: 50 });
 
     await screen.findByText('Brief');

@@ -28,13 +28,13 @@ const formFor = () => {
 };
 
 describe('toFormFieldErrors', () => {
-  it('picks the message for a field the schema holds', () => {
+  it('returns the message for a field the schema declares', () => {
     expect(toFormFieldErrors<Schema>(schema, refusalWith({ username: ['Already taken'] }))).toEqual(
       [{ field: 'username', message: 'Already taken' }]
     );
   });
 
-  it('picks every named field, in the order the schema declares them', () => {
+  it('returns every named field in the order the schema declares them', () => {
     const fieldErrors = toFormFieldErrors<Schema>(
       schema,
       refusalWith({ confirm_password: ["Doesn't match"], username: ['Already taken'] })
@@ -43,25 +43,25 @@ describe('toFormFieldErrors', () => {
     expect(fieldErrors.map(({ field }) => field)).toEqual(['username', 'confirm_password']);
   });
 
-  it('keeps only the first message, since a field shows one at a time', () => {
+  it('returns the first message when a field carries several', () => {
     expect(
       toFormFieldErrors<Schema>(schema, refusalWith({ username: ['Too short', 'Already taken'] }))
     ).toEqual([{ field: 'username', message: 'Too short' }]);
   });
 
-  it('leaves out a complaint about no field the schema holds', () => {
+  it('returns nothing for a field the schema does not declare', () => {
     expect(
       toFormFieldErrors<Schema>(schema, refusalWith({ non_field_errors: ['Try later'] }))
     ).toEqual([]);
   });
 
-  it('answers empty when the refusal explains nothing at all', () => {
+  it('returns an empty list when the error carries no field messages', () => {
     expect(toFormFieldErrors<Schema>(schema, refusalWith(undefined))).toEqual([]);
   });
 });
 
 describe('setFormFieldErrors', () => {
-  it('reports each message on the field it belongs to', () => {
+  it('sets each message on its own form field', () => {
     const form = formFor();
 
     act(() => {
@@ -75,7 +75,7 @@ describe('setFormFieldErrors', () => {
     expect(form.current.errors.confirm_password?.message).toBe("Doesn't match");
   });
 
-  it('leaves the form untouched when there is nothing to report', () => {
+  it('sets no errors when the list is empty', () => {
     const form = formFor();
 
     act(() => {
