@@ -38,12 +38,15 @@ export function useIsAppBusy() {
     const settle = setTimeout(
       () =>
         setReported((previous) => {
-          if (!isBusy) {
-            return previous.isBusy ? { ...previous, isBusy: false } : previous;
+          // The timer outlived the change it was set for, so there is nothing to report.
+          if (previous.isBusy === isBusy) {
+            return previous;
           }
 
-          // Work already being reported keeps its id; a new stretch takes the next.
-          return previous.isBusy ? previous : { isBusy: true, busyId: previous.busyId + 1 };
+          // Each stretch of work takes an id of its own; the end of one keeps it.
+          return isBusy
+            ? { isBusy: true, busyId: previous.busyId + 1 }
+            : { ...previous, isBusy: false };
         }),
       isBusy ? SHOW_AFTER_MS : HIDE_AFTER_MS
     );
