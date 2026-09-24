@@ -5,15 +5,16 @@ import { cva } from 'class-variance-authority';
   outlined for the secondary one, text for links.
 */
 export const akButtonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         // A loading button keeps its colour: it is busy, not unavailable.
         filled:
           'text-white disabled:not-data-loading:bg-disabled-button disabled:not-data-loading:text-white',
+        /* Carries the page's own background, so it reads as a control on a tinted section. */
         outlined:
-          'border bg-transparent disabled:not-data-loading:border-border-strong disabled:not-data-loading:text-foreground-disabled',
+          'border bg-background disabled:not-data-loading:border-border-strong disabled:not-data-loading:text-foreground-disabled',
         text: 'min-w-0 bg-transparent p-0 hover:underline focus-visible:underline disabled:no-underline disabled:not-data-loading:text-foreground-disabled',
       },
       color: {
