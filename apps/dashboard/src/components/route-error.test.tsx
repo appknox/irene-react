@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthEndpoints } from '@irene/api/services/auth/endpoints';
 import { OrganizationEndpoints } from '@irene/api/services/organization/endpoints';
@@ -39,8 +39,21 @@ const failOrganizationsUntilFixed = () => {
   return state;
 };
 
+/** Puts the tab on an Appknox host, which is what decides whether support is ours to offer. */
+const onAppknoxHost = () => {
+  vi.spyOn(window, 'location', 'get').mockReturnValue({
+    ...window.location,
+    href: 'https://secure.appknox.com/dashboard/projects',
+  } as Location);
+};
+
 describe('RouteError', () => {
-  it('renders the failure message instead of the loading screen', async () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  it('renders the failure message in place of the loading screen', async () => {
     storeSession(buildSession());
     failOrganizationsUntilFixed();
 
@@ -51,7 +64,8 @@ describe('RouteError', () => {
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
-  it('renders a support mailto link', async () => {
+  it('renders a support mailto link carrying the HTTP status', async () => {
+    onAppknoxHost();
     storeSession(buildSession());
     failOrganizationsUntilFixed();
 
@@ -59,10 +73,47 @@ describe('RouteError', () => {
 
     const support = await screen.findByRole('link', { name: akMT('emailSupport') });
 
-    expect(support).toHaveAttribute('href', 'mailto:support@appknox.com');
+    expect(support).toHaveAttribute(
+      'href',
+      `mailto:support@appknox.com?subject=${encodeURIComponent(akMT('couldNotLoadPageStatus', { status: 500 }))}`
+    );
   });
 
-  it('renders the page when a retry succeeds', async () => {
+  it('renders the HTTP status of the failed request', async () => {
+    storeSession(buildSession());
+    failOrganizationsUntilFixed();
+
+    await renderAtRoute('/');
+
+    expect(
+      await screen.findByText(akMT('couldNotLoadPageStatus', { status: 500 }))
+    ).toBeInTheDocument();
+  });
+
+  it('renders no HTTP status when the request never reached the server', async () => {
+    storeSession(buildSession());
+
+    server.use(http.get(organizationsUrl, () => HttpResponse.error()));
+
+    await renderAtRoute('/');
+
+    await screen.findByText(akMT('couldNotLoadPage'));
+
+    expect(document.querySelector('[data-test-route-error-status]')).not.toBeInTheDocument();
+  });
+
+  it('renders no support address on a whitelabel host', async () => {
+    storeSession(buildSession());
+    failOrganizationsUntilFixed();
+
+    await renderAtRoute('/');
+
+    await screen.findByText(akMT('couldNotLoadPage'));
+
+    expect(screen.queryByRole('link', { name: akMT('emailSupport') })).not.toBeInTheDocument();
+  });
+
+  it('renders the page when the user clicks Retry and the request succeeds', async () => {
     const user = userEvent.setup();
 
     storeSession(buildSession());
@@ -82,7 +133,7 @@ describe('RouteError', () => {
     });
   });
 
-  it('keeps the failure message when a retry fails again', async () => {
+  it('keeps the failure message when the retried request fails again', async () => {
     const user = userEvent.setup();
 
     storeSession(buildSession());
@@ -95,7 +146,7 @@ describe('RouteError', () => {
     expect(await screen.findByText(akMT('couldNotLoadPage'))).toBeInTheDocument();
   });
 
-  it('renders the login page rather than the failure screen for /login', async () => {
+  it('renders /login rather than the failure screen when the failure happens there', async () => {
     server.use(
       http.get(organizationsUrl, () =>
         HttpResponse.json({ detail: 'Server error' }, { status: 500 })
@@ -117,7 +168,7 @@ describe('RouteError', () => {
     expect(await screen.findByRole('button', { name: akMT('logout') })).toBeInTheDocument();
   });
 
-  it('clears the stored session when logout is clicked', async () => {
+  it('clears the stored session when the user clicks Logout', async () => {
     const user = userEvent.setup();
 
     storeSession(buildSession());
@@ -135,5 +186,31 @@ describe('RouteError', () => {
     await user.click(await screen.findByRole('button', { name: akMT('logout') }));
 
     await waitFor(() => expect(getStoredSession()).toBeNull());
+  });
+
+  it('renders the underlying error message in a development build', async () => {
+    vi.stubEnv('DEV', true);
+
+    storeSession(buildSession());
+    failOrganizationsUntilFixed();
+
+    await renderAtRoute('/');
+
+    await screen.findByText(akMT('couldNotLoadPage'));
+
+    expect(document.querySelector('pre')).toBeInTheDocument();
+  });
+
+  it('renders no underlying error message in a production build', async () => {
+    vi.stubEnv('DEV', false);
+
+    storeSession(buildSession());
+    failOrganizationsUntilFixed();
+
+    await renderAtRoute('/');
+
+    await screen.findByText(akMT('couldNotLoadPage'));
+
+    expect(document.querySelector('pre')).not.toBeInTheDocument();
   });
 });

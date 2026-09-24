@@ -301,6 +301,7 @@
   "copy": "コピー",
   "couldNotLoadPage": "We could not load the requested page",
   "couldNotLoadPageHint": "The server did not answer as expected. Try again, and contact support if it keeps happening.",
+  "couldNotLoadPageStatus": "Error {status}",
   "country": "Country",
   "createAccount": "Create Account",
   "createTeam": "チームの作成",
