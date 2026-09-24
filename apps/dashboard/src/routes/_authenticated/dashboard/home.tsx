@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router';
 import { organizationStore } from '@irene/api/stores/organization';
 import { akMT } from '@irene/translations/intl';
 import { setupUserAndOrgContext } from '@/actions/setup-user-context';
-import { HomePage } from '@/features/home/pages/home';
+import { HomePage } from '@/features/dashboard/pages/home';
 
 export const Route = createFileRoute('/_authenticated/dashboard/home')({
   staticData: { pageTitle: () => akMT('home') },

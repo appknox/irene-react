@@ -5,7 +5,7 @@ import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { AkIcon } from '@irene/ui/ak-icon';
 import { AkTypography } from '@irene/ui/ak-typography';
 
-import type { ProductFeatureDestination } from '@/features/home/pages/home/product-features';
+import type { ProductFeatureDestination } from '@/features/dashboard/pages/home/product-features';
 
 /** The artwork a card carries: a banner behind its head, and the product's mark. */
 type ProductCardArtwork = ComponentType<SVGProps<SVGSVGElement>>;

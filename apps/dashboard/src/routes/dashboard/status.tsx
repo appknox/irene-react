@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { akMT } from '@irene/translations/intl';
 import { loadConfiguration, loadDashboardConfiguration } from '@/actions/load-configuration';
-import { SystemStatusPage } from '@/features/status/pages/system-status';
+import { SystemStatusPage } from '@/features/dashboard/pages/system-status';
 
 /*
   Outside both guards: the page reports whether the systems are reachable, which

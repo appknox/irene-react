@@ -8,8 +8,8 @@ import { AkTypography } from '@irene/ui/ak-typography';
 
 import { AppLogo } from '@/components/app-logo';
 import { useLogout } from '@/features/auth/hooks/use-logout';
-import { ProductFeatureCard } from '@/features/home/pages/home/components/product-feature-card';
-import { buildProductFeatures } from '@/features/home/pages/home/product-features';
+import { ProductFeatureCard } from '@/features/dashboard/pages/home/components/product-feature-card';
+import { buildProductFeatures } from '@/features/dashboard/pages/home/product-features';
 import { useOrganization } from '@/hooks/use-organization';
 import { useServerConfiguration } from '@/hooks/use-server-configuration';
 import { useWhitelabel } from '@/hooks/use-whitelabel';
