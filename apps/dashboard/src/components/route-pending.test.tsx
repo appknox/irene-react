@@ -55,6 +55,43 @@ describe('RoutePending', () => {
     expect(progressValue()).toBeLessThan(100);
   });
 
+  it('says nothing about the wait in its first ten seconds', () => {
+    renderPending();
+
+    act(() => vi.advanceTimersByTime(9_000));
+
+    expect(
+      screen.queryByText(akMT('bootLoadingScreenMsg.stillGettingThingsReady'))
+    ).not.toBeInTheDocument();
+
+    expect(screen.queryByText(akMT('bootLoadingScreenMsg.almostThere'))).not.toBeInTheDocument();
+    expect(screen.queryByText(akMT('bootLoadingScreenMsg.thanksForYourPatience'))).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [10_000, akMT('bootLoadingScreenMsg.stillGettingThingsReady')],
+    [25_000, akMT('bootLoadingScreenMsg.almostThere')],
+    [40_000, akMT('bootLoadingScreenMsg.thanksForYourPatience')],
+  ])('says more about the wait once %i ms have passed', (waited, message) => {
+    renderPending();
+
+    act(() => vi.advanceTimersByTime(waited));
+
+    expect(screen.getByText(message)).toBeInTheDocument();
+  });
+
+  it('replaces each message with the next rather than stacking them', () => {
+    renderPending();
+
+    act(() => vi.advanceTimersByTime(25_000));
+
+    expect(
+      screen.queryByText(akMT('bootLoadingScreenMsg.stillGettingThingsReady'))
+    ).not.toBeInTheDocument();
+
+    expect(screen.getByText(akMT('bootLoadingScreenMsg.almostThere'))).toBeInTheDocument();
+  });
+
   it('swaps the illustration every second and clears its timers on unmount', () => {
     const { container, unmount } = renderPending();
 
