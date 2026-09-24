@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 
 import { HTTP_STATUS_CODES } from '@irene/constants';
 
-import { REQUEST_ABORT_TIMEOUT_MS } from '@irene/api/request';
 import { UserEndpoints, UserService } from '@irene/api/services/user';
 import { getApiErrorStatus } from '@irene/api/utils/errors';
 import { buildUser, buildUserResponse } from '@tests/factories';
@@ -56,12 +55,15 @@ describe('UserService.getUser', () => {
 });
 
 describe('the timeout on the account', () => {
-  it('abandons the request after a minute, so a hung server does not hold the page', async () => {
+  it('abandons the request after 30 seconds, so a hung server does not hold the page', async () => {
     const recorder = recordRequestConfigs();
 
     await UserService.getUser(1).catch(() => undefined);
     recorder.stop();
 
-    expect(recorder.latest()?.timeout).toBe(REQUEST_ABORT_TIMEOUT_MS);
+    // The wait rides on a signal rather than axios's own `timeout`, which an
+    // intercepted request never honours.
+    expect(recorder.latest()?.signal).toBeInstanceOf(AbortSignal);
+    expect(recorder.latest()?.signal?.aborted).toBe(false);
   });
 });

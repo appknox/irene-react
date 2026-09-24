@@ -10,7 +10,6 @@ import {
   buildStoreknoxOrganization,
 } from '@tests/factories';
 
-import { REQUEST_ABORT_TIMEOUT_MS } from '@irene/api/request';
 import { OrganizationEndpoints, OrganizationService } from '@irene/api/services/organization';
 import { getApiErrorStatus } from '@irene/api/utils/errors';
 import { buildAPITestURL, server } from '@tests/server';
@@ -129,12 +128,15 @@ describe('OrganizationService.getStoreknoxOrganization', () => {
 });
 
 describe('the timeout on the organization setup', () => {
-  it('abandons the request after a minute, so a hung server does not hold the page', async () => {
+  it('abandons the request after 30 seconds, so a hung server does not hold the page', async () => {
     const recorder = recordRequestConfigs();
 
     await OrganizationService.getOrganizations().catch(() => undefined);
     recorder.stop();
 
-    expect(recorder.latest()?.timeout).toBe(REQUEST_ABORT_TIMEOUT_MS);
+    // The wait rides on a signal rather than axios's own `timeout`, which an
+    // intercepted request never honours.
+    expect(recorder.latest()?.signal).toBeInstanceOf(AbortSignal);
+    expect(recorder.latest()?.signal?.aborted).toBe(false);
   });
 });

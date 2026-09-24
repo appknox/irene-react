@@ -7,6 +7,7 @@ import {
   getApiErrorPayload,
   getApiErrorStatus,
   getApiFieldErrors,
+  isAbortedRequest,
   isNetworkError,
   isRateLimited,
   unlessRateLimited,
@@ -207,6 +208,28 @@ describe('isRateLimited', () => {
 
   it('is false for a value that is not an API error', () => {
     expect(isRateLimited(new Error('nope'))).toBe(false);
+  });
+});
+
+describe('isAbortedRequest', () => {
+  it('is true for a request that timed out', () => {
+    expect(isAbortedRequest(new AxiosError('timeout', AxiosError.ECONNABORTED))).toBe(true);
+  });
+
+  it('is true for a request an abort signal cancelled', () => {
+    expect(isAbortedRequest(new AxiosError('cancelled', AxiosError.ERR_CANCELED))).toBe(true);
+  });
+
+  it('is false for a request that never reached the server', () => {
+    expect(isAbortedRequest(unreachable())).toBe(false);
+  });
+
+  it('is false for a request the server refused', () => {
+    expect(isAbortedRequest(refusal(500, {}))).toBe(false);
+  });
+
+  it('is false for a value that is not an axios error', () => {
+    expect(isAbortedRequest(new Error('boom'))).toBe(false);
   });
 });
 

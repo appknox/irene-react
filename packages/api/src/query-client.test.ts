@@ -42,4 +42,11 @@ describe('retry policy', () => {
   it('stops retrying after two attempts', () => {
     expect(retry()(2, failedWith(500))).toBe(false);
   });
+
+  it.each([
+    ['a request that timed out', AxiosError.ECONNABORTED],
+    ['a request that was aborted', AxiosError.ERR_CANCELED],
+  ])('does not retry %s', (_case, code) => {
+    expect(retry()(0, new AxiosError('given up on', code))).toBe(false);
+  });
 });

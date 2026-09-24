@@ -1,4 +1,4 @@
-import { isAxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 
 /** Per-field messages from a DRF error body, keyed by field name. */
@@ -6,6 +6,12 @@ export type ApiFieldErrors<TFields extends string = string> = Partial<Record<TFi
 
 /** DRF puts a form-wide complaint under `detail`; it is filed here instead. */
 const NON_FIELD = 'non_field_errors';
+
+/**
+ * The codes axios rejects with when a request is given up on rather than
+ * answered: its own `timeout` elapsing, and an `AbortSignal` firing.
+ */
+const ABORTED_REQUEST_CODES = new Set([AxiosError.ECONNABORTED, AxiosError.ERR_CANCELED]);
 
 /**
  * Normalises one DRF error value into a list of messages.
@@ -63,6 +69,20 @@ function _parseFieldErrors(payload: unknown): ApiFieldErrors {
  */
 export function isNetworkError(error: unknown): boolean {
   return isAxiosError(error) && !error.response;
+}
+
+/**
+ * Whether the request was abandoned before the server answered.
+ *
+ * Reads as a network failure like any other, so it is told apart by its code:
+ * the request was given up on, not refused, and sending it again would wait out
+ * the same timeout.
+ *
+ * @param error - Whatever the request rejected with.
+ * @returns Whether the request was abandoned.
+ */
+export function isAbortedRequest(error: unknown): boolean {
+  return isAxiosError(error) && ABORTED_REQUEST_CODES.has(error.code ?? '');
 }
 
 /**

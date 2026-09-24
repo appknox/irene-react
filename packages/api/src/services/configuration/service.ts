@@ -36,6 +36,6 @@ export default class ConfigurationService {
    */
   public static readonly getDashboardConfiguration = () =>
     apiRequest.get<ApiDashboardConfig>(ConfigurationEndpoints.dashboard(), {
-      timeout: REQUEST_ABORT_TIMEOUT_MS,
+      signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS),
     });
 }

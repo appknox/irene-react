@@ -20,7 +20,7 @@ export default class OrganizationService {
   public static readonly getOrganizations = async () => {
     const page = await apiRequest.get<ApiPageEnvelope<ApiOrganization>>(
       OrganizationEndpoints.list(),
-      { timeout: REQUEST_ABORT_TIMEOUT_MS }
+      { signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS) }
     );
 
     return transformPaginatedResponse(page);
@@ -34,7 +34,7 @@ export default class OrganizationService {
    */
   public static readonly getOrganizationMe = (organizationId: number | string) =>
     apiRequest.get<ApiOrganizationMe>(OrganizationEndpoints.me(organizationId), {
-      timeout: REQUEST_ABORT_TIMEOUT_MS,
+      signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS),
     });
 
   /**
@@ -50,7 +50,7 @@ export default class OrganizationService {
   ) =>
     apiRequest.get<ApiOrganizationMembership>(
       OrganizationEndpoints.member(organizationId, userId),
-      { timeout: REQUEST_ABORT_TIMEOUT_MS }
+      { signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS) }
     );
 
   /**
@@ -59,6 +59,6 @@ export default class OrganizationService {
    */
   public static readonly getStoreknoxOrganization = () =>
     apiRequest.get<ApiStoreknoxOrganization>(OrganizationEndpoints.storeknoxOrganization(), {
-      timeout: REQUEST_ABORT_TIMEOUT_MS,
+      signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS),
     });
 }

@@ -17,7 +17,7 @@ export default class UserService {
    */
   public static readonly getUser = async (id: number | string) => {
     const response = await apiRequest.get<ApiUserResponse>(UserEndpoints.detail(id), {
-      timeout: REQUEST_ABORT_TIMEOUT_MS,
+      signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS),
     });
 
     return transformUserResponse(response);
