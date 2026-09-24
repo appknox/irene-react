@@ -96,7 +96,7 @@ function AkFormMessage({ className, children, ...props }: ComponentProps<'p'>) {
   );
 }
 
-type AkFormFieldProps<
+export type AkFormFieldProps<
   TFieldValues extends FieldValues,
   TName extends FieldPath<TFieldValues>,
 > = Omit<ComponentProps<'div'>, 'children'> & {

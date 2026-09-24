@@ -7,14 +7,19 @@ import { getApiFieldErrors, unlessRateLimited } from '@irene/api/utils/errors';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
-import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
+import { AkFormProvider } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
 import { AkTypography } from '@irene/ui/ak-typography';
 import { akNotify } from '@irene/ui/notify';
 
+import {
+  buildRecoverSchema,
+  RecoverFormField,
+  type RecoverFormSchema,
+} from '@/features/auth/schemas/recover';
+
 import { BackToLogin } from '@/features/auth/components/back-to-login';
 import { useRequiredField } from '@/features/auth/hooks/use-required-field';
-import { buildRecoverSchema, type RecoverFormSchema } from '@/features/auth/schemas/recover';
 import { AuthLayout } from '@/layouts/auth-layout';
 
 /**
@@ -69,14 +74,14 @@ export function RecoverPage() {
             className="flex flex-col gap-5"
             onSubmit={recoverForm.handleSubmit((values) => recover.mutate(values))}
           >
-            <AkFormField name="username" label={akMT('usernameEmailIdTextLabel')}>
+            <RecoverFormField name="username" label={akMT('usernameEmailIdTextLabel')}>
               <AkInput
                 autoComplete="username"
                 placeholder={akMT('usernameEmailIdTextPlaceholder')}
                 autoFocus
                 data-test-recover-username-input
               />
-            </AkFormField>
+            </RecoverFormField>
 
             <AkButton
               type="submit"

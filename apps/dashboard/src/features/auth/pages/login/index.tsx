@@ -13,11 +13,11 @@ import { AkFormProvider } from '@irene/ui/ak-form';
 import { AkTypography } from '@irene/ui/ak-typography';
 import { akNotify } from '@irene/ui/notify';
 
-import { LoginCheckType } from '@/features/auth/components/login-check-type';
-import { LoginPerformMfa } from '@/features/auth/components/login-perform-mfa';
-import { LoginViaPassword } from '@/features/auth/components/login-via-password';
-import { LoginViaSso } from '@/features/auth/components/login-via-sso';
-import { RegistrationFooter } from '@/features/auth/components/registration-footer';
+import { LoginCheckType } from '@/features/auth/pages/login/components/login-check-type';
+import { LoginPerformMfa } from '@/features/auth/pages/login/components/login-perform-mfa';
+import { LoginViaPassword } from '@/features/auth/pages/login/components/login-via-password';
+import { LoginViaSso } from '@/features/auth/pages/login/components/login-via-sso';
+import { RegistrationFooter } from '@/features/auth/pages/login/components/registration-footer';
 import { resolveLoginSchema, type LoginFormSchema } from '@/features/auth/schemas/login';
 import { AuthLayout } from '@/layouts/auth-layout';
 

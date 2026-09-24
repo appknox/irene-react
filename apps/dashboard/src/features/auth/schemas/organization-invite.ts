@@ -1,5 +1,7 @@
 import { z } from 'zod';
+
 import { akMT } from '@irene/translations/intl';
+import { createAkFormField } from '@irene/ui/ak-form/helpers';
 
 /** What every organization invitation asks for, whichever way the account signs in. */
 const _accountSchema = () =>
@@ -45,3 +47,9 @@ export type OrganizationInviteFormSchema = z.infer<ReturnType<typeof _accountSch
   password: string;
   confirm_password: string;
 };
+
+/**
+ * The field this form's controls are built from, bound to the schema above so
+ * every `name` is checked against it.
+ */
+export const OrganizationInviteFormField = createAkFormField<OrganizationInviteFormSchema>();

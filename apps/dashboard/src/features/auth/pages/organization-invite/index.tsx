@@ -10,7 +10,7 @@ import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
 import { AkCheckbox } from '@irene/ui/ak-checkbox';
-import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
+import { AkFormProvider } from '@irene/ui/ak-form';
 import { AkIcon } from '@irene/ui/ak-icon';
 import { AkInput } from '@irene/ui/ak-input';
 import { AkTypography } from '@irene/ui/ak-typography';
@@ -18,6 +18,7 @@ import { akNotify } from '@irene/ui/notify';
 
 import {
   buildOrganizationInviteSchema,
+  OrganizationInviteFormField,
   type OrganizationInviteFormSchema,
 } from '@/features/auth/schemas/organization-invite';
 
@@ -147,54 +148,65 @@ export function OrganizationInvitePage() {
               />
 
               <div className="flex gap-3.5">
-                <AkFormField name="first_name" label={akMT('firstName')} className="flex-1">
+                <OrganizationInviteFormField
+                  name="first_name"
+                  label={akMT('firstName')}
+                  className="flex-1"
+                >
                   <AkInput
                     autoComplete="given-name"
                     placeholder={akMT('firstName')}
                     data-test-organization-invite-first-name-input
                   />
-                </AkFormField>
+                </OrganizationInviteFormField>
 
-                <AkFormField name="last_name" label={akMT('lastName')} className="flex-1">
+                <OrganizationInviteFormField
+                  name="last_name"
+                  label={akMT('lastName')}
+                  className="flex-1"
+                >
                   <AkInput
                     autoComplete="family-name"
                     placeholder={akMT('lastName')}
                     data-test-organization-invite-last-name-input
                   />
-                </AkFormField>
+                </OrganizationInviteFormField>
               </div>
 
-              <AkFormField name="username" label={akMT('username')}>
+              <OrganizationInviteFormField name="username" label={akMT('username')}>
                 <AkInput
                   autoComplete="username"
                   placeholder={akMT('username')}
                   data-test-organization-invite-username-input
                 />
-              </AkFormField>
+              </OrganizationInviteFormField>
 
               {!isSsoEnforced && (
                 <Fragment>
-                  <AkFormField name="password" label={akMT('password')}>
+                  <OrganizationInviteFormField name="password" label={akMT('password')}>
                     <AkInput
                       type="password"
                       autoComplete="new-password"
                       placeholder={akMT('passwordMinimumPlaceholder')}
                       data-test-organization-invite-password-input
                     />
-                  </AkFormField>
+                  </OrganizationInviteFormField>
 
-                  <AkFormField name="confirm_password" label={akMT('confirmPassword')}>
+                  <OrganizationInviteFormField
+                    name="confirm_password"
+                    label={akMT('confirmPassword')}
+                  >
                     <AkInput
                       type="password"
                       autoComplete="new-password"
                       placeholder={akMT('reenterPasswordPlaceholder')}
                       data-test-organization-invite-confirm-password-input
                     />
-                  </AkFormField>
+                  </OrganizationInviteFormField>
                 </Fragment>
               )}
 
-              <AkFormField name="terms_accepted" className="gap-2">
+              <OrganizationInviteFormField name="terms_accepted" className="gap-2">
                 <div className="flex items-center gap-2">
                   <AkCheckbox color="success" data-test-organization-invite-terms-checkbox />
 
@@ -206,7 +218,7 @@ export function OrganizationInvitePage() {
                     </span>
                   </AkTypography>
                 </div>
-              </AkFormField>
+              </OrganizationInviteFormField>
 
               <AkButton
                 type="submit"

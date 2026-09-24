@@ -9,19 +9,24 @@ import { getConfigValue } from '@irene/config';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
-import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
+import { AkFormProvider } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
 import { AkTypography } from '@irene/ui/ak-typography';
 import { akNotify } from '@irene/ui/notify';
 
+import {
+  buildRegisterSchema,
+  RegisterFormField,
+  type RegisterFormSchema,
+} from '@/features/auth/schemas/register';
+
 import { BackToLogin } from '@/features/auth/components/back-to-login';
-import { RegisterCompanyFooter } from '@/features/auth/components/register-company-footer';
-import { buildRegisterSchema, type RegisterFormSchema } from '@/features/auth/schemas/register';
+import { RegisterCompanyFooter } from '@/features/auth/pages/register/components/register-company-footer';
 import { AuthLayout } from '@/layouts/auth-layout';
 import { setFormFieldErrors, toFormFieldErrors } from '@/utils/form-field-errors';
 
 /** The fields the API reports errors against. */
-type RegisterFieldError = 'email' | 'company' | 'recaptcha';
+type RegisterFieldError = keyof RegisterFormSchema | 'recaptcha';
 
 // The action the token is scored against, which the backend checks it for.
 const RECAPTCHA_ACTION = 'registration';
@@ -116,7 +121,7 @@ export function RegisterPage() {
           className="flex flex-col gap-5"
           onSubmit={registerForm.handleSubmit((values) => register.mutate(values))}
         >
-          <AkFormField name="email" label={akMT('emailId')}>
+          <RegisterFormField name="email" label={akMT('emailId')}>
             <AkInput
               type="email"
               autoComplete="email"
@@ -124,15 +129,15 @@ export function RegisterPage() {
               autoFocus
               data-test-register-email-input
             />
-          </AkFormField>
+          </RegisterFormField>
 
-          <AkFormField name="company" label={akMT('companyName')}>
+          <RegisterFormField name="company" label={akMT('companyName')}>
             <AkInput
               autoComplete="organization"
               placeholder={akMT('companyName')}
               data-test-register-company-input
             />
-          </AkFormField>
+          </RegisterFormField>
 
           <AkButton type="submit" loading={register.isPending} data-test-register-submit-button>
             <AkMessageTranslate id="register" />

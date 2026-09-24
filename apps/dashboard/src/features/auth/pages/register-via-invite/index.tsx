@@ -10,13 +10,14 @@ import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
 import { AkCheckbox } from '@irene/ui/ak-checkbox';
-import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
+import { AkFormProvider } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
 import { AkTypography } from '@irene/ui/ak-typography';
 import { akNotify } from '@irene/ui/notify';
 
 import {
   buildRegisterViaInviteSchema,
+  RegisterViaInviteFormField,
   type RegisterViaInviteFormSchema,
 } from '@/features/auth/schemas/register-via-invite';
 
@@ -65,7 +66,6 @@ export function RegisterViaInvitePage() {
   const { reset: resetForm } = inviteForm;
   const invitedRegistration = invitation.data;
   const invitedCompany = invitedRegistration?.company;
-  const invitedEmail = invitedRegistration?.email;
 
   // Register the user via the API
   const register = useMutation({
@@ -127,7 +127,7 @@ export function RegisterViaInvitePage() {
               <RegisterInvitationReadOnlyField
                 id="invited-email"
                 label={akMT('emailId')}
-                value={invitedEmail ?? ''}
+                value={invitation.data.email}
               />
 
               {invitedCompany ? (
@@ -137,60 +137,68 @@ export function RegisterViaInvitePage() {
                   value={invitedCompany}
                 />
               ) : (
-                <AkFormField name="company" label={akMT('companyName')}>
+                <RegisterViaInviteFormField name="company" label={akMT('companyName')}>
                   <AkInput
                     autoComplete="organization"
                     placeholder={akMT('companyName')}
                     data-test-invite-company-input
                   />
-                </AkFormField>
+                </RegisterViaInviteFormField>
               )}
 
               <div className="flex gap-3.5">
-                <AkFormField name="first_name" label={akMT('firstName')} className="flex-1">
+                <RegisterViaInviteFormField
+                  name="first_name"
+                  label={akMT('firstName')}
+                  className="flex-1"
+                >
                   <AkInput
                     autoComplete="given-name"
                     placeholder={akMT('firstName')}
                     data-test-invite-first-name-input
                   />
-                </AkFormField>
+                </RegisterViaInviteFormField>
 
-                <AkFormField name="last_name" label={akMT('lastName')} className="flex-1">
+                <RegisterViaInviteFormField
+                  name="last_name"
+                  label={akMT('lastName')}
+                  className="flex-1"
+                >
                   <AkInput
                     autoComplete="family-name"
                     placeholder={akMT('lastName')}
                     data-test-invite-last-name-input
                   />
-                </AkFormField>
+                </RegisterViaInviteFormField>
               </div>
 
-              <AkFormField name="username" label={akMT('username')}>
+              <RegisterViaInviteFormField name="username" label={akMT('username')}>
                 <AkInput
                   autoComplete="username"
                   placeholder={akMT('username')}
                   data-test-invite-username-input
                 />
-              </AkFormField>
+              </RegisterViaInviteFormField>
 
-              <AkFormField name="password" label={akMT('password')}>
+              <RegisterViaInviteFormField name="password" label={akMT('password')}>
                 <AkInput
                   type="password"
                   autoComplete="new-password"
                   placeholder={akMT('passwordMinimumPlaceholder')}
                   data-test-invite-password-input
                 />
-              </AkFormField>
+              </RegisterViaInviteFormField>
 
-              <AkFormField name="confirm_password" label={akMT('confirmPassword')}>
+              <RegisterViaInviteFormField name="confirm_password" label={akMT('confirmPassword')}>
                 <AkInput
                   type="password"
                   autoComplete="new-password"
                   placeholder={akMT('reenterPasswordPlaceholder')}
                   data-test-invite-confirm-password-input
                 />
-              </AkFormField>
+              </RegisterViaInviteFormField>
 
-              <AkFormField name="terms_accepted" className="gap-2">
+              <RegisterViaInviteFormField name="terms_accepted" className="gap-2">
                 <div className="flex items-center gap-2">
                   <AkCheckbox color="success" data-test-invite-terms-checkbox />
 
@@ -202,7 +210,7 @@ export function RegisterViaInvitePage() {
                     </span>
                   </AkTypography>
                 </div>
-              </AkFormField>
+              </RegisterViaInviteFormField>
 
               <AkButton type="submit" loading={register.isPending} data-test-invite-submit-button>
                 <AkMessageTranslate id="register" />

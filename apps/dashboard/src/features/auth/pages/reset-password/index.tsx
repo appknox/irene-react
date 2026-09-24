@@ -11,7 +11,7 @@ import { HTTP_STATUS_CODES } from '@irene/constants';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
-import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
+import { AkFormProvider } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
 import { AkSkeleton } from '@irene/ui/ak-skeleton';
 import { AkTypography } from '@irene/ui/ak-typography';
@@ -19,6 +19,7 @@ import { akNotify } from '@irene/ui/notify';
 
 import {
   buildResetPasswordSchema,
+  ResetPasswordFormField,
   type ResetPasswordFormSchema,
 } from '@/features/auth/schemas/reset-password';
 
@@ -124,7 +125,7 @@ export function ResetPasswordPage() {
             className="flex flex-col gap-5"
             onSubmit={resetForm.handleSubmit((values) => reset.mutate(values))}
           >
-            <AkFormField name="password" label={akMT('newPassword')}>
+            <ResetPasswordFormField name="password" label={akMT('newPassword')}>
               <AkInput
                 type="password"
                 autoComplete="new-password"
@@ -132,16 +133,16 @@ export function ResetPasswordPage() {
                 autoFocus
                 data-test-new-password-input
               />
-            </AkFormField>
+            </ResetPasswordFormField>
 
-            <AkFormField name="confirm_password" label={akMT('confirmPassword')}>
+            <ResetPasswordFormField name="confirm_password" label={akMT('confirmPassword')}>
               <AkInput
                 type="password"
                 autoComplete="new-password"
                 placeholder={akMT('enterConfirmPassword')}
                 data-test-confirm-password-input
               />
-            </AkFormField>
+            </ResetPasswordFormField>
 
             <AkButton
               type="submit"

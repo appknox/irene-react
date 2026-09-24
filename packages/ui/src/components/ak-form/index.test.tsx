@@ -8,6 +8,7 @@ import * as z from 'zod';
 import type { ReactNode } from 'react';
 
 import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
+import { useAkFormField } from '@irene/ui/ak-form/context';
 import { AkInput } from '@irene/ui/ak-input';
 
 const EMAIL = faker.internet.email();
@@ -51,7 +52,7 @@ function TestForm({
 }
 
 describe('the control as a child', () => {
-  it("keeps the control's own change handler alongside the field's", async () => {
+  it("calls the control's own onChange as well as the field's", async () => {
     const onChange = vi.fn();
     const onValid = vi.fn();
 
@@ -80,13 +81,13 @@ describe('the control as a child', () => {
 });
 
 describe('rendering', () => {
-  it('ties the label to the control', () => {
+  it('points the label at the control with htmlFor', () => {
     render(<TestForm />);
 
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
   });
 
-  it('describes the control with its description', () => {
+  it('points aria-describedby at the description', () => {
     render(<TestForm />);
 
     const describedBy = screen.getByLabelText('Email').getAttribute('aria-describedby');
@@ -94,7 +95,7 @@ describe('rendering', () => {
     expect(describedBy).toBe(screen.getByText('We only use this to sign you in.').id);
   });
 
-  it('reports no error before submission', () => {
+  it('renders no error before the form is submitted', () => {
     render(<TestForm />);
 
     expect(screen.getByLabelText('Email')).toHaveAttribute('aria-invalid', 'false');
@@ -102,7 +103,7 @@ describe('rendering', () => {
 });
 
 describe('validation', () => {
-  it('shows the schema message when the value is rejected', async () => {
+  it('renders the schema message when the value fails validation', async () => {
     render(<TestForm />);
 
     await userEvent.type(screen.getByLabelText('Email'), 'not-an-email');
@@ -111,7 +112,7 @@ describe('validation', () => {
     expect(await screen.findByText('Enter a valid email address')).toBeInTheDocument();
   });
 
-  it('marks the control invalid and points at the message', async () => {
+  it('sets aria-invalid and aria-describedby on the control', async () => {
     render(<TestForm />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
@@ -124,7 +125,7 @@ describe('validation', () => {
     expect(control.getAttribute('aria-describedby')).toContain(messageId);
   });
 
-  it('does not submit while the value is rejected', async () => {
+  it('does not call onSubmit while the value fails validation', async () => {
     const onValid = vi.fn();
     render(<TestForm onValid={onValid} />);
 
@@ -134,7 +135,7 @@ describe('validation', () => {
     expect(onValid).not.toHaveBeenCalled();
   });
 
-  it('submits the values once they pass', async () => {
+  it('calls onSubmit with the values once they pass', async () => {
     const onValid = vi.fn();
     render(<TestForm onValid={onValid} />);
 
@@ -153,5 +154,67 @@ describe('validation', () => {
     await userEvent.type(screen.getByLabelText('Email'), EMAIL);
 
     expect(screen.queryByText('Enter a valid email address')).not.toBeInTheDocument();
+  });
+});
+
+describe('a field with no label', () => {
+  function UnlabelledForm() {
+    const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { email: '' } });
+
+    return (
+      <AkFormProvider {...form}>
+        <AkFormField name="email">
+          <AkInput aria-label="Email" />
+        </AkFormField>
+      </AkFormProvider>
+    );
+  }
+
+  it('renders the control without the label row', () => {
+    render(<UnlabelledForm />);
+
+    expect(screen.getByRole('textbox', { name: 'Email' })).toBeInTheDocument();
+    expect(screen.queryByText('Email', { selector: 'label' })).not.toBeInTheDocument();
+  });
+});
+
+describe('the error message under a field', () => {
+  function ErrorForm() {
+    const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { email: '' } });
+
+    return (
+      <AkFormProvider {...form}>
+        <AkFormField name="email" label="Email">
+          <AkInput />
+        </AkFormField>
+
+        <button type="button" onClick={() => form.setError('email', { type: 'server' })}>
+          Refuse
+        </button>
+      </AkFormProvider>
+    );
+  }
+
+  it('marks the field invalid when the error carries no message', async () => {
+    render(<ErrorForm />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Refuse' }));
+
+    const message = document.querySelector('[data-slot="form-message"]');
+
+    expect(message).toHaveTextContent('');
+    expect(message?.querySelector('svg')).toBeInTheDocument();
+  });
+});
+
+describe('useAkFormField outside a field', () => {
+  function Orphan() {
+    useAkFormField();
+
+    return null;
+  }
+
+  it('throws when called outside an AkFormField', () => {
+    expect(() => render(<Orphan />)).toThrow('useAkFormField should be used within <AkFormField>');
   });
 });

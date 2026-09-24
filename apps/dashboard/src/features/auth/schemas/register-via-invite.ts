@@ -1,5 +1,7 @@
 import { z } from 'zod';
+
 import { akMT } from '@irene/translations/intl';
+import { createAkFormField } from '@irene/ui/ak-form/helpers';
 
 /**
  * The account an invitation is redeemed for. Built per render, so its messages
@@ -26,3 +28,9 @@ export const buildRegisterViaInviteSchema = () =>
     });
 
 export type RegisterViaInviteFormSchema = z.infer<ReturnType<typeof buildRegisterViaInviteSchema>>;
+
+/**
+ * The field this form's controls are built from, bound to the schema above so
+ * every `name` is checked against it.
+ */
+export const RegisterViaInviteFormField = createAkFormField<RegisterViaInviteFormSchema>();

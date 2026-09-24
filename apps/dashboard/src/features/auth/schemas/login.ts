@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { akMT } from '@irene/translations/intl';
+import { createAkFormField } from '@irene/ui/ak-form/helpers';
 import type { ApiMfaRequirement } from '@irene/api/services/auth';
 
 /**
@@ -54,3 +55,9 @@ export const resolveLoginSchema = (
 
 // The shape every step shares, since each step only tightens the same fields.
 export type LoginFormSchema = z.infer<ReturnType<typeof buildUsernameSchema>>;
+
+/**
+ * The field this form's controls are built from, bound to the schema above so
+ * every `name` is checked against it.
+ */
+export const LoginFormField = createAkFormField<LoginFormSchema>();
