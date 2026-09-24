@@ -151,7 +151,7 @@ export function OrganizationInvitePage() {
                 <OrganizationInviteFormField
                   name="first_name"
                   label={akMT('firstName')}
-                  className="flex-1"
+                  className="flex-1 content-start"
                 >
                   <AkInput
                     autoComplete="given-name"
@@ -163,7 +163,7 @@ export function OrganizationInvitePage() {
                 <OrganizationInviteFormField
                   name="last_name"
                   label={akMT('lastName')}
-                  className="flex-1"
+                  className="flex-1 content-start"
                 >
                   <AkInput
                     autoComplete="family-name"

@@ -10,10 +10,11 @@ import {
   buildStoreknoxOrganization,
 } from '@tests/factories';
 
+import { REQUEST_ABORT_TIMEOUT_MS } from '@irene/api/request';
 import { OrganizationEndpoints, OrganizationService } from '@irene/api/services/organization';
 import { getApiErrorStatus } from '@irene/api/utils/errors';
 import { buildAPITestURL, server } from '@tests/server';
-import { buildDrfPage } from '@tests/utils';
+import { buildDrfPage, recordRequestConfigs } from '@tests/utils';
 
 const ORGANIZATION_ID = 42;
 const USER_ID = 7;
@@ -124,5 +125,16 @@ describe('OrganizationService.getStoreknoxOrganization', () => {
     );
 
     expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.NOT_FOUND);
+  });
+});
+
+describe('the timeout on the organization setup', () => {
+  it('abandons the request after a minute, so a hung server does not hold the page', async () => {
+    const recorder = recordRequestConfigs();
+
+    await OrganizationService.getOrganizations().catch(() => undefined);
+    recorder.stop();
+
+    expect(recorder.latest()?.timeout).toBe(REQUEST_ABORT_TIMEOUT_MS);
   });
 });

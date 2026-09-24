@@ -3,10 +3,12 @@ import { describe, expect, it } from 'vitest';
 
 import { HTTP_STATUS_CODES } from '@irene/constants';
 
+import { REQUEST_ABORT_TIMEOUT_MS } from '@irene/api/request';
 import { UserEndpoints, UserService } from '@irene/api/services/user';
 import { getApiErrorStatus } from '@irene/api/utils/errors';
 import { buildUser, buildUserResponse } from '@tests/factories';
 import { buildAPITestURL, server } from '@tests/server';
+import { recordRequestConfigs } from '@tests/utils';
 
 const USER_ID = 42;
 const detailUrl = (id: number | string) => buildAPITestURL(UserEndpoints.detail(id));
@@ -50,5 +52,16 @@ describe('UserService.getUser', () => {
     const error = await UserService.getUser(USER_ID).catch((reason: unknown) => reason);
 
     expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.FORBIDDEN);
+  });
+});
+
+describe('the timeout on the account', () => {
+  it('abandons the request after a minute, so a hung server does not hold the page', async () => {
+    const recorder = recordRequestConfigs();
+
+    await UserService.getUser(1).catch(() => undefined);
+    recorder.stop();
+
+    expect(recorder.latest()?.timeout).toBe(REQUEST_ABORT_TIMEOUT_MS);
   });
 });

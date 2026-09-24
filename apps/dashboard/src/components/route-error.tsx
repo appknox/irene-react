@@ -86,7 +86,7 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
           </AkButton>
 
           {isAppknoxUrl && (
-            <AkButton variant="outlined" color="neutral" asChild data-test-route-error-support>
+            <AkButton color="neutral" asChild data-test-route-error-support>
               <a href={`mailto:${APPKNOX_SUPPORT_EMAIL}${supportEmailSubject}`}>
                 {akMT('emailSupport')}
               </a>
@@ -94,6 +94,7 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
           )}
 
           <AkButton
+            variant="outlined"
             color="neutral"
             loading={logout.isPending}
             onClick={() => logout.mutate()}

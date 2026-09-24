@@ -92,6 +92,16 @@ describe('RegisterViaInvitePage', () => {
     expect(email).toBeDisabled();
   });
 
+  it('packs the name fields to the top, so an error under one does not drop the other out of line', async () => {
+    await openInvitation();
+
+    const firstName = await screen.findByLabelText(akMT('firstName'));
+    const lastName = screen.getByLabelText(akMT('lastName'));
+
+    expect(firstName.closest('[data-slot="form-item"]')).toHaveClass('content-start');
+    expect(lastName.closest('[data-slot="form-item"]')).toHaveClass('content-start');
+  });
+
   it('prefills the first and last name from the invitation', async () => {
     await openInvitation();
 

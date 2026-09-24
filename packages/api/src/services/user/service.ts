@@ -1,4 +1,4 @@
-import { apiRequest } from '@irene/api/request';
+import { apiRequest, REQUEST_ABORT_TIMEOUT_MS } from '@irene/api/request';
 import { transformUserResponse } from '@irene/api/utils/transforms';
 import type { ApiUserResponse } from '@irene/api/services/user';
 
@@ -16,7 +16,9 @@ export default class UserService {
    * @returns The account.
    */
   public static readonly getUser = async (id: number | string) => {
-    const response = await apiRequest.get<ApiUserResponse>(UserEndpoints.detail(id));
+    const response = await apiRequest.get<ApiUserResponse>(UserEndpoints.detail(id), {
+      timeout: REQUEST_ABORT_TIMEOUT_MS,
+    });
 
     return transformUserResponse(response);
   };

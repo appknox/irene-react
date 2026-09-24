@@ -1,4 +1,4 @@
-import { apiRequest } from '@irene/api/request';
+import { apiRequest, REQUEST_ABORT_TIMEOUT_MS } from '@irene/api/request';
 import { transformPaginatedResponse } from '@irene/api/utils/transforms';
 import type { ApiPageEnvelope } from '@irene/api/utils/pagination';
 
@@ -19,7 +19,8 @@ export default class OrganizationService {
    */
   public static readonly getOrganizations = async () => {
     const page = await apiRequest.get<ApiPageEnvelope<ApiOrganization>>(
-      OrganizationEndpoints.list()
+      OrganizationEndpoints.list(),
+      { timeout: REQUEST_ABORT_TIMEOUT_MS }
     );
 
     return transformPaginatedResponse(page);
@@ -32,7 +33,9 @@ export default class OrganizationService {
    * @returns The account's role and permissions there.
    */
   public static readonly getOrganizationMe = (organizationId: number | string) =>
-    apiRequest.get<ApiOrganizationMe>(OrganizationEndpoints.me(organizationId));
+    apiRequest.get<ApiOrganizationMe>(OrganizationEndpoints.me(organizationId), {
+      timeout: REQUEST_ABORT_TIMEOUT_MS,
+    });
 
   /**
    * Fetches one account's membership of an organization.
@@ -45,12 +48,17 @@ export default class OrganizationService {
     organizationId: number | string,
     userId: number | string
   ) =>
-    apiRequest.get<ApiOrganizationMembership>(OrganizationEndpoints.member(organizationId, userId));
+    apiRequest.get<ApiOrganizationMembership>(
+      OrganizationEndpoints.member(organizationId, userId),
+      { timeout: REQUEST_ABORT_TIMEOUT_MS }
+    );
 
   /**
    * Fetches the StoreKnox organization.
    * @returns The StoreKnox organization; rejects on a deployment without one.
    */
   public static readonly getStoreknoxOrganization = () =>
-    apiRequest.get<ApiStoreknoxOrganization>(OrganizationEndpoints.storeknoxOrganization());
+    apiRequest.get<ApiStoreknoxOrganization>(OrganizationEndpoints.storeknoxOrganization(), {
+      timeout: REQUEST_ABORT_TIMEOUT_MS,
+    });
 }

@@ -31,6 +31,21 @@ type RequestOptions = Omit<AxiosRequestConfig, 'url' | 'method' | 'data'>;
 export const currentProduct = () =>
   window.location.hostname === DEVKNOX_HOSTNAME ? ENUMS.PRODUCT.DEVKNOX : ENUMS.PRODUCT.APPKNOX;
 
+/**
+ * How long a request that blocks a screen may run before it is abandoned.
+ *
+ * A server that refuses a connection fails at once, but one that accepts it and
+ * never replies leaves the request in flight for as long as the browser allows,
+ * holding whatever waits on it with no message and no way out. An abandoned
+ * request rejects with no response, which reads as a network failure, so the
+ * failure card and its retry button already handle it.
+ *
+ * Deliberately not set on the client: a request nobody is waiting on can take
+ * as long as it takes, and an upload has no business being cut off after a
+ * minute. The endpoints that hold a screen apply it themselves.
+ */
+export const REQUEST_ABORT_TIMEOUT_MS = 30_000;
+
 /*
   The endpoints that answer 401 as part of their own job: a wrong password, a
   refused SSO token, a spent reset link. Each is reported where the user is

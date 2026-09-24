@@ -94,6 +94,18 @@ describe('OrganizationInvitePage', () => {
     expect(screen.getByDisplayValue(INVITATION.company)).toBeDisabled();
   });
 
+  it('packs the name fields to the top, so an error under one does not drop the other out of line', async () => {
+    invitationIs();
+
+    await openInvitation();
+
+    const firstName = await screen.findByLabelText(akMT('firstName'));
+    const lastName = screen.getByLabelText(akMT('lastName'));
+
+    expect(firstName.closest('[data-slot="form-item"]')).toHaveClass('content-start');
+    expect(lastName.closest('[data-slot="form-item"]')).toHaveClass('content-start');
+  });
+
   it('renders the skeleton while the invitation request is in flight', async () => {
     server.use(http.get(inviteUrl, () => new Promise(() => undefined)));
 

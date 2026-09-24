@@ -1,4 +1,4 @@
-import { apiRequest } from '@irene/api/request';
+import { apiRequest, REQUEST_ABORT_TIMEOUT_MS } from '@irene/api/request';
 
 import type {
   ApiDashboardConfig,
@@ -35,5 +35,7 @@ export default class ConfigurationService {
    * @returns The dashboard and device farm URLs.
    */
   public static readonly getDashboardConfiguration = () =>
-    apiRequest.get<ApiDashboardConfig>(ConfigurationEndpoints.dashboard());
+    apiRequest.get<ApiDashboardConfig>(ConfigurationEndpoints.dashboard(), {
+      timeout: REQUEST_ABORT_TIMEOUT_MS,
+    });
 }

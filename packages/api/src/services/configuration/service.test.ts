@@ -9,9 +9,11 @@ import {
   buildServerConfiguration,
 } from '@tests/factories';
 
+import { REQUEST_ABORT_TIMEOUT_MS } from '@irene/api/request';
 import { ConfigurationEndpoints, ConfigurationService } from '@irene/api/services/configuration';
 import { getApiErrorStatus } from '@irene/api/utils/errors';
 import { buildAPITestURL, server } from '@tests/server';
+import { recordRequestConfigs } from '@tests/utils';
 
 const dashboardUrl = buildAPITestURL(ConfigurationEndpoints.dashboard());
 
@@ -82,5 +84,16 @@ describe('ConfigurationService.getServerConfiguration', () => {
     );
 
     await expect(ConfigurationService.getServerConfiguration()).resolves.toEqual(configuration);
+  });
+});
+
+describe('the timeout on the dashboard configuration', () => {
+  it('abandons the request after a minute, so a hung server does not hold the page', async () => {
+    const recorder = recordRequestConfigs();
+
+    await ConfigurationService.getDashboardConfiguration().catch(() => undefined);
+    recorder.stop();
+
+    expect(recorder.latest()?.timeout).toBe(REQUEST_ABORT_TIMEOUT_MS);
   });
 });
