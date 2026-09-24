@@ -75,7 +75,7 @@ describe('RouteError', () => {
 
     expect(support).toHaveAttribute(
       'href',
-      `mailto:support@appknox.com?subject=${encodeURIComponent(akMT('couldNotLoadPageStatus', { status: 500 }))}`
+      `mailto:support@appknox.com?subject=${encodeURIComponent(akMT('couldNotLoadPageEmailSubject', { status: 500 }))}`
     );
   });
 
@@ -85,9 +85,8 @@ describe('RouteError', () => {
 
     await renderAtRoute('/');
 
-    expect(
-      await screen.findByText(akMT('couldNotLoadPageStatus', { status: 500 }))
-    ).toBeInTheDocument();
+    // Rendered from markup, so the status is matched on the element carrying it.
+    expect(await screen.findByText('500')).toBeInTheDocument();
   });
 
   it('renders no HTTP status when the request never reached the server', async () => {

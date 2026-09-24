@@ -39,7 +39,7 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
   const errorStatus = getApiErrorStatus(error);
 
   const supportEmailSubject = errorStatus
-    ? `?subject=${encodeURIComponent(akMT('couldNotLoadPageStatus', { status: errorStatus }))}`
+    ? `?subject=${encodeURIComponent(akMT('couldNotLoadPageEmailSubject', { status: errorStatus }))}`
     : '';
 
   // The failed answers are cached, so they are dropped before the route reruns.
@@ -75,8 +75,13 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
         </AkTypography>
 
         {errorStatus && (
-          <AkTypography variant="body2" color="textSecondary" data-test-route-error-status>
-            {akMT('couldNotLoadPageStatus', { status: errorStatus })}
+          <AkTypography
+            variant="body2"
+            color="textSecondary"
+            className="font-mono text-sm leading-tight"
+            data-test-route-error-status
+          >
+            <AkMessageTranslate id="couldNotLoadPageStatus" values={{ status: errorStatus }} />
           </AkTypography>
         )}
 

@@ -178,6 +178,11 @@
   "billingPeriod": "Billing Period",
   "bitbucketPipeline": "Bitbucket Pipeline",
   "bitriseWorkflow": "Bitrise Workflow",
+  "bootLoadingScreenMsg": {
+    "almostThere": "Almost there, thanks for bearing with us a moment...",
+    "stillGettingThingsReady": "Still getting everything on your dashboard ready...",
+    "thanksForYourPatience": "Hang tight, we are nearly finished getting you in..."
+  },
   "browseFiles": "browse files",
   "businessImplication": "Business Implication",
   "by": "by",
@@ -300,8 +305,9 @@
   "copiedToClipboard": "Copied to clipboard!",
   "copy": "Copy",
   "couldNotLoadPage": "We could not load the requested page",
+  "couldNotLoadPageEmailSubject": "Error Status - {status}",
   "couldNotLoadPageHint": "The server did not answer as expected. Try again, and contact support if it keeps happening.",
-  "couldNotLoadPageStatus": "Error {status}",
+  "couldNotLoadPageStatus": "Error Status - <strong>{status}</strong>",
   "country": "Country",
   "createAccount": "Create Account",
   "createTeam": "Create Team",
