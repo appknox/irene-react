@@ -15,7 +15,7 @@
     "build": "node scripts/generate.ts",
     "generate": "node scripts/generate.ts",
     "lint": "eslint .",
-    "test": "node scripts/generate.ts && vitest run",
+    "test": "node scripts/generate.ts && vitest run --coverage",
     "type-check": "node scripts/generate.ts && tsc -b --noEmit"
   },
   "peerDependencies": {

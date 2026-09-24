@@ -4,6 +4,8 @@ import { defineConfig } from 'vitest/config';
 
 import { svgrPlugin } from '@irene/ui/vite';
 
+import { coverageConfig } from '../../vitest.coverage';
+
 const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
@@ -34,6 +36,6 @@ export default defineConfig({
     isolate: false,
     globals: true,
     setupFiles: ['./tests/setup.ts'],
-    coverage: { provider: 'v8', reporter: ['text', 'html'] },
+    coverage: coverageConfig,
   },
 });

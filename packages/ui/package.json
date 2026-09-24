@@ -81,7 +81,7 @@
     "lint": "eslint .",
     "shadcn:add": "sh -c 'shadcn add --yes \"$@\" && node scripts/rewrite-shadcn-imports.ts && prettier --write src/components' --",
     "storybook": "storybook dev -p 6006",
-    "test": "vitest run",
+    "test": "vitest run --coverage",
     "test:watch": "vitest",
     "type-check": "tsc -b --noEmit"
   }

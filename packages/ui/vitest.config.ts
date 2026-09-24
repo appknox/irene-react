@@ -3,6 +3,8 @@ import { defineConfig } from 'vitest/config';
 
 import { svgrPlugin } from '@irene/ui/vite';
 
+import { coverageConfig } from '../../vitest.coverage';
+
 /*
   Handed to the tests, since a test that reads a file cannot rely on the
   working directory: a shared environment is entered from the workspace root.
@@ -23,6 +25,6 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./tests/setup.ts'],
     env: { IRENE_UI_PACKAGE_ROOT: packageRoot },
-    coverage: { provider: 'v8', reporter: ['text'] },
+    coverage: coverageConfig,
   },
 });

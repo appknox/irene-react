@@ -138,16 +138,54 @@ dies between the guard and the token check.
 
 ## App boot and route failures
 
-| Scenario                  | How to get there                                             | Expected                                                      |
-| ------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------- |
-| Cold boot with a session  | Reload `/` while signed in                                   | Loading screen covers the app, its bar advances to the end    |
-| Configuration in flight   | Reload `/login` with `api/v2/frontend_configuration` held    | Logo and footer hold their space until it arrives             |
-| Signed-in setup in flight | Reload `/` with `api/organizations` held                     | Loading screen stays up                                       |
-| Setup fails               | Reload `/` while `api/organizations` answers 500             | Failure card: retry, email support, log out                   |
-| Retry succeeds            | From that card, restore the API and press Retry              | Page renders                                                  |
-| Retry fails again         | From that card, press Retry while it still fails             | Failure card stays, no duplicate messages                     |
-| Unknown URL               | `/not-a-real-page`                                           | "Page not found" placeholder — untranslated, not yet designed |
-| Page navigation           | Move between `/` and `/dashboard/oidc/redirect?oidc_token=x` | Thin progress bar at the top, no full-screen cover            |
+| Scenario                  | How to get there                                             | Expected                                                   |
+| ------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| Cold boot with a session  | Reload `/` while signed in                                   | Loading screen covers the app, its bar advances to the end |
+| Configuration in flight   | Reload `/login` with `api/v2/frontend_configuration` held    | Logo and footer hold their space until it arrives          |
+| Signed-in setup in flight | Reload `/` with `api/organizations` held                     | Loading screen stays up                                    |
+| Setup fails               | Reload `/` while `api/organizations` answers 500             | Failure card: retry, email support, log out                |
+| Retry succeeds            | From that card, restore the API and press Retry              | Page renders                                               |
+| Retry fails again         | From that card, press Retry while it still fails             | Failure card stays, no duplicate messages                  |
+| Unknown URL               | `/not-a-real-page`                                           | "Page not found", with the line on why it may be missing   |
+| Page navigation           | Move between `/` and `/dashboard/oidc/redirect?oidc_token=x` | Thin progress bar at the top, no full-screen cover         |
+
+## Home
+
+Reached at `/dashboard/home`. Every scenario here signs itself in, so no login
+step is needed — open the URL as it is written.
+
+The product names follow the host: anything but an Appknox host is somebody
+else's brand, so the first two cards are named after what they do. Open
+`http://secure.appknox.com.localhost:4200/…` to see the Appknox names, and
+`http://localhost:4200/…` to see the whitelabel ones.
+
+| Scenario            | How to get there                                    | Expected                                                             |
+| ------------------- | --------------------------------------------------- | -------------------------------------------------------------------- |
+| Every product       | `/dashboard/home?mock=home:all`                     | Five cards: VAPT, StoreKnox, offensive security, reporting, security |
+| Appknox names       | The same URL on `secure.appknox.com.localhost:4200` | First two cards read Appknox and StoreKnox                           |
+| Nothing to choose   | `/dashboard/home?mock=home:appknox-only`            | Redirected straight to `/dashboard/projects`, no card shown          |
+| StoreKnox entitled  | `/dashboard/home?mock=home:storeknox`               | Two cards                                                            |
+| Security permission | `/dashboard/home?mock=home:security`                | Two cards; the security one opens `/security/projects` in a new tab  |
+| Self-hosted install | `/dashboard/home?mock=home:enterprise`              | Reporting is entitled but withheld — two cards                       |
+| Whitelabel branding | `/dashboard/home?mock=home:whitelabel`              | The Sentinel logo above the heading                                  |
+| Sign out            | Any of the above, press Logout                      | Session cleared, lands on `/login`                                   |
+| Narrow window       | Any of the above, resize below the card row's width | Cards wrap, none stretches to fill the row                           |
+
+## System status
+
+Reached at `/dashboard/status`, outside both guards, so no session is needed.
+
+| Scenario          | How to get there                                   | Expected                                                    |
+| ----------------- | -------------------------------------------------- | ----------------------------------------------------------- |
+| Everything up     | `/dashboard/status?mock=status:all-up`             | Three rows, all Operational                                 |
+| Everything down   | `/dashboard/status?mock=status:all-down`           | All three Unavailable; storage carries the proxy hint       |
+| Object store down | `?mock=status:storage-down`                        | Storage Unavailable, the other two Operational              |
+| Device farm down  | `?mock=status:devicefarm-down`                     | Device farm Unavailable                                     |
+| API down          | `?mock=status:api-down`                            | API server Unavailable                                      |
+| Checks in flight  | `?mock=status:checking`                            | All three rows stay on Checking                             |
+| Refocus           | `?mock=status:all-up`, leave the tab and come back | Every check runs again                                      |
+| Old address       | `/status`                                          | Replaced by `/dashboard/status`, no entry in the back stack |
+| Language          | Any of the above, switch below the card            | Systems, statuses and the heading follow                    |
 
 ## Language and branding
 
