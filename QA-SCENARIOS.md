@@ -138,16 +138,16 @@ dies between the guard and the token check.
 
 ## App boot and route failures
 
-| Scenario                  | How to get there                                             | Expected                                                   |
-| ------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
-| Cold boot with a session  | Reload `/` while signed in                                   | Loading screen covers the app, its bar advances to the end |
-| Configuration in flight   | Reload `/login` with `api/v2/frontend_configuration` held    | Logo and footer hold their space until it arrives          |
-| Signed-in setup in flight | Reload `/` with `api/organizations` held                     | Loading screen stays up                                    |
-| Setup fails               | Reload `/` while `api/organizations` answers 500             | Failure card: retry, email support, log out                |
-| Retry succeeds            | From that card, restore the API and press Retry              | Page renders                                               |
-| Retry fails again         | From that card, press Retry while it still fails             | Failure card stays, no duplicate messages                  |
-| Unknown URL               | `/not-a-real-page`                                           | "Page not found", with the line on why it may be missing   |
-| Page navigation           | Move between `/` and `/dashboard/oidc/redirect?oidc_token=x` | Thin progress bar at the top, no full-screen cover         |
+| Scenario                  | How to get there                                             | Expected                                                     |
+| ------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Cold boot with a session  | Reload `/` while signed in                                   | Loading screen covers the app, its bar advances to the end   |
+| Configuration in flight   | Reload `/login` with `api/v2/frontend_configuration` held    | Logo and footer hold their space for 15 seconds, then render |
+| Signed-in setup in flight | Reload `/` with `api/organizations` held                     | Loading screen stays up                                      |
+| Setup fails               | Reload `/` while `api/organizations` answers 500             | Failure card: retry, email support, log out                  |
+| Retry succeeds            | From that card, restore the API and press Retry              | Page renders                                                 |
+| Retry fails again         | From that card, press Retry while it still fails             | Failure card stays, no duplicate messages                    |
+| Unknown URL               | `/not-a-real-page`                                           | "Page not found", with the line on why it may be missing     |
+| Page navigation           | Move between `/` and `/dashboard/oidc/redirect?oidc_token=x` | Thin progress bar at the top, no full-screen cover           |
 
 ## Home
 
@@ -175,17 +175,95 @@ else's brand, so the first two cards are named after what they do. Open
 
 Reached at `/dashboard/status`, outside both guards, so no session is needed.
 
-| Scenario          | How to get there                                   | Expected                                                    |
-| ----------------- | -------------------------------------------------- | ----------------------------------------------------------- |
-| Everything up     | `/dashboard/status?mock=status:all-up`             | Three rows, all Operational                                 |
-| Everything down   | `/dashboard/status?mock=status:all-down`           | All three Unavailable; storage carries the proxy hint       |
-| Object store down | `?mock=status:storage-down`                        | Storage Unavailable, the other two Operational              |
-| Device farm down  | `?mock=status:devicefarm-down`                     | Device farm Unavailable                                     |
-| API down          | `?mock=status:api-down`                            | API server Unavailable                                      |
-| Checks in flight  | `?mock=status:checking`                            | All three rows stay on Checking                             |
-| Refocus           | `?mock=status:all-up`, leave the tab and come back | Every check runs again                                      |
-| Old address       | `/status`                                          | Replaced by `/dashboard/status`, no entry in the back stack |
-| Language          | Any of the above, switch below the card            | Systems, statuses and the heading follow                    |
+| Scenario          | How to get there                                   | Expected                                                                |
+| ----------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
+| Everything up     | `/dashboard/status?mock=status:all-up`             | Three rows, all Operational                                             |
+| Everything down   | `/dashboard/status?mock=status:all-down`           | All three Unavailable; storage carries the proxy hint                   |
+| Object store down | `?mock=status:storage-down`                        | Storage Unavailable, the other two Operational                          |
+| Device farm down  | `?mock=status:devicefarm-down`                     | Device farm Unavailable                                                 |
+| API down          | `?mock=status:api-down`                            | API server Unavailable                                                  |
+| Checks in flight  | `?mock=status:checking`                            | All three rows stay on Checking, then turn Operational after 15 seconds |
+| Refocus           | `?mock=status:all-up`, leave the tab and come back | Every check runs again                                                  |
+| Old address       | `/status`                                          | Replaced by `/dashboard/status`, no entry in the back stack             |
+| Language          | Any of the above, switch below the card            | Systems, statuses and the heading follow                                |
+
+## Mock scenarios
+
+Every scenario below runs from the dev server with no backend. Name one in the
+URL and open the page beside it. A scenario marked signed in writes its own
+session, so no login step is needed; the rest clear whatever session is stored.
+
+A scenario that holds a request open answers it after 15 seconds, so the screen
+after the wait is reachable without a reload. Nothing is aborted: the request
+stays in flight and is answered late, the way a slow server behaves. Add `&hold=`
+to change that — `&hold=10` waits ten seconds and `&hold=forever` never answers.
+`forever` is not forever on the dashboard and account setup endpoints: those
+requests are abandoned after 30 seconds and land on the failure card. Everywhere
+else the page waits for as long as the tab is open.
+
+Where the product names matter, open the same URL on
+`http://secure.appknox.com.localhost:4200` for the Appknox names and on
+`http://localhost:4200` for the whitelabel ones.
+
+| Scenario                    | Open                                                          | Expected                                                                            |
+| --------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `home:all`                  | `/dashboard/home?mock=home:all`                               | Five cards: VAPT, StoreKnox, offensive security, reporting, security                |
+| `home:appknox-only`         | `/dashboard/home?mock=home:appknox-only`                      | Redirected to `/dashboard/projects`, no card shown                                  |
+| `home:storeknox`            | `/dashboard/home?mock=home:storeknox`                         | Two cards                                                                           |
+| `home:security`             | `/dashboard/home?mock=home:security`                          | Two cards; the security one opens `/security/projects` in a new tab                 |
+| `home:enterprise`           | `/dashboard/home?mock=home:enterprise`                        | Reporting is entitled but withheld — two cards                                      |
+| `home:whitelabel`           | `/dashboard/home?mock=home:whitelabel`                        | The Sentinel logo above the heading                                                 |
+| `status:all-up`             | `/dashboard/status?mock=status:all-up`                        | Three rows, all Operational                                                         |
+| `status:all-down`           | `/dashboard/status?mock=status:all-down`                      | All three Unavailable; storage carries the proxy hint                               |
+| `status:storage-down`       | `/dashboard/status?mock=status:storage-down`                  | Storage Unavailable, the other two Operational                                      |
+| `status:devicefarm-down`    | `/dashboard/status?mock=status:devicefarm-down`               | Device farm Unavailable                                                             |
+| `status:api-down`           | `/dashboard/status?mock=status:api-down`                      | API server Unavailable                                                              |
+| `status:checking`           | `/dashboard/status?mock=status:checking`                      | All three rows stay on Checking                                                     |
+| `login:success`             | `/login?mock=login:success`                                   | Any password signs in and lands on the dashboard                                    |
+| `login:wrong-password`      | `/login?mock=login:wrong-password`                            | Both fields marked, message under the password                                      |
+| `login:locked`              | `/login?mock=login:locked`                                    | Locked message, password reset offered in place of the button                       |
+| `login:server-error`        | `/login?mock=login:server-error`                              | Notification carrying the server's message                                          |
+| `login:rate-limited`        | `/login?mock=login:rate-limited`                              | 30-second countdown, no password error beside it                                    |
+| `login:sso-optional`        | `/login?mock=login:sso-optional`                              | Password field and SSO button together                                              |
+| `login:sso-only`            | `/login?mock=login:sso-only`                                  | No password field; the SSO button submits                                           |
+| `login:mfa-app`             | `/login?mock=login:mfa-app`                                   | Authenticator code step — `123456` passes, anything else is refused                 |
+| `login:mfa-email`           | `/login?mock=login:mfa-email`                                 | Same, worded for email                                                              |
+| `login:mfa-mandatory`       | `/login?mock=login:mfa-mandatory`                             | Same, with the notice that the organization mandates it                             |
+| `login:mfa-mandatory-email` | `/login?mock=login:mfa-mandatory-email`                       | Same, worded for email                                                              |
+| `login:check-held`          | `/login?mock=login:check-held`                                | The username step keeps its spinner for 15 seconds, then moves on                   |
+| `recover:sent`              | `/recover?mock=recover:sent`                                  | Confirmation telling the user to read their email                                   |
+| `recover:unknown-account`   | `/recover?mock=recover:unknown-account`                       | The same check-your-email confirmation, which never says who has an account         |
+| `recover:server-error`      | `/recover?mock=recover:server-error`                          | Notification, and the form keeps what was typed                                     |
+| `recover:rate-limited`      | `/recover?mock=recover:rate-limited`                          | 30-second countdown, nothing else                                                   |
+| `reset:valid-link`          | `/reset/mock-reset-token?mock=reset:valid-link`               | Password form; a valid password returns to `/login`                                 |
+| `reset:spent-link`          | `/reset/anything?mock=reset:spent-link`                       | Invalid-link message, no form                                                       |
+| `reset:check-fails`         | `/reset/anything?mock=reset:check-fails`                      | Server-error message with an enabled Retry                                          |
+| `reset:check-held`          | `/reset/anything?mock=reset:check-held`                       | The form holds its shape for 15 seconds, then renders                               |
+| `reset:password-refused`    | `/reset/mock-reset-token?mock=reset:password-refused`         | Message under the password field                                                    |
+| `register:accepted`         | `/register?mock=register:accepted`                            | "Registration has been initiated." and check-your-email                             |
+| `register:field-refused`    | `/register?mock=register:field-refused`                       | Message under the company field                                                     |
+| `register:disabled`         | `/register?mock=register:disabled`                            | Generic notification                                                                |
+| `register:elsewhere`        | `/register?mock=register:elsewhere`                           | Leaves for the registration link the configuration names                            |
+| `invite:open`               | `/register-via-invite/mock-token?mock=invite:open`            | Email and company read-only, name prefilled                                         |
+| `invite:no-company`         | `/register-via-invite/mock-token?mock=invite:no-company`      | Company field editable                                                              |
+| `invite:spent`              | `/register-via-invite/mock-token?mock=invite:spent`           | Invalid-invitation state                                                            |
+| `orginvite:open`            | `/invite/mock-invitation-token?mock=orginvite:open`           | Read-only email and organization; accepting asks the user to sign in                |
+| `orginvite:sso`             | `/invite/mock-invitation-token?mock=orginvite:sso`            | No password fields                                                                  |
+| `orginvite:username-taken`  | `/invite/mock-invitation-token?mock=orginvite:username-taken` | Message under the username field                                                    |
+| `orginvite:spent`           | `/invite/anything?mock=orginvite:spent`                       | Invalid-invitation state                                                            |
+| `boot:setup-fails`          | `/?mock=boot:setup-fails`                                     | Failure screen naming Error 500, with a support mailto carrying it                  |
+| `boot:setup-unreachable`    | `/?mock=boot:setup-unreachable`                               | Failure screen with no status named                                                 |
+| `boot:retry-succeeds`       | `/?mock=boot:retry-succeeds`                                  | Failure screen; Retry loads the page                                                |
+| `boot:setup-held`           | `/?mock=boot:setup-held`                                      | Loading overlay stays up for 15 seconds, its bar advancing, then the page renders   |
+| `boot:setup-timeout`        | `/?mock=boot:setup-timeout`                                   | Overlay for 30 seconds, then the failure card with no status, and no second attempt |
+| `boot:wait-messages`        | `/?mock=boot:wait-messages`                                   | Overlay for 28 seconds: the waiting message at 10s, the next at 25s, then the page  |
+| `boot:slow-page`            | `/dashboard/status?mock=boot:slow-page`                       | Progress bar at the top for three seconds                                           |
+| `boot:session-expired`      | `/?mock=boot:session-expired`                                 | Session cleared, back to `/login` with the expiry alert                             |
+| `boot:config-held`          | `/login?mock=boot:config-held`                                | Logo and footer hold their space                                                    |
+| `boot:whitelabel-failure`   | `/?mock=boot:whitelabel-failure`                              | Failure screen with no Appknox support address                                      |
+
+The not-found page needs no scenario: open `/not-a-real-page`. `/status` should
+replace itself with `/dashboard/status`.
 
 ## Language and branding
 
