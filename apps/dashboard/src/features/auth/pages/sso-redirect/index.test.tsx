@@ -21,11 +21,11 @@ function holdTheExchange() {
   );
 }
 
-describe('the wait while an identity provider signs a user in', () => {
-  it('says what is happening rather than leaving the screen blank', async () => {
+describe('SsoRedirectPage', () => {
+  it('renders the signing-in message', async () => {
     holdTheExchange();
 
-    await renderAtRoute('/saml2/redirect?sso_token=tok3n', false);
+    await renderAtRoute('/saml2/redirect?sso_token=tok3n', { settle: false });
 
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: akMT('signingYouIn') })).toBeInTheDocument()
@@ -34,10 +34,10 @@ describe('the wait while an identity provider signs a user in', () => {
     expect(screen.getByText(akMT('completingSsoSignIn'))).toBeInTheDocument();
   });
 
-  it('announces the wait to a screen reader', async () => {
+  it('marks the message as a live region for screen readers', async () => {
     holdTheExchange();
 
-    await renderAtRoute('/saml2/redirect?sso_token=tok3n', false);
+    await renderAtRoute('/saml2/redirect?sso_token=tok3n', { settle: false });
 
     await waitFor(() => expect(screen.getByRole('status')).toBeInTheDocument());
   });

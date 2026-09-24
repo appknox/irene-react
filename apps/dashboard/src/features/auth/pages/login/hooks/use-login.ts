@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 
 import {
   AuthService,
@@ -11,6 +11,8 @@ import { akNotify } from '@irene/ui/notify';
 
 import { startSession } from '@/features/auth/actions/session';
 import { getLoginFailure } from '@/features/auth/utils/login-error';
+
+const loginRoute = getRouteApi('/_unauthenticated/login');
 
 /**
  * ============================================================
@@ -30,15 +32,18 @@ interface UseLoginOptions {
  * @returns The mutation, and how its refusal should be shown.
  */
 export function useLogin({ onMfaRequired }: UseLoginOptions = {}) {
+  /* The URL the `_authenticated` guard blocked, e.g. an OIDC redirect carrying `oidc_token`. */
+  const { redirectTo } = loginRoute.useSearch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Login mutation
   const login = useMutation({
     mutationFn: (values: ApiLoginRequest) => AuthService.login(values),
 
     onSuccess: async (response) => {
       startSession(queryClient, response);
-      await navigate({ to: '/' });
+      await navigate({ to: redirectTo ?? '/' });
     },
 
     // Only a refused password and a locked account belong on the field itself.

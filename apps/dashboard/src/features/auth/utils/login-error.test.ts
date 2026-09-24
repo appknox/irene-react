@@ -20,12 +20,18 @@ const unreachable = () =>
   new AxiosError('Network Error', AxiosError.ERR_NETWORK, { headers: new AxiosHeaders() });
 
 describe('getLoginFailure', () => {
-  it('reports nothing while the sign-in has not failed', () => {
+  it('returns nothing for a rate-limit error, which the countdown reports', () => {
+    const error = refusal(HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 60 } });
+
+    expect(getLoginFailure(error)).toBeUndefined();
+  });
+
+  it('returns nothing when no error was given', () => {
     expect(getLoginFailure(null)).toBeUndefined();
     expect(getLoginFailure(undefined)).toBeUndefined();
   });
 
-  it('marks a wrong password for the field itself', () => {
+  it('returns a wrong-password failure for the password field', () => {
     const error = refusal(HTTP_STATUS_CODES.UNAUTHORIZED, {
       message: API_LOGIN_REFUSAL_MESSAGES.CREDENTIALS_REJECTED,
     });
@@ -33,7 +39,7 @@ describe('getLoginFailure', () => {
     expect(getLoginFailure(error)).toEqual({ kind: 'credentials' });
   });
 
-  it('marks a locked account for the field itself', () => {
+  it('returns an account-locked failure for the password field', () => {
     const error = refusal(HTTP_STATUS_CODES.UNAUTHORIZED, {
       message: API_LOGIN_REFUSAL_MESSAGES.ACCOUNT_LOCKED,
     });
@@ -41,7 +47,7 @@ describe('getLoginFailure', () => {
     expect(getLoginFailure(error)).toEqual({ kind: 'locked' });
   });
 
-  it('passes any other message from the server through to a toast', () => {
+  it('returns any other server message for a notification', () => {
     const error = refusal(HTTP_STATUS_CODES.FORBIDDEN, {
       message: 'Your organisation has been suspended',
     });
@@ -52,14 +58,14 @@ describe('getLoginFailure', () => {
     });
   });
 
-  it('names the network when the request never reached the server', () => {
+  it('returns the network-error message when the request never reached the server', () => {
     expect(getLoginFailure(unreachable())).toEqual({
       kind: 'notify',
       message: akMT('networkError'),
     });
   });
 
-  it('falls back to a generic message when the body explains nothing', () => {
+  it('returns the generic message when the body carries none', () => {
     const error = refusal(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR, '<html>Bad Gateway</html>');
 
     expect(getLoginFailure(error)).toEqual({
@@ -68,7 +74,7 @@ describe('getLoginFailure', () => {
     });
   });
 
-  it('reads a second-factor mfaRequirement as a step forward, not a complaint', () => {
+  it('returns an mfa step rather than a failure when the body carries mfaRequirement', () => {
     const error = refusal(HTTP_STATUS_CODES.UNAUTHORIZED, { type: 'TOTP', forced: 'True' });
 
     expect(getLoginFailure(error)).toEqual({
@@ -77,7 +83,7 @@ describe('getLoginFailure', () => {
     });
   });
 
-  it('reads a mfaRequirement with no forced flag as optional', () => {
+  it('reports the mfa step as optional when the body sets no forced flag', () => {
     const error = refusal(HTTP_STATUS_CODES.UNAUTHORIZED, { type: 'HOTP' });
 
     expect(getLoginFailure(error)).toEqual({
@@ -98,14 +104,14 @@ describe('getLoginFailure', () => {
     }
   );
 
-  it('does not raise a code step for a factor it cannot render', () => {
+  it('returns no mfa step for a factor the page cannot render', () => {
     // The user would get an input with no idea what to put in it.
     const error = refusal(HTTP_STATUS_CODES.UNAUTHORIZED, { type: 'SMS' });
 
     expect(getLoginFailure(error)?.kind).not.toBe('mfa');
   });
 
-  it('reads a message the API sent as a list, as DRF does', () => {
+  it('reads a message the API sent as a list', () => {
     const error = refusal(HTTP_STATUS_CODES.BAD_REQUEST, {
       message: [API_LOGIN_REFUSAL_MESSAGES.ACCOUNT_LOCKED],
     });
@@ -115,7 +121,7 @@ describe('getLoginFailure', () => {
     });
   });
 
-  it('surfaces a form-wide detail, not just a message field', () => {
+  it('reads a form-wide detail as well as a message field', () => {
     const error = refusal(HTTP_STATUS_CODES.BAD_REQUEST, {
       detail: 'This organisation has been suspended',
     });

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "vitest run --coverage",
     "type-check": "tsc -b --noEmit"
   }
 }

@@ -1,10 +1,12 @@
 import { faker } from '@faker-js/faker';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthEndpoints, type ApiSsoCheck } from '@irene/api/services/auth';
+import { formatWaitTime, rateLimitStore } from '@irene/api/stores/rate-limit';
+import { HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
 
 import { buildSsoCheck } from '@tests/factories/sso';
@@ -61,7 +63,7 @@ async function submitUsername() {
 }
 
 describe('useSsoLogin', () => {
-  it('sends a SAML user to the provider, with the check token and an absolute return URL', async () => {
+  it('redirects a SAML account to the provider with the check token and an absolute return URL', async () => {
     checkReturns({ is_saml: true, is_sso_enforced: true, token: 'check-token' });
 
     let query: URLSearchParams | undefined;
@@ -83,7 +85,7 @@ describe('useSsoLogin', () => {
     expect(query?.get('return_to')).toBe(`${ORIGIN}/saml2/redirect`);
   });
 
-  it('sends an OIDC user to the provider with the username, not the SAML token', async () => {
+  it('redirects an OIDC account to the provider with the username rather than the check token', async () => {
     checkReturns({ is_oidc: true, is_sso_enforced: true });
 
     let body: unknown;
@@ -107,7 +109,7 @@ describe('useSsoLogin', () => {
     });
   });
 
-  it('offers SSO beside the password when the account may use either', async () => {
+  it('reports SSO as available when the account may also use a password', async () => {
     checkReturns({ is_saml: true, token: 'check-token' });
 
     server.use(
@@ -124,7 +126,7 @@ describe('useSsoLogin', () => {
     await waitFor(() => expect(assignedHref).toBe(IDP_URL));
   });
 
-  it('warns and stays put when the provider cannot be reached', async () => {
+  it('renders a notification and does not navigate when the provider request fails', async () => {
     checkReturns({ is_saml: true, is_sso_enforced: true });
     server.use(http.get(buildAPITestURL(AuthEndpoints.samlStart()), () => HttpResponse.error()));
 
@@ -135,7 +137,7 @@ describe('useSsoLogin', () => {
     expect(assignedHref).toBeUndefined();
   });
 
-  it('warns rather than navigating when the response carries no URL', async () => {
+  it('renders a notification and does not navigate when the response carries no URL', async () => {
     checkReturns({ is_saml: true, is_sso_enforced: true });
 
     server.use(
@@ -147,5 +149,52 @@ describe('useSsoLogin', () => {
 
     expect(await screen.findByText(akMT('pleaseTryAgain'))).toBeInTheDocument();
     expect(assignedHref).toBeUndefined();
+  });
+
+  describe('an account the server has throttled', () => {
+    // The lock is app-wide and outlives a render.
+    // Wrapped: ending the wait updates whatever is still mounted.
+    afterEach(() => act(() => rateLimitStore.getState().clearThrottle()));
+
+    it('renders the rate-limit countdown instead of the generic error', async () => {
+      checkReturns({ is_saml: true, is_sso_enforced: true, token: 'check-token' });
+
+      server.use(
+        http.get(buildAPITestURL(AuthEndpoints.samlStart()), () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await submitUsername();
+      await userEvent.click(await screen.findByRole('button', { name: akMT('ssoLogin') }));
+
+      expect(
+        await screen.findByText(`${akMT('rateLimitExceeded')} ${formatWaitTime(30)}`)
+      ).toBeInTheDocument();
+
+      expect(screen.queryByText(akMT('pleaseTryAgain'))).not.toBeInTheDocument();
+    });
+
+    it('does not navigate while the account is rate limited', async () => {
+      checkReturns({ is_saml: true, is_sso_enforced: true, token: 'check-token' });
+
+      server.use(
+        http.get(buildAPITestURL(AuthEndpoints.samlStart()), () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await submitUsername();
+      await userEvent.click(await screen.findByRole('button', { name: akMT('ssoLogin') }));
+      await screen.findByText(`${akMT('rateLimitExceeded')} ${formatWaitTime(30)}`);
+
+      expect(assignedHref).toBeUndefined();
+    });
   });
 });

@@ -12,7 +12,7 @@ afterEach(() => {
 const renderToaster = (props = {}) => render(<AkToaster {...props} />);
 
 describe('AkToaster', () => {
-  it('shows a toast raised from outside React', async () => {
+  it('renders a toast raised from outside React', async () => {
     renderToaster();
 
     akNotify.success('Signed in');
@@ -57,7 +57,7 @@ describe('AkToaster', () => {
     );
   });
 
-  it('renders the toast as an alert, matching the inline UI', async () => {
+  it('renders the toast with the alert role', async () => {
     renderToaster();
 
     akNotify.error('Unable to reach the server');
@@ -69,7 +69,7 @@ describe('AkToaster', () => {
     expect(alert.querySelector('svg')).toBeInTheDocument();
   });
 
-  it('shows a description under the message', async () => {
+  it('renders the description under the message', async () => {
     renderToaster();
 
     akNotify.error('Login failed', { description: 'Invalid username or password.' });
@@ -77,7 +77,7 @@ describe('AkToaster', () => {
     expect(await screen.findByText('Invalid username or password.')).toBeInTheDocument();
   });
 
-  it('sits in the bottom right corner', async () => {
+  it('renders in the bottom right corner', async () => {
     const { container } = renderToaster();
 
     akNotify.info('Scan queued');
@@ -89,7 +89,7 @@ describe('AkToaster', () => {
     expect(toaster).toHaveAttribute('data-x-position', 'right');
   });
 
-  it("uses the app's own font, not sonner's system stack", async () => {
+  it("renders the toast in the app's own font family", async () => {
     const { container } = renderToaster();
 
     akNotify.info('Scan queued');

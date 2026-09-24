@@ -1,6 +1,8 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
+import { coverageConfig } from '../../vitest.coverage';
+
 const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
@@ -14,6 +16,6 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./tests/setup.ts'],
-    coverage: { provider: 'v8', reporter: ['text', 'html'] },
+    coverage: coverageConfig,
   },
 });

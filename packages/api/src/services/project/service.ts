@@ -1,6 +1,7 @@
 import { apiRequest } from '@irene/api/request';
+import { transformPaginatedResponse } from '@irene/api/utils/transforms';
 import type { ApiProject, ApiProjectListRequest } from '@irene/api/services/project';
-import type { ApiPage, ApiPageResponse } from '@irene/api/types/pagination';
+import type { ApiPageEnvelope } from '@irene/api/utils/pagination';
 
 import { ProjectEndpoints } from './config';
 
@@ -8,31 +9,21 @@ import { ProjectEndpoints } from './config';
 export default class ProjectService {
   /**
    * Fetches a page of projects and unwraps the DRF envelope.
-   *
    * @param params - The page size, offset and search text.
    * @returns The projects on the page, the total count, and whether more pages exist either side.
    */
-  public static readonly list = async (
-    params: ApiProjectListRequest
-  ): Promise<ApiPage<ApiProject>> => {
-    const page = await apiRequest.get<ApiPageResponse<ApiProject>>(ProjectEndpoints.list(), {
-      params,
-    });
+  public static readonly getProjects = async (params: ApiProjectListRequest) => {
+    const url = ProjectEndpoints.list();
+    const page = await apiRequest.get<ApiPageEnvelope<ApiProject>>(url, { params });
 
-    return {
-      items: page.results ?? [],
-      count: page.count ?? 0,
-      hasNext: Boolean(page.next),
-      hasPrevious: Boolean(page.previous),
-    };
+    return transformPaginatedResponse(page);
   };
 
   /**
    * Fetches one project.
-   *
    * @param id - The project id.
    * @returns The project.
    */
-  public static readonly detail = (id: number | string): Promise<ApiProject> =>
-    apiRequest.get(ProjectEndpoints.detail(id));
+  public static readonly getProject = (id: number | string) =>
+    apiRequest.get<ApiProject>(ProjectEndpoints.detail(id));
 }

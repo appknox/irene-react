@@ -1,16 +1,31 @@
 import { isAxiosError } from 'axios';
 import { http, HttpResponse, type JsonBodyType } from 'msw';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HTTP_STATUS_CODES } from '@irene/constants';
 import { ENUMS } from '@irene/enums';
 
-import { apiRequest, currentProduct, request } from '@irene/api/request';
+import {
+  apiRequest,
+  currentProduct,
+  request,
+  SELF_HANDLING_UNAUTHORIZED_API_ENDPOINTS,
+} from '@irene/api/request';
+
+import { AuthEndpoints } from '@irene/api/services/auth/endpoints';
+import { rateLimitStore } from '@irene/api/stores/rate-limit';
 import { getApiErrorPayload, getApiErrorStatus } from '@irene/api/utils/errors';
-import { storeSession } from '@irene/api/utils/session';
+import { getStoredSession, storeSession } from '@irene/api/utils/session';
+import { buildSession } from '@tests/factories';
 import { buildAPITestURL, server } from '@tests/server';
 
 const PING = buildAPITestURL('api/ping');
+const PROJECTS_PATH = 'api/v3/projects';
+
+/** ============================================================
+ * TEST HELPERS
+ * ============================================================
+ */
 
 /** Captures what the client actually sent. */
 function intercept(
@@ -63,6 +78,33 @@ async function clientWith(tiers: { injected?: string; baked?: string; hostname?:
   return (await import('@irene/api/request')).client;
 }
 
+/** A stored session for the interceptor to end. */
+function signIn() {
+  storeSession(buildSession());
+}
+
+/** Records where the browser is sent. jsdom will not let `replace` be spied on. */
+function watchNavigation() {
+  const replace = vi.fn();
+
+  Object.defineProperty(window, 'location', {
+    value: { ...realLocation, replace },
+    configurable: true,
+  });
+
+  return replace;
+}
+
+/** Answers one path with one status. */
+function refuse(path: string, status: number, body: JsonBodyType = {}) {
+  server.use(http.all(buildAPITestURL(path), () => HttpResponse.json(body, { status })));
+}
+
+/** ============================================================
+ * TEST START
+ * ============================================================
+ */
+
 describe('host resolution', () => {
   it('takes the host from the injected tier', async () => {
     const fresh = await clientWith({ injected: 'https://injected.example.com' });
@@ -85,13 +127,13 @@ describe('host resolution', () => {
     expect(fresh.defaults.baseURL).toBe('https://injected.example.com');
   });
 
-  it('falls back to the resolver default', async () => {
+  it('falls back to the default host when neither tier carries one', async () => {
     const fresh = await clientWith({});
 
     expect(fresh.defaults.baseURL).toBe('https://api.appknox.com');
   });
 
-  it('reads a host of / as same origin', async () => {
+  it('turns a host of / into an empty baseURL', async () => {
     const fresh = await clientWith({ injected: '/' });
 
     expect(fresh.defaults.baseURL).toBe('');
@@ -99,20 +141,20 @@ describe('host resolution', () => {
 });
 
 describe('product header', () => {
-  it('sends Appknox from any host but the Devknox one', async () => {
+  it('sends the Appknox product header from any host but the Devknox one', async () => {
     const fresh = await clientWith({ hostname: 'dashboard.example.test' });
 
     expect(currentProduct()).toBe(ENUMS.PRODUCT.APPKNOX);
     expect(fresh.defaults.headers['X-Product']).toBe('0');
   });
 
-  it('sends Devknox from the Devknox host', async () => {
+  it('sends the Devknox product header from the Devknox host', async () => {
     const fresh = await clientWith({ hostname: 'secure.devknox.io' });
 
     expect(fresh.defaults.headers['X-Product']).toBe('1');
   });
 
-  it('puts it on every request', async () => {
+  it('sends the product header on every request', async () => {
     Object.defineProperty(window, 'location', { value: realLocation, configurable: true });
 
     const seen = intercept('get');
@@ -124,13 +166,13 @@ describe('product header', () => {
 });
 
 describe('request', () => {
-  it('unwraps the response to its data', async () => {
+  it('resolves to the response data', async () => {
     intercept('get', 200, { id: 7 });
 
     await expect(request({ url: 'api/ping' })).resolves.toEqual({ id: 7 });
   });
 
-  it('sends the body exactly as written', async () => {
+  it('sends the request body unchanged', async () => {
     const seen = intercept('post');
 
     await request({ url: 'api/ping', method: 'POST', data: { is_active: true } });
@@ -148,7 +190,7 @@ describe('request', () => {
     expect(getApiErrorPayload(error)).toEqual({ detail: 'Forbidden' });
   });
 
-  it('rejects with an Error that isAxiosError recognises', async () => {
+  it('rejects with an error isAxiosError recognises', async () => {
     intercept('get', 500);
 
     const error = await request({ url: 'api/ping' }).catch((reason: unknown) => reason);
@@ -222,17 +264,19 @@ describe('the credential interceptor', () => {
     window.localStorage.clear();
   });
 
-  it('attaches the stored credential, so no call site has to', async () => {
-    storeSession({ token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' });
+  it('sets the Authorization header from the stored session', async () => {
+    const session = buildSession();
+
+    storeSession(session);
 
     const seen = interceptPing();
 
     await request({ url: 'api/ping' });
 
-    expect(seen.authorization).toBe('Basic NDI6dG9rM24=');
+    expect(seen.authorization).toBe(`Basic ${session.b64token}`);
   });
 
-  it('sends none when signed out, rather than an empty credential', async () => {
+  it('sends no Authorization header when no session is stored', async () => {
     const seen = interceptPing();
 
     await request({ url: 'api/ping' });
@@ -240,8 +284,8 @@ describe('the credential interceptor', () => {
     expect(seen.authorization).toBeNull();
   });
 
-  it('leaves an explicit credential alone, for one not yet stored', async () => {
-    storeSession({ token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' });
+  it('keeps an Authorization header the caller set', async () => {
+    storeSession(buildSession());
 
     const seen = interceptPing();
 
@@ -250,19 +294,124 @@ describe('the credential interceptor', () => {
     expect(seen.authorization).toBe('Basic OTk6b3RoZXI=');
   });
 
-  it('reads storage per request, so signing in mid-session is picked up', async () => {
+  it('reads the stored session on each request, so a mid-session sign-in is picked up', async () => {
     const before = interceptPing();
 
     await request({ url: 'api/ping' });
 
     expect(before.authorization).toBeNull();
 
-    storeSession({ token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' });
+    const session = buildSession();
+
+    storeSession(session);
 
     const after = interceptPing();
 
     await request({ url: 'api/ping' });
 
-    expect(after.authorization).toBe('Basic NDI6dG9rM24=');
+    expect(after.authorization).toBe(`Basic ${session.b64token}`);
+  });
+});
+
+describe('the response interceptor', () => {
+  beforeEach(() => {
+    rateLimitStore.getState().clearThrottle();
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', { value: realLocation, configurable: true });
+    vi.restoreAllMocks();
+  });
+
+  describe('a 401 response', () => {
+    it('clears the stored session and navigates to /login', async () => {
+      signIn();
+
+      const navigation = watchNavigation();
+
+      refuse(PROJECTS_PATH, HTTP_STATUS_CODES.UNAUTHORIZED, { detail: 'Invalid token' });
+
+      await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow();
+
+      expect(getStoredSession()).toBeNull();
+      expect(navigation).toHaveBeenCalledWith('/login?sessionExpired=true');
+    });
+
+    it('navigates to /login with userInactive when the body reports an inactive account', async () => {
+      signIn();
+
+      const navigation = watchNavigation();
+
+      refuse(PROJECTS_PATH, HTTP_STATUS_CODES.UNAUTHORIZED, { detail: 'User account is inactive' });
+
+      await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow();
+
+      expect(navigation).toHaveBeenCalledWith('/login?userInactive=true');
+    });
+
+    it.each(SELF_HANDLING_UNAUTHORIZED_API_ENDPOINTS)(
+      'leaves %s to report its own 401',
+      async (path) => {
+        signIn();
+
+        const navigation = watchNavigation();
+
+        refuse(path, HTTP_STATUS_CODES.UNAUTHORIZED, { detail: 'Refused' });
+
+        await expect(apiRequest.post(path)).rejects.toThrow();
+
+        expect(navigation).not.toHaveBeenCalled();
+        expect(getStoredSession()).not.toBeNull();
+      }
+    );
+
+    it('does not navigate for a 401 on the password reset endpoints', async () => {
+      signIn();
+
+      const navigation = watchNavigation();
+      const path = AuthEndpoints.resetPassword('some-t0ken');
+
+      refuse(path, HTTP_STATUS_CODES.UNAUTHORIZED, { detail: 'Refused' });
+
+      await expect(apiRequest.put(path)).rejects.toThrow();
+
+      expect(navigation).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a 429 response', () => {
+    it('starts the rate-limit countdown with the seconds the body names', async () => {
+      refuse(PROJECTS_PATH, HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 45 } });
+
+      await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow();
+
+      expect(rateLimitStore.getState()).toMatchObject({ isThrottled: true, secondsRemaining: 45 });
+    });
+
+    it('starts no countdown for a 429 on an upload request', async () => {
+      refuse('api/upload_app', HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 45 } });
+
+      await expect(apiRequest.post('api/upload_app', {})).rejects.toThrow();
+
+      expect(rateLimitStore.getState().isThrottled).toBe(false);
+    });
+
+    it('still rejects, so the caller handles the failure', async () => {
+      refuse(PROJECTS_PATH, HTTP_STATUS_CODES.TOO_MANY_REQUESTS, { detail: { lock_time: 45 } });
+
+      await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow('429');
+    });
+  });
+
+  it('rejects a request that never reached the server without touching the session', async () => {
+    const navigation = watchNavigation();
+
+    server.use(http.get(buildAPITestURL(PROJECTS_PATH), () => HttpResponse.error()));
+
+    await expect(apiRequest.get(PROJECTS_PATH)).rejects.toThrow();
+
+    expect(navigation).not.toHaveBeenCalled();
+    expect(rateLimitStore.getState().isThrottled).toBe(false);
   });
 });

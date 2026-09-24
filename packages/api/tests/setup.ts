@@ -10,6 +10,16 @@ const reset = () => {
   delete window.runtimeGlobalConfig;
 };
 
+/*
+  jsdom implements no navigation, so the redirect the interceptor performs is
+  reported as an unimplemented feature. The cases that assert on it replace
+  `location` with their own recorder.
+*/
+Object.defineProperty(window, 'location', {
+  value: { ...window.location, replace: () => undefined },
+  configurable: true,
+});
+
 // Modules read config at import, so the tiers must exist before they load.
 reset();
 

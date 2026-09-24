@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./*": "./src/components/*/index.tsx",
     "./*/variants": "./src/components/*/variants.ts",
+    "./*/helpers": "./src/components/*/helpers.ts",
     "./*/styles.module.css": "./src/components/*/styles.module.css",
     "./*/context": "./src/components/*/context.ts",
     "./images/*": "./src/images/*",
@@ -65,6 +66,8 @@
   "dependencies": {
     "@iconify/react": "^6.0.2",
     "@irene/enums": "workspace:*",
+    "@irene/translations": "workspace:*",
+    "@tanstack/react-table": "^9.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cn": "^0.3.0",
@@ -78,7 +81,7 @@
     "lint": "eslint .",
     "shadcn:add": "sh -c 'shadcn add --yes \"$@\" && node scripts/rewrite-shadcn-imports.ts && prettier --write src/components' --",
     "storybook": "storybook dev -p 6006",
-    "test": "vitest run",
+    "test": "vitest run --coverage",
     "test:watch": "vitest",
     "type-check": "tsc -b --noEmit"
   }

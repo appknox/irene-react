@@ -7,7 +7,7 @@ const text = (container: HTMLElement) =>
   container.querySelector<HTMLElement>('[data-slot="typography"]');
 
 describe('AkTypography', () => {
-  it('reads as body text when nothing is asked for', () => {
+  it('renders the body variant when none is given', () => {
     const { container } = render(<AkTypography>Hello</AkTypography>);
 
     expect(text(container)?.tagName).toBe('P');
@@ -34,13 +34,13 @@ describe('AkTypography', () => {
     expect(text(container)?.tagName).toBe(tagName);
   });
 
-  it('announces a heading to a screen reader', () => {
+  it('renders a heading element for a heading variant', () => {
     render(<AkTypography variant="h3">Findings</AkTypography>);
 
     expect(screen.getByRole('heading', { name: 'Findings' })).toBeInTheDocument();
   });
 
-  it('takes a different element without losing the variant styling', () => {
+  it('renders the element the tag prop names, keeping the variant classes', () => {
     const { container } = render(
       <AkTypography variant="h5" tag="span">
         Inline
@@ -83,7 +83,7 @@ describe('AkTypography', () => {
     expect(text(container)).toHaveClass(className);
   });
 
-  it('clips to one line when asked', () => {
+  it('truncates to one line with noWrap', () => {
     const { container } = render(<AkTypography noWrap>A very long line</AkTypography>);
 
     expect(text(container)).toHaveClass('truncate');

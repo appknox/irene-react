@@ -15,7 +15,7 @@ import type { ApiSessionResponse } from '@irene/api/services/auth';
  * @returns Never — it always throws the redirect.
  */
 export function bounceToLogin(reason: string): never {
-  throw redirect({ to: '/login', search: { sso_login_error: reason } });
+  throw redirect({ to: '/login', search: { ssoLoginError: reason } });
 }
 
 /**

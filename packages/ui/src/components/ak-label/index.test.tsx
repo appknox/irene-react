@@ -13,7 +13,7 @@ describe('rendering', () => {
     expect(screen.getByText('ApiProject name')).toBeInTheDocument();
   });
 
-  it('marks itself for styling hooks', () => {
+  it('renders a data attribute on the label', () => {
     render(<AkLabel>ApiProject name</AkLabel>);
 
     expect(screen.getByText('ApiProject name')).toHaveAttribute('data-slot', 'label');
@@ -21,7 +21,7 @@ describe('rendering', () => {
 });
 
 describe('pairing with a control', () => {
-  it('names the input it points at', () => {
+  it('points at the input with htmlFor', () => {
     render(
       <Fragment>
         <AkLabel htmlFor="project">ApiProject name</AkLabel>
@@ -32,7 +32,7 @@ describe('pairing with a control', () => {
     expect(screen.getByRole('textbox', { name: 'ApiProject name' })).toBeInTheDocument();
   });
 
-  it('focuses that input when clicked', async () => {
+  it('focuses the input when the user clicks the label', async () => {
     render(
       <Fragment>
         <AkLabel htmlFor="project">ApiProject name</AkLabel>

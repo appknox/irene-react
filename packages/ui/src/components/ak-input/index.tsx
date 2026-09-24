@@ -1,5 +1,6 @@
-import { type ComponentProps, type ReactNode } from 'react';
+import { useState, type ComponentProps, type ReactNode } from 'react';
 
+import { akMT } from '@irene/translations/intl';
 import { AkIcon } from '@irene/ui/ak-icon';
 import { cn } from '@irene/ui/cn';
 
@@ -11,6 +12,11 @@ type AkInputProps = ComponentProps<'input'> & {
 
 /**
  * A text field, with its error message underneath when it has one.
+ *
+ * A `password` field carries a control that reveals what was typed, since a
+ * field nobody can read is where typos go unnoticed. It is a button rather than
+ * a toggle on the field itself, so the browser keeps treating the field as a
+ * password until the user asks otherwise.
  *
  * @param props.hasError - Colours the border without showing a message.
  * @param props.errorMessage - The message under the field.
@@ -25,23 +31,47 @@ function AkInput({
   'aria-invalid': ariaInvalid,
   ...props
 }: AkInputProps) {
+  const [isRevealed, setIsRevealed] = useState(false);
+
   // Keeps an explicit false from the form control, which a screen reader reads as valid.
   const invalid = hasError || Boolean(errorMessage) || ariaInvalid;
+  const isPassword = type === 'password';
+  const inputType = isPassword && isRevealed ? 'text' : type;
 
   return (
     <div className={cn('grid w-full gap-1', wrapperClassName)}>
-      <input
-        type={type}
-        data-slot="input"
-        aria-invalid={invalid}
-        className={cn(
-          'h-9 w-full min-w-0 rounded-sm border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-base placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30',
-          'focus-visible:border-border-strong focus-visible:ring-[3px] focus-visible:ring-border-strong/40',
-          'aria-invalid:border-danger aria-invalid:ring-danger/20',
-          className
+      <div className="relative">
+        <input
+          type={inputType}
+          data-slot="input"
+          aria-invalid={invalid}
+          className={cn(
+            'h-9 w-full min-w-0 rounded-sm border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-base placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-neutral-100 disabled:bg-neutral-100 disabled:text-foreground dark:bg-input/30',
+            'focus-visible:border-border-strong focus-visible:ring-[3px] focus-visible:ring-border-strong/40',
+            'aria-invalid:border-danger aria-invalid:ring-danger/20',
+            isPassword && 'pr-9',
+            className
+          )}
+          {...props}
+        />
+
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setIsRevealed((revealed) => !revealed)}
+            aria-label={isRevealed ? akMT('hidePassword') : akMT('showPassword')}
+            aria-pressed={isRevealed}
+            disabled={props.disabled}
+            data-slot="input-reveal"
+            className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-3 text-foreground-muted transition-colors hover:text-foreground disabled:pointer-events-none"
+          >
+            <AkIcon
+              name={isRevealed ? 'material-symbols:visibility-off' : 'material-symbols:visibility'}
+              className="size-4"
+            />
+          </button>
         )}
-        {...props}
-      />
+      </div>
 
       {errorMessage && (
         <p className="flex items-start gap-1 text-sm text-danger" data-slot="input-error">

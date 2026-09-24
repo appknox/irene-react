@@ -42,35 +42,35 @@ function interceptCheck(respond: () => Response) {
   return seen;
 }
 
-describe('AuthService.check', () => {
+describe('AuthService.checkSession', () => {
   beforeEach(signedIn);
 
-  describe('when the credential is live', () => {
-    it('posts to the v1 check endpoint with the credential', async () => {
+  describe('when the credential is accepted', () => {
+    it('posts to the v1 check endpoint with the Authorization header', async () => {
       const seen = interceptCheck(() => HttpResponse.json({}));
 
-      await AuthService.check();
+      await AuthService.checkSession();
 
       expect(seen.method).toBe('POST');
       expect(seen.authorization).toBe(`Basic ${B64TOKEN}`);
     });
 
-    it('sends an empty body, as irene does', async () => {
+    it('posts an empty body', async () => {
       const seen = interceptCheck(() => HttpResponse.json({}));
 
-      await AuthService.check();
+      await AuthService.checkSession();
 
       expect(seen.body).toEqual({});
     });
   });
 
   describe('when the credential is refused', () => {
-    it('keeps the status and detail from a 401', async () => {
+    it('rejects with the status and detail of a 401', async () => {
       interceptCheck(() =>
         HttpResponse.json({ detail: 'Invalid token.' }, { status: HTTP_STATUS_CODES.UNAUTHORIZED })
       );
 
-      const error = await AuthService.check().catch((reason: unknown) => reason);
+      const error = await AuthService.checkSession().catch((reason: unknown) => reason);
 
       expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.UNAUTHORIZED);
 
@@ -79,7 +79,7 @@ describe('AuthService.check', () => {
       });
     });
 
-    it('rejects an inactive account, which the backend reports separately', async () => {
+    it('rejects with the inactive-account body the backend returns', async () => {
       interceptCheck(() =>
         HttpResponse.json(
           { detail: 'User inactive or deleted.' },
@@ -87,29 +87,29 @@ describe('AuthService.check', () => {
         )
       );
 
-      const error = await AuthService.check().catch((reason: unknown) => reason);
+      const error = await AuthService.checkSession().catch((reason: unknown) => reason);
 
       expect(getApiErrorPayload(error)).toEqual({
         detail: 'User inactive or deleted.',
       });
     });
 
-    it('propagates a server error instead of treating it as signed out', async () => {
+    it('rejects on a 500 rather than reporting a signed-out session', async () => {
       interceptCheck(() =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
       );
 
-      await expect(AuthService.check()).rejects.toThrow('500');
+      await expect(AuthService.checkSession()).rejects.toThrow('500');
     });
   });
 
-  describe('edge cases', () => {
-    it('sends no credential at all when nothing is stored', async () => {
+  describe('when nothing is stored', () => {
+    it('sends no Authorization header', async () => {
       window.localStorage.clear();
 
       const seen = interceptCheck(() => HttpResponse.json({}));
 
-      await AuthService.check();
+      await AuthService.checkSession();
 
       expect(seen.authorization).toBeNull();
     });
@@ -147,7 +147,7 @@ describe('AuthService.login', () => {
       await expect(AuthService.login(credentials)).resolves.toEqual(response);
     });
 
-    it('sends the username lowercased with the password', async () => {
+    it('posts the username in lower case with the password', async () => {
       const seen = interceptLogin(() => HttpResponse.json({ token: 't', user_id: 1 }));
 
       await AuthService.login({ ...credentials, username: 'Jane.Doe@Example.COM' });
@@ -160,7 +160,7 @@ describe('AuthService.login', () => {
   });
 
   describe('when the credentials are refused', () => {
-    it('keeps the detail from a 401', async () => {
+    it('rejects with the detail of a 401', async () => {
       interceptLogin(() =>
         HttpResponse.json(
           { detail: 'Invalid username or password' },
@@ -177,7 +177,7 @@ describe('AuthService.login', () => {
       });
     });
 
-    it('propagates a server error', async () => {
+    it('rejects on a 500', async () => {
       interceptLogin(() =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
       );
@@ -190,7 +190,7 @@ describe('AuthService.login', () => {
 describe('AuthService.logout', () => {
   beforeEach(signedIn);
 
-  it('posts to the v1 logout endpoint with the credential', async () => {
+  it('posts to the v1 logout endpoint with the Authorization header', async () => {
     const seen: { authorization: string | null; method: string } = {
       authorization: null,
       method: '',
@@ -211,7 +211,7 @@ describe('AuthService.logout', () => {
     expect(seen.authorization).toBe(`Basic ${B64TOKEN}`);
   });
 
-  it('propagates a refusal, leaving the caller to sign out locally anyway', async () => {
+  it('rejects when the logout request is refused', async () => {
     server.use(
       http.post(LOGOUT_URL, () => HttpResponse.json({}, { status: HTTP_STATUS_CODES.UNAUTHORIZED }))
     );
@@ -222,7 +222,7 @@ describe('AuthService.logout', () => {
   });
 });
 
-describe('AuthService.recover', () => {
+describe('AuthService.recoverPassword', () => {
   const RECOVER_URL = buildAPITestURL(AuthEndpoints.recover());
 
   it('posts the username to the v2 forgot password endpoint', async () => {
@@ -240,7 +240,7 @@ describe('AuthService.recover', () => {
       })
     );
 
-    await AuthService.recover(RECOVER_USERNAME);
+    await AuthService.recoverPassword(RECOVER_USERNAME);
 
     expect(seen.body).toEqual({ username: RECOVER_USERNAME });
 
@@ -248,7 +248,7 @@ describe('AuthService.recover', () => {
     expect(seen.authorization).toBeNull();
   });
 
-  it('keeps the per-field errors from a 400, so the form can show them', async () => {
+  it('rejects with the field errors of a 400', async () => {
     server.use(
       http.post(RECOVER_URL, () =>
         HttpResponse.json(
@@ -258,7 +258,9 @@ describe('AuthService.recover', () => {
       )
     );
 
-    const error = await AuthService.recover(UNKNOWN_USERNAME).catch((reason: unknown) => reason);
+    const error = await AuthService.recoverPassword(UNKNOWN_USERNAME).catch(
+      (reason: unknown) => reason
+    );
 
     expect(getApiErrorPayload(error)).toEqual({
       username: ['No account uses that address'],
@@ -284,7 +286,7 @@ describe('AuthService.login with a second factor', () => {
     return seen;
   }
 
-  it('omits otp entirely on an attempt that has none', async () => {
+  it('posts no otp field when no code is given', async () => {
     const seen = sendLogin(() => HttpResponse.json({ token: 't', user_id: 1 }));
 
     await AuthService.login({ username: 'jane', password: 'pw' });
@@ -292,7 +294,7 @@ describe('AuthService.login with a second factor', () => {
     expect(seen.body).toEqual({ username: 'jane', password: 'pw' });
   });
 
-  it('sends otp once there is a code to send', async () => {
+  it('posts the otp field once a code is given', async () => {
     const seen = sendLogin(() => HttpResponse.json({ token: 't', user_id: 1 }));
 
     await AuthService.login({ username: 'jane', password: 'pw', otp: '123456' });
@@ -300,7 +302,7 @@ describe('AuthService.login with a second factor', () => {
     expect(seen.body).toEqual({ username: 'jane', password: 'pw', otp: '123456' });
   });
 
-  it('keeps the challenge from a 401, so the caller can ask for the code', async () => {
+  it('rejects with the mfa challenge a 401 carries', async () => {
     sendLogin(() =>
       HttpResponse.json(
         { type: 'TOTP', forced: 'true' },
@@ -323,7 +325,7 @@ describe('AuthService reset password', () => {
   const TOKEN = 'reset-t0ken';
   const RESET_URL = buildAPITestURL(AuthEndpoints.resetPassword(TOKEN));
 
-  it('checks a link with a GET before anything is typed', async () => {
+  it('gets the reset endpoint to check the link', async () => {
     let method = '';
 
     server.use(
@@ -339,7 +341,7 @@ describe('AuthService reset password', () => {
     expect(method).toBe('GET');
   });
 
-  it('rejects a spent link', async () => {
+  it('rejects for a spent link', async () => {
     server.use(
       http.get(RESET_URL, () => HttpResponse.json({}, { status: HTTP_STATUS_CODES.NOT_FOUND }))
     );
@@ -347,7 +349,7 @@ describe('AuthService reset password', () => {
     await expect(AuthService.verifyResetToken(TOKEN)).rejects.toThrow('404');
   });
 
-  it('puts the new password under the snake_case name the API expects', async () => {
+  it('posts the new password under the snake_case field names the API expects', async () => {
     let body: unknown;
 
     server.use(
@@ -361,7 +363,7 @@ describe('AuthService reset password', () => {
     await AuthService.resetPassword({
       token: TOKEN,
       password: 'correct-horse',
-      confirmPassword: 'correct-horse',
+      confirm_password: 'correct-horse',
     });
 
     expect(body).toEqual({ password: 'correct-horse', confirm_password: 'correct-horse' });

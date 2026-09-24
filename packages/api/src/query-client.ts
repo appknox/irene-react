@@ -1,16 +1,20 @@
 import { QueryClient } from '@tanstack/react-query';
 
 import { HTTP_STATUS_CODES } from '@irene/constants';
-import { getApiErrorStatus } from '@irene/api/utils/errors';
+import { getApiErrorStatus, isAbortedRequest } from '@irene/api/utils/errors';
 
 const RETRYABLE_ATTEMPTS = 2;
 
 /**
  * Retry transient failures only. A 4xx fails again with the same request, and
  * retrying a 429 makes the rate limit worse.
+ *
+ * An abandoned request is not retried either: it carries no status, so it would
+ * otherwise read as a network failure, and each attempt would wait out the same
+ * timeout before giving up again.
  */
 const _shouldRetry = (failureCount: number, error: unknown) => {
-  if (failureCount >= RETRYABLE_ATTEMPTS) {
+  if (failureCount >= RETRYABLE_ATTEMPTS || isAbortedRequest(error)) {
     return false;
   }
 

@@ -1,10 +1,28 @@
-import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import axios, { isAxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 
 import { getConfigValue } from '@irene/config';
-import { DEVKNOX_HOSTNAME } from '@irene/constants';
+import { DEVKNOX_HOSTNAME, HTTP_STATUS_CODES } from '@irene/constants';
 import { ENUMS } from '@irene/enums';
-import { getAuthorizationHeader } from '@irene/api/utils/session';
 
+import { AuthEndpoints } from '@irene/api/services/auth/endpoints';
+import { isRateLimitExempt, rateLimitStore } from '@irene/api/stores/rate-limit';
+import { getApiErrorMessage } from '@irene/api/utils/errors';
+import { clearStoredSession, getAuthorizationHeader } from '@irene/api/utils/session';
+
+/**
+ * ============================================================
+ * TYPES
+ * ============================================================
+ */
+
+/** What a verb helper accepts: everything but what the helper itself sets. */
+type RequestOptions = Omit<AxiosRequestConfig, 'url' | 'method' | 'data'>;
+
+/**
+ * ============================================================
+ * CONSTANTS
+ * ============================================================
+ */
 /**
  * Works out which product the app is serving from the hostname.
  *
@@ -13,13 +31,48 @@ import { getAuthorizationHeader } from '@irene/api/utils/session';
 export const currentProduct = () =>
   window.location.hostname === DEVKNOX_HOSTNAME ? ENUMS.PRODUCT.DEVKNOX : ENUMS.PRODUCT.APPKNOX;
 
+/**
+ * How long a request that blocks a screen may run before it is abandoned.
+ *
+ * A server that refuses a connection fails at once, but one that accepts it and
+ * never replies leaves the request in flight for as long as the browser allows,
+ * holding whatever waits on it with no message and no way out. An abandoned
+ * request rejects with no response, which reads as a network failure, so the
+ * failure card and its retry button already handle it.
+ *
+ * Deliberately not set on the client: a request nobody is waiting on can take
+ * as long as it takes, and an upload has no business being cut off after a
+ * minute. The endpoints that hold a screen apply it themselves.
+ */
+export const REQUEST_ABORT_TIMEOUT_MS = 30_000;
+
+/*
+  The endpoints that answer 401 as part of their own job: a wrong password, a
+  refused SSO token, a spent reset link. Each is reported where the user is
+  standing, so none of them should throw the user out of the app.
+*/
+export const SELF_HANDLING_UNAUTHORIZED_API_ENDPOINTS = [
+  AuthEndpoints.check(),
+  AuthEndpoints.login(),
+  AuthEndpoints.logout(),
+  AuthEndpoints.recover(),
+  AuthEndpoints.ssoCheck(),
+  AuthEndpoints.samlStart(),
+  AuthEndpoints.samlLogin(),
+  AuthEndpoints.oidcStart(),
+  AuthEndpoints.oidcCallback(),
+];
+
+/**
+ * ============================================================
+ * REQUEST CLIENT
+ * ============================================================
+ */
+
 /** The axios instance every API request goes through, with the API host and product header set. */
 export const client = axios.create({
   baseURL: getConfigValue('IRENE_API_HOST'),
-  headers: {
-    Accept: 'application/json, text/plain, */*',
-    'X-Product': String(currentProduct()),
-  },
+  headers: { Accept: 'application/json, text/plain, */*', 'X-Product': String(currentProduct()) },
 });
 
 /*
@@ -39,8 +92,48 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
-/** What a verb helper accepts: everything but what the helper itself sets. */
-type RequestOptions = Omit<AxiosRequestConfig, 'url' | 'method' | 'data'>;
+/*
+  A 401 means the credential is gone, so the session ends and the user returns
+  to login — except on the endpoints in `SELF_HANDLED_PATHS`. A 429 means the account is throttled,
+  which becomes a countdown the whole app can read.
+
+  The error is re-thrown either way, so callers still see what happened.
+*/
+client.interceptors.response.use(undefined, (error: unknown) => {
+  if (!isAxiosError(error) || !error.response) {
+    return Promise.reject(error);
+  }
+
+  const { response, config } = error;
+  const url = config?.url ?? '';
+  const resStatus = response.status;
+  const resData = response.data;
+
+  // The server is throttling this account, so start the wait everyone reads from.
+  if (resStatus === HTTP_STATUS_CODES.TOO_MANY_REQUESTS && !isRateLimitExempt(url)) {
+    rateLimitStore.getState().throttle(resData);
+  }
+
+  // If the endpoint is not in `SELF_HANDLED_PATHS`,
+  // it means the credential is gone, so the session ends and the user returns to login.
+  const handlesItsOwn = SELF_HANDLING_UNAUTHORIZED_API_ENDPOINTS.some((path) => url.includes(path));
+
+  if (resStatus === HTTP_STATUS_CODES.UNAUTHORIZED && !handlesItsOwn) {
+    const refusal = getApiErrorMessage(error)?.toLowerCase() ?? '';
+    const reason = refusal.includes('inactive') ? 'userInactive' : 'sessionExpired';
+
+    clearStoredSession();
+    window.location.replace(`/login?${reason}=true`);
+  }
+
+  return Promise.reject(error);
+});
+
+/**
+ * ============================================================
+ * REQUEST HELPERS
+ * ============================================================
+ */
 
 /**
  * Sends a request through the shared client.
@@ -58,7 +151,7 @@ export async function request<TData>(options: AxiosRequestConfig): Promise<TData
  * One helper per HTTP verb, each resolving to the response body.
  *
  * @example
- * const page = await apiRequest.get<ApiPageResponse<ApiProject>>('api/v3/projects', { params: { limit: 10 } });
+ * const page = await apiRequest.get<ApiPageEnvelope<ApiProject>>('api/v3/projects', { params: { limit: 10 } });
  */
 export const apiRequest = {
   get: <TData>(url: string, options?: RequestOptions) =>

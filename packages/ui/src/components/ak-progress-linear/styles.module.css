@@ -1,0 +1,66 @@
+/*
+  A `<progress>` draws itself, so the track and the bar are the element's own
+  parts rather than child elements. Each engine names them differently, hence
+  the repetition.
+
+  In the components layer, so a utility on the element still wins.
+*/
+@layer components {
+  .progress {
+    appearance: none;
+    display: block;
+    overflow: hidden;
+    border: none;
+  }
+
+  /* WebKit draws a track over the element's background, so it is cleared. */
+  .progress::-webkit-progress-bar {
+    background-color: transparent;
+  }
+
+  .progress::-webkit-progress-value {
+    border-radius: inherit;
+    background-color: var(--color-primary);
+    transition: width 300ms ease-out;
+  }
+
+  .progress::-moz-progress-bar {
+    border-radius: inherit;
+    background-color: var(--color-primary);
+  }
+
+  /*
+    Indeterminate: a bar that travels, for a wait whose length nothing knows.
+    The element paints it, since there is no value part to move.
+  */
+  .progress:indeterminate {
+    background-image: linear-gradient(
+      to right,
+      transparent 0%,
+      var(--color-primary) 0%,
+      var(--color-primary) 40%,
+      transparent 40%
+    );
+    background-repeat: no-repeat;
+    background-size: 250% 100%;
+    animation: travel 1.4s ease-in-out infinite;
+  }
+
+  .progress:indeterminate::-webkit-progress-value {
+    background-color: transparent;
+  }
+
+  .progress:indeterminate::-moz-progress-bar {
+    background-color: transparent;
+  }
+
+  @keyframes travel {
+    0% {
+      background-position: -60% 0;
+    }
+
+    100% {
+      background-position: 160% 0;
+    }
+  }
+}

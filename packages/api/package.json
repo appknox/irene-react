@@ -6,23 +6,24 @@
   "exports": {
     ".": "./src/index.ts",
     "./services/*": "./src/services/*/index.ts",
+    "./services/*/endpoints": "./src/services/*/endpoints.ts",
     "./stores/*": "./src/stores/*/index.ts",
-    "./types/*": "./src/types/*.ts",
     "./utils/*": "./src/utils/*.ts",
     "./*": "./src/*.ts"
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "vitest run --coverage",
     "type-check": "tsc -b --noEmit"
   },
   "dependencies": {
     "@irene/config": "workspace:*",
     "@irene/constants": "workspace:*",
-    "@irene/translations": "workspace:*",
     "@irene/enums": "workspace:*",
+    "@irene/translations": "workspace:*",
     "@tanstack/react-query": "^5.102.8",
-    "axios": "^1.20.0"
+    "axios": "^1.20.0",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",

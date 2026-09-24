@@ -19,7 +19,7 @@ describe('messages', () => {
       await expect(loadMessages('ja')).resolves.toEqual(ja);
     });
 
-    it('loads a locale with the same ids as English', async () => {
+    it('loads a locale carrying the same message ids as English', async () => {
       const messages = await loadMessages('ja');
 
       const byName = (a: string, b: string) => a.localeCompare(b);

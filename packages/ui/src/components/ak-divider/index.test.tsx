@@ -7,19 +7,19 @@ const divider = (container: HTMLElement) =>
   container.querySelector<HTMLElement>('[data-slot="divider"]');
 
 describe('AkDivider', () => {
-  it('renders an hr when it lies flat', () => {
+  it('renders an hr for the horizontal orientation', () => {
     const { container } = render(<AkDivider />);
 
     expect(divider(container)?.tagName).toBe('HR');
   });
 
-  it('renders a div when it stands up, since an hr cannot', () => {
+  it('renders a div for the vertical orientation', () => {
     const { container } = render(<AkDivider direction="vertical" />);
 
     expect(divider(container)?.tagName).toBe('DIV');
   });
 
-  it('reads as a separator either way', () => {
+  it('exposes the separator role in both orientations', () => {
     const { rerender } = render(<AkDivider />);
 
     expect(screen.getByRole('separator')).toBeInTheDocument();
@@ -29,14 +29,14 @@ describe('AkDivider', () => {
     expect(screen.getByRole('separator')).toHaveAttribute('aria-orientation', 'vertical');
   });
 
-  it('is faint by default and stronger when asked', () => {
+  it('renders the color variants correctly', () => {
     const { container, rerender } = render(<AkDivider />);
 
-    expect(divider(container)).toHaveClass('border-divider');
-
-    rerender(<AkDivider color="dark" />);
-
     expect(divider(container)).toHaveClass('border-divider-strong');
+
+    rerender(<AkDivider color="light" />);
+
+    expect(divider(container)).toHaveClass('border-divider');
   });
 
   it('puts the border on the bottom when flat and the left when upright', () => {
@@ -49,7 +49,7 @@ describe('AkDivider', () => {
     expect(divider(container)).toHaveClass('border-l');
   });
 
-  it('insets itself with the middle variant', () => {
+  it('insets the rule with the middle variant', () => {
     const { container } = render(<AkDivider variant="middle" />);
 
     expect(divider(container)).toHaveClass('mx-4');
@@ -62,7 +62,7 @@ describe('AkDivider', () => {
     expect(divider(container)).not.toHaveClass('w-full');
   });
 
-  it('passes arbitrary attributes through', () => {
+  it('passes arbitrary attributes through to the element', () => {
     const { container } = render(<AkDivider data-test-rule />);
 
     expect(divider(container)).toHaveAttribute('data-test-rule');

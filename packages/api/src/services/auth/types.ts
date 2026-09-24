@@ -26,10 +26,16 @@ export interface ApiLoginRequest {
 /* The type of MFA the account uses.*/
 export type ApiMfaType = 'HOTP' | 'TOTP';
 
-/* Response interface from the MFA endpoint.*/
+/**
+ * Response interface from the MFA endpoint.
+ *
+ * Every value in a refusal body arrives as text, `forced` included, which reads
+ * `'True'`. `email` names where an emailed code was sent.
+ */
 export interface ApiMfaRequirement {
   type: ApiMfaType;
-  forced?: 'True';
+  email?: string;
+  forced?: string;
 }
 
 /**
@@ -47,7 +53,7 @@ export interface ApiResetTokenResponse {
 export interface ApiResetPasswordRequest {
   token: string;
   password: string;
-  confirmPassword: string;
+  confirm_password: string;
 }
 
 /**
@@ -90,8 +96,7 @@ export interface ApiOidcCallbackRequest {
 
 /* Response shape from the OIDC callback endpoint.*/
 export interface ApiOidcCallbackResponse {
-  message: string;
-  provider: string;
+  success: boolean;
   token: string;
   user: ApiOidcCallbackUser;
 }

@@ -4,6 +4,9 @@ import { describe, expect, it } from 'vitest';
 
 import { cn, SHADOW_SCALE } from '@irene/ui/cn';
 
+/** Where this package lives, handed over by vitest.config.ts. */
+const packageRoot = process.env.IRENE_UI_PACKAGE_ROOT;
+
 describe('joining', () => {
   it('joins strings', () => {
     expect(cn('text-sm', 'font-bold')).toBe('text-sm font-bold');
@@ -28,7 +31,7 @@ describe('conflict resolution, last one wins', () => {
     expect(cn(first, second)).toBe(second);
   });
 
-  it('leaves classes that target different properties alone', () => {
+  it('keeps classes that target different properties', () => {
     expect(cn('p-4', 'text-sm')).toBe('p-4 text-sm');
   });
 });
@@ -49,10 +52,8 @@ describe('the custom theme', () => {
     expect(cn('text-sm', 'text-primary')).toBe('text-sm text-primary');
   });
 
-  it('fails if the shadow scale drifts from the theme', () => {
-    // process.cwd() is the package root under vitest; import.meta.url is not
-    // a file URL in the jsdom environment.
-    const theme = readFileSync(join(process.cwd(), 'styles/theme.css'), 'utf8');
+  it('covers every shadow step the theme declares', () => {
+    const theme = readFileSync(join(packageRoot, 'styles/theme.css'), 'utf8');
     const declared = [...theme.matchAll(/--shadow-([\w-]+):/g)].map((m) => m[1]);
 
     expect([...SHADOW_SCALE].sort()).toEqual([...declared].sort());

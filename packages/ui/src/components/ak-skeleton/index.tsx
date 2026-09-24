@@ -18,13 +18,14 @@ type AkSkeletonProps = ComponentProps<'span'> &
  * loading, rather than every placeholder announcing itself.
  *
  * @param props.variant - rounded for text and fields, circular for avatars, rectangular for images.
- * @param props.width - Any CSS width.
+ * @param props.width - Any CSS width. Fills its container by default, since a
+ * placeholder sized to its own content has nothing to be as wide as.
  * @param props.height - Any CSS height.
  */
 function AkSkeleton({
   className,
   variant,
-  width = 'auto',
+  width = '100%',
   height = '1.2rem',
   style,
   ...props

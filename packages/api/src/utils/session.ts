@@ -1,7 +1,7 @@
 import type { ApiSessionResponse } from '@irene/api/services/auth';
 
 /** Mirrors Ember Simple Auth's `ember_simple_auth-session`. */
-export interface Session {
+export interface IreneAuthSession {
   token: string;
   userId: number;
   b64token: string;
@@ -15,7 +15,7 @@ export const IRENE_AUTH_SESSION_KEY = 'appknox-session';
  * @param value - Anything read back from storage.
  * @returns Whether the value is a usable session.
  */
-const _isValidSession = (value: unknown): value is Session =>
+const _isValidSession = (value: unknown): value is IreneAuthSession =>
   typeof value === 'object' &&
   value !== null &&
   'token' in value &&
@@ -82,7 +82,7 @@ export const createSessionFromResponse = ({ token, user_id: userId }: ApiSession
     token,
     userId,
     b64token: buildBasicCredential(userId, token),
-  }) as Session;
+  }) as IreneAuthSession;
 
 /**
  * Reads the stored session. Blocked storage or a bad entry reads as signed out.
@@ -101,7 +101,7 @@ export function getStoredSession() {
  *
  * @param session - The session to store.
  */
-export function storeSession(session: Session) {
+export function storeSession(session: IreneAuthSession) {
   window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, JSON.stringify(session));
 }
 

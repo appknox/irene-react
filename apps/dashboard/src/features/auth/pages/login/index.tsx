@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { AuthService, type ApiMfaRequirement } from '@irene/api/services/auth';
+import { unlessRateLimited } from '@irene/api/utils/errors';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkAlert, AkAlertDescription } from '@irene/ui/ak-alert';
@@ -12,11 +13,11 @@ import { AkFormProvider } from '@irene/ui/ak-form';
 import { AkTypography } from '@irene/ui/ak-typography';
 import { akNotify } from '@irene/ui/notify';
 
-import { LoginCheckType } from '@/features/auth/components/login-check-type';
-import { LoginPerformMfa } from '@/features/auth/components/login-perform-mfa';
-import { LoginViaPassword } from '@/features/auth/components/login-via-password';
-import { LoginViaSso } from '@/features/auth/components/login-via-sso';
-import { RegistrationFooter } from '@/features/auth/components/registration-footer';
+import { LoginCheckType } from '@/features/auth/pages/login/components/login-check-type';
+import { LoginPerformMfa } from '@/features/auth/pages/login/components/login-perform-mfa';
+import { LoginViaPassword } from '@/features/auth/pages/login/components/login-via-password';
+import { LoginViaSso } from '@/features/auth/pages/login/components/login-via-sso';
+import { RegistrationFooter } from '@/features/auth/pages/login/components/registration-footer';
 import { resolveLoginSchema, type LoginFormSchema } from '@/features/auth/schemas/login';
 import { AuthLayout } from '@/layouts/auth-layout';
 
@@ -28,20 +29,24 @@ const loginRoute = getRouteApi('/_unauthenticated/login');
  */
 export function LoginPage() {
   const [mfaRequirement, setMfaRequirement] = useState<ApiMfaRequirement | null>(null);
-
-  const { unauthenticated, sso_login_error: ssoLoginError } = loginRoute.useSearch();
+  const { unauthenticated, ssoLoginError, sessionExpired, userInactive } = loginRoute.useSearch();
   const navigate = useNavigate();
 
   const ssoCheck = useMutation({
-    mutationFn: ({ username }: LoginFormSchema) => AuthService.ssoCheck(username),
-    onError: () => akNotify.error(akMT('pleaseTryAgain')),
+    mutationFn: ({ username }: LoginFormSchema) => AuthService.checkSso(username),
+    onError: unlessRateLimited(() => akNotify.error(akMT('pleaseTryAgain'))),
   });
 
   const checkData = ssoCheck.data;
   const isSsoEnabled = Boolean(checkData?.is_saml || checkData?.is_oidc);
   const isSsoEnforced = isSsoEnabled && Boolean(checkData?.is_sso_enforced);
   const showPasswordLoginOnly = ssoCheck.isSuccess && !isSsoEnforced && !mfaRequirement;
-  const notSignedInReason = ssoLoginError ?? (unauthenticated ? akMT('pleaseLogin') : null);
+
+  const notSignedInReason =
+    ssoLoginError ??
+    (userInactive ? akMT('loginFailed') : null) ??
+    (sessionExpired ? akMT('pleaseLoginAgain') : null) ??
+    (unauthenticated ? akMT('pleaseLogin') : null);
 
   // Each step requires one more field than the last.
   const loginForm = useForm<LoginFormSchema>({

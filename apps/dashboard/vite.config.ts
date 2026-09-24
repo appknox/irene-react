@@ -16,12 +16,17 @@ export default defineConfig({
   // __BUILD_CONFIG__ is undefined at runtime.
   define: buildConfigDefine(),
   plugins: [
-    // Generates routeTree.gen.ts. Must run before the React plugin.
-    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
+    /*
+      Generates routeTree.gen.ts from tsr.config.json, which `tsr generate`
+      reads too. Must run before the React plugin.
+    */
+    tanstackRouter({ autoCodeSplitting: true }),
+
     // Generates the flat message files, and regenerates them when a translation file is saved.
     translationsPlugin(),
     react(),
     tailwindcss(),
+
     // Turns `@irene/ui/svgs/*.svg?react` imports into components.
     svgrPlugin(),
   ],

@@ -1,9 +1,10 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { AuthEndpoints } from '@irene/api/services/auth';
+import { formatWaitTime, rateLimitStore } from '@irene/api/stores/rate-limit';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
 
@@ -25,17 +26,17 @@ const linkIsSpent = () =>
   );
 
 const newPassword = () => screen.getByLabelText(akMT('newPassword'));
-const confirmPassword = () => screen.getByLabelText(akMT('confirmPassword'));
+const confirm_password = () => screen.getByLabelText(akMT('confirmPassword'));
 
 /** Fill both fields and submit. */
 async function submitPasswords(password: string, confirmation = password) {
   await userEvent.type(await screen.findByLabelText(akMT('newPassword')), password);
-  await userEvent.type(confirmPassword(), confirmation);
+  await userEvent.type(confirm_password(), confirmation);
   await userEvent.click(screen.getByRole('button', { name: akMT('reset') }));
 }
 
 describe('ResetPasswordPage', () => {
-  it('holds the form shape while the link is being checked', async () => {
+  it('reserves the form layout while the link check is in flight', async () => {
     let release: (() => void) | undefined;
 
     server.use(
@@ -61,16 +62,16 @@ describe('ResetPasswordPage', () => {
     expect(skeleton()).not.toBeInTheDocument();
   });
 
-  it('offers the form once the link checks out', async () => {
+  it('renders the password form once the link checks out', async () => {
     linkIsLive();
     await renderAtRoute(PAGE);
 
     expect(await screen.findByLabelText(akMT('newPassword'))).toBeInTheDocument();
-    expect(confirmPassword()).toBeInTheDocument();
+    expect(confirm_password()).toBeInTheDocument();
     expect(screen.queryByText(INVALID_LINK_MESSAGE)).not.toBeInTheDocument();
   });
 
-  it('says the link is no good rather than offering a form that cannot work', async () => {
+  it('renders the invalid-link message and no form when the link is spent or unknown', async () => {
     linkIsSpent();
     await renderAtRoute(PAGE);
 
@@ -78,7 +79,7 @@ describe('ResetPasswordPage', () => {
     expect(screen.queryByLabelText(akMT('newPassword'))).not.toBeInTheDocument();
   });
 
-  it('refuses a confirmation that does not match, without calling the API', async () => {
+  it('rejects a confirmation that differs from the password without sending a request', async () => {
     linkIsLive();
 
     let calls = 0;
@@ -98,7 +99,7 @@ describe('ResetPasswordPage', () => {
     expect(calls).toBe(0);
   });
 
-  it('sends both fields under the names the API expects', async () => {
+  it('posts password and confirm_password under the names the API expects', async () => {
     linkIsLive();
 
     let body: unknown;
@@ -119,7 +120,7 @@ describe('ResetPasswordPage', () => {
     );
   });
 
-  it('returns the user to login and says the password changed', async () => {
+  it('navigates to /login and renders the password-changed confirmation', async () => {
     linkIsLive();
     server.use(http.put(RESET_URL, () => HttpResponse.json({})));
 
@@ -131,7 +132,7 @@ describe('ResetPasswordPage', () => {
     expect(await screen.findByText(akMT('passwordIsReset'))).toBeInTheDocument();
   });
 
-  it("puts the API's complaint on the password field", async () => {
+  it("renders the API's error on the password field", async () => {
     linkIsLive();
 
     server.use(
@@ -151,7 +152,7 @@ describe('ResetPasswordPage', () => {
     expect(router.state.location.pathname).toBe(PAGE);
   });
 
-  it('toasts a failure that names no field', async () => {
+  it('renders a notification when the error names no field', async () => {
     linkIsLive();
 
     server.use(
@@ -166,7 +167,7 @@ describe('ResetPasswordPage', () => {
     expect(await screen.findByText(akMT('somethingWentWrong'))).toBeInTheDocument();
   });
 
-  it('offers the way back to login whether or not the link is good', async () => {
+  it('renders the back-to-login link for both a valid and an invalid link', async () => {
     linkIsSpent();
 
     const { router } = await renderAtRoute(PAGE);
@@ -177,12 +178,138 @@ describe('ResetPasswordPage', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
   });
 
-  it('keeps the new password out of the DOM, since it is typed in the clear otherwise', async () => {
+  it('renders the password inputs with type password', async () => {
     linkIsLive();
     await renderAtRoute(PAGE);
 
     expect(await screen.findByLabelText(akMT('newPassword'))).toHaveAttribute('type', 'password');
-    expect(confirmPassword()).toHaveAttribute('type', 'password');
+    expect(confirm_password()).toHaveAttribute('type', 'password');
     expect(newPassword()).toHaveAttribute('autocomplete', 'new-password');
+  });
+
+  describe('a rate-limited account', () => {
+    // The lock is app-wide and outlives a render.
+    // Wrapped: ending the wait updates whatever is still mounted.
+    afterEach(() => act(() => rateLimitStore.getState().clearThrottle()));
+
+    it('renders the rate-limit countdown when the reset request is throttled', async () => {
+      linkIsLive();
+
+      server.use(
+        http.put(RESET_URL, () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await renderAtRoute(PAGE);
+      await submitPasswords('a-new-passw0rd');
+
+      expect(
+        await screen.findByText(`${akMT('rateLimitExceeded')} ${formatWaitTime(30)}`)
+      ).toBeInTheDocument();
+
+      expect(screen.queryByText(akMT('somethingWentWrong'))).not.toBeInTheDocument();
+    });
+
+    it('renders no invalid-link message when the check request fails', async () => {
+      server.use(
+        http.get(RESET_URL, () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await renderAtRoute(PAGE);
+
+      expect(await screen.findByText(akMT('resetLinkRateLimited'))).toBeInTheDocument();
+      expect(screen.queryByText(INVALID_LINK_MESSAGE)).not.toBeInTheDocument();
+    });
+
+    it('disables the retry button while the rate limit is still running', async () => {
+      server.use(
+        http.get(RESET_URL, () =>
+          HttpResponse.json(
+            { detail: { lock_time: 30 } },
+            { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+          )
+        )
+      );
+
+      await renderAtRoute(PAGE);
+
+      expect(await screen.findByRole('button', { name: akMT('retry') })).toBeDisabled();
+    });
+  });
+
+  describe('a link the check request could not verify', () => {
+    it.each([HTTP_STATUS_CODES.BAD_REQUEST, HTTP_STATUS_CODES.NOT_FOUND, HTTP_STATUS_CODES.GONE])(
+      'calls the link invalid when the check fails with %i',
+      async (status) => {
+        server.use(http.get(RESET_URL, () => HttpResponse.json({}, { status })));
+
+        await renderAtRoute(PAGE);
+
+        expect(await screen.findByText(INVALID_LINK_MESSAGE)).toBeInTheDocument();
+        expect(screen.queryByText(akMT('resetLinkRateLimited'))).not.toBeInTheDocument();
+      }
+    );
+
+    it('renders the server-error message rather than the invalid-link message when the check answers 500', async () => {
+      server.use(
+        http.get(RESET_URL, () =>
+          HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
+        )
+      );
+
+      await renderAtRoute(PAGE);
+
+      expect(await screen.findByText(akMT('somethingWentWrong'))).toBeInTheDocument();
+      expect(screen.queryByText(INVALID_LINK_MESSAGE)).not.toBeInTheDocument();
+    });
+
+    it('renders an enabled retry button after a server error', async () => {
+      server.use(
+        http.get(RESET_URL, () =>
+          HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
+        )
+      );
+
+      await renderAtRoute(PAGE);
+
+      expect(await screen.findByRole('button', { name: akMT('retry') })).toBeEnabled();
+    });
+
+    it('renders the password form once a retry succeeds', async () => {
+      let attempts = 0;
+
+      server.use(
+        http.get(RESET_URL, () => {
+          attempts += 1;
+
+          return attempts === 1
+            ? HttpResponse.json(
+                { detail: { lock_time: 30 } },
+                { status: HTTP_STATUS_CODES.TOO_MANY_REQUESTS }
+              )
+            : HttpResponse.json({ username: 'jane' });
+        })
+      );
+
+      await renderAtRoute(PAGE);
+
+      const retry = await screen.findByRole('button', { name: akMT('retry') });
+
+      // Inside act: lifting the lock re-enables the button the click needs.
+      act(() => rateLimitStore.getState().clearThrottle());
+
+      await userEvent.click(retry);
+
+      expect(await screen.findByLabelText(akMT('newPassword'))).toBeInTheDocument();
+    });
   });
 });

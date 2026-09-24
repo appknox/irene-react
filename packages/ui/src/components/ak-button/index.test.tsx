@@ -22,7 +22,7 @@ describe('rendering', () => {
     expect(button).toHaveAttribute('data-size', 'default');
   });
 
-  it('records the variant, color and size it was given', () => {
+  it('renders the data attributes for the variant, color and size it was given', () => {
     render(
       <AkButton variant="outlined" color="error" size="sm">
         Delete
@@ -55,7 +55,7 @@ describe('class handling', () => {
     expect(screen.getByRole('button')).toHaveClass('bg-danger');
   });
 
-  it('tints an outlined button with its color', () => {
+  it('applies the color classes to an outlined button', () => {
     render(
       <AkButton variant="outlined" color="primary">
         Login using SSO
@@ -99,7 +99,7 @@ describe('behaviour', () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it('does not fire when disabled', async () => {
+  it('does not call onClick when disabled', async () => {
     const onClick = vi.fn();
 
     render(
@@ -129,7 +129,7 @@ describe('behaviour', () => {
 });
 
 describe('noPadding', () => {
-  it('drops the padding when asked', () => {
+  it('renders no padding with noPadding', () => {
     render(<AkButton noPadding>Register Today</AkButton>);
 
     const button = screen.getByRole('button');
@@ -166,13 +166,13 @@ describe('loading', () => {
     expect(button.querySelector('svg')).toBeInTheDocument();
   });
 
-  it('keeps its label while loading, so the button does not resize', () => {
+  it('keeps the label rendered while loading, so the width does not change', () => {
     render(<AkButton loading>Login</AkButton>);
 
     expect(screen.getByRole('button')).toHaveTextContent('Login');
   });
 
-  it('does not fire while loading', async () => {
+  it('does not call onClick while loading', async () => {
     const onClick = vi.fn();
 
     render(
@@ -200,14 +200,14 @@ describe('loading', () => {
     expect(button.querySelector('svg')).toBeInTheDocument();
   });
 
-  it('keeps its colour while loading rather than looking unavailable', () => {
+  it('keeps the color classes while loading', () => {
     render(<AkButton loading>Login</AkButton>);
 
     // The disabled background only applies to a button that is not loading.
     expect(screen.getByRole('button')).toHaveClass('disabled:not-data-loading:bg-disabled-button');
   });
 
-  it('has no spinner when it is not loading', () => {
+  it('renders no spinner when loading is false', () => {
     render(<AkButton>Login</AkButton>);
 
     expect(screen.getByRole('button').querySelector('svg')).toBeNull();
@@ -217,5 +217,34 @@ describe('loading', () => {
 describe('akButtonVariants used on its own', () => {
   it('produces the classes for a variant without rendering a button', () => {
     expect(akButtonVariants({ variant: 'text', color: 'primary' })).toContain('text-primary');
+  });
+
+  it('renders aria-disabled on a link, which takes no disabled attribute', () => {
+    render(
+      <AkButton asChild disabled>
+        <a href="/projects">Projects</a>
+      </AkButton>
+    );
+
+    const link = screen.getByRole('link', { name: 'Projects' });
+
+    expect(link).toHaveAttribute('aria-disabled', 'true');
+    expect(link).toHaveAttribute('data-disabled');
+    expect(link).toHaveClass('pointer-events-none');
+    expect(link).not.toHaveAttribute('disabled');
+  });
+
+  it('renders no aria-disabled on an enabled link', () => {
+    render(
+      <AkButton asChild>
+        <a href="/projects">Projects</a>
+      </AkButton>
+    );
+
+    const link = screen.getByRole('link', { name: 'Projects' });
+
+    expect(link).not.toHaveAttribute('aria-disabled');
+    expect(link).not.toHaveAttribute('data-disabled');
+    expect(link).not.toHaveClass('pointer-events-none');
   });
 });

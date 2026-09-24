@@ -1,13 +1,16 @@
 import { faker } from '@faker-js/faker';
 import { AxiosError, AxiosHeaders, type AxiosResponse } from 'axios';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   getApiErrorMessage,
   getApiErrorPayload,
   getApiErrorStatus,
   getApiFieldErrors,
+  isAbortedRequest,
   isNetworkError,
+  isRateLimited,
+  unlessRateLimited,
 } from '@irene/api/utils/errors';
 
 import { HTTP_STATUS_CODES } from '@irene/constants';
@@ -31,29 +34,29 @@ const unreachable = () =>
   new AxiosError('Network Error', AxiosError.ERR_NETWORK, { headers: new AxiosHeaders() });
 
 describe('getApiErrorPayload', () => {
-  it('returns the body of a refused request', () => {
+  it('returns the response body of a failed request', () => {
     const body = { detail: faker.lorem.sentence() };
 
     expect(getApiErrorPayload(refusal(400, body))).toEqual(body);
   });
 
-  it('returns nothing when the request never reached the server', () => {
+  it('returns undefined when the request never reached the server', () => {
     expect(getApiErrorPayload(unreachable())).toBeUndefined();
   });
 
-  it('returns nothing for something that is not an axios error', () => {
+  it('returns undefined for a value that is not an axios error', () => {
     expect(getApiErrorPayload(new Error('boom'))).toBeUndefined();
     expect(getApiErrorPayload('a string')).toBeUndefined();
     expect(getApiErrorPayload(null)).toBeUndefined();
   });
 
-  it('hands back a body that is not a complaint, for the caller to read', () => {
+  it('returns a body that carries no field errors', () => {
     const challenge = { type: 'TOTP', forced: 'True' };
 
     expect(getApiErrorPayload<typeof challenge>(refusal(401, challenge))).toEqual(challenge);
   });
 
-  it('hands back the rate limit body, whose detail is an object', () => {
+  it('returns the rate limit body, whose detail is an object', () => {
     const body = { detail: { lock_time: 42 } };
 
     expect(getApiErrorPayload<typeof body>(refusal(429, body))?.detail.lock_time).toBe(42);
@@ -61,7 +64,7 @@ describe('getApiErrorPayload', () => {
 });
 
 describe('getApiFieldErrors', () => {
-  it('keys each field to its messages', () => {
+  it('returns each field keyed to its messages', () => {
     const error = refusal(400, { username: ['Already taken'], password: ['Too short'] });
 
     expect(getApiFieldErrors(error)).toEqual({
@@ -70,37 +73,37 @@ describe('getApiFieldErrors', () => {
     });
   });
 
-  it('wraps a single string into a list, as DRF sends either', () => {
+  it('wraps a single string message into a list', () => {
     expect(getApiFieldErrors(refusal(400, { username: 'Already taken' }))).toEqual({
       username: ['Already taken'],
     });
   });
 
-  it('files a form-wide detail under non_field_errors', () => {
+  it('keys a form-wide detail under non_field_errors', () => {
     expect(getApiFieldErrors(refusal(400, { detail: 'Invalid input' }))).toEqual({
       non_field_errors: ['Invalid input'],
     });
   });
 
-  it('files a top-level array under non_field_errors', () => {
+  it('keys a top-level array under non_field_errors', () => {
     expect(getApiFieldErrors(refusal(400, ['Invalid input']))).toEqual({
       non_field_errors: ['Invalid input'],
     });
   });
 
-  it('ignores a bare string body, which is how an HTML error page arrives', () => {
+  it('returns no messages for a body that is a bare string', () => {
     expect(getApiFieldErrors(refusal(500, '<html>Bad Gateway</html>'))).toEqual({});
   });
 
-  it('coerces non-string messages rather than dropping them', () => {
+  it('converts a non-string message to a string', () => {
     expect(getApiFieldErrors(refusal(400, { code: [1, 2] }))).toEqual({ code: ['1', '2'] });
   });
 
-  it('drops a field whose messages are empty, so no key is ever an empty list', () => {
+  it('omits a field whose message list is empty', () => {
     expect(getApiFieldErrors(refusal(400, { a: [], b: ['real'] }))).toEqual({ b: ['real'] });
   });
 
-  it('drops a value it cannot read as messages', () => {
+  it('omits a value it cannot read as messages', () => {
     expect(getApiFieldErrors(refusal(400, { address: { city: ['required'] } }))).toEqual({});
   });
 
@@ -108,7 +111,7 @@ describe('getApiFieldErrors', () => {
     expect(getApiFieldErrors(unreachable())).toEqual({});
   });
 
-  it('names the fields a caller expects', () => {
+  it('returns the field names the body carries', () => {
     const errors = getApiFieldErrors<'username' | 'password'>(
       refusal(400, { username: ['Already taken'] })
     );
@@ -119,12 +122,12 @@ describe('getApiFieldErrors', () => {
 });
 
 describe('getApiErrorMessage', () => {
-  it('reports nothing while the request has not failed', () => {
+  it('returns undefined when no error was given', () => {
     expect(getApiErrorMessage(null)).toBeUndefined();
     expect(getApiErrorMessage(undefined)).toBeUndefined();
   });
 
-  it('passes a string through, for a caller that already has the message', () => {
+  it('returns a string argument unchanged', () => {
     expect(getApiErrorMessage('Already a message')).toBe('Already a message');
   });
 
@@ -136,44 +139,44 @@ describe('getApiErrorMessage', () => {
     expect(getApiErrorMessage(refusal(400, body))).toBe(Object.values(body)[0]);
   });
 
-  it('reads the first field message when there is no form-wide one', () => {
+  it('returns the first field message when the body carries no form-wide one', () => {
     expect(getApiErrorMessage(refusal(400, { username: ['Already taken'] }))).toBe('Already taken');
   });
 
-  it('reads a top-level array', () => {
+  it('returns the first entry of a top-level array', () => {
     expect(getApiErrorMessage(refusal(400, ['Invalid input']))).toBe('Invalid input');
   });
 
-  it('reports nothing for a bare string body, rather than showing an HTML page', () => {
+  it('returns undefined for a body that is a bare string', () => {
     expect(getApiErrorMessage(refusal(500, '<html>Bad Gateway</html>'))).toBeUndefined();
   });
 
-  it('reports nothing when the body explains nothing', () => {
+  it('returns undefined when the body carries no message', () => {
     expect(getApiErrorMessage(refusal(500, {}))).toBeUndefined();
     expect(getApiErrorMessage(refusal(500, null))).toBeUndefined();
   });
 
-  it("never shows axios's own text, which is written for developers", () => {
+  it("returns undefined rather than axios's own message text", () => {
     // The rejection's own message reads 'Request failed with status code 500'.
     expect(getApiErrorMessage(refusal(500, {}))).toBeUndefined();
     expect(getApiErrorMessage(unreachable())).toBeUndefined();
   });
 
-  it('reports nothing for a plain Error, which carries no server message', () => {
+  it('returns undefined for a plain Error', () => {
     expect(getApiErrorMessage(new Error('boom'))).toBeUndefined();
   });
 });
 
 describe('getApiErrorStatus', () => {
-  it('reads the status of a refused request', () => {
+  it('returns the status of a failed request', () => {
     expect(getApiErrorStatus(refusal(403, {}))).toBe(HTTP_STATUS_CODES.FORBIDDEN);
   });
 
-  it('returns nothing when the request never reached the server', () => {
+  it('returns undefined when the request never reached the server', () => {
     expect(getApiErrorStatus(unreachable())).toBeUndefined();
   });
 
-  it('returns nothing for something that is not an axios error', () => {
+  it('returns undefined for a value that is not an axios error', () => {
     expect(getApiErrorStatus(new Error('boom'))).toBeUndefined();
     expect(getApiErrorStatus(null)).toBeUndefined();
   });
@@ -184,12 +187,85 @@ describe('isNetworkError', () => {
     expect(isNetworkError(unreachable())).toBe(true);
   });
 
-  it('is false when the server answered, however badly', () => {
+  it('is false when the server answered with any status', () => {
     expect(isNetworkError(refusal(500, {}))).toBe(false);
   });
 
-  it('is false for something that is not an axios error', () => {
+  it('is false for a value that is not an axios error', () => {
     expect(isNetworkError(new Error('boom'))).toBe(false);
     expect(isNetworkError(null)).toBe(false);
+  });
+});
+
+describe('isRateLimited', () => {
+  it('is true for a 429', () => {
+    expect(isRateLimited(refusal(HTTP_STATUS_CODES.TOO_MANY_REQUESTS, {}))).toBe(true);
+  });
+
+  it('is false for any other status', () => {
+    expect(isRateLimited(refusal(HTTP_STATUS_CODES.UNAUTHORIZED, {}))).toBe(false);
+  });
+
+  it('is false for a value that is not an API error', () => {
+    expect(isRateLimited(new Error('nope'))).toBe(false);
+  });
+});
+
+describe('isAbortedRequest', () => {
+  it('is true for a request that timed out', () => {
+    expect(isAbortedRequest(new AxiosError('timeout', AxiosError.ECONNABORTED))).toBe(true);
+  });
+
+  it('is true for a request an abort signal cancelled', () => {
+    expect(isAbortedRequest(new AxiosError('cancelled', AxiosError.ERR_CANCELED))).toBe(true);
+  });
+
+  it('is false for a request that never reached the server', () => {
+    expect(isAbortedRequest(unreachable())).toBe(false);
+  });
+
+  it('is false for a request the server refused', () => {
+    expect(isAbortedRequest(refusal(500, {}))).toBe(false);
+  });
+
+  it('is false for a value that is not an axios error', () => {
+    expect(isAbortedRequest(new Error('boom'))).toBe(false);
+  });
+});
+
+describe('unlessRateLimited', () => {
+  it('calls the handler for a status other than 429', () => {
+    const handler = vi.fn();
+
+    unlessRateLimited(handler)(refusal(HTTP_STATUS_CODES.BAD_REQUEST, {}));
+    expect(handler).toHaveBeenCalledOnce();
+  });
+
+  it('calls no handler for a 429', () => {
+    const handler = vi.fn();
+
+    unlessRateLimited(handler)(refusal(HTTP_STATUS_CODES.TOO_MANY_REQUESTS, {}));
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('passes every argument through to the handler', () => {
+    const handler = vi.fn();
+    const error = refusal(HTTP_STATUS_CODES.BAD_REQUEST, {});
+
+    unlessRateLimited(handler)(error, { username: 'jane' });
+    expect(handler).toHaveBeenCalledWith(error, { username: 'jane' });
+  });
+
+  it('calls the handler for a value that is not an API error', () => {
+    const handler = vi.fn();
+
+    unlessRateLimited(handler)(new Error('nope'));
+    expect(handler).toHaveBeenCalledOnce();
+  });
+});
+
+describe('a body that is an empty list', () => {
+  it('returns no field errors', () => {
+    expect(getApiFieldErrors(refusal(HTTP_STATUS_CODES.BAD_REQUEST, []))).toEqual({});
   });
 });

@@ -4,13 +4,15 @@ import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
 import { AuthEndpoints } from '@irene/api/services/auth';
-import { getStoredSession, storeSession, type Session } from '@irene/api/utils/session';
+import { clearStoredSession, getStoredSession, storeSession } from '@irene/api/utils/session';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 
+import { buildSession } from '@tests/factories';
+import { mockOrganizationFeatures } from '@tests/organization';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
-const session: Session = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
+const session = buildSession();
 
 /** Let the session check pass, so the home page is reachable. */
 const signedIn = () => {
@@ -22,6 +24,9 @@ const signedIn = () => {
 async function logout() {
   signedIn();
 
+  /* The control lives on the home page, which needs a product to choose between. */
+  mockOrganizationFeatures({ storeknox: true });
+
   const rendered = await renderAtRoute('/');
 
   await userEvent.click(await screen.findByRole('button', { name: 'Logout' }));
@@ -30,7 +35,7 @@ async function logout() {
 }
 
 describe('useLogout', () => {
-  it('releases the session server-side', async () => {
+  it('posts the stored credential to api/logout when the user clicks Logout', async () => {
     let released = false;
 
     server.use(
@@ -46,7 +51,7 @@ describe('useLogout', () => {
     await waitFor(() => expect(released).toBe(true));
   });
 
-  it('forgets the stored session and returns to the login page', async () => {
+  it('clears the stored session and navigates to /login', async () => {
     server.use(http.post(buildAPITestURL(AuthEndpoints.logout()), () => HttpResponse.json({})));
 
     const { router } = await logout();
@@ -55,7 +60,7 @@ describe('useLogout', () => {
     expect(getStoredSession()).toBeNull();
   });
 
-  it('signs the user out even when the server refuses, so they are never left in', async () => {
+  it('clears the stored session and navigates to /login when api/logout answers 401', async () => {
     server.use(
       http.post(buildAPITestURL(AuthEndpoints.logout()), () =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.UNAUTHORIZED })
@@ -66,5 +71,31 @@ describe('useLogout', () => {
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
     expect(getStoredSession()).toBeNull();
+  });
+
+  it('posts nothing to api/logout when the session was cleared before the user clicked Logout', async () => {
+    let released = false;
+
+    server.use(
+      http.post(buildAPITestURL(AuthEndpoints.logout()), () => {
+        released = true;
+
+        return HttpResponse.json({});
+      })
+    );
+
+    signedIn();
+    mockOrganizationFeatures({ storeknox: true });
+
+    const rendered = await renderAtRoute('/');
+
+    /* Cleared between the page rendering and the control being pressed. */
+    clearStoredSession();
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Logout' }));
+
+    await waitFor(() => expect(rendered.router.state.location.pathname).toBe('/login'));
+
+    expect(released).toBe(false);
   });
 });

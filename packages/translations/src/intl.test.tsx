@@ -170,4 +170,29 @@ describe('intl', () => {
       expect(getIntl().formatNumber(1234.5, { format: 'USD' })).toBe('$1,234.50');
     });
   });
+
+  describe('a message rendered without the values it takes', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+      vi.restoreAllMocks();
+    });
+
+    it('throws while developing, so the mistake is fixed rather than shipped', () => {
+      vi.stubEnv('DEV', true);
+
+      expect(() =>
+        getIntl().formatMessage({ id: 'apiScanModule.uniqueApisRequestsCaptured' })
+      ).toThrow();
+    });
+
+    it('logs it in production, where throwing would take the page down', () => {
+      vi.stubEnv('DEV', false);
+
+      const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+      getIntl().formatMessage({ id: 'apiScanModule.uniqueApisRequestsCaptured' });
+
+      expect(logged).toHaveBeenCalled();
+    });
+  });
 });

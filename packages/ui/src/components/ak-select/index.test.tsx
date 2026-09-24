@@ -5,7 +5,10 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   AkSelect,
   AkSelectContent,
+  AkSelectGroup,
   AkSelectItem,
+  AkSelectLabel,
+  AkSelectSeparator,
   AkSelectTrigger,
   AkSelectValue,
 } from '@irene/ui/ak-select';
@@ -29,13 +32,13 @@ const Severity = (props: React.ComponentProps<typeof AkSelect>) => (
 );
 
 describe('closed state', () => {
-  it('shows the placeholder until something is chosen', () => {
+  it('renders the placeholder while no value is selected', () => {
     render(<Severity />);
 
     expect(screen.getByRole('combobox', { name: 'Severity' })).toHaveTextContent('Any severity');
   });
 
-  it('shows the label of the current value', () => {
+  it('renders the label of the selected value', () => {
     render(<Severity value="high" />);
 
     expect(screen.getByRole('combobox')).toHaveTextContent('High');
@@ -58,7 +61,7 @@ describe('choosing a value', () => {
     expect(screen.getByRole('option', { name: 'High' })).toBeInTheDocument();
   });
 
-  it('reports the chosen value', async () => {
+  it('calls onValueChange with the option the user picks', async () => {
     const onValueChange = vi.fn();
     render(<Severity onValueChange={onValueChange} />);
 
@@ -68,7 +71,7 @@ describe('choosing a value', () => {
     expect(onValueChange).toHaveBeenCalledWith('high');
   });
 
-  it('ignores a disabled option', async () => {
+  it('does not select a disabled option', async () => {
     const onValueChange = vi.fn();
     render(<Severity onValueChange={onValueChange} />);
 
@@ -97,5 +100,74 @@ describe('disabled', () => {
     await userEvent.click(screen.getByRole('combobox'));
 
     expect(screen.queryByRole('option')).not.toBeInTheDocument();
+  });
+});
+
+describe('grouped options', () => {
+  const Grouped = () => (
+    <AkSelect>
+      <AkSelectTrigger aria-label="Scan">
+        <AkSelectValue placeholder="Any scan" />
+      </AkSelectTrigger>
+
+      <AkSelectContent>
+        <AkSelectGroup>
+          <AkSelectLabel>Static</AkSelectLabel>
+
+          <AkSelectItem value="static">Static scan</AkSelectItem>
+        </AkSelectGroup>
+
+        <AkSelectSeparator />
+
+        <AkSelectGroup>
+          <AkSelectLabel>Dynamic</AkSelectLabel>
+
+          <AkSelectItem value="dynamic">Dynamic scan</AkSelectItem>
+        </AkSelectGroup>
+      </AkSelectContent>
+    </AkSelect>
+  );
+
+  it('renders a label for each option group', async () => {
+    render(<Grouped />);
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Scan' }));
+
+    expect(await screen.findByRole('group', { name: 'Static' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Dynamic' })).toBeInTheDocument();
+  });
+
+  it('renders a separator between groups with pointer events disabled', async () => {
+    render(<Grouped />);
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Scan' }));
+
+    await screen.findByRole('group', { name: 'Static' });
+
+    expect(document.querySelector('[data-slot="select-separator"]')).toHaveClass(
+      'pointer-events-none'
+    );
+  });
+});
+
+describe('the item-aligned list position', () => {
+  it('renders no popper sizing classes when the list is item-aligned', async () => {
+    render(
+      <AkSelect>
+        <AkSelectTrigger aria-label="Severity">
+          <AkSelectValue placeholder="Any severity" />
+        </AkSelectTrigger>
+
+        <AkSelectContent position="popper">
+          <AkSelectItem value="critical">Critical</AkSelectItem>
+        </AkSelectContent>
+      </AkSelect>
+    );
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Severity' }));
+
+    const content = await screen.findByRole('listbox');
+
+    expect(content).toHaveClass('w-(--radix-select-trigger-width)');
   });
 });
