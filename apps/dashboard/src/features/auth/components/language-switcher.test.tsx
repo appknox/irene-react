@@ -20,13 +20,13 @@ describe('LanguageSwitcher', () => {
     expect(screen.getByRole('combobox')).toHaveTextContent(akMT('languageEnglish'));
   });
 
-  it('labels the trigger with "Language"', () => {
+  it('labels the trigger Language', () => {
     renderWithProviders(<LanguageSwitcher />);
 
     expect(screen.getByRole('combobox')).toHaveAccessibleName(akMT('language'));
   });
 
-  it('lists every supported locale under its own name', async () => {
+  it('lists every supported locale under its own endonym', async () => {
     const user = userEvent.setup();
 
     renderWithProviders(<LanguageSwitcher />);
@@ -40,7 +40,7 @@ describe('LanguageSwitcher', () => {
     expect(screen.getByRole('option', { name: akMT('languageJapanese') })).toBeInTheDocument();
   });
 
-  it('sets the locale to the option picked', async () => {
+  it('sets the locale to the option the user picks', async () => {
     const user = userEvent.setup();
 
     renderWithProviders(<LanguageSwitcher />);
@@ -51,7 +51,7 @@ describe('LanguageSwitcher', () => {
     await waitFor(() => expect(getLocale()).toBe('ja'));
   });
 
-  it('stores the locale picked', async () => {
+  it('writes the picked locale to localStorage', async () => {
     const user = userEvent.setup();
 
     renderWithProviders(<LanguageSwitcher />);

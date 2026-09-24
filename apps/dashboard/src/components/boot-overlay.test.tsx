@@ -11,6 +11,7 @@ import { akMT } from '@irene/translations/intl';
 
 import { sessionCheckOptions } from '@/features/auth/queries/session';
 import { buildSession } from '@tests/factories';
+import { mockOrganizationFeatures } from '@tests/organization';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
@@ -35,7 +36,7 @@ const hold = (url: string, method: 'get' | 'post' = 'get') => {
 };
 
 describe('BootOverlay', () => {
-  it('covers the session check, which runs before anything renders', async () => {
+  it('renders while the api/check request is in flight', async () => {
     storeSession(buildSession());
     hold(buildAPITestURL(AuthEndpoints.check()), 'post');
 
@@ -46,7 +47,7 @@ describe('BootOverlay', () => {
     );
   });
 
-  it('covers the install describing itself', async () => {
+  it('renders while the configuration requests are in flight', async () => {
     storeSession(buildSession());
     hold(buildAPITestURL(ConfigurationEndpoints.frontend()));
 
@@ -55,7 +56,7 @@ describe('BootOverlay', () => {
     await waitFor(() => expect(overlay()).toBeInTheDocument());
   });
 
-  it('covers the signed-in setup that follows', async () => {
+  it('renders while the signed-in setup requests are in flight', async () => {
     storeSession(buildSession());
     hold(buildAPITestURL(OrganizationEndpoints.list()));
 
@@ -64,7 +65,7 @@ describe('BootOverlay', () => {
     await waitFor(() => expect(overlay()).toBeInTheDocument());
   });
 
-  it('completes its bar before it goes, rather than vanishing part way', async () => {
+  it('advances its bar to 100 percent before it unmounts', async () => {
     storeSession(buildSession());
 
     await renderAtRoute('/', { settle: false });
@@ -73,7 +74,7 @@ describe('BootOverlay', () => {
     await waitFor(() => expect(overlay()).not.toBeInTheDocument());
   });
 
-  it('covers the setup that follows signing in, having started on the login page', async () => {
+  it('renders after a sign-in that started on /login', async () => {
     clearStoredSession();
 
     const { router, queryClient } = await renderAtRoute('/login');
@@ -94,7 +95,7 @@ describe('BootOverlay', () => {
     await waitFor(() => expect(overlay()).toBeInTheDocument());
   });
 
-  it('covers a second sign-in in the same tab, after signing out of the first', async () => {
+  it('renders again on a second sign-in in the same tab', async () => {
     storeSession(buildSession());
 
     server.use(
@@ -103,6 +104,8 @@ describe('BootOverlay', () => {
       ),
       http.post(buildAPITestURL(AuthEndpoints.logout()), () => HttpResponse.json({}))
     );
+
+    mockOrganizationFeatures({ storeknox: true }); // Logout lives on the home page.
 
     const { router, queryClient } = await renderAtRoute('/');
 
@@ -125,7 +128,7 @@ describe('BootOverlay', () => {
     await waitFor(() => expect(overlay()).toBeInTheDocument());
   });
 
-  it('renders nothing for a visitor with no session to restore', async () => {
+  it('renders nothing when no session is stored', async () => {
     clearStoredSession();
     hold(buildAPITestURL(ConfigurationEndpoints.frontend()));
 

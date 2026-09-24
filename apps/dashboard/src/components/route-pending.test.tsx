@@ -47,7 +47,7 @@ describe('RoutePending', () => {
     expect(progressValue()).toBeGreaterThan(moved);
   });
 
-  it('never completes the bar, however long the wait runs', () => {
+  it('holds the progress bar short of 100 percent however long the wait runs', () => {
     renderPending();
 
     act(() => vi.advanceTimersByTime(60_000));

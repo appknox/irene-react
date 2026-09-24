@@ -3,15 +3,10 @@ import { useFormContext } from 'react-hook-form';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { AkButton } from '@irene/ui/ak-button';
 
-import { LoginUsernameField } from '@/features/auth/components/login-username-field';
 import { useRequiredField } from '@/features/auth/hooks/use-required-field';
+import { LoginUsernameField } from '@/features/auth/pages/login/components/login-username-field';
 import type { LoginFormSchema } from '@/features/auth/schemas/login';
 
-/**
- * ===============================================
- * TYPES
- * ===============================================
- */
 interface LoginCheckTypeProps {
   loading: boolean;
   onSubmit: (values: LoginFormSchema) => void;

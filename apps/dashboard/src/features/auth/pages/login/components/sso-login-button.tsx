@@ -1,11 +1,6 @@
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { AkButton } from '@irene/ui/ak-button';
 
-/**
- * ============================================================
- * TYPES
- * ============================================================
- */
 interface SsoLoginButtonProps {
   isEnforced?: boolean;
   loading?: boolean;

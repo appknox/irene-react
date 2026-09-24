@@ -4,29 +4,29 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { akMT } from '@irene/translations/intl';
 
-import { SsoLoginButton } from '@/features/auth/components/sso-login-button';
+import { SsoLoginButton } from '@/features/auth/pages/login/components/sso-login-button';
 import { renderWithProviders } from '@tests/render';
 
 describe('SsoLoginButton', () => {
-  it('reads as a button the user can press', () => {
+  it('renders a button with the SSO label', () => {
     renderWithProviders(<SsoLoginButton />);
 
     expect(screen.getByRole('button', { name: akMT('ssoLogin') })).toBeInTheDocument();
   });
 
-  it('is a plain button when SSO is one option among others', () => {
+  it('renders type button when the account may also use a password', () => {
     renderWithProviders(<SsoLoginButton />);
 
     expect(screen.getByRole('button')).toHaveAttribute('type', 'button');
   });
 
-  it('submits the form when the organisation allows nothing but SSO', () => {
+  it('renders type submit when the organization enforces SSO', () => {
     renderWithProviders(<SsoLoginButton isEnforced />);
 
     expect(screen.getByRole('button')).toHaveAttribute('type', 'submit');
   });
 
-  it('starts the redirect when pressed', async () => {
+  it('starts the provider redirect when the user clicks it', async () => {
     const onClick = vi.fn();
 
     renderWithProviders(<SsoLoginButton onClick={onClick} />);
@@ -35,7 +35,7 @@ describe('SsoLoginButton', () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it('blocks a second press while the redirect is being prepared', async () => {
+  it('disables itself while the redirect request is in flight', async () => {
     const onClick = vi.fn();
 
     renderWithProviders(<SsoLoginButton loading onClick={onClick} />);

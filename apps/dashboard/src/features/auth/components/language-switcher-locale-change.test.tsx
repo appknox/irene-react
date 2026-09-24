@@ -16,8 +16,8 @@ afterEach(async () => {
   await act(async () => setLocale('en'));
 });
 
-describe('switching the locale on the login page', () => {
-  it('renders the heading in the locale picked', async () => {
+describe('switching the locale on /login', () => {
+  it('renders the heading in the picked locale', async () => {
     const user = userEvent.setup();
 
     await renderAtRoute('/login');
@@ -29,7 +29,7 @@ describe('switching the locale on the login page', () => {
     });
   });
 
-  it('renders the field label and placeholder in the locale picked', async () => {
+  it('renders the field label and placeholder in the picked locale', async () => {
     const user = userEvent.setup();
 
     await renderAtRoute('/login');
@@ -45,7 +45,7 @@ describe('switching the locale on the login page', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the document title in the locale picked', async () => {
+  it('renders the document title in the picked locale', async () => {
     const user = userEvent.setup();
 
     await renderAtRoute('/login');

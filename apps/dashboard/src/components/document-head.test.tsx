@@ -7,6 +7,7 @@ import { storeSession } from '@irene/api/utils/session';
 import { akMT } from '@irene/translations/intl';
 
 import { buildSession } from '@tests/factories';
+import { mockOrganizationFeatures } from '@tests/organization';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
@@ -22,22 +23,23 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
-describe('the browser tab', () => {
-  it('names the page it is showing, then the product', async () => {
+describe('DocumentHead', () => {
+  it('renders the document title as page name then product name', async () => {
     signedIn();
+    mockOrganizationFeatures({ storeknox: true }); // So `/` rests on the home page.
 
     await renderAtRoute('/');
 
     await waitFor(() => expect(document.title).toBe(`${akMT('home')} | Appknox`));
   });
 
-  it('names a page nobody has signed in for', async () => {
+  it('renders the document title on an unauthenticated route', async () => {
     await renderAtRoute('/login');
 
     await waitFor(() => expect(document.title).toBe(`${akMT('login')} | Appknox`));
   });
 
-  it('shows the product alone on a page that names none', async () => {
+  it('renders the product name alone for a route with no page title', async () => {
     await renderAtRoute('/no-such-page');
 
     await waitFor(() => expect(document.title).toBe('Appknox'));

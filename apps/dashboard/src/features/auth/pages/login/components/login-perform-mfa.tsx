@@ -4,23 +4,17 @@ import { useFormContext } from 'react-hook-form';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
-import { AkFormField } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
 import { AkTypography } from '@irene/ui/ak-typography';
 import type { ApiMfaRequirement } from '@irene/api/services/auth';
 
-import { LoginRefusalMessage } from '@/features/auth/components/login-refusal-message';
-import { PasswordResetButton } from '@/features/auth/components/password-reset-button';
 import { useRequiredField } from '@/features/auth/hooks/use-required-field';
+import { LoginRefusalMessage } from '@/features/auth/pages/login/components/login-refusal-message';
+import { PasswordResetButton } from '@/features/auth/pages/login/components/password-reset-button';
 import { useLogin } from '@/features/auth/pages/login/hooks/use-login';
+import { LoginFormField, type LoginFormSchema } from '@/features/auth/schemas/login';
 import { isLockedOrCredentialsFailure, LoginFailureKind } from '@/features/auth/utils/login-error';
-import type { LoginFormSchema } from '@/features/auth/schemas/login';
 
-/**
- * ============================================================
- * TYPES
- * ============================================================
- */
 interface LoginPerformMfaProps {
   mfaRequirement: ApiMfaRequirement;
 }
@@ -76,7 +70,7 @@ export function LoginPerformMfa({ mfaRequirement }: Readonly<LoginPerformMfaProp
         )}
       </div>
 
-      <AkFormField name="otp" label={mfaInputLabel}>
+      <LoginFormField name="otp" label={mfaInputLabel}>
         <AkInput
           placeholder={akMT('enterCode')}
           hasError={loginRefusal}
@@ -85,7 +79,7 @@ export function LoginPerformMfa({ mfaRequirement }: Readonly<LoginPerformMfaProp
           autoFocus
           data-test-mfa-otp-input
         />
-      </AkFormField>
+      </LoginFormField>
 
       {isLocked ? (
         <PasswordResetButton />

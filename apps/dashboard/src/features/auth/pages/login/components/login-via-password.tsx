@@ -6,26 +6,20 @@ import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
 import { AkDivider } from '@irene/ui/ak-divider';
-import { AkFormField } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
 import { AkTypography } from '@irene/ui/ak-typography';
 import type { ApiMfaRequirement, ApiSsoCheck } from '@irene/api/services/auth';
 
-import { LoginRefusalMessage } from '@/features/auth/components/login-refusal-message';
-import { LoginUsernameField } from '@/features/auth/components/login-username-field';
-import { PasswordResetButton } from '@/features/auth/components/password-reset-button';
-import { SsoLoginButton } from '@/features/auth/components/sso-login-button';
 import { useRequiredField } from '@/features/auth/hooks/use-required-field';
+import { LoginRefusalMessage } from '@/features/auth/pages/login/components/login-refusal-message';
+import { LoginUsernameField } from '@/features/auth/pages/login/components/login-username-field';
+import { PasswordResetButton } from '@/features/auth/pages/login/components/password-reset-button';
+import { SsoLoginButton } from '@/features/auth/pages/login/components/sso-login-button';
 import { useLogin } from '@/features/auth/pages/login/hooks/use-login';
 import { useSsoLogin } from '@/features/auth/pages/login/hooks/use-sso-login';
+import { LoginFormField, type LoginFormSchema } from '@/features/auth/schemas/login';
 import { isLockedOrCredentialsFailure } from '@/features/auth/utils/login-error';
-import type { LoginFormSchema } from '@/features/auth/schemas/login';
 
-/**
- * ============================================================
- * TYPES
- * ============================================================
- */
 interface LoginViaPasswordProps {
   check: ApiSsoCheck;
   isSsoEnabled: boolean;
@@ -76,7 +70,7 @@ export function LoginViaPassword({
     >
       <LoginUsernameField hasError={wasRefused} onChange={onUsernameChange} />
 
-      <AkFormField
+      <LoginFormField
         name="password"
         label={<AkMessageTranslate id="password" />}
         labelAction={
@@ -99,7 +93,7 @@ export function LoginViaPassword({
           autoFocus
           data-test-login-password-input
         />
-      </AkFormField>
+      </LoginFormField>
 
       {isLockedAccount ? (
         <PasswordResetButton />

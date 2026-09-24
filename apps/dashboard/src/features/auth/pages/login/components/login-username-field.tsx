@@ -1,12 +1,7 @@
 import { akMT } from '@irene/translations/intl';
-import { AkFormField } from '@irene/ui/ak-form';
 import { AkInput } from '@irene/ui/ak-input';
+import { LoginFormField } from '@/features/auth/schemas/login';
 
-/**
- * ============================================================
- * TYPES
- * ============================================================
- */
 interface LoginUsernameFieldProps {
   hasError?: boolean;
   autoFocus?: boolean;
@@ -24,7 +19,7 @@ export const LoginUsernameField = (props: Readonly<LoginUsernameFieldProps>) => 
   const { hasError, autoFocus, onChange } = props;
 
   return (
-    <AkFormField name="username" label={akMT('usernameEmailIdTextLabel')}>
+    <LoginFormField name="username" label={akMT('usernameEmailIdTextLabel')}>
       <AkInput
         autoComplete="username"
         placeholder={akMT('usernameEmailIdTextPlaceholder')}
@@ -33,6 +28,6 @@ export const LoginUsernameField = (props: Readonly<LoginUsernameFieldProps>) => 
         autoFocus={autoFocus}
         data-test-login-username-input
       />
-    </AkFormField>
+    </LoginFormField>
   );
 };

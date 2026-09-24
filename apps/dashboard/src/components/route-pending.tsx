@@ -8,6 +8,16 @@ import MainLoaderImage2 from '@irene/ui/svgs/main-loader-image2.svg?react';
 import MainLoaderImage3 from '@irene/ui/svgs/main-loader-image3.svg?react';
 
 const LOADER_IMAGES = [MainLoaderImage1, MainLoaderImage2, MainLoaderImage3];
+
+/**
+ * Which illustration is on screen, and which follows it. Written out rather
+ * than derived with a modulo so the lookup is total: an index arrived at by
+ * arithmetic is possibly-undefined to the compiler, and the fallback it then
+ * needs can never run. Add an image here and in `LOADER_IMAGES` together.
+ */
+type LoaderImageIndex = 0 | 1 | 2;
+
+const NEXT_LOADER_IMAGE_INDEX: Record<LoaderImageIndex, LoaderImageIndex> = { 0: 1, 1: 2, 2: 0 };
 const IMAGE_INTERVAL_MS = 1000;
 const COMPLETION_PERCENTAGE = 100;
 
@@ -23,13 +33,13 @@ const COMPLETION_PERCENTAGE = 100;
  * moment the wait ends.
  */
 export function RoutePending({ progress: routeProgress }: Readonly<{ progress?: number }>) {
-  const [imageIndex, setImageIndex] = useState(0);
+  const [imageIndex, setImageIndex] = useState<LoaderImageIndex>(0);
   const { progress } = useNProgress({ isAnimating: routeProgress === undefined });
-  const LoaderImage = LOADER_IMAGES[imageIndex] ?? MainLoaderImage1;
+  const LoaderImage = LOADER_IMAGES[imageIndex];
 
   // Handles the image animation.
   useEffect(() => {
-    const imageIdxIncrement = () => setImageIndex((idx) => (idx + 1) % LOADER_IMAGES.length);
+    const imageIdxIncrement = () => setImageIndex((index) => NEXT_LOADER_IMAGE_INDEX[index]);
     const imagesInterval = setInterval(imageIdxIncrement, IMAGE_INTERVAL_MS);
 
     return () => clearInterval(imagesInterval);

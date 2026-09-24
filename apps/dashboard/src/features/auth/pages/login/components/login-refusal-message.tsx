@@ -3,11 +3,6 @@ import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { useWhitelabel } from '@/hooks/use-whitelabel';
 import type { LoginFailure } from '@/features/auth/utils/login-error';
 
-/**
- * ============================================================
- * TYPES
- * ============================================================
- */
 interface LoginRefusalMessageProps {
   failure?: LoginFailure;
 }

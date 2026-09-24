@@ -7,15 +7,16 @@ import { useWhitelabel } from '@/hooks/use-whitelabel';
  * The product logo, as this deployment brands itself.
  *
  * @param props.className - Sizing for the image.
+ * @param props.src - A mark to show in place of the logo, for a page that carries its own.
  */
-export function AppLogo({ className }: Readonly<{ className?: string }>) {
+export function AppLogo({ className, src }: Readonly<{ className?: string; src?: string }>) {
   const { hasLoadedFrontendConfig, name, logo } = useWhitelabel();
 
   // Show the logo when the frontend configuration has loaded
   if (hasLoadedFrontendConfig) {
     return (
       <Link to="/" aria-label={name}>
-        <img src={logo} alt={name} className={className} />
+        <img src={src ?? logo} alt={name} className={className} />
       </Link>
     );
   }

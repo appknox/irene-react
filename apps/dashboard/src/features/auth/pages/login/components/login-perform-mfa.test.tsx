@@ -65,8 +65,8 @@ async function reachMfaStep() {
   return rendered;
 }
 
-describe('the second factor', () => {
-  it('asks for an authenticator code when the account uses an app', async () => {
+describe('LoginPerformMfa', () => {
+  it('renders the authenticator-app wording when the account uses an app factor', async () => {
     challengeThen('TOTP', 'False', () => HttpResponse.json({}));
     await reachMfaStep();
 
@@ -74,7 +74,7 @@ describe('the second factor', () => {
     expect(screen.getByText(akMT('authenticatorCode'))).toBeInTheDocument();
   });
 
-  it('asks for an emailed code when the account uses email', async () => {
+  it('renders the email wording when the account uses an email factor', async () => {
     challengeThen('HOTP', 'False', () => HttpResponse.json({}));
     await reachMfaStep();
 
@@ -82,21 +82,21 @@ describe('the second factor', () => {
     expect(screen.getByText(akMT('emailOTP'))).toBeInTheDocument();
   });
 
-  it('says so when the organisation mandates it, rather than letting it look optional', async () => {
+  it('renders the mandatory-2FA notice when the organization mandates it', async () => {
     challengeThen('HOTP', 'True', () => HttpResponse.json({}));
     await reachMfaStep();
 
     expect(screen.getByText(akMT('organizationMandatory2FA'))).toBeInTheDocument();
   });
 
-  it('leaves out the mandate notice when the user chose 2FA themselves', async () => {
+  it('renders no mandatory-2FA notice when the user enabled 2FA themselves', async () => {
     challengeThen('TOTP', 'False', () => HttpResponse.json({}));
     await reachMfaStep();
 
     expect(screen.queryByText(akMT('organizationMandatory2FA'))).not.toBeInTheDocument();
   });
 
-  it('replaces the password step rather than sitting beside it', async () => {
+  it('removes the password step from the DOM when the code step renders', async () => {
     challengeThen('TOTP', 'False', () => HttpResponse.json({}));
     await reachMfaStep();
 
@@ -104,7 +104,7 @@ describe('the second factor', () => {
     expect(screen.queryByRole('button', { name: akMT('login') })).not.toBeInTheDocument();
   });
 
-  it('cannot be submitted without a code, and does not nag about it', async () => {
+  it('disables the submit button and shows no error while the code is empty', async () => {
     challengeThen('TOTP', 'False', () => HttpResponse.json({}));
     await reachMfaStep();
 
@@ -113,7 +113,7 @@ describe('the second factor', () => {
     expect(sent).toHaveLength(1);
   });
 
-  it('stops complaining once the code is cleared again', async () => {
+  it('clears the required-field error when the code is typed and deleted again', async () => {
     challengeThen('TOTP', 'False', () =>
       HttpResponse.json(
         { message: CREDENTIALS_REJECTED },
@@ -135,7 +135,7 @@ describe('the second factor', () => {
     expect(screen.getByRole('button', { name: akMT('verify') })).toBeDisabled();
   });
 
-  it('sends the code with the credentials, since the API signs in on one request', async () => {
+  it('posts the code alongside the username and password in one login request', async () => {
     challengeThen('TOTP', 'False', () => HttpResponse.json({ token: 'tok3n', user_id: 42 }));
 
     const { router } = await reachMfaStep();
@@ -144,7 +144,7 @@ describe('the second factor', () => {
 
     await userEvent.click(screen.getByRole('button', { name: akMT('verify') }));
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/'));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/dashboard/projects'));
 
     expect(sent[1]).toEqual({
       // The service lowercases it, since the server compares case-insensitively.
@@ -154,14 +154,14 @@ describe('the second factor', () => {
     });
   });
 
-  it('never sends an otp on the first attempt, which has none to send', async () => {
+  it('posts no otp field on the first login request', async () => {
     challengeThen('TOTP', 'False', () => HttpResponse.json({}));
     await reachMfaStep();
 
     expect(sent[0]).toEqual({ username: USERNAME.toLowerCase(), password: PASSWORD });
   });
 
-  it('reports a wrong code on the field', async () => {
+  it('renders the wrong-code error on the code field', async () => {
     challengeThen('TOTP', 'False', () =>
       HttpResponse.json(
         { message: CREDENTIALS_REJECTED },
@@ -180,7 +180,7 @@ describe('the second factor', () => {
     expect(field).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it('offers a password reset when too many codes lock the account out', async () => {
+  it('renders a password reset link when repeated codes lock the account', async () => {
     challengeThen('TOTP', 'False', () =>
       HttpResponse.json({ message: ACCOUNT_LOCKED }, { status: HTTP_STATUS_CODES.UNAUTHORIZED })
     );

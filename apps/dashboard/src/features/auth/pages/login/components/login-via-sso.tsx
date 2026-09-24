@@ -2,16 +2,11 @@ import { useFormContext } from 'react-hook-form';
 
 import type { ApiSsoCheck } from '@irene/api/services/auth';
 
-import { LoginUsernameField } from '@/features/auth/components/login-username-field';
-import { SsoLoginButton } from '@/features/auth/components/sso-login-button';
+import { LoginUsernameField } from '@/features/auth/pages/login/components/login-username-field';
+import { SsoLoginButton } from '@/features/auth/pages/login/components/sso-login-button';
 import { useSsoLogin } from '@/features/auth/pages/login/hooks/use-sso-login';
 import type { LoginFormSchema } from '@/features/auth/schemas/login';
 
-/**
- * ============================================================
- * TYPES
- * ============================================================
- */
 interface LoginViaSsoProps {
   accountCheckStatus: ApiSsoCheck;
   onUsernameChange: () => void;

@@ -58,14 +58,14 @@ describe('OidcError', () => {
     clearStoredSession();
   });
 
-  it("renders the API's own wording for the refusal", async () => {
+  it("renders the API's error message for the refusal", async () => {
     renderError();
 
     expect(await screen.findByText('Invalid OIDC Token')).toBeInTheDocument();
   });
 
   describe('with a session', () => {
-    it('tells the user to start again from the application or login again', async () => {
+    it('renders the message asking the user to restart from the client application or sign in again', async () => {
       signedIn();
       renderError();
 
@@ -74,7 +74,7 @@ describe('OidcError', () => {
       ).toBeInTheDocument();
     });
 
-    it('offers the dashboard, since /login would send a signed-in user back to it', async () => {
+    it('renders a button to the dashboard rather than to /login when a session is stored', async () => {
       signedIn();
 
       const { router } = renderError();
@@ -84,7 +84,7 @@ describe('OidcError', () => {
       await waitFor(() => expect(router.state.location.pathname).toBe('/'));
     });
 
-    it('replaces the spent token URL rather than leaving it behind the back button', async () => {
+    it('replaces the spent-token URL in history when the user leaves the page', async () => {
       signedIn();
 
       const { router } = renderError();
@@ -96,7 +96,7 @@ describe('OidcError', () => {
       expect(router.history).toHaveLength(1);
     });
 
-    it('signs the user out and returns them to the login page', async () => {
+    it('clears the session and navigates to /login when the user clicks Login again', async () => {
       signedIn();
 
       server.use(http.post(buildAPITestURL(AuthEndpoints.logout()), () => HttpResponse.json({})));
@@ -112,7 +112,7 @@ describe('OidcError', () => {
   });
 
   describe('without a session', () => {
-    it('tells the user to login before starting again', async () => {
+    it('renders the message asking the user to sign in before restarting', async () => {
       renderError();
 
       expect(
@@ -120,7 +120,7 @@ describe('OidcError', () => {
       ).toBeInTheDocument();
     });
 
-    it('offers the login page', async () => {
+    it('renders a button to /login', async () => {
       const { router } = renderError();
 
       await userEvent.click(await screen.findByRole('link', { name: akMT('login') }));
