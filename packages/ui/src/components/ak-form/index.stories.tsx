@@ -57,7 +57,6 @@ function EmailField({ description, invalid = false }: Readonly<EmailFieldProps>)
 const meta = {
   title: 'Components/AkFormProvider',
   component: EmailField,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
   argTypes: { invalid: { control: 'boolean' } },
 } satisfies Meta<typeof EmailField>;

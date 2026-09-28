@@ -16,7 +16,6 @@ import { AkLabel } from '@irene/ui/ak-label';
 const meta = {
   title: 'Components/AkSelect',
   component: AkSelect,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
   argTypes: { disabled: { control: 'boolean' } },
 } satisfies Meta<typeof AkSelect>;

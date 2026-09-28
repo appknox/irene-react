@@ -6,7 +6,6 @@ import { AkIcon } from '@irene/ui/ak-icon';
 const meta = {
   title: 'Components/AkAlert',
   component: AkAlert,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
   argTypes: {
     variant: { control: 'select', options: ['default', 'destructive'] },

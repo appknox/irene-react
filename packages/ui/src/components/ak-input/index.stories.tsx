@@ -6,7 +6,6 @@ import { AkLabel } from '@irene/ui/ak-label';
 const meta = {
   title: 'Components/AkInput',
   component: AkInput,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
   argTypes: {
     type: {

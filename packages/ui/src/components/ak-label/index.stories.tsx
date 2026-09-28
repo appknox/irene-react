@@ -6,7 +6,6 @@ import { AkLabel } from '@irene/ui/ak-label';
 const meta = {
   title: 'Components/AkLabel',
   component: AkLabel,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
   args: { children: 'ApiProject name' },
 } satisfies Meta<typeof AkLabel>;

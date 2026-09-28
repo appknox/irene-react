@@ -4,7 +4,6 @@ import { AkSpinner } from '@irene/ui/ak-spinner';
 const meta = {
   title: 'Components/AkSpinner',
   component: AkSpinner,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
 } satisfies Meta<typeof AkSpinner>;
 

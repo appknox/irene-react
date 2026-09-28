@@ -6,7 +6,6 @@ import { iconNamesBySet } from '@irene/ui/icons/sets';
 const meta = {
   title: 'Components/AkIcon',
   component: AkIcon,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
   argTypes: {
     size: { control: 'text' },

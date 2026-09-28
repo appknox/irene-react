@@ -29,7 +29,6 @@ const COLORS = [
 const meta = {
   title: 'Components/AkTypography',
   component: AkTypography,
-  parameters: { layout: 'padded' },
   tags: ['autodocs'],
   argTypes: {
     variant: { control: 'select', options: VARIANTS },

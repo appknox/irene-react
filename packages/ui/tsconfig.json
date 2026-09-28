@@ -20,6 +20,7 @@
     "paths": {
       "@irene/ui": ["./src/index.ts"],
       "@irene/ui/cn": ["./src/utils/cn/index.ts"],
+      "@irene/ui/story-layout": ["./.storybook/story-layout.tsx"],
       "@irene/ui/ui": ["./src/components/ui"],
       "@irene/ui/styles/*": ["./styles/*"],
       "@irene/ui/*/variants": ["./src/components/*/variants.ts"],

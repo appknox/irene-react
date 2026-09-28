@@ -50,7 +50,6 @@ const Label = ({ children }: { children: ReactNode }) => (
 const meta = {
   title: 'Components/AkTable',
   component: AkTable<Finding>,
-  parameters: { layout: 'padded' },
   tags: ['autodocs'],
 
   /* A table stretches to whatever it is given, which reads badly across a full canvas. */

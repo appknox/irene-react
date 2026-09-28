@@ -4,7 +4,6 @@ import { AkLink } from '@irene/ui/ak-link';
 const meta = {
   title: 'Components/AkLink',
   component: AkLink,
-  parameters: { layout: 'padded' },
   tags: ['autodocs'],
   argTypes: {
     color: {

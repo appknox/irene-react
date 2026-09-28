@@ -4,7 +4,6 @@ import { AkDivider } from '@irene/ui/ak-divider';
 const meta = {
   title: 'Components/AkDivider',
   component: AkDivider,
-  parameters: { layout: 'padded' },
   tags: ['autodocs'],
   argTypes: {
     direction: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
