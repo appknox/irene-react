@@ -5,7 +5,7 @@ import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { AkIcon } from '@irene/ui/ak-icon';
 import { AkTypography } from '@irene/ui/ak-typography';
 
-import type { ProductFeatureDestination } from '@/features/dashboard/pages/home/product-features';
+import type { ProductFeatureDestination } from '@/features/dashboard/utils/product-features';
 
 /** The artwork a card carries: a banner behind its head, and the product's mark. */
 type ProductCardArtwork = ComponentType<SVGProps<SVGSVGElement>>;
@@ -61,7 +61,6 @@ export function ProductFeatureCard({
             {title}
           </AkTypography>
 
-          {/* Held at two lines so every card's link sits on the same line. */}
           <AkTypography variant="subtitle2" fontWeight="regular" className="min-h-9">
             {description}
           </AkTypography>

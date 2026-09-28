@@ -106,7 +106,11 @@ export function SystemStatusPage() {
       className="flex min-h-screen flex-col items-center justify-center p-4"
       data-test-system-status
     >
-      <div className="w-full max-w-lg overflow-hidden rounded-sm border border-border bg-background shadow-3">
+      <div
+        className="
+          w-full max-w-lg overflow-hidden rounded-sm border border-border bg-background shadow-3
+        "
+      >
         <div className="flex justify-center px-6 pt-5 pb-3.5">
           <AppLogo className="max-h-11 max-w-42" />
         </div>

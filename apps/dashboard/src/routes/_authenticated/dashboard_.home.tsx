@@ -5,7 +5,7 @@ import { akMT } from '@irene/translations/intl';
 import { setupUserAndOrgContext } from '@/actions/setup-user-context';
 import { HomePage } from '@/features/dashboard/pages/home';
 
-export const Route = createFileRoute('/_authenticated/dashboard/home')({
+export const Route = createFileRoute('/_authenticated/dashboard_/home')({
   staticData: { pageTitle: () => akMT('home') },
 
   /*
@@ -22,9 +22,9 @@ export const Route = createFileRoute('/_authenticated/dashboard/home')({
   beforeLoad: async ({ context }) => {
     await setupUserAndOrgContext(context.queryClient, context.session.userId);
 
-    const { selected, me } = organizationStore.getState();
-    const securityDashboardEnabled = me?.has_security_permission;
-    const storeKnoxEnabled = selected?.features.storeknox;
+    const organization = organizationStore.getState();
+    const securityDashboardEnabled = organization.hasSecurityPermission();
+    const storeKnoxEnabled = organization.features().storeknox;
 
     if (!securityDashboardEnabled && !storeKnoxEnabled) {
       throw redirect({ to: '/dashboard/projects', replace: true });

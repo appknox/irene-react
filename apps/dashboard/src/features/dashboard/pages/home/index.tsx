@@ -9,7 +9,7 @@ import { AkTypography } from '@irene/ui/ak-typography';
 import { AppLogo } from '@/components/app-logo';
 import { useLogout } from '@/features/auth/hooks/use-logout';
 import { ProductFeatureCard } from '@/features/dashboard/pages/home/components/product-feature-card';
-import { buildProductFeatures } from '@/features/dashboard/pages/home/product-features';
+import { buildProductFeatures } from '@/features/dashboard/utils/product-features';
 import { useOrganization } from '@/hooks/use-organization';
 import { useServerConfiguration } from '@/hooks/use-server-configuration';
 import { useWhitelabel } from '@/hooks/use-whitelabel';
@@ -21,26 +21,23 @@ import { useWhitelabel } from '@/hooks/use-whitelabel';
  */
 export function HomePage() {
   const logout = useLogout();
+  const organization = useOrganization();
   const { isAppknoxUrl, favicon, logo } = useWhitelabel();
-  const { selected, me } = useOrganization();
   const { isEnterprise } = useServerConfiguration();
 
-  const productFeatures = useMemo(() => {
-    const hasOffensiveSecurity = Boolean(selected?.features.offensive_security);
-
-    const hidesOffensiveSecurityUpsell =
-      !hasOffensiveSecurity && Boolean(selected?.hide_upsell_features);
-
-    return buildProductFeatures({
-      hasStoreknox: Boolean(selected?.features.storeknox),
-      hasOffensiveSecurity,
-      hasReporting: Boolean(selected?.ai_features.reporting),
-      hasSecurityPermission: Boolean(me?.has_security_permission),
-      hidesOffensiveSecurityUpsell,
-      isEnterprise,
-      isAppknoxUrl,
-    });
-  }, [selected, me, isEnterprise, isAppknoxUrl]);
+  // All features this account has access to.
+  const productFeatures = useMemo(
+    () =>
+      buildProductFeatures({
+        hasStoreknox: organization.features().storeknox,
+        hasReporting: organization.aiFeatures().reporting,
+        hasSecurityPermission: organization.hasSecurityPermission(),
+        showsOffensiveSecurity: organization.showsOffensiveSecurity(),
+        isEnterprise,
+        isAppknoxUrl,
+      }),
+    [organization, isEnterprise, isAppknoxUrl]
+  );
 
   return (
     <main

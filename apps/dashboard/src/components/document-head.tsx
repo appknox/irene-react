@@ -1,7 +1,15 @@
 import { useMatches } from '@tanstack/react-router';
 import { Fragment } from 'react';
 
+import {
+  getProductFeatureIdForPath,
+  getProductFeatureName,
+} from '@/features/dashboard/utils/product-features';
+
 import { useWhitelabel } from '@/hooks/use-whitelabel';
+
+/* The layout every product's pages render in. The landing page opts out of it and names no module. */
+const PRODUCT_LAYOUT_ROUTE = '/_authenticated/dashboard';
 
 /** What sits between a page and the one that contains it. */
 const TITLE_SEPARATOR = ' | ';
@@ -17,8 +25,17 @@ const TITLE_SEPARATOR = ' | ';
  * readable while every one of them belongs to the same product.
  */
 export function DocumentHead() {
-  const { name, favicon } = useWhitelabel();
+  const { name, favicon, isAppknoxUrl } = useWhitelabel();
   const matches = useMatches();
+  const productLayout = matches.some((match) => match.routeId === PRODUCT_LAYOUT_ROUTE);
+
+  /* The module the page belongs to, named as this install names it. */
+  const productName = productLayout
+    ? getProductFeatureName(
+        getProductFeatureIdForPath(matches.at(-1)?.pathname ?? ''),
+        isAppknoxUrl
+      )
+    : undefined;
 
   /*
     Every level that names a page contributes, deepest first, with the product
@@ -29,7 +46,12 @@ export function DocumentHead() {
     .filter(Boolean)
     .reverse();
 
-  const pageTitle = [...matchingRoutePageTitles, name].join(TITLE_SEPARATOR);
+  /* A page that is its own module names it once: "Reports | Appknox", never "Reports | Reports". */
+  const segments = [...matchingRoutePageTitles, productName, name].filter(
+    (segment, index, all) => segment && segment !== all[index + 1]
+  );
+
+  const pageTitle = segments.join(TITLE_SEPARATOR);
 
   return (
     <Fragment>

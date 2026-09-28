@@ -29,9 +29,13 @@ type ProductFeatureRoute =
 export type ProductFeatureDestination =
   { kind: 'route'; to: ProductFeatureRoute } | { kind: 'app'; href: string };
 
+/** The product features this app knows about. */
+export type ProductFeatureId =
+  'appknox' | 'storeknox' | 'offensive-security' | 'reporting' | 'security';
+
 /** One product feature the account may open from the home page. */
-interface ProductFeature {
-  id: string;
+export interface ProductFeature {
+  id: ProductFeatureId;
   title: string;
   description: string;
   destination: ProductFeatureDestination;
@@ -43,22 +47,41 @@ interface ProductFeature {
 /** What the account is entitled to, and how this install is branded. */
 interface ProductFeatureAccess {
   hasStoreknox: boolean;
-  hasOffensiveSecurity: boolean;
+  showsOffensiveSecurity: boolean;
   hasReporting: boolean;
   hasSecurityPermission: boolean;
   isEnterprise: boolean;
   isAppknoxUrl: boolean;
-
-  /** Set when the organization lacks offensive security and is shown no upsell for it. */
-  hidesOffensiveSecurityUpsell: boolean;
 }
+
+/**
+ * What a product is called.
+ *
+ * An Appknox install names its products after themselves; a whitelabel install
+ * names them for what they do, since its customers do not call them Appknox.
+ *
+ * @param id - The product being named.
+ * @param isAppknoxUrl - Whether this tab is on an Appknox host.
+ * @returns The name to show.
+ */
+export const getProductFeatureName = (id: ProductFeatureId, isAppknoxUrl: boolean) => {
+  const names: Record<ProductFeatureId, string> = {
+    appknox: isAppknoxUrl ? akMT('appknox') : akMT('vapt'),
+    storeknox: isAppknoxUrl ? akMT('storeknox.title') : akMT('appMonitoring'),
+    reporting: akMT('reportModule.title'),
+    security: akMT('securityDashboard'),
+    'offensive-security': akMT('offensiveSecurity.title'),
+  };
+
+  return names[id];
+};
 
 /** The product features this account may open, in the order they are shown. */
 export const buildProductFeatures = (access: ProductFeatureAccess): ProductFeature[] => {
   const entries: Array<ProductFeature | false> = [
     {
       id: 'appknox',
-      title: access.isAppknoxUrl ? akMT('appknox') : akMT('vapt'),
+      title: getProductFeatureName('appknox', access.isAppknoxUrl),
       description: akMT('appknoxDesc'),
       destination: { kind: 'route', to: '/dashboard/projects' },
       cover: AppknoxCover,
@@ -67,28 +90,27 @@ export const buildProductFeatures = (access: ProductFeatureAccess): ProductFeatu
 
     access.hasStoreknox && {
       id: 'storeknox',
-      title: access.isAppknoxUrl ? akMT('storeknox.title') : akMT('appMonitoring'),
+      title: getProductFeatureName('storeknox', access.isAppknoxUrl),
       description: akMT('storeknox.description'),
       destination: { kind: 'route', to: '/dashboard/storeknox/inventory/app-list' },
       cover: StoreknoxCover,
       indicator: StoreknoxIndicator,
     },
 
-    !access.hidesOffensiveSecurityUpsell &&
-      access.hasOffensiveSecurity && {
-        id: 'offensive-security',
-        title: akMT('offensiveSecurity.title'),
-        description: akMT('offensiveSecurity.homeCardDescription'),
-        destination: { kind: 'route', to: '/dashboard/offensive-security' },
-        cover: OffensiveSecurityCover,
-        indicator: OffensiveSecurityIndicator,
-      },
+    access.showsOffensiveSecurity && {
+      id: 'offensive-security',
+      title: getProductFeatureName('offensive-security', access.isAppknoxUrl),
+      description: akMT('offensiveSecurity.homeCardDescription'),
+      destination: { kind: 'route', to: '/dashboard/offensive-security' },
+      cover: OffensiveSecurityCover,
+      indicator: OffensiveSecurityIndicator,
+    },
 
     /* Reporting is sold, so a self-hosted install is never offered it. */
     access.hasReporting &&
       !access.isEnterprise && {
         id: 'reporting',
-        title: akMT('reportModule.title'),
+        title: getProductFeatureName('reporting', access.isAppknoxUrl),
         description: akMT('reportModule.description'),
         destination: { kind: 'route', to: '/dashboard/reports' },
         cover: ReportCover,
@@ -97,7 +119,7 @@ export const buildProductFeatures = (access: ProductFeatureAccess): ProductFeatu
 
     access.hasSecurityPermission && {
       id: 'security',
-      title: akMT('securityDashboard'),
+      title: getProductFeatureName('security', access.isAppknoxUrl),
       description: akMT('securityDashboardDesc'),
       destination: { kind: 'app', href: '/security/projects' },
       cover: SecurityCover,
@@ -108,3 +130,36 @@ export const buildProductFeatures = (access: ProductFeatureAccess): ProductFeatu
 
   return entries.filter(Boolean) as ProductFeature[];
 };
+
+/*
+  Which product a path belongs to. The Appknox dashboard holds every path that
+  is not one of these, so it is what an unmatched path falls back to.
+*/
+const PRODUCT_FEATURE_PATHS: Array<[string, ProductFeatureId]> = [
+  ['/dashboard/storeknox', 'storeknox'],
+  ['/dashboard/offensive-security', 'offensive-security'],
+  ['/dashboard/reports', 'reporting'],
+  ['/security', 'security'],
+];
+
+/**
+ * Whether a path is the product's own page or one beneath it.
+ *
+ * The next character has to be a separator, so `/dashboard/store-release-readiness`
+ * is not read as a page of StoreKnox.
+ *
+ * @param pathname - Where the router currently is.
+ * @param prefix - The product's entry path.
+ * @returns Whether the path belongs to that product.
+ */
+const isWithinProduct = (pathname: string, prefix: string) =>
+  pathname === prefix || pathname.startsWith(`${prefix}/`);
+
+/**
+ * The product the page being shown belongs to, including every page beneath it.
+ *
+ * @param pathname - Where the router currently is.
+ * @returns The product that page is part of.
+ */
+export const getProductFeatureIdForPath = (pathname: string): ProductFeatureId =>
+  PRODUCT_FEATURE_PATHS.find(([prefix]) => isWithinProduct(pathname, prefix))?.[1] ?? 'appknox';
