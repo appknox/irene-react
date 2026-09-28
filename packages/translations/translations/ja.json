@@ -2274,7 +2274,7 @@
   "saveAndProceed": "Save and Proceed",
   "saveCredentials": "資格情報の保存",
   "savedPreferences": "設定を保存しました",
-  "SBOM": "SBOM",
+  "SBOM": "SCA",
   "sbomModule": {
     "applicationName": "Application Name",
     "applicationVersion": "Application Version",

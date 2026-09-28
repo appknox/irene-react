@@ -2274,7 +2274,7 @@
   "saveAndProceed": "Save and Proceed",
   "saveCredentials": "Save Credentials",
   "savedPreferences": "Successfully saved the preferences",
-  "SBOM": "SBOM",
+  "SBOM": "SCA",
   "sbomModule": {
     "applicationName": "Application Name",
     "applicationVersion": "Application Version",
