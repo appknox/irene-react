@@ -65,7 +65,10 @@ describe('RoutePending', () => {
     ).not.toBeInTheDocument();
 
     expect(screen.queryByText(akMT('bootLoadingScreenMsg.almostThere'))).not.toBeInTheDocument();
-    expect(screen.queryByText(akMT('bootLoadingScreenMsg.thanksForYourPatience'))).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByText(akMT('bootLoadingScreenMsg.thanksForYourPatience'))
+    ).not.toBeInTheDocument();
   });
 
   it.each([

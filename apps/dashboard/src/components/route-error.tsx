@@ -63,7 +63,12 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
       className="flex min-h-screen flex-col items-center justify-center p-4"
       data-test-route-error
     >
-      <div className="flex w-full max-w-120 flex-col items-center gap-4 rounded-sm border border-border bg-background p-10 text-center shadow-3">
+      <div
+        className={`
+          flex w-full max-w-120 flex-col items-center gap-4 rounded-sm border border-border
+          bg-background p-10 text-center shadow-3
+        `}
+      >
         <AkIcon name="lucide:triangle-alert" className="size-10 text-error" />
 
         <AkTypography tag="h1" variant="h5">

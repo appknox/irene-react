@@ -25,7 +25,13 @@ function AkCheckbox({ className, color, ...props }: AkCheckboxProps) {
   return (
     <span className="group/checkbox relative inline-flex" data-slot="checkbox-field">
       {/* The halo effect of hovering over the checkbox.*/}
-      <span className="pointer-events-none absolute -inset-2 rounded-full bg-neutral-100 opacity-0 transition-opacity group-hover/checkbox:opacity-100 group-has-disabled/checkbox:opacity-0" />
+      <span
+        className={cn(
+          'pointer-events-none absolute -inset-2 rounded-full bg-neutral-100 opacity-0',
+          'transition-opacity group-hover/checkbox:opacity-100',
+          'group-has-disabled/checkbox:opacity-0'
+        )}
+      />
 
       <CheckboxPrimitive.Root
         data-slot="checkbox"

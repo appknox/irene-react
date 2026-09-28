@@ -46,8 +46,21 @@ function AkInput({
           data-slot="input"
           aria-invalid={invalid}
           className={cn(
-            'h-9 w-full min-w-0 rounded-sm border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-base placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-neutral-100 disabled:bg-neutral-100 disabled:text-foreground dark:bg-input/30',
-            'focus-visible:border-border-strong focus-visible:ring-[3px] focus-visible:ring-border-strong/40',
+            'h-9 w-full min-w-0 rounded-sm border border-input bg-transparent px-3 py-1 text-base',
+            'shadow-xs transition-[color,box-shadow] outline-none',
+            'selection:bg-primary selection:text-primary-foreground',
+            `
+              file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm
+              file:font-medium
+            `,
+            'file:text-foreground placeholder:text-base placeholder:text-muted-foreground',
+            'disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-neutral-100',
+            'disabled:bg-neutral-100 disabled:text-foreground',
+            'dark:bg-input/30',
+            `
+              focus-visible:border-border-strong focus-visible:ring-[3px]
+              focus-visible:ring-border-strong/40
+            `,
             'aria-invalid:border-danger aria-invalid:ring-danger/20',
             isPassword && 'pr-9',
             className
@@ -63,7 +76,13 @@ function AkInput({
             aria-pressed={isRevealed}
             disabled={props.disabled}
             data-slot="input-reveal"
-            className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-3 text-foreground-muted transition-colors hover:text-foreground disabled:pointer-events-none"
+            className={cn(
+              `
+                absolute inset-y-0 right-0 flex cursor-pointer items-center px-3
+                text-foreground-muted
+              `,
+              'transition-colors hover:text-foreground disabled:pointer-events-none'
+            )}
           >
             <AkIcon
               name={isRevealed ? 'material-symbols:visibility-off' : 'material-symbols:visibility'}
