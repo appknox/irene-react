@@ -67,6 +67,7 @@ Two layers, deliberately separate:
      Components reference these. Only this block changes when the palette does.
      --------------------------------------------------------------------- */
   --color-primary: var(--color-red-500);
+  --color-primary-strong: var(--color-red-600);
   --color-primary-hover: var(--color-red-600);
   --color-primary-foreground: var(--color-white);
 
@@ -145,6 +146,9 @@ Two layers, deliberately separate:
   --shadow-15: 0px 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-16: 0 5px 5px 0 rgba(64, 64, 64, 0.1);
   --shadow-17: 0 4px 12px rgba(64, 64, 64, 0.25);
+
+  /* The chrome: the top bar, the side navigation, and the panels they open. */
+  --shadow-18: 4px 4px 20px rgba(222, 222, 222, 0.25);
 
   /* ---------------------------------------------------------------------
      Typography — px for the same reason as spacing.
