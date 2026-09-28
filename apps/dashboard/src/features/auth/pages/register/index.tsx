@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 
 import { RegistrationService } from '@irene/api/services/registration';
 import { getApiFieldErrors, unlessRateLimited } from '@irene/api/utils/errors';
-import { getConfigValue } from '@irene/config';
+import { G_RECAPTCHA } from '@irene/config/product';
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
@@ -157,7 +157,7 @@ export function RegisterPage() {
 export function RegisterPageWithRecaptcha() {
   return (
     <GoogleReCaptchaProvider
-      reCaptchaKey={getConfigValue('IRENE_RECAPTCHA_SITE_KEY')}
+      reCaptchaKey={G_RECAPTCHA.siteKey}
       useRecaptchaNet
       scriptProps={{ async: true, defer: true }}
     >

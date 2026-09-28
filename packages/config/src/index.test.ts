@@ -108,8 +108,8 @@ describe('unregistered keys', () => {
     expect(() => getConfig('NOT_A_KEY' as ConfigKey)).toThrow('ENV: NOT_A_KEY not registered');
   });
 
-  it('registers thirteen keys', () => {
-    expect(CONFIG_KEYS).toHaveLength(13);
+  it('registers twelve keys', () => {
+    expect(CONFIG_KEYS).toHaveLength(12);
   });
 });
 
