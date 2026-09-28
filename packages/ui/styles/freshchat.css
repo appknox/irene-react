@@ -1,0 +1,13 @@
+/*
+  The Freshchat widget mounts on document.body, outside the React tree, so its
+  position is set here rather than by the component that opens it.
+
+  --ak-chat-left is the width of whatever the widget must clear, usually a side
+  navigation. An app sets it on :root; unset, the widget sits at the left edge.
+*/
+#fc_frame,
+#fc_frame.fc-widget-normal {
+  right: auto !important;
+  left: var(--ak-chat-left, 0) !important;
+  transition: left 200ms ease-in-out;
+}

@@ -3,6 +3,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { configurationStore } from '@irene/api/stores/configuration';
 import { organizationStore } from '@irene/api/stores/organization';
 import { vulnerabilityStore } from '@irene/api/stores/vulnerability';
+import { isPluginEnabled } from '@irene/config';
 import { akMT, setLocale } from '@irene/translations/intl';
 import { isSupportedLocale, storeLocale } from '@irene/translations/locale';
 import { akNotify } from '@irene/ui/notify';
@@ -20,6 +21,8 @@ import {
 import { dashboardConfigurationOptions } from '@/queries/configuration';
 import { userOptions } from '@/queries/user';
 import { vulnerabilitiesOptions } from '@/queries/vulnerability';
+import { installFreshchat } from '@/scripts/freshchat';
+import { identifyForProductGuides, installProductGuides } from '@/scripts/pendo';
 
 /**
  * Records the organization the account works in, and its standing there.
@@ -43,7 +46,7 @@ async function _selectOrganization(
     return;
   }
 
-  // Asked for together: what the account may do there, and how it came to be a member.
+  // This loads more information about the user and their organization membership.
   const [me] = await Promise.all([
     queryClient.query(organizationMeOptions(selected.id)),
     queryClient.query(organizationMembershipOptions(selected.id, userId)),
@@ -81,6 +84,49 @@ async function _applyUserLocale(user: ApiUser) {
 }
 
 /**
+ * Loads the product guides and tells them who is reading, where the install runs them.
+ *
+ * @param user - The signed-in account.
+ */
+function _installProductGuides(user: ApiUser) {
+  if (!isPluginEnabled('IRENE_ENABLE_PENDO')) {
+    return;
+  }
+
+  const pendoKey = configurationStore.getState().integrationData.pendo_key;
+  installProductGuides(pendoKey);
+
+  /* An account with no address on record still gets the agent, unnamed. */
+  if (user.email) {
+    identifyForProductGuides({ id: user.id, email: user.email });
+  }
+}
+
+/**
+ * Installs the chat widget for this account, where the install has chat at all.
+ *
+ * It is installed here rather than in the navigation so a conversation survives
+ * a move between pages, and the navigation only opens it.
+ *
+ * @param user - The account the conversation belongs to.
+ */
+function _installChatSupport(user: ApiUser) {
+  const organizationName = organizationStore.getState().selected?.name;
+
+  if (!user.freshchat_hash || !organizationName) {
+    return;
+  }
+
+  installFreshchat(configurationStore.getState().freshchatKey(), {
+    firstName: user.first_name,
+    lastName: user.last_name,
+    email: user.email ?? '',
+    organizationName,
+    hash: user.freshchat_hash,
+  });
+}
+
+/**
  * Loads what every signed-in page can then rely on.
  *
  * The organizations, the hosts the product links to, and the vulnerability
@@ -107,6 +153,9 @@ export async function setupUserAndOrgContext(queryClient: QueryClient, userId: n
 
   const user = await queryClient.query(userOptions(userId));
   await _applyUserLocale(user);
+
+  _installChatSupport(user);
+  _installProductGuides(user);
 
   return user;
 }

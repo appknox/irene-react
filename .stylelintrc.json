@@ -48,6 +48,12 @@
       "rules": {
         "declaration-property-value-disallowed-list": null
       }
+    },
+    {
+      "files": ["packages/ui/styles/freshchat.css"],
+      "rules": {
+        "selector-id-pattern": null
+      }
     }
   ]
 }

@@ -15,10 +15,18 @@
 
 @import 'tailwindcss';
 
+/*
+  Defines the enter and exit utilities the components already reference —
+  `animate-in`, `fade-in-0`, `zoom-in-95`, `slide-in-from-*`. Without it those
+  class names resolve to nothing and the panels appear instantly.
+*/
+@import 'tw-animate-css';
+
 @import './fonts.css';
 @import './theme.css';
 @import './shadcn.css';
 @import './legacy-theme.css' layer(legacy);
+@import './freshchat.css';
 
 /*
   Dark mode is not supported yet, but shadcn components ship `dark:` classes. Left on the
