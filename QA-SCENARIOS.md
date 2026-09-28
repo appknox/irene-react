@@ -265,6 +265,48 @@ Where the product names matter, open the same URL on
 The not-found page needs no scenario: open `/not-a-real-page`. `/status` should
 replace itself with `/dashboard/status`.
 
+## Dashboard navigation
+
+The chrome every signed-in page sits in: the logo, the product switcher, the
+items, and the chat, release and width rows below them. Each scenario patches
+the organization, the account's standing or the deployment's configuration and
+leaves the rest of the API alone.
+
+| Scenario                          | How to get there                                           | Expected                                                                         |
+| --------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `nav:every-product`               | `/dashboard/projects?mock=nav:every-product`               | Every product is entitled, so the switcher holds all of them                     |
+| `nav:appknox-only`                | `/dashboard/projects?mock=nav:appknox-only`                | Nothing beyond Appknox, so the switcher holds nothing to switch to               |
+| `nav:storeknox`                   | `/dashboard/projects?mock=nav:storeknox`                   | StoreKnox alone                                                                  |
+| `nav:offensive-security`          | `/dashboard/projects?mock=nav:offensive-security`          | Offensive security is entitled, so it is offered                                 |
+| `nav:offensive-security-withheld` | `/dashboard/projects?mock=nav:offensive-security-withheld` | Offensive security is not entitled and the upsell is hidden, so nothing is shown |
+| `nav:reporting`                   | `/dashboard/projects?mock=nav:reporting`                   | AI reporting on a hosted install, where it is offered                            |
+| `nav:reporting-on-enterprise`     | `/dashboard/projects?mock=nav:reporting-on-enterprise`     | AI reporting on a self-hosted install, which is never sold it                    |
+| `nav:security-dashboard`          | `/dashboard/projects?mock=nav:security-dashboard`          | The account may reach the security dashboard, which opens in a tab of its own    |
+| `nav:chat-support`                | `/dashboard/projects?mock=nav:chat-support`                | The deployment carries a Freshchat key, so the navigation offers chat support    |
+| `nav:no-chat-support`             | `/dashboard/projects?mock=nav:no-chat-support`             | The deployment carries no Freshchat key, so no chat row is shown                 |
+| `nav:member`                      | `/dashboard/projects?mock=nav:member`                      | A member: no analytics, no billing, no subscription                              |
+| `nav:admin`                       | `/dashboard/projects?mock=nav:admin`                       | An admin: analytics, but billing belongs to the owner                            |
+| `nav:owner`                       | `/dashboard/projects?mock=nav:owner`                       | An owner: analytics and billing                                                  |
+| `nav:owner-with-subscription`     | `/dashboard/projects?mock=nav:owner-with-subscription`     | An owner whose billing is hidden, so the subscription stands in for it           |
+| `nav:owner-without-billing`       | `/dashboard/projects?mock=nav:owner-without-billing`       | An owner whose billing is hidden with nothing to stand in, so neither is shown   |
+| `nav:partner`                     | `/dashboard/projects?mock=nav:partner`                     | An account that may reach the partner clients, marked beta in the navigation     |
+| `nav:every-module`                | `/dashboard/projects?mock=nav:every-module`                | Privacy, SCA and release readiness are all entitled                              |
+| `nav:no-modules`                  | `/dashboard/projects?mock=nav:no-modules`                  | None are entitled, so each is offered as an upsell                               |
+| `nav:upsell-hidden`               | `/dashboard/projects?mock=nav:upsell-hidden`               | Nothing is entitled and the upsell is hidden, so privacy, SCA and readiness go   |
+| `nav:public-apis`                 | `/dashboard/projects?mock=nav:public-apis`                 | The public APIs are bought, so the API documentation is offered                  |
+| `nav:enterprise`                  | `/dashboard/projects?mock=nav:enterprise`                  | A self-hosted install: privacy and SCA go, release readiness stays               |
+| `nav:many-projects`               | `/dashboard/projects?mock=nav:many-projects`               | A large organization, so the count beside Projects is at its widest              |
+| `nav:no-projects`                 | `/dashboard/projects?mock=nav:no-projects`                 | A new organization, which counts none                                            |
+| `nav:everything`                  | `/dashboard/projects?mock=nav:everything`                  | The fullest account there is: every product, every module, every permission      |
+| `nav:nothing`                     | `/dashboard/projects?mock=nav:nothing`                     | The emptiest account there is: a member of an organization entitled to nothing   |
+
+Three states have no scenario, because no API answers them. Whether the
+deployment is whitelabelled is read from the host, so open the app on an
+appknox.com host for the Appknox and StoreKnox names and logos, and on plain
+localhost for VAPT and App Monitoring. The marketplace item and the product
+guides are build flags: set `IRENE_ENABLE_MARKETPLACE` or `IRENE_ENABLE_PENDO`
+in `public/runtimeconfig.js`.
+
 ## Language and branding
 
 | Scenario               | How to get there                                    | Expected                                      |

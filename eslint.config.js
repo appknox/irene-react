@@ -67,6 +67,16 @@ export default defineConfig([
         palette lands it has to be found by hand rather than changed in one
         file. Add a token instead.
       */
+      /*
+        A class list longer than the line is read by scrolling, and its diff
+        shows the whole list rather than the state that changed. Wrapped by
+        variant group, both read at a glance. Autofixable, so it costs nothing.
+      */
+      'better-tailwindcss/enforce-consistent-line-wrapping': [
+        'error',
+        { printWidth: 100, group: 'newLine', preferSingleLine: true, strictness: 'loose' },
+      ],
+
       'better-tailwindcss/no-restricted-classes': [
         'error',
         {

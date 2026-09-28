@@ -35,10 +35,11 @@ const UNMEASURED = [
   '**/query-devtools.tsx',
 
   /*
-    Build tooling. These scripts run on import — they write generated files and
-    rewrite sources — so a test of one is a run of one.
+    Build tooling at a package's root: these run on import — they write
+    generated files and rewrite sources — so a test of one is a run of one.
+    Scoped to the root so `src/scripts`, which is app code, still counts.
   */
-  '**/scripts/**',
+  'scripts/**',
 ];
 
 /**

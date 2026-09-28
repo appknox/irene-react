@@ -25,6 +25,11 @@ not when someone notices it.
 | Mandated 2FA drops the email line         | `/login`, second-factor step                            | The mandate notice is always followed by "We've sent a OTP code to your email", whatever the factor is                                     | The mandate notice stands alone; the email or app wording follows the factor                                                                                                                                                     | `forced` and `type` are separate fields, so half of mandated accounts were sent to an empty inbox                                                  |
 | Setup requests time out after 30 seconds  | The dashboard and account setup queries                 | No request carries a timeout, so a server that accepts a connection and never replies holds the loading overlay until the browser gives up | The setup queries abandon a request after 30s and land on the failure card                                                                                                                                                       | A hung request left the app on a spinner with no message, no status and no retry                                                                   |
 | Loading screen says when a wait runs long | The boot overlay and every route's pending screen       | The loading screen shows an illustration and a bar, and says nothing however long it runs                                                  | After ten seconds it adds a line, changing at 25s and 40s: "Still getting everything on your dashboard ready...", "Almost there, thanks for bearing with us a moment...", "Hang tight, we are nearly finished getting you in..." | A bar that has been creeping for half a minute reads as broken. The lines reassure rather than explain, since the delay is not the reader's to fix |
+| Even margins on the side bar logo         | The dashboard side navigation                           | `3em auto 1em` expanded, `0.5em auto 1em` collapsed                                                                                        | 14px above and below at either width                                                                                                                                                                                             | The logo read as sitting high in its band, and the two widths pushed the items down by different amounts                                           |
+| Buttons load in every variant             | Every `AkButton` with `loading`                         | `loading` applies to `filled` only; on `outlined` and `text` it does nothing, not even disable the button                                  | Every variant shows the spinner, disables and sets `aria-busy`                                                                                                                                                                   | A flag that silently does nothing is a trap; the caller has no way to know the button never became busy                                            |
+| A loading button keeps its right icon     | Every `AkButton` with `rightIcon`                       | The spinner replaces the left icon and the right icon is hidden                                                                            | The spinner replaces the left icon; the right icon stays                                                                                                                                                                         | The row's width jumps when the trailing mark disappears mid-action                                                                                 |
+| Chips sit closer to their icon            | Every `AkChip` with `icon`                              | `0.5em` on the icon and on the label, so 7px between them                                                                                  | 2px between the icon and the label; the outer inset is unchanged                                                                                                                                                                 | The label read as detached from the mark it belongs to                                                                                             |
+| Reporting opens on its first page         | `/dashboard/reports`                                    | An index route renders the reporting landing page                                                                                          | Redirects to `/dashboard/reports/generate`                                                                                                                                                                                       | Reporting's landing page is unbuilt, and the generate page is the only screen it offers                                                            |
 
 ## Accepted
 
@@ -36,14 +41,15 @@ Nothing here is a deliberate departure. They are listed so QA does not raise
 them: most are unbuilt work, and one is an inconsistency of irene's own that the
 port carries.
 
-| Gap                               | Where                                                                            | Note                                                                                        |
-| --------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `LOGOUT_EVENT` is not tracked     | `useLogout`                                                                      | irene sends it to PostHog. Analytics is Week 5 work                                         |
-| Freshdesk is not signed out       | `useLogout`                                                                      | irene signs the user out of the support widget and destroys it. Freshdesk itself is unbuilt |
-| PostHog is not registered on boot | `setupUserAndOrgContext`                                                         | The last of irene's seven ordered `afterModel()` steps; the other six are built             |
-| Pendo, trial flag and socket      | `setupUserAndOrgContext`                                                         | Three more of those steps, all Week 5 work                                                  |
-| No realtime server row            | `/dashboard/status`                                                              | irene shows a fourth row for the WebSocket while signed in; the socket is unbuilt           |
-| Support address gated two ways    | `register-invitation-invalid`, the locked-account message, the page-failure card | irene uses two different rules and the port keeps each one where irene has it. See below    |
+| Gap                                                             | Where                                                                            | Note                                                                                                                                                                                                                                             |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LOGOUT_EVENT` is not tracked                                   | `useLogout`                                                                      | irene sends it to PostHog. Analytics is Week 5 work                                                                                                                                                                                              |
+| The chat widget outlives a sign-out                             | `useLogout`, `scripts/freshchat.ts`                                              | irene destroys the Freshchat widget and signs the account out of the Freshdesk support widget. `destroyFreshchat` is written and tested but never called; the support widget is unbuilt                                                          |
+| PostHog is not registered on boot                               | `setupUserAndOrgContext`                                                         | The last of irene's seven ordered `afterModel()` steps; the other six are built                                                                                                                                                                  |
+| Pendo is built but unverified                                   | `setupUserAndOrgContext`, `scripts/pendo.ts`, the side navigation                | Written against irene, never run against a live subscription. See below                                                                                                                                                                          |
+| No realtime server row                                          | `/dashboard/status`                                                              | irene shows a fourth row for the WebSocket while signed in; the socket is unbuilt                                                                                                                                                                |
+| Support address gated two ways                                  | `register-invitation-invalid`, the locked-account message, the page-failure card | irene uses two different rules and the port keeps each one where irene has it. See below                                                                                                                                                         |
+| StoreKnox and offensive security render in the dashboard chrome | `/dashboard/storeknox/…`, `/dashboard/offensive-security`                        | irene gives each product its own wrapper, navigation and title. Ours are route shells nested under the dashboard layout, so they carry its navigation and read as `… \| VAPT \| Appknox`. Resolved when each gets a layout, as reporting now has |
 
 ### The two support-address rules
 
@@ -60,3 +66,33 @@ Both rules give the right answer in production: an Appknox deployment links the
 address, a whitelabel one does not. They only disagree on localhost and staging,
 where the build flag is unset but the host is not `secure.appknox.com` — so the
 invitation screen links the address and the other two print it as plain text.
+
+### Pendo is written but has never run
+
+The agent, the account it identifies and the badge the navigation carries are
+all ported from irene: `installProductGuides` loads the agent behind a queueing
+stub, `identifyForProductGuides` names the visitor by user id and the account by
+email domain, and the release row in the navigation carries
+`ak-pendo-version-container` and opens the guide the badge stands for. All of it
+is off unless `IRENE_ENABLE_PENDO` is set, which is how irene gates it too.
+
+None of it has been seen working. Switching it on locally never reached a guide
+or the Visual Design Studio, and the attempt turned up two things to settle
+before anyone calls this done:
+
+- **Local configuration does not reach the app in dev.** `IRENE_*` keys are
+  frozen into the bundle by Vite's `define`, and the dev server does not
+  substitute `__BUILD_CONFIG__` in `@irene/config` — so every key falls back to
+  its default however the environment is set, and no plugin can be switched on
+  from a developer's machine. A deployment is unaffected: it injects
+  `runtimeconfig.js`, which wins over the build tier.
+- **Nothing is known about the subscription.** The agent key is irene's
+  production one, hardcoded as irene hardcodes it. Pendo recommends a separate
+  key and prefixed visitor ids for non-production, and the designer only opens
+  on a host the subscription allows.
+
+Revisit when the app is served somewhere Pendo accepts: confirm the agent
+loads, that `pendo.validateInstall()` answers, that the release row opens a
+badge guide, and decide whether a non-production key belongs in
+`integrations.pendo_key` — the installer already prefers it over the built-in
+one.
