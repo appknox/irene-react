@@ -9,14 +9,15 @@
     "./locale": "./src/locale.ts",
     "./messages": "./src/messages.ts",
     "./provider": "./src/provider/index.tsx",
+    "./test-utils": "./tests/test-utils.ts",
     "./vite": "./vite/index.ts"
   },
   "scripts": {
     "build": "node scripts/generate.ts",
     "generate": "node scripts/generate.ts",
     "lint": "eslint .",
-    "test": "node scripts/generate.ts && vitest run --coverage",
-    "type-check": "node scripts/generate.ts && tsc -b --noEmit"
+    "test": "vitest run --coverage",
+    "type-check": "tsc -b --noEmit"
   },
   "peerDependencies": {
     "react": "^19.2.0"

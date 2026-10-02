@@ -1506,6 +1506,15 @@
   "note": "Note",
   "notifications": "通知",
   "notificationModule": {
+    "markAllAsRead": "Mark all as read",
+    "noUnreadNotifications": "No unread notifications",
+    "viewAllNotifications": "View All Notifications",
+    "advisory": "Advisory",
+    "affects": "Affects",
+    "fixedInVersion": "Fixed in version",
+    "newVersion": "New version",
+    "viewComponent": "View component",
+    "viewDirectory": "View Directory",
     "currentRiskStatusFile": "Current risk status of file",
     "messages": {
       "nf-am-newversn": "Unscanned version of {platform_display} app <strong>{app_name} ({package_name})</strong> detected via storeknox. Please <strong>upload app binary of version {version_unscanned} to perform scan.</strong>",
@@ -1523,6 +1532,8 @@
       "nf-nsreqstd1": "{requester_username} has <strong>requested for {platform_display} namespace {namespace_value}</strong>.",
       "nf-nsreqstd2": "{current_requester_username} has <strong>requested for an unapproved {platform_display} namespace {namespace_value}</strong> (initially requested by {initial_requester_username} on {namespace_created_on}).",
       "nf-sastcmpltd1": "<strong>Static scan completed</strong> for {platform_display} app <strong>{file_name} ({package_name})</strong>.",
+      "nf-sbom-comp-update": "A new version is available for this component",
+      "nf-sbom-vuln-update": "New vulnerability advisory <strong>{max_severity}</strong> detected",
       "nf-sbomcmpltd": {
         "prefix": "<strong>SBOM generated successfully</strong> for the ",
         "suffix": ", {platform_display} app <strong>{file_name} ({package_name})</strong>.",
