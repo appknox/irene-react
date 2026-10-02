@@ -4,7 +4,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AkCheckbox } from '@irene/ui/ak-checkbox';
 import { AkLabel } from '@irene/ui/ak-label';
 import { AkTooltip } from '@irene/ui/ak-tooltip';
-import { cn } from '@irene/ui/cn';
 
 const meta = {
   title: 'Components/AkCheckbox',
@@ -63,7 +62,7 @@ function ToggleableCheckbox({ checked, ...props }: ComponentProps<typeof AkCheck
 function AnnotatedCheckbox({ title, children }: Readonly<{ title: string; children: ReactNode }>) {
   return (
     <AkTooltip title={title} arrow>
-      <span className={cn('inline-flex')}>{children}</span>
+      <span className="inline-flex">{children}</span>
     </AkTooltip>
   );
 }

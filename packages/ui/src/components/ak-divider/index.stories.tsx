@@ -27,13 +27,17 @@ export const Playground: Story = {
     args.direction === 'vertical' ? (
       <div className="flex h-24 items-center gap-4">
         <span>Before</span>
+
         <AkDivider {...args} />
+
         <span>After</span>
       </div>
     ) : (
       <div className="flex flex-col gap-4">
         <span>Above</span>
+
         <AkDivider {...args} />
+
         <span>Below</span>
       </div>
     ),
@@ -45,11 +49,13 @@ export const Colors: Story = {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <span className="text-sm text-foreground-muted">color=&quot;dark&quot; (default)</span>
+
         <AkDivider color="dark" />
       </div>
 
       <div className="flex flex-col gap-2">
         <span className="text-sm text-foreground-muted">color=&quot;light&quot;</span>
+
         <AkDivider color="light" />
       </div>
     </div>
@@ -62,11 +68,13 @@ export const Variants: Story = {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2 bg-neutral-100 py-2">
         <span className="px-2 text-sm text-foreground-muted">variant=&quot;fullWidth&quot;</span>
+
         <AkDivider variant="fullWidth" />
       </div>
 
       <div className="flex flex-col gap-2 bg-neutral-100 py-2">
         <span className="px-2 text-sm text-foreground-muted">variant=&quot;middle&quot;</span>
+
         <AkDivider variant="middle" />
       </div>
     </div>
@@ -79,6 +87,7 @@ export const Directions: Story = {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <span className="text-sm text-foreground-muted">direction=&quot;horizontal&quot;</span>
+
         <AkDivider direction="horizontal" />
       </div>
 
@@ -87,7 +96,9 @@ export const Directions: Story = {
 
         <div className="flex h-12 items-center gap-4">
           <span>Before</span>
+
           <AkDivider direction="vertical" />
+
           <span>After</span>
         </div>
       </div>
@@ -110,7 +121,9 @@ export const AllVariants: Story = {
 
             <div className="flex h-10 items-center gap-4 px-2">
               <span>Before</span>
+
               <AkDivider direction="vertical" color={color} variant={variant} />
+
               <span>After</span>
             </div>
           </div>
@@ -125,7 +138,9 @@ export const BesideText: Story = {
   render: () => (
     <div className="flex items-center gap-2">
       <AkDivider className="flex-1" />
+
       <span>or</span>
+
       <AkDivider className="flex-1" />
     </div>
   ),

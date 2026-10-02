@@ -25,8 +25,11 @@ export const Progress: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <AkProgressLinear value={0} />
+
       <AkProgressLinear value={35} />
+
       <AkProgressLinear value={75} />
+
       <AkProgressLinear value={100} />
     </div>
   ),
@@ -43,7 +46,9 @@ export const Sizes: Story = {
   render: () => (
     <div className="flex flex-col items-start gap-4">
       <AkProgressLinear value={60} className="h-0.5 max-w-40" />
+
       <AkProgressLinear value={60} className="max-w-70" />
+
       <AkProgressLinear value={60} className="h-3" />
     </div>
   ),

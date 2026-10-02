@@ -25,6 +25,7 @@ describe('pairing with a control', () => {
     render(
       <Fragment>
         <AkLabel htmlFor="project">ApiProject name</AkLabel>
+
         <AkInput id="project" />
       </Fragment>
     );
@@ -36,6 +37,7 @@ describe('pairing with a control', () => {
     render(
       <Fragment>
         <AkLabel htmlFor="project">ApiProject name</AkLabel>
+
         <AkInput id="project" />
       </Fragment>
     );

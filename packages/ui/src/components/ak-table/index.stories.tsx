@@ -94,16 +94,19 @@ export const Variants: Story = {
         <Label>
           variant=&quot;semi-bordered&quot; (default) — a rule under every row but the last
         </Label>
+
         <AkTable {...args} variant="semi-bordered" />
       </div>
 
       <div className="flex flex-col gap-2">
         <Label>variant=&quot;full-bordered&quot; — every cell boxed</Label>
+
         <AkTable {...args} variant="full-bordered" />
       </div>
 
       <div className="flex flex-col gap-2">
         <Label>variant=&quot;borderless&quot; — for a table inside a card that draws its own</Label>
+
         <AkTable {...args} variant="borderless" />
       </div>
     </div>
@@ -116,11 +119,13 @@ export const HeaderColors: Story = {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
         <Label>headerColor=&quot;neutral&quot; (default)</Label>
+
         <AkTable {...args} headerColor="neutral" />
       </div>
 
       <div className="flex flex-col gap-2">
         <Label>headerColor=&quot;transparent&quot; — the header follows borderColor instead</Label>
+
         <AkTable {...args} headerColor="transparent" />
       </div>
     </div>
@@ -133,11 +138,13 @@ export const BorderColors: Story = {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
         <Label>borderColor=&quot;light&quot; (default) — the faint rule</Label>
+
         <AkTable {...args} borderColor="light" />
       </div>
 
       <div className="flex flex-col gap-2">
         <Label>borderColor=&quot;dark&quot; — the stronger one</Label>
+
         <AkTable {...args} borderColor="dark" />
       </div>
     </div>
@@ -150,11 +157,13 @@ export const Density: Story = {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
         <Label>dense={'{false}'} (default)</Label>
+
         <AkTable {...args} dense={false} />
       </div>
 
       <div className="flex flex-col gap-2">
         <Label>dense={'{true}'}</Label>
+
         <AkTable {...args} dense />
       </div>
     </div>
@@ -170,11 +179,13 @@ export const ColumnWidths: Story = {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
         <Label>No width set — the browser sizes each column to its content</Label>
+
         <AkTable {...args} columns={AUTO_COLUMNS} />
       </div>
 
       <div className="flex flex-col gap-2">
         <Label>meta.width 55% / 30% / 15% — laid out fixed, so the widths hold</Label>
+
         <AkTable {...args} columns={COLUMNS} />
       </div>
     </div>

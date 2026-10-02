@@ -35,21 +35,27 @@ export const Colors: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-4">
       <AkLink href="#">Primary</AkLink>
+
       <AkLink href="#" color="secondary">
         Secondary
       </AkLink>
+
       <AkLink href="#" color="error">
         Error
       </AkLink>
+
       <AkLink href="#" color="success">
         Success
       </AkLink>
+
       <AkLink href="#" color="warning">
         Warning
       </AkLink>
+
       <AkLink href="#" color="textPrimary">
         Text primary
       </AkLink>
+
       <AkLink href="#" color="textSecondary">
         Text secondary
       </AkLink>

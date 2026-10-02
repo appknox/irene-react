@@ -41,9 +41,13 @@ export const AllStates: Story = {
   render: () => (
     <div className="flex w-64 flex-col gap-3">
       <AkInput placeholder="Default" />
+
       <AkInput placeholder="With a value" defaultValue="irene" />
+
       <AkInput placeholder="Disabled" disabled />
+
       <AkInput placeholder="Invalid" aria-invalid />
+
       <AkInput type="password" defaultValue="secret" />
     </div>
   ),
@@ -54,6 +58,7 @@ export const WithLabel: Story = {
   render: () => (
     <div className="flex w-64 flex-col gap-2">
       <AkLabel htmlFor="project">ApiProject name</AkLabel>
+
       <AkInput id="project" placeholder="Acme Mobile" />
     </div>
   ),
@@ -64,18 +69,31 @@ export const AllTypes: Story = {
   render: () => (
     <div className="flex w-72 flex-col gap-3">
       <AkInput type="text" placeholder="Text" />
+
       <AkInput type="email" placeholder="you@appknox.com" />
+
       <AkInput type="password" defaultValue="secret" />
+
       <AkInput type="search" placeholder="Search projects" />
+
       <AkInput type="number" placeholder="42" />
+
       <AkInput type="tel" placeholder="+1 555 0100" />
+
       <AkInput type="url" placeholder="https://appknox.com" />
+
       <AkInput type="date" />
+
       <AkInput type="time" />
+
       <AkInput type="datetime-local" />
+
       <AkInput type="month" />
+
       <AkInput type="week" />
+
       <AkInput type="color" defaultValue="#ff4d3f" />
+
       <AkInput type="file" />
     </div>
   ),
@@ -86,6 +104,7 @@ export const Errors: Story = {
   render: () => (
     <div className="flex w-72 flex-col gap-4">
       <AkInput hasError defaultValue="wrong@appknox" />
+
       <AkInput errorMessage="Account Locked Out" defaultValue="wrong@appknox" />
     </div>
   ),

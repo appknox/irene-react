@@ -98,8 +98,11 @@ export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-2">
       <AkButton size="xs">Extra small</AkButton>
+
       <AkButton size="sm">Small</AkButton>
+
       <AkButton size="default">Default</AkButton>
+
       <AkButton size="lg">Large</AkButton>
     </div>
   ),

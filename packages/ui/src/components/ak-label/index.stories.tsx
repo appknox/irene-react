@@ -19,6 +19,7 @@ export const WithControl: Story = {
   render: () => (
     <div className="flex w-64 flex-col gap-2">
       <AkLabel htmlFor="project">ApiProject name</AkLabel>
+
       <AkInput id="project" placeholder="Acme Mobile" />
     </div>
   ),
