@@ -70,7 +70,7 @@ function AkButton({
           {loading && <AkSpinner aria-hidden className="size-4" />}
 
           {!loading && leftIcon && (
-            <span data-slot="button-left-icon" className={cn('inline-flex items-center')}>
+            <span data-slot="button-left-icon" className="inline-flex items-center">
               {leftIcon}
             </span>
           )}
@@ -78,7 +78,7 @@ function AkButton({
           {children}
 
           {rightIcon && (
-            <span data-slot="button-right-icon" className={cn('inline-flex items-center')}>
+            <span data-slot="button-right-icon" className="inline-flex items-center">
               {rightIcon}
             </span>
           )}

@@ -112,6 +112,16 @@ Two layers, deliberately separate:
   --color-disabled-button: var(--color-neutral-400);
 
   /* ---------------------------------------------------------------------
+     Severity — how a finding is ranked. A scan reports counts at each.
+     --------------------------------------------------------------------- */
+  --color-severity-critical: var(--color-red-700);
+  --color-severity-high: var(--color-orange-500);
+  --color-severity-medium: var(--color-yellow-400);
+  --color-severity-low: var(--color-cyan-400);
+  --color-severity-passed: var(--color-green-500);
+  --color-severity-untested: #a0a0a0;
+
+  /* ---------------------------------------------------------------------
      Radius — six sizes plus a capsule.
      --------------------------------------------------------------------- */
   --radius-xs: 2px;
@@ -147,7 +157,7 @@ Two layers, deliberately separate:
   --shadow-16: 0 5px 5px 0 rgba(64, 64, 64, 0.1);
   --shadow-17: 0 4px 12px rgba(64, 64, 64, 0.25);
 
-  /* The chrome: the top bar, the side navigation, and the panels they open. */
+  /* The layout: the top bar, the side navigation, and the panels they open. */
   --shadow-18: 4px 4px 20px rgba(222, 222, 222, 0.25);
 
   /* ---------------------------------------------------------------------

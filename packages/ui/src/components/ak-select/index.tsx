@@ -98,6 +98,7 @@ function AkSelectContent({
         >
           {children}
         </SelectPrimitive.Viewport>
+
         <AkSelectScrollDownButton />
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
@@ -147,6 +148,7 @@ function AkSelectItem({
           <AkIcon name="material-symbols:check" className="size-4" />
         </SelectPrimitive.ItemIndicator>
       </span>
+
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   );

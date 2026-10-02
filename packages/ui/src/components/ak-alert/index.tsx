@@ -38,14 +38,12 @@ function AkAlert(props: AkAlertProps) {
           size="xs"
           noPadding
           aria-label={dismissLabel}
-          className={cn(
-            `
-              absolute -top-2 -right-2 cursor-pointer rounded-full border-inherit bg-inherit
-              text-current opacity-80
-              hover:opacity-100
-              has-[>svg]:px-1
-            `
-          )}
+          className={`
+            absolute -top-2 -right-2 cursor-pointer rounded-full border-inherit bg-inherit
+            text-current opacity-80
+            hover:opacity-100
+            has-[>svg]:px-1
+          `}
           onClick={onDismiss}
           data-slot="alert-dismiss"
         >
