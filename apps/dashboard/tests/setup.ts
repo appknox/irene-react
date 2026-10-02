@@ -5,6 +5,8 @@ import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
 
 import { queryClient } from '@irene/api/query-client';
 import { configurationStore } from '@irene/api/stores/configuration';
+import { setLocale } from '@irene/translations/intl';
+import { DEFAULT_LOCALE } from '@irene/translations/locale';
 import { akNotify } from '@irene/ui/notify';
 
 import { server } from '@tests/server';
@@ -82,7 +84,16 @@ const reset = () => {
 // Modules read config at import, so the tiers must exist before they load.
 reset();
 
-beforeEach(reset);
+beforeEach(async () => {
+  reset();
+
+  /*
+    The active locale is module state in the translations package, so a test
+    that switches languages would leave every later test reading its messages
+    in that language.
+  */
+  await setLocale(DEFAULT_LOCALE);
+});
 
 beforeAll(() => {
   // An unhandled request means a test is hitting an endpoint it did not declare.

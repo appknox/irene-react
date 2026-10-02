@@ -1,6 +1,7 @@
 import {
   createMemoryHistory,
   createRouter,
+  RouterContextProvider,
   RouterProvider,
   type AnyRouter,
 } from '@tanstack/react-router';
@@ -37,6 +38,35 @@ export function renderWithProviders(ui: ReactNode) {
       RENDER_OPTIONS
     ),
   };
+}
+
+/**
+ * Renders a component that links to routes, without opening one.
+ *
+ * `renderWithProviders` is not enough for anything containing a `Link`: a link
+ * reads the route tree to build its href, so a router has to be in context
+ * even when no route is rendered.
+ *
+ * @param ui - The component to render.
+ * @returns The testing-library result.
+ */
+export function renderWithRouterContext(ui: ReactNode) {
+  queryClient.clear();
+
+  const router = createRouter({
+    ...IRENE_DASHBOARD_ROUTER_DEFAULTS,
+    history: createMemoryHistory({ initialEntries: ['/'] }),
+    context: { queryClient },
+  });
+
+  return render(
+    <TranslationsProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterContextProvider router={router}>{ui}</RouterContextProvider>
+      </QueryClientProvider>
+    </TranslationsProvider>,
+    RENDER_OPTIONS
+  );
 }
 
 /** What a route render may vary. */
@@ -81,7 +111,9 @@ export async function renderAtRoute(
     <TranslationsProvider>
       <QueryClientProvider client={routerContext.queryClient}>
         <RouterProvider router={router} />
+
         <BootOverlay router={router} />
+
         <AkToaster />
       </QueryClientProvider>
     </TranslationsProvider>,

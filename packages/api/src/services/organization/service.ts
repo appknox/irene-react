@@ -6,6 +6,7 @@ import type {
   ApiOrganization,
   ApiOrganizationMe,
   ApiOrganizationMembership,
+  ApiOrganizationNamespace,
   ApiStoreknoxOrganization,
 } from '@irene/api/services/organization';
 
@@ -52,6 +53,48 @@ export default class OrganizationService {
       OrganizationEndpoints.member(organizationId, userId),
       { signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS) }
     );
+
+  /**
+   * Fetches one namespace an organization has claimed.
+   *
+   * @param organizationId - The organization the namespace belongs to.
+   * @param namespaceId - The namespace to read.
+   * @returns The namespace; rejects when it has been rejected and removed.
+   */
+  public static readonly getOrganizationNamespace = (
+    organizationId: number | string,
+    namespaceId: number | string
+  ) =>
+    apiRequest.get<ApiOrganizationNamespace>(
+      OrganizationEndpoints.namespace(organizationId, namespaceId)
+    );
+
+  /**
+   * Approves a namespace, which lets uploads under it through.
+   *
+   * @param organizationId - The organization the namespace belongs to.
+   * @param namespaceId - The namespace to approve.
+   * @returns The approved namespace.
+   */
+  public static readonly approveOrganizationNamespace = (
+    organizationId: number | string,
+    namespaceId: number | string
+  ) =>
+    apiRequest.put<ApiOrganizationNamespace>(
+      OrganizationEndpoints.namespace(organizationId, namespaceId),
+      { is_approved: true }
+    );
+
+  /**
+   * Rejects a namespace, which removes it.
+   *
+   * @param organizationId - The organization the namespace belongs to.
+   * @param namespaceId - The namespace to reject.
+   */
+  public static readonly rejectOrganizationNamespace = (
+    organizationId: number | string,
+    namespaceId: number | string
+  ) => apiRequest.delete<void>(OrganizationEndpoints.namespace(organizationId, namespaceId));
 
   /**
    * Fetches the StoreKnox organization.

@@ -3,6 +3,8 @@ import { setupServer } from 'msw/node';
 
 import { AuthEndpoints } from '@irene/api/services/auth/endpoints';
 import { ConfigurationEndpoints } from '@irene/api/services/configuration/endpoints';
+import { FreshdeskEndpoints } from '@irene/api/services/freshdesk/endpoints';
+import { NotificationEndpoints } from '@irene/api/services/notification/endpoints';
 import { OrganizationEndpoints } from '@irene/api/services/organization/endpoints';
 import { UserEndpoints } from '@irene/api/services/user/endpoints';
 import { VulnerabilityEndpoints } from '@irene/api/services/vulnerability/endpoints';
@@ -14,6 +16,7 @@ import {
   buildOrganization,
   buildOrganizationMe,
   buildOrganizationMembership,
+  buildOrganizationNamespace,
   buildServerConfiguration,
   buildUserResponse,
   buildVulnerabilityListResponse,
@@ -68,5 +71,20 @@ export const server = setupServer(
   http.get(`*/${OrganizationEndpoints.storeknoxOrganization()}`, () =>
     HttpResponse.json({ detail: 'Not found.' }, { status: 404 })
   ),
-  http.get(`*/${UserEndpoints.detail('*')}`, () => HttpResponse.json(buildUserResponse()))
+  http.get(`*/${UserEndpoints.detail('*')}`, () => HttpResponse.json(buildUserResponse())),
+
+  /* The namespace-request notifications read the namespace to state where it stands. */
+  http.get(`*/${OrganizationEndpoints.namespace('*', '*')}`, () =>
+    HttpResponse.json(buildOrganizationNamespace())
+  ),
+
+  /* The bar's bell asks for the unread count on every signed-in page. */
+  http.get(`*/${NotificationEndpoints.list()}`, () =>
+    HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
+  ),
+
+  /* Every signed-in page installs the support widget, which signs in on load. */
+  http.post(`*/${FreshdeskEndpoints.authenticate()}`, () =>
+    HttpResponse.json({ token: 'a-widget-token', name: 'ada', email: 'ada@appknox.com' })
+  )
 );
