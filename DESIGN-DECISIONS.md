@@ -41,15 +41,21 @@ Nothing here is a deliberate departure. They are listed so QA does not raise
 them: most are unbuilt work, and one is an inconsistency of irene's own that the
 port carries.
 
-| Gap                                                             | Where                                                                            | Note                                                                                                                                                                                                                                             |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `LOGOUT_EVENT` is not tracked                                   | `useLogout`                                                                      | irene sends it to PostHog. Analytics is Week 5 work                                                                                                                                                                                              |
-| The chat widget outlives a sign-out                             | `useLogout`, `scripts/freshchat.ts`                                              | irene destroys the Freshchat widget and signs the account out of the Freshdesk support widget. `destroyFreshchat` is written and tested but never called; the support widget is unbuilt                                                          |
-| PostHog is not registered on boot                               | `setupUserAndOrgContext`                                                         | The last of irene's seven ordered `afterModel()` steps; the other six are built                                                                                                                                                                  |
-| Pendo is built but unverified                                   | `setupUserAndOrgContext`, `scripts/pendo.ts`, the side navigation                | Written against irene, never run against a live subscription. See below                                                                                                                                                                          |
-| No realtime server row                                          | `/dashboard/status`                                                              | irene shows a fourth row for the WebSocket while signed in; the socket is unbuilt                                                                                                                                                                |
-| Support address gated two ways                                  | `register-invitation-invalid`, the locked-account message, the page-failure card | irene uses two different rules and the port keeps each one where irene has it. See below                                                                                                                                                         |
-| StoreKnox and offensive security render in the dashboard chrome | `/dashboard/storeknox/…`, `/dashboard/offensive-security`                        | irene gives each product its own wrapper, navigation and title. Ours are route shells nested under the dashboard layout, so they carry its navigation and read as `… \| VAPT \| Appknox`. Resolved when each gets a layout, as reporting now has |
+| Gap                                                                  | Where                                                                            | Note                                                                                                                                                                                                                                                 |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LOGOUT_EVENT` is not tracked                                        | `useLogout`                                                                      | irene sends it to PostHog. Analytics is Week 5 work                                                                                                                                                                                                  |
+| PostHog is not registered on boot                                    | `setupUserAndOrgContext`                                                         | The last of irene's seven ordered `afterModel()` steps; the other six are built                                                                                                                                                                      |
+| Pendo is built but unverified                                        | `setupUserAndOrgContext`, `scripts/pendo.ts`, the side navigation                | Written against irene, never run against a live subscription. See below                                                                                                                                                                              |
+| No realtime server row                                               | `/dashboard/status`                                                              | irene shows a fourth row for the WebSocket while signed in; the socket is unbuilt                                                                                                                                                                    |
+| Support address gated two ways                                       | `register-invitation-invalid`, the locked-account message, the page-failure card | irene uses two different rules and the port keeps each one where irene has it. See below                                                                                                                                                             |
+| The notification list loads as a skeleton, not a spinner             | `notifications/components/loading-skeleton.tsx`                                  | irene centres an `AkLoader` in a 12.5em band. Ours stands in four rows shaped as the real ones, so the panel does not resize when they arrive                                                                                                        |
+| The support widget renews its token for as long as the session lasts | `scripts/freshdesk.ts`                                                           | irene answers the widget's expiry callback with a token and no callback of its own, so the next expiry is never answered and support loses the account after four hours. Ours passes the callback each time                                          |
+| Eight route shells exist only for notification links                 | `/dashboard/file/$fileId` and seven others                                       | irene's notification messages link into the file, analysis, dynamic-scan, SBOM, store-monitoring, StoreKnox inventory and project-settings pages. Each is a `RouteShell` so the links resolve and navigate; each is replaced as its page is migrated |
+| The notifications page is a route shell                              | `/dashboard/notifications`                                                       | The dropdown's "View All Notifications" link needs a destination. The full page, its read/unread filter and its pagination are unbuilt                                                                                                               |
+| Each notification checks its context before rendering                | `notifications/components/messages/*/context.ts`, `notification-map.tsx`         | irene reads the context straight off the model. Ours declares a zod schema per message, which the map parses before handing it over, so a payload that has drifted renders as its code rather than as a message with holes. See below                |
+| Notification message layout is unverified against production         | `features/notifications/components/messages/`                                    | All 44 are ported from irene's templates and SCSS. Every one renders from a real payload, but only two have been compared against production for layout. See below                                                                                   |
+| Six notification codes render as their code                          | `notifications/components/notification-map.tsx`                                  | mycroft sends `NF_AUTOPILOT_DAST_ERRORED` and five StoreKnox app-request codes that irene has no template for either. They fall through to the error message, which names the code. Resolved when the product decides whether they should appear     |
+| StoreKnox and offensive security render in the dashboard layout      | `/dashboard/storeknox/…`, `/dashboard/offensive-security`                        | irene gives each product its own wrapper, navigation and title. Ours are route shells nested under the dashboard layout, so they carry its navigation and read as `… \| VAPT \| Appknox`. Resolved when each gets a layout, as reporting now has     |
 
 ### The two support-address rules
 
@@ -66,6 +72,45 @@ Both rules give the right answer in production: an Appknox deployment links the
 address, a whitelabel one does not. They only disagree on localhost and staging,
 where the build flag is unset but the host is not `secure.appknox.com` — so the
 invitation screen links the address and the other two print it as plain text.
+
+### Notification message templates need a second pass
+
+The 44 message components, the dropdown and the message row are ported from
+irene's `notifications-page` and `notifications-dropdown` templates and their
+SCSS, value by value: the stack spacings, the type scale, the weights and the
+colours all resolve to the same pixels and hex codes irene renders.
+
+Every one of the 44 has been rendered from a real payload: each event was fired
+on a local mycroft, read back through `GET /api/v2/nf_in_app_notifications` and
+run through its own schema. What that does not cover is layout — only the
+dropdown list and the SBOM message have been compared against production for
+spacing, weight and colour, so the port is still only as good as the reading of
+each template. Four things are worth looking at first when someone does compare
+them:
+
+- **The risk-status card.** irene lays the six severities out with
+  `grid-template-rows: 1fr 1fr 1fr` and `grid-auto-flow: column`, so they fill
+  down the left column before the right: Critical, High, Medium, then Low,
+  Passed, Untested. A row-first grid reads plausibly and is wrong, which is how
+  it was built the first time.
+- **The namespace approval block.** The request and the approve and reject
+  buttons share one bordered box; the links sit outside it. The standing comes
+  from the namespace itself rather than the notification, and a namespace that
+  404s counts as rejected, because rejecting removes it.
+- **The per-message spacing.** irene's spacing utilities and `AkStack @spacing`
+  both count in `0.5em` steps, so `pt-1` is 7px and `@spacing='2'` is 14px — not
+  14px and 28px. Every gap in this module was wrong by a factor of two until
+  that was traced.
+- **Values the spacing scale cannot express.** The SBOM summary separates its
+  counts by `1.25em`, which is 17.5px at a 14px root and needs a multiplier of
+  4.375. Tailwind takes at most two decimal places, so the class generated no
+  CSS and the counts ran together. It is rounded to the nearest step the scale
+  has. A gap, padding or margin needing three decimals has to be rounded the
+  same way — the class will not fail, it will silently do nothing.
+
+What is deliberately not ported: the messages' deep links point at route shells
+rather than real pages, and the notifications page itself is a shell, both
+listed above.
 
 ### Pendo is written but has never run
 

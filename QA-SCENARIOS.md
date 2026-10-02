@@ -267,8 +267,8 @@ replace itself with `/dashboard/status`.
 
 ## Dashboard navigation
 
-The chrome every signed-in page sits in: the logo, the product switcher, the
-items, and the chat, release and width rows below them. Each scenario patches
+The side navigation every signed-in page sits beside: the logo, the product
+switcher, the items, and the chat, release and width rows below them. Each scenario patches
 the organization, the account's standing or the deployment's configuration and
 leaves the rest of the API alone.
 
@@ -306,6 +306,38 @@ appknox.com host for the Appknox and StoreKnox names and logos, and on plain
 localhost for VAPT and App Monitoring. The marketplace item and the product
 guides are build flags: set `IRENE_ENABLE_MARKETPLACE` or `IRENE_ENABLE_PENDO`
 in `public/runtimeconfig.js`.
+
+## Top bar and notifications
+
+No mock scenarios exist for these: notifications come from the server, so they
+need an account with real ones. The bell shows the seven most recent unread.
+
+| What to check    | How to get there                                      | Expected                                                         |
+| ---------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
+| Unread dot       | Any signed-in page with something unread              | A dot on the bell; it goes once everything is read               |
+| Count            | Open the bell                                         | The pill beside "Notifications" matches what the server holds    |
+| Mark all as read | Open the bell, use the control                        | The list empties and the count falls to zero                     |
+| One at a time    | Click a row's dot                                     | The dot hollows and the count falls by one                       |
+| Empty            | An account with nothing unread                        | The illustration and "No unread notifications"                   |
+| Scrolling        | An account with seven unread                          | The list scrolls inside the panel rather than growing it         |
+| Knowledge base   | A deployment with `freshdesk_configuration.widget_id` | The control opens the widget as a full-height panel on the right |
+
+Compare each message against irene rather than reading it for plausibility —
+all 44 are ported from its templates, and each renders from a real payload, but
+only two have been checked against production for layout. They fall into six
+shapes:
+
+| Shape             | Message codes                                                                                                                                                                          | What is easy to get wrong                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Scan completed    | `NF_SASTCMPLTD1`, `NF_DASTCMPLTD1`, `NF_APISTCMPLTD1`                                                                                                                                  | The risk card fills down the left column first: Critical, High, Medium, then Low, Passed, Untested |
+| Namespace request | `NF_NSREQSTD1`, `NF_NSREQSTD2`, `NF_STR_URL_NSREQSTD1`, `NF_STR_URL_NSREQSTD2`                                                                                                         | The request and its buttons share one bordered box; the links sit outside it                       |
+| Namespace settled | `NF_NSAPPRVD1/2`, `NF_NSAUTOAPPRVD1/2`, `NF_NSREJCTD1/2`                                                                                                                               | Only the `2` variants carry a link to the namespaces page                                          |
+| Upload failed     | the eight `NF_UPLDFAIL*` and `NF_STR_URL_UPLDFAIL*` codes                                                                                                                              | The store variants carry a store link; `NPRJDENY2` adds a second line in a lighter grey            |
+| Automated DAST    | the four `NF_AUTOMATED_DAST_*` codes                                                                                                                                                   | The file link sits inline between the two halves of one sentence                                   |
+| Everything else   | `NF_SBOMCMPLTD`, `NF_AM_NEWVERSN`, `NF_SK_NEWVERSN`, `NF_SK_SUBEXP`, `NF_JIRA_PUSH_ERR`, `NF_OVRREQ_*`, `NF_PUBLIC_API_USER_UPDATED`, `NF_STR_URL_VLDTN_ERR`, the two upload successes | The SBOM summary separates its three counts; the error boxes are bordered, not filled              |
+
+A code this build does not know states the code itself rather than rendering
+nothing, so an unported message is visible rather than silent.
 
 ## Language and branding
 
