@@ -7,7 +7,7 @@ export interface IreneAuthSession {
   b64token: string;
 }
 
-export const IRENE_AUTH_SESSION_KEY = 'appknox-session';
+export const IRENE_AUTH_SESSION_KEY = 'irene:auth-session';
 
 /**
  * Checks that a parsed value has the shape of a stored session.

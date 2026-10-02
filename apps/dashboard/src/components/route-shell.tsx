@@ -11,7 +11,7 @@ import { AkTypography } from '@irene/ui/ak-typography';
  */
 export function RouteShell({ name }: Readonly<{ name: string }>) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-2 p-4">
+    <div className="flex min-h-full flex-col items-center justify-center gap-2 p-4">
       <AkTypography tag="h1" variant="h4" fontWeight="bold" align="center" className="text-xl">
         {name}
       </AkTypography>
@@ -19,6 +19,6 @@ export function RouteShell({ name }: Readonly<{ name: string }>) {
       <AkTypography color="textSecondary" align="center">
         This screen has not been migrated yet.
       </AkTypography>
-    </main>
+    </div>
   );
 }

@@ -16,7 +16,7 @@ export interface ReportNavItem extends SideNavItemDefinition {
  * The reporting navigation, which is the same for every account that reaches it.
  *
  * Reporting is sold as one thing: an account either has it or never sees this
- * chrome, so nothing here is gated.
+ * navigation, so nothing here is gated.
  *
  * @returns One entry per page reporting offers.
  */

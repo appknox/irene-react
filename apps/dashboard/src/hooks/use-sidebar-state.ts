@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
+/* One key for every product, so collapsing the navigation in one holds in the next. */
+const STORAGE_KEY = 'irene:sidebar-state';
+
 const COLLAPSED = 'collapsed';
 const EXPANDED = 'expanded';
 
@@ -11,21 +14,21 @@ const EXPANDED = 'expanded';
 const SIDE_NAV_WIDTH = { collapsed: '56px', expanded: '250px' };
 
 /**
- * Whether a product's navigation is collapsed, remembered per product.
+ * Whether the navigation is collapsed, remembered across every product.
  *
- * Each layout passes its own storage key, so collapsing the dashboard's
- * navigation does not collapse reporting's.
+ * The app switcher moves between products without reloading, and the
+ * navigation is the same bar throughout, so its width is one choice rather
+ * than one per product.
  *
  * It also writes the current width to `--ak-chat-left` on the document root.
  * The Freshchat widget mounts on the body, outside the React tree, and is
  * placed against that property by packages/ui/styles/freshchat.css.
  *
- * @param storageKey - Where this product's choice is stored.
  * @returns Whether the navigation is collapsed, and a toggle for it.
  */
-export function useSidebarState(storageKey: string) {
+export function useSidebarState() {
   const [isCollapsed, setIsCollapsed] = useState(() => {
-    const stored = window.localStorage.getItem(storageKey);
+    const stored = window.localStorage.getItem(STORAGE_KEY);
 
     /* Collapsed until the user says otherwise, so a first visit gives the page its width. */
     return stored === null ? true : stored === COLLAPSED;
@@ -35,11 +38,11 @@ export function useSidebarState(storageKey: string) {
   const toggle = useCallback(() => {
     setIsCollapsed((collapsed) => {
       const next = !collapsed;
-      window.localStorage.setItem(storageKey, next ? COLLAPSED : EXPANDED);
+      window.localStorage.setItem(STORAGE_KEY, next ? COLLAPSED : EXPANDED);
 
       return next;
     });
-  }, [storageKey]);
+  }, []);
 
   // Adjusts the position of the freshchat widget based on the sidebar state.
   useEffect(() => {

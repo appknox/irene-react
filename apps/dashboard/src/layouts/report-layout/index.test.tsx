@@ -64,20 +64,19 @@ describe('ReportLayout', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('remembers its own width, not the dashboard navigation width', async () => {
-    window.localStorage.setItem('irene-dashboard-sidebar-state', 'expanded');
+  it('opens at the width the navigation was left at in another product', async () => {
+    window.localStorage.setItem('irene:sidebar-state', 'expanded');
 
     await openReports();
 
-    expect(await screen.findByRole('button', { name: akMT('expand') })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: akMT('collapse') })).toBeInTheDocument();
   });
 
-  it('stores the width it is toggled to under its own key', async () => {
+  it('stores the width it is toggled to for every product to read', async () => {
     await openReports();
 
     await userEvent.click(await screen.findByRole('button', { name: akMT('expand') }));
 
-    expect(window.localStorage.getItem('irene-report-sidebar-state')).toBe('expanded');
-    expect(window.localStorage.getItem('irene-dashboard-sidebar-state')).toBeNull();
+    expect(window.localStorage.getItem('irene:sidebar-state')).toBe('expanded');
   });
 });

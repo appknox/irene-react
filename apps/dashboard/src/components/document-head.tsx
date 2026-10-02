@@ -15,7 +15,7 @@ const PRODUCT_LAYOUT_ROUTE = '/_authenticated/dashboard';
 const TITLE_SEPARATOR = ' | ';
 
 /**
- * How the deployment names itself in the browser chrome.
+ * How the deployment names itself in the browser tab.
  *
  * Rendered rather than assigned: React hoists `title`, `meta` and `link` into
  * the document head, so the tab follows the branding the way any other element

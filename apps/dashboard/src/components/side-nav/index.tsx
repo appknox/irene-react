@@ -25,7 +25,7 @@ interface SideNavProps {
 }
 
 /**
- * The navigation every product's chrome renders.
+ * The navigation every product's layout renders.
  *
  * The items belong to the product: each layout builds its own list and passes
  * it in. Everything else is the same wherever it renders — the logo, the
@@ -71,8 +71,12 @@ export function SideNav({ items, isCollapsed, onSidebarToggle }: Readonly<SideNa
       )}
       data-test-side-nav
     >
+      {/* Collapsed, the mark sits 14px below the aside's top: 8px of padding and 6px here. */}
       <div
-        className={cn('flex shrink-0 items-center justify-center', isCollapsed ? 'h-21' : 'h-30')}
+        className={cn(
+          'flex shrink-0 justify-center',
+          isCollapsed ? 'h-21 items-start pt-1.5' : 'h-30 items-center'
+        )}
       >
         <AppLogo
           src={isCollapsed ? favicon : logo}

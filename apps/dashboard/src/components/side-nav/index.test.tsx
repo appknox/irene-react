@@ -13,7 +13,7 @@ import { mockOrganizationFeatures, mockOrganizationMe } from '@tests/organizatio
 import { renderAtRoute } from '@tests/render';
 import { server } from '@tests/server';
 
-/** A page inside the chrome, so the navigation is on screen. */
+/** A page inside the dashboard layout, so the navigation is on screen. */
 const PROJECTS = '/dashboard/projects';
 
 const openProjects = () => renderAtRoute(PROJECTS);
@@ -318,7 +318,7 @@ describe('SideNav', () => {
     });
   });
 
-  it('shows the partner clients in the same chrome as the dashboard', async () => {
+  it('shows the partner clients in the same layout as the dashboard', async () => {
     mockOrganizationMe({ can_access_partner_dashboard: true });
 
     await renderAtRoute('/partner/clients');
