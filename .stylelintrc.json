@@ -50,9 +50,10 @@
       }
     },
     {
-      "files": ["packages/ui/styles/freshchat.css"],
+      "files": ["packages/ui/styles/freshchat.css", "packages/ui/styles/freshdesk.css"],
       "rules": {
-        "selector-id-pattern": null
+        "selector-id-pattern": null,
+        "declaration-property-value-disallowed-list": null
       }
     }
   ]

@@ -12,6 +12,8 @@ import { vulnerabilityStore } from '@irene/api/stores/vulnerability';
 import type { ApiSessionResponse } from '@irene/api/services/auth';
 
 import { sessionCheckOptions } from '@/features/auth/queries/session';
+import { destroyFreshchat } from '@/scripts/freshchat';
+import { signOutOfFreshdesk } from '@/scripts/freshdesk';
 
 /**
  * Records a session the app has just been granted: stored for the next visit,
@@ -43,6 +45,10 @@ export function startSession(queryClient: QueryClient, response: ApiSessionRespo
  * @param queryClient - The cache to clear.
  */
 export function endSession(queryClient: QueryClient) {
+  /* Both widgets hold the account, so they go with the session. */
+  destroyFreshchat();
+  signOutOfFreshdesk();
+
   clearStoredSession();
   queryClient.clear();
   queryClient.setQueryData(sessionCheckOptions().queryKey, null);

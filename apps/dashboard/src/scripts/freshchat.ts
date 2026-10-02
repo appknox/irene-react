@@ -45,6 +45,9 @@ export interface FreshchatIdentity {
 const FRESHCHAT_HOST = 'https://appknox-support.freshchat.com';
 const SCRIPT_ID = 'freshchat-widget';
 
+/* The account's hash alone would sit unnamespaced beside every other key on the origin. */
+const restoreIdKey = (hash: string) => `irene:freshchat-restore-id:${hash}`;
+
 /**
  * Whether the widget has finished installing.
  *
@@ -63,7 +66,7 @@ const isInstalled = () => typeof window.fcWidget === 'object';
  */
 function readRestoreId(hash: string): string | null {
   try {
-    return window.localStorage.getItem(hash);
+    return window.localStorage.getItem(restoreIdKey(hash));
   } catch {
     return null;
   }
@@ -77,7 +80,7 @@ function readRestoreId(hash: string): string | null {
  */
 function storeRestoreId(hash: string, restoreId: string) {
   try {
-    window.localStorage.setItem(hash, restoreId);
+    window.localStorage.setItem(restoreIdKey(hash), restoreId);
   } catch {
     /* A tab that cannot store it simply starts a new conversation next time. */
   }

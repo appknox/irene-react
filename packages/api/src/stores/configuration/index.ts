@@ -46,6 +46,7 @@ type FrontendData = Omit<ApiFrontendConfiguration, 'images' | 'theme' | 'integra
  * @property {function} showRegistrationLink - Whether the login page offers a way to register.
  * @property {function} registrationLink - Where signing up sends them.
  * @property {function} freshchatKey - The key the chat widget is installed with, empty where chat is off.
+ * @property {function} supportWidgetId - The Freshdesk widget the knowledge base opens, empty where it is off.
  * @property {function} isAppknoxUrl - Whether this tab is on an Appknox host, where Appknox answers its own support.
  * @property {function} isEnterprise - Whether this install is self-hosted, which suppresses every upsell.
  * @property {function} socketHost - The host the realtime connection opens against.
@@ -76,6 +77,7 @@ interface ConfigurationStore {
   showRegistrationLink: () => boolean;
   registrationLink: () => string;
   freshchatKey: () => string;
+  supportWidgetId: () => string;
   isAppknoxUrl: () => boolean;
   isEnterprise: () => boolean;
   socketHost: () => string;
@@ -164,6 +166,7 @@ export const configurationStore = createStore<ConfigurationStore>((set, get) => 
   name: () => get().frontendData.name || WHITELABEL_DEFAULTS.name,
   registrationLink: () => get().frontendData.registration_link,
   freshchatKey: () => get().integrationData.freshchat_key,
+  supportWidgetId: () => get().integrationData.freshdesk_configuration.widget_id,
   isAppknoxUrl: () => APPKNOX_HOSTS.some((host) => window.location.href.includes(host)),
   isEnterprise: () => Boolean(get().serverData.enterprise),
   socketHost: () => get().serverData.websocket || getConfigValue('IRENE_API_HOST') || SAME_ORIGIN,

@@ -11,10 +11,13 @@ import {
 const IDENTITY: FreshchatIdentity = {
   firstName: 'Ada',
   lastName: 'Lovelace',
-  email: 'ada@appknox.com',
+  email: 'ada@example.com',
   organizationName: 'Appknox',
   hash: 'a-freshchat-hash',
 };
+
+/** Where the widget's conversation id is stored for this account. */
+const RESTORE_ID_KEY = `irene:freshchat-restore-id:${IDENTITY.hash}`;
 
 const widgetScript = () => document.getElementById('freshchat-widget');
 
@@ -89,7 +92,7 @@ describe('installFreshchat', () => {
   });
 
   it('restores the conversation this account was last in', () => {
-    window.localStorage.setItem(IDENTITY.hash, 'a-restore-id');
+    window.localStorage.setItem(RESTORE_ID_KEY, 'a-restore-id');
 
     installFreshchat('a-key', IDENTITY);
 
@@ -113,7 +116,7 @@ describe('installFreshchat', () => {
     expect(widget.user.create).toHaveBeenCalledWith({
       firstName: 'Ada',
       lastName: 'Lovelace',
-      email: 'ada@appknox.com',
+      email: 'ada@example.com',
       cf_custom_company_name: 'Appknox',
     });
   });
@@ -129,7 +132,7 @@ describe('installFreshchat', () => {
     runOnInit();
 
     expect(widget.user.setProperties).toHaveBeenCalledWith({ cf_custom_company_name: 'Appknox' });
-    expect(window.localStorage.getItem(IDENTITY.hash)).toBe('a-restore-id');
+    expect(window.localStorage.getItem(RESTORE_ID_KEY)).toBe('a-restore-id');
   });
 
   it('remembers the conversation the widget opens for an account it has just created', () => {
@@ -142,7 +145,7 @@ describe('installFreshchat', () => {
 
     created?.({ status: 200, data: { restoreId: 'a-new-restore-id' } });
 
-    expect(window.localStorage.getItem(IDENTITY.hash)).toBe('a-new-restore-id');
+    expect(window.localStorage.getItem(RESTORE_ID_KEY)).toBe('a-new-restore-id');
   });
 
   it('remembers nothing from a request the widget refused', () => {
@@ -155,7 +158,7 @@ describe('installFreshchat', () => {
 
     created?.({ status: 500 });
 
-    expect(window.localStorage.getItem(IDENTITY.hash)).toBeNull();
+    expect(window.localStorage.getItem(RESTORE_ID_KEY)).toBeNull();
   });
 
   it('carries on where the widget has not defined itself yet', () => {

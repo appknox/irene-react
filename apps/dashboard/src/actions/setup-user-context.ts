@@ -22,6 +22,7 @@ import { dashboardConfigurationOptions } from '@/queries/configuration';
 import { userOptions } from '@/queries/user';
 import { vulnerabilitiesOptions } from '@/queries/vulnerability';
 import { installFreshchat } from '@/scripts/freshchat';
+import { installFreshdesk } from '@/scripts/freshdesk';
 import { identifyForProductGuides, installProductGuides } from '@/scripts/pendo';
 
 /**
@@ -156,6 +157,9 @@ export async function setupUserAndOrgContext(queryClient: QueryClient, userId: n
 
   _installChatSupport(user);
   _installProductGuides(user);
+
+  /* The knowledge base is opened from the top bar, so the widget loads with the page. */
+  installFreshdesk(configurationStore.getState().supportWidgetId());
 
   return user;
 }

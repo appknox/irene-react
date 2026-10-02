@@ -14,8 +14,11 @@ export function App() {
     <TranslationsProvider>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={ireneDashboardRouter} />
+
         <BootOverlay router={ireneDashboardRouter} />
+
         <QueryDevtools />
+
         <AkToaster />
       </QueryClientProvider>
     </TranslationsProvider>
