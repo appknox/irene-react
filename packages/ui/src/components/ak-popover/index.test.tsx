@@ -109,6 +109,15 @@ describe('AkPopover', () => {
     expect(screen.queryByRole('button', { name: 'Done' })).not.toBeInTheDocument();
   });
 
+  it('takes the panel off the page when it closes', async () => {
+    render(<Switcher />);
+
+    await openSwitcher();
+    await userEvent.keyboard('{Escape}');
+
+    expect(screen.queryByRole('link', { name: 'Appknox' })).not.toBeInTheDocument();
+  });
+
   it('draws a pointer at the trigger when asked', async () => {
     render(<Switcher arrow />);
 

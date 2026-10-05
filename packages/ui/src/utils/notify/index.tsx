@@ -31,7 +31,7 @@ function _notify(kind: NotifyKind, message: ReactNode, options: NotifyOptions = 
       <AkAlert variant={kind} className="shadow-lg" onDismiss={() => toast.dismiss(id)}>
         <AkIcon name={ICONS[kind]} />
 
-        <AkAlertTitle>{message}</AkAlertTitle>
+        <AkAlertTitle className="line-clamp-none">{message}</AkAlertTitle>
 
         {description && <AkAlertDescription>{description}</AkAlertDescription>}
       </AkAlert>

@@ -93,6 +93,7 @@ describe('UploadViaLink', () => {
     expect(
       await screen.findByText(akMT('uploadAppModule.unsupportedStoreLink'))
     ).toBeInTheDocument();
+
     expect(confirmButton()).toBeDisabled();
   });
 
