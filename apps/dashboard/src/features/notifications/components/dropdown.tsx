@@ -14,6 +14,8 @@ import {
   unreadNotificationsOptions,
 } from '@/features/notifications/queries/notification';
 
+import { useProductNotifications } from '@/hooks/use-product-notifications';
+
 import { NotificationsLoadingSkeleton } from './loading-skeleton';
 import { NotificationMessage } from './message';
 
@@ -28,7 +30,8 @@ interface NotificationsDropdownProps {
  * @param props.onNavigate - Closes the panel when the footer link moves the page on.
  */
 export function NotificationsDropdown({ onNavigate }: Readonly<NotificationsDropdownProps>) {
-  const { data, isPending } = useQuery(unreadNotificationsOptions());
+  const product = useProductNotifications();
+  const { data, isPending } = useQuery(unreadNotificationsOptions(product));
   const notifications = data?.items ?? [];
 
   return (
@@ -79,10 +82,11 @@ export function NotificationsDropdown({ onNavigate }: Readonly<NotificationsDrop
 /** States the count and clears it, above the list. */
 function DropdownHeader({ unreadCount }: Readonly<{ unreadCount: number }>) {
   const queryClient = useQueryClient();
+  const product = useProductNotifications();
 
   const markAllAsRead = useMutation({
-    mutationFn: () => NotificationService.markAllAsRead(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: notificationKeys.all() }),
+    mutationFn: () => NotificationService.markAllAsRead(product),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: notificationKeys.product(product) }),
   });
 
   return (

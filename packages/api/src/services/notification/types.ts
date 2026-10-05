@@ -1,3 +1,6 @@
+/** The products that keep notifications of their own. */
+export type ApiNotificationProduct = 'appknox' | 'storeknox';
+
 /** One in-app notification, as the list returns it. */
 export interface ApiNotification {
   id: number;

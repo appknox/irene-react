@@ -78,8 +78,12 @@ export const server = setupServer(
     HttpResponse.json(buildOrganizationNamespace())
   ),
 
-  /* The bar's bell asks for the unread count on every signed-in page. */
-  http.get(`*/${NotificationEndpoints.list()}`, () =>
+  /* The bar's bell asks for the unread count on every signed-in page, for whichever product it is on. */
+  http.get(`*/${NotificationEndpoints.list('appknox')}`, () =>
+    HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
+  ),
+
+  http.get(`*/${NotificationEndpoints.list('storeknox')}`, () =>
     HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
   ),
 

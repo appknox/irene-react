@@ -6,6 +6,7 @@ import { AkIcon } from '@irene/ui/ak-icon';
 import { AkPopover, AkPopoverContent, AkPopoverTrigger } from '@irene/ui/ak-popover';
 
 import { unreadNotificationsOptions } from '@/features/notifications/queries/notification';
+import { useProductNotifications } from '@/hooks/use-product-notifications';
 
 import { NotificationsDropdown } from './dropdown';
 
@@ -17,7 +18,9 @@ import { NotificationsDropdown } from './dropdown';
  */
 export function NotificationsBell() {
   const [isOpen, setIsOpen] = useState(false);
-  const { data, refetch: loadUnreadNotifications } = useQuery(unreadNotificationsOptions());
+  const product = useProductNotifications();
+
+  const { data, refetch: loadUnreadNotifications } = useQuery(unreadNotificationsOptions(product));
   const unreadCount = data?.count ?? 0;
 
   const handleOpenNotifPopover = (open: boolean) => {

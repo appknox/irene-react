@@ -30,7 +30,7 @@ const openProjects = () => renderAtRoute('/dashboard/projects');
 /** Answers the unread list with `notifications`, and its count with their number. */
 const mockUnreadNotifications = (notifications: ApiNotification[]) =>
   server.use(
-    http.get(`*/${NotificationEndpoints.list()}`, () =>
+    http.get(`*/${NotificationEndpoints.list('appknox')}`, () =>
       HttpResponse.json({
         count: notifications.length,
         next: null,
@@ -39,6 +39,27 @@ const mockUnreadNotifications = (notifications: ApiNotification[]) =>
       })
     )
   );
+
+/** Reports which product's notifications were asked for. */
+const watchNotificationRequests = () => {
+  const askedFor: string[] = [];
+
+  server.use(
+    http.get(`*/${NotificationEndpoints.list('appknox')}`, () => {
+      askedFor.push('appknox');
+
+      return HttpResponse.json({ count: 0, next: null, previous: null, results: [] });
+    }),
+
+    http.get(`*/${NotificationEndpoints.list('storeknox')}`, () => {
+      askedFor.push('storeknox');
+
+      return HttpResponse.json({ count: 0, next: null, previous: null, results: [] });
+    })
+  );
+
+  return askedFor;
+};
 
 const openBell = async () => {
   await userEvent.click(await screen.findByRole('button', { name: akMT('notifications') }));
@@ -186,7 +207,7 @@ describe('NotificationsBell', () => {
     mockUnreadNotifications([buildNotification()]);
 
     server.use(
-      http.post(`*/${NotificationEndpoints.markAllAsRead()}`, () => {
+      http.post(`*/${NotificationEndpoints.markAllAsRead('appknox')}`, () => {
         markedAll = true;
 
         return new HttpResponse(null, { status: 204 });
@@ -209,7 +230,7 @@ describe('NotificationsBell', () => {
     mockUnreadNotifications([notification]);
 
     server.use(
-      http.patch(`*/${NotificationEndpoints.detail(notification.id)}`, () =>
+      http.patch(`*/${NotificationEndpoints.detail('appknox', notification.id)}`, () =>
         HttpResponse.json({ ...notification, has_read: true })
       )
     );
@@ -233,7 +254,7 @@ describe('NotificationsBell', () => {
     /* The request never settles, so only the optimistic update can flip it. */
     server.use(
       http.patch(
-        `*/${NotificationEndpoints.detail(notification.id)}`,
+        `*/${NotificationEndpoints.detail('appknox', notification.id)}`,
         () => new Promise(() => undefined)
       )
     );
@@ -256,7 +277,7 @@ describe('NotificationsBell', () => {
     mockUnreadNotifications([notification]);
 
     server.use(
-      http.patch(`*/${NotificationEndpoints.detail(notification.id)}`, () =>
+      http.patch(`*/${NotificationEndpoints.detail('appknox', notification.id)}`, () =>
         HttpResponse.json({ detail: 'Server error.' }, { status: 500 })
       )
     );
@@ -278,7 +299,7 @@ describe('NotificationsBell', () => {
     mockUnreadNotifications([notification]);
 
     server.use(
-      http.patch(`*/${NotificationEndpoints.detail(notification.id)}`, () => {
+      http.patch(`*/${NotificationEndpoints.detail('appknox', notification.id)}`, () => {
         patchedId = notification.id;
 
         return HttpResponse.json({ ...notification, has_read: true });
@@ -304,5 +325,36 @@ describe('NotificationsBell', () => {
     );
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/dashboard/notifications'));
+  });
+});
+
+describe('NotificationsBell across products', () => {
+  beforeEach(() => {
+    storeSession(session);
+    mockOrganizationFeatures({ storeknox: true });
+  });
+
+  it('asks for the notifications of the product the page belongs to', async () => {
+    const askedFor = watchNotificationRequests();
+
+    renderAtRoute('/dashboard/storeknox/inventory/app-list');
+
+    await screen.findByRole('button', { name: akMT('notifications') });
+
+    await waitFor(() => expect(askedFor).toContain('storeknox'));
+
+    expect(askedFor).not.toContain('appknox');
+  });
+
+  it('asks Appknox for them on a VAPT page', async () => {
+    const askedFor = watchNotificationRequests();
+
+    openProjects();
+
+    await screen.findByRole('button', { name: akMT('notifications') });
+
+    await waitFor(() => expect(askedFor).toContain('appknox'));
+
+    expect(askedFor).not.toContain('storeknox');
   });
 });

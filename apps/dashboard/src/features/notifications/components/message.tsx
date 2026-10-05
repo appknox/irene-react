@@ -1,10 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useId } from 'react';
 
+import { patchPaginationItem } from '@irene/api/normalization';
 import { NotificationService, type ApiNotification } from '@irene/api/services/notification';
 import { AkTypography } from '@irene/ui/ak-typography';
 
 import { unreadNotificationsOptions } from '@/features/notifications/queries/notification';
+import { useProductNotifications } from '@/hooks/use-product-notifications';
 import { formatRelativeTime } from '@/utils/relative-time';
 
 import { NotificationErrorMessage } from './messages/error';
@@ -24,35 +26,29 @@ interface NotificationMessageProps {
  */
 export function NotificationMessage({ notification }: Readonly<NotificationMessageProps>) {
   const queryClient = useQueryClient();
+  const product = useProductNotifications();
 
   /* Updates the row in place so a notification marked read stays on the list until it is reopened. */
   const setRead = useMutation({
     mutationFn: (hasRead: boolean) =>
-      NotificationService.setNotificationRead(notification.id, hasRead),
+      NotificationService.setNotificationRead(product, notification.id, hasRead),
 
     onMutate: async (hasRead) => {
-      const { queryKey } = unreadNotificationsOptions();
+      const { queryKey } = unreadNotificationsOptions(product);
 
       await queryClient.cancelQueries({ queryKey });
-
       const previous = queryClient.getQueryData(queryKey);
 
       queryClient.setQueryData(queryKey, (page) =>
-        page
-          ? {
-              ...page,
-              items: page.items.map((item) =>
-                item.id === notification.id ? { ...item, has_read: hasRead } : item
-              ),
-            }
-          : page
+        patchPaginationItem(page, notification.id, { has_read: hasRead })
       );
 
       return { previous };
     },
 
     onError: (_error, _hasRead, context) => {
-      queryClient.setQueryData(unreadNotificationsOptions().queryKey, context?.previous);
+      const queryKey = unreadNotificationsOptions(product).queryKey;
+      queryClient.setQueryData(queryKey, context?.previous);
     },
   });
 

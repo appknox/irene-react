@@ -18,13 +18,13 @@ const notification: ApiNotification = {
 describe('NotificationService', () => {
   it('returns the page of notifications and the total count', async () => {
     server.use(
-      http.get(`*/${NotificationEndpoints.list()}`, () =>
+      http.get(`*/${NotificationEndpoints.list('appknox')}`, () =>
         HttpResponse.json({ count: 1, next: null, previous: null, results: [notification] })
       )
     );
 
     await expect(
-      NotificationService.getNotifications({ limit: 7, offset: 0, has_read: false })
+      NotificationService.getNotifications('appknox', { limit: 7, offset: 0, has_read: false })
     ).resolves.toMatchObject({ items: [notification], count: 1, hasNext: false });
   });
 
@@ -32,14 +32,14 @@ describe('NotificationService', () => {
     let requestedUrl = '';
 
     server.use(
-      http.get(`*/${NotificationEndpoints.list()}`, ({ request }) => {
+      http.get(`*/${NotificationEndpoints.list('appknox')}`, ({ request }) => {
         requestedUrl = request.url;
 
         return HttpResponse.json({ count: 0, next: null, previous: null, results: [] });
       })
     );
 
-    await NotificationService.getNotifications({ limit: 7, offset: 0, has_read: false });
+    await NotificationService.getNotifications('appknox', { limit: 7, offset: 0, has_read: false });
 
     expect(requestedUrl).toContain('has_read=false');
     expect(requestedUrl).toContain('limit=7');
@@ -47,14 +47,16 @@ describe('NotificationService', () => {
 
   it('marks one notification read', async () => {
     server.use(
-      http.patch(`*/${NotificationEndpoints.detail(7)}`, async ({ request }) => {
+      http.patch(`*/${NotificationEndpoints.detail('appknox', 7)}`, async ({ request }) => {
         const body = await request.json();
 
         return HttpResponse.json({ ...notification, ...(body as object) });
       })
     );
 
-    await expect(NotificationService.setNotificationRead(7, true)).resolves.toMatchObject({
+    await expect(
+      NotificationService.setNotificationRead('appknox', 7, true)
+    ).resolves.toMatchObject({
       has_read: true,
     });
   });
@@ -62,11 +64,29 @@ describe('NotificationService', () => {
   it('marks every notification read', async () => {
     server.use(
       http.post(
-        `*/${NotificationEndpoints.markAllAsRead()}`,
+        `*/${NotificationEndpoints.markAllAsRead('appknox')}`,
         () => new HttpResponse(null, { status: 204 })
       )
     );
 
-    await expect(NotificationService.markAllAsRead()).resolves.not.toThrow();
+    await expect(NotificationService.markAllAsRead('appknox')).resolves.not.toThrow();
+  });
+});
+
+describe('NotificationService across products', () => {
+  it('reads store monitoring notifications from their own path', async () => {
+    server.use(
+      http.get(`*/${NotificationEndpoints.list('storeknox')}`, () =>
+        HttpResponse.json({ count: 1, next: null, previous: null, results: [notification] })
+      )
+    );
+
+    await expect(
+      NotificationService.getNotifications('storeknox', { limit: 7, offset: 0, has_read: false })
+    ).resolves.toMatchObject({ count: 1, items: [{ id: notification.id }] });
+  });
+
+  it('names a different path for each product', () => {
+    expect(NotificationEndpoints.list('appknox')).not.toBe(NotificationEndpoints.list('storeknox'));
   });
 });
