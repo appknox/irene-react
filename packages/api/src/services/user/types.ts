@@ -21,6 +21,7 @@ export interface ApiUserAttributes {
   'is-trial'?: boolean;
   'can-disable-mfa'?: boolean;
   'freshchat-hash'?: string;
+  'socket-id'?: string;
 }
 
 /** How the endpoint wraps the account: the id beside the attributes. */
@@ -51,4 +52,5 @@ export interface ApiUser {
   mfa_method: ApiUserMfaMethod | null;
   can_disable_mfa: boolean;
   freshchat_hash: string | null;
+  socket_id: string | null;
 }

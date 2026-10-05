@@ -11,6 +11,9 @@ const UNMEASURED = [
   ...coverageConfigDefaults.exclude,
   '**/routeTree.gen.ts',
   '**/tests/**',
+
+  /* The harness a package ships for other packages' tests, same as `tests/`. */
+  '**/src/testing/**',
   '**/*.stories.tsx',
   '**/vite/**',
 

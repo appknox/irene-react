@@ -19,6 +19,8 @@
     "@irene/config": "workspace:*",
     "@irene/constants": "workspace:*",
     "@irene/enums": "workspace:*",
+    "@irene/websocket": "workspace:*",
+    "@normy/react-query": "^0.21.0",
     "@irene/translations": "workspace:*",
     "@irene/ui": "workspace:*",
     "@tanem/react-nprogress": "^7.1.3",

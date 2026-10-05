@@ -3,13 +3,29 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
 
+import {
+  clearWebsocketSignals,
+  createFakeWebsocketTransport,
+  releaseAllDeviceSessions,
+  setWebsocketTransport,
+} from '@irene/websocket/testing';
+
 import { queryClient } from '@irene/api/query-client';
 import { configurationStore } from '@irene/api/stores/configuration';
 import { setLocale } from '@irene/translations/intl';
 import { DEFAULT_LOCALE } from '@irene/translations/locale';
 import { akNotify } from '@irene/ui/notify';
 
+import { uploadAppStore } from '@/features/upload-app/store';
 import { server } from '@tests/server';
+
+/**
+ * The transport every test's connection opens through.
+ *
+ * A signed-in page opens one on render, and a real one would reach the socket
+ * host. Tests that are about websocket play events through this.
+ */
+export const websocketTransport = createFakeWebsocketTransport();
 
 /*
   jsdom has no layout, so it implements no scrolling. The router calls scrollTo
@@ -77,8 +93,16 @@ const reset = () => {
   // Replaces rather than merges, so the store goes back to unsettled with its actions intact.
   configurationStore.setState(configurationStore.getInitialState(), true);
 
+  // A popover left open by one file would swallow the next file's click to open it.
+  uploadAppStore.setState(uploadAppStore.getInitialState(), true);
+
   // The cache is a module singleton, so an answer from one file would be read by the next.
   queryClient.clear();
+
+  // A connection opens on every signed-in page, and a real one would reach the socket host.
+  setWebsocketTransport(websocketTransport);
+  clearWebsocketSignals();
+  void releaseAllDeviceSessions();
 };
 
 // Modules read config at import, so the tiers must exist before they load.
