@@ -9,6 +9,8 @@ import { ProfileMenu } from './profile-menu';
 interface TopNavProps {
   username: string;
   email: string;
+  showNotifications?: boolean;
+  actions?: ReactNode;
   children?: ReactNode;
 }
 
@@ -21,21 +23,36 @@ interface TopNavProps {
  *
  * @param props.username - The signed-in account's name.
  * @param props.email - The address it signed in with.
+ * @param props.showNotifications - Whether to offer the bell, which not every product has.
+ * @param props.actions - The product's own controls, beside the knowledge base.
  * @param props.children - The product's own controls, laid out from the left.
  */
-export function TopNav({ username, email, children }: Readonly<TopNavProps>) {
+export function TopNav({
+  username,
+  email,
+  showNotifications = true,
+  actions,
+  children,
+}: Readonly<TopNavProps>) {
   return (
-    <AkAppbar color="default" elevation className="h-14 shrink-0 gap-6 py-2.25" data-test-top-nav>
-      <div className="flex flex-1 items-stretch justify-between gap-6 self-stretch">
-        <div className="flex items-center gap-3.5">{children}</div>
+    <AkAppbar
+      color="default"
+      elevation
+      className="h-14 shrink-0 gap-2.75 py-2.25"
+      data-test-top-nav
+    >
+      <div className="flex flex-1 items-stretch justify-between gap-2.75 self-stretch">
+        <div className="flex items-center gap-2.75">{children}</div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.75">
+          {actions}
+
           <KnowledgeBase />
         </div>
       </div>
 
-      <div className="flex items-center gap-6 self-stretch">
-        <NotificationsBell />
+      <div className="flex items-center gap-2.75 self-stretch">
+        {showNotifications && <NotificationsBell />}
 
         <ProfileMenu username={username} email={email} />
       </div>

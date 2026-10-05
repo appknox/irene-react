@@ -64,6 +64,14 @@ describe('ReportLayout', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('renders no notification bell on a reporting page', async () => {
+    await openReports();
+
+    await screen.findByRole('link', { name: akMT('reportModule.generateReport') });
+
+    expect(document.querySelector('[data-test-notifications-bell]')).not.toBeInTheDocument();
+  });
+
   it('opens at the width the navigation was left at in another product', async () => {
     window.localStorage.setItem('irene:sidebar-state', 'expanded');
 

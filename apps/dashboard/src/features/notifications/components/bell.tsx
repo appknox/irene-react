@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { akMT } from '@irene/translations/intl';
 import { AkIcon } from '@irene/ui/ak-icon';
+import { AkIconButton } from '@irene/ui/ak-icon-button';
 import { AkPopover, AkPopoverContent, AkPopoverTrigger } from '@irene/ui/ak-popover';
 
 import { unreadNotificationsOptions } from '@/features/notifications/queries/notification';
@@ -35,31 +36,32 @@ export function NotificationsBell() {
   return (
     <AkPopover open={isOpen} onOpenChange={handleOpenNotifPopover}>
       <AkPopoverTrigger asChild>
-        <button
-          type="button"
-          className="flex items-center relative cursor-pointer text-foreground "
+        <AkIconButton
           title={akMT('notifications')}
           aria-label={akMT('notifications')}
           data-test-notifications-bell
         >
-          <AkIcon name="material-symbols:notifications" className="size-5.25" />
+          {/* The dot is placed against the icon, so the button's padding does not move it. */}
+          <span className="relative flex">
+            <AkIcon name="material-symbols:notifications" />
 
-          {unreadCount > 0 && (
-            <span
-              className={`
-                absolute -top-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background
-                bg-danger
-              `}
-              data-test-notifications-unread-dot
-            />
-          )}
-        </button>
+            {unreadCount > 0 && (
+              <span
+                className={`
+                  absolute -top-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background
+                  bg-danger
+                `}
+                data-test-notifications-unread-dot
+              />
+            )}
+          </span>
+        </AkIconButton>
       </AkPopoverTrigger>
 
       <AkPopoverContent
         arrow
         align="end"
-        sideOffset={10}
+        sideOffset={0}
         className="w-122.5 border-border p-0 shadow-9"
       >
         <NotificationsDropdown onNavigate={() => setIsOpen(false)} />

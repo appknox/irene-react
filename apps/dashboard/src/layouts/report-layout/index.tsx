@@ -11,7 +11,8 @@ import { buildReportNavItems } from './nav-items';
  * The layout every reporting page sits in.
  *
  * Reporting is its own product: it renders the shared navigation with its own
- * items, and the switcher leads back to the dashboard.
+ * items, and the switcher leads back to the dashboard. It keeps no
+ * notifications of its own, so the bar carries no bell.
  */
 export function ReportLayout() {
   const { isCollapsed, toggle } = useSidebarState();
@@ -22,7 +23,11 @@ export function ReportLayout() {
       <SideNav items={buildReportNavItems()} isCollapsed={isCollapsed} onSidebarToggle={toggle} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopNav username={user?.username ?? ''} email={user?.email ?? ''} />
+        <TopNav
+          username={user?.username ?? ''}
+          email={user?.email ?? ''}
+          showNotifications={false}
+        />
 
         <main className="flex-1 overflow-y-auto bg-background-subtle" data-test-report-main>
           <Outlet />
