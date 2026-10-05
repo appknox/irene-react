@@ -1,4 +1,4 @@
-import { Link, useRouterState } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import { Fragment, useState, type ComponentType, type SVGProps } from 'react';
 
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
@@ -12,12 +12,12 @@ import StoreknoxLogo from '@irene/ui/svgs/sk-icon.svg?react';
 
 import {
   buildProductFeatures,
-  getProductFeatureIdForPath,
   type ProductFeature,
   type ProductFeatureId,
 } from '@/features/dashboard/utils/product-features';
 
 import { useOrganization } from '@/hooks/use-organization';
+import { useProductFeatureId } from '@/hooks/use-product-feature-id';
 import { useServerConfiguration } from '@/hooks/use-server-configuration';
 import { useWhitelabel } from '@/hooks/use-whitelabel';
 import { closeFreshchat } from '@/scripts/freshchat';
@@ -49,9 +49,7 @@ const PRODUCT_LOGOS: Partial<Record<ProductFeatureId, ComponentType<SVGProps<SVG
  */
 export function ProductSwitcher({ isCollapsed, className }: Readonly<ProductSwitcherProps>) {
   /* The product being shown is left out: there is nothing to switch to in it. */
-  const currentProduct = useRouterState({
-    select: (state) => getProductFeatureIdForPath(state.location.pathname),
-  });
+  const currentProduct = useProductFeatureId();
 
   const [isOpen, setIsOpen] = useState(false);
   const { isEnterprise } = useServerConfiguration();
@@ -83,16 +81,16 @@ export function ProductSwitcher({ isCollapsed, className }: Readonly<ProductSwit
           <AkIcon name="material-symbols:apps" className="size-5 shrink-0 text-foreground" />
 
           {!isCollapsed && (
-            <AkTypography tag="span" variant="body2" className="flex-1 text-left" noWrap>
-              {akMT('appSwitcher')}
-            </AkTypography>
-          )}
+            <Fragment>
+              <AkTypography tag="span" variant="body2" className="flex-1 text-left" noWrap>
+                {akMT('appSwitcher')}
+              </AkTypography>
 
-          {!isCollapsed && (
-            <AkIcon
-              name="material-symbols:chevron-right"
-              className="size-5 shrink-0 text-foreground"
-            />
+              <AkIcon
+                name="material-symbols:chevron-right"
+                className="size-5 shrink-0 text-foreground"
+              />
+            </Fragment>
           )}
         </button>
       </AkPopoverTrigger>

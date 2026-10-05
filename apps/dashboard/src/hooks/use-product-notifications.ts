@@ -1,7 +1,5 @@
-import { useRouterState } from '@tanstack/react-router';
-
-import { getProductFeatureIdForPath } from '@/features/dashboard/utils/product-features';
 import type { ApiNotificationProduct } from '@irene/api/services/notification';
+import { useProductFeatureId } from '@/hooks/use-product-feature-id';
 
 /**
  * Whose notifications the bell reads: the product the page being shown belongs to.
@@ -13,8 +11,7 @@ import type { ApiNotificationProduct } from '@irene/api/services/notification';
  * @returns The product to read notifications for.
  */
 export function useProductNotifications(): ApiNotificationProduct {
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const product = getProductFeatureIdForPath(pathname);
+  const product = useProductFeatureId();
 
   return product === 'storeknox' ? 'storeknox' : 'appknox';
 }
