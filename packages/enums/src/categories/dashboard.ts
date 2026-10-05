@@ -351,6 +351,11 @@ export const DASHBOARD_ENUMS = {
     UPLOAD: 0,
     STORE: 1,
     SCM: 2,
+    DEVKNOX: 3,
+    DASHBOARD: 4,
+    SDK: 5,
+    API: 6,
+    OFFSEC: 7,
   },
 
   SUBMISSION_STATUS: {

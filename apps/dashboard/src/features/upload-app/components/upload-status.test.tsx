@@ -46,10 +46,10 @@ const serverHasUploads = (submissions: object[]) => {
 };
 
 /** Opens a signed-in page and waits for the bar to have read the uploads. */
-const openPageWithUploads = async (submissions: object[]) => {
+const openPageWithUploads = async (submissions: object[], route = '/dashboard/projects') => {
   serverHasUploads(submissions);
 
-  renderAtRoute('/dashboard/projects');
+  renderAtRoute(route);
 
   await screen.findByText(akMT('startNewScan'));
 };
@@ -342,5 +342,110 @@ describe('UploadStatus', () => {
     raiseWebsocketSignal('SubmissionCounter');
 
     await waitFor(() => expect(uploadCounts()[0]).toHaveTextContent('02'));
+  });
+
+  describe('between the two queues an upload can be in', () => {
+    const OFFENSIVE_SECURITY_ROUTE = '/dashboard/offensive-security';
+
+    /** An offensive-security upload the server is still validating. */
+    const buildOffsecUploadInFlight = (overrides = {}) =>
+      buildUploadInFlight({ source: ENUMS.SUBMISSION_SOURCE.OFFSEC, ...overrides });
+
+    /** Pushes an upload the server has just created. */
+    const serverCreates = (submission: object) =>
+      serverSends(WEBSOCKET_EVENTS.modelCreated, {
+        model_name: 'submission',
+        data: tagRecordForCaching('submission', submission),
+      });
+
+    it('omits a pushed offensive security upload from the dashboard list', async () => {
+      const existing = buildUploadInFlight();
+
+      await openPageWithUploads([existing]);
+      await openStatusPopover();
+
+      await waitFor(() => expect(uploadCounts()[0]).toHaveTextContent('01'));
+
+      /* The list endpoint is taken away, so only a pushed record can add a row. */
+      server.use(http.get(LIST_URL, () => HttpResponse.error()));
+
+      serverCreates(
+        buildOffsecUploadInFlight({
+          id: existing.id + 1,
+          app_data: buildSubmissionAppData({ name: 'An Attack Run' }),
+        })
+      );
+
+      /*
+        Pushed alongside it and belonging to this list, so its row arriving is
+        what says the other one was left out rather than still on its way.
+      */
+      serverCreates(
+        buildUploadInFlight({
+          id: existing.id + 2,
+          app_data: buildSubmissionAppData({ name: 'A Scan Upload' }),
+        })
+      );
+
+      expect(await screen.findByText('A Scan Upload')).toBeInTheDocument();
+
+      expect(screen.queryByText('An Attack Run')).not.toBeInTheDocument();
+      expect(uploadCounts()[0]).toHaveTextContent('02');
+    });
+
+    it('adds a pushed offensive security upload to the offensive security list', async () => {
+      mockOrganizationFeatures({ offensive_security: true });
+
+      const existing = buildOffsecUploadInFlight();
+
+      await openPageWithUploads([existing], OFFENSIVE_SECURITY_ROUTE);
+      await openStatusPopover();
+
+      await waitFor(() => expect(uploadCounts()[0]).toHaveTextContent('01'));
+
+      server.use(http.get(LIST_URL, () => HttpResponse.error()));
+
+      serverCreates(
+        buildOffsecUploadInFlight({
+          id: existing.id + 1,
+          app_data: buildSubmissionAppData({ name: 'An Attack Run' }),
+        })
+      );
+
+      expect(await screen.findByText('An Attack Run')).toBeInTheDocument();
+      await waitFor(() => expect(uploadCounts()[0]).toHaveTextContent('02'));
+    });
+
+    it('omits a pushed dashboard upload from the offensive security list', async () => {
+      mockOrganizationFeatures({ offensive_security: true });
+
+      const existing = buildOffsecUploadInFlight();
+
+      await openPageWithUploads([existing], OFFENSIVE_SECURITY_ROUTE);
+      await openStatusPopover();
+
+      await waitFor(() => expect(uploadCounts()[0]).toHaveTextContent('01'));
+
+      server.use(http.get(LIST_URL, () => HttpResponse.error()));
+
+      serverCreates(
+        buildUploadInFlight({
+          id: existing.id + 1,
+          app_data: buildSubmissionAppData({ name: 'A Scan Upload' }),
+        })
+      );
+
+      serverCreates(
+        buildOffsecUploadInFlight({
+          id: existing.id + 2,
+          app_data: buildSubmissionAppData({ name: 'An Attack Run' }),
+        })
+      );
+
+      expect(await screen.findByText('An Attack Run')).toBeInTheDocument();
+
+      expect(screen.queryByText('A Scan Upload')).not.toBeInTheDocument();
+      expect(uploadCounts()[0]).toHaveTextContent('02');
+    });
   });
 });

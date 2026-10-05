@@ -84,6 +84,23 @@ export function uploadOutcome(submission: ApiSubmission): UploadOutcome {
 }
 
 /**
+ * Whether an upload belongs to the list being shown.
+ *
+ * The two products list their uploads separately, and the server filters its
+ * answer accordingly. A pushed upload arrives unfiltered, so it is checked
+ * here against the list it would be added to.
+ *
+ * @param submission - The upload as the server reported it.
+ * @param isOffsec - Whether the list being shown is the offensive-security one.
+ * @returns Whether that list is where this upload goes.
+ */
+export function isUploadInQueue(submission: ApiSubmission, isOffsec?: boolean) {
+  const isOffsecUpload = submission.source === ENUMS.SUBMISSION_SOURCE.OFFSEC;
+
+  return isOffsecUpload === Boolean(isOffsec);
+}
+
+/**
  * How an outcome is shown: what it is called, and the icon and colour for it.
  *
  * @param outcome - Whether the upload failed, finished, or is still running.

@@ -12,7 +12,8 @@ import type { ApiSubmission } from '@irene/api/services/submission';
 
 import { submissionKeys, uploadsInFlightOptions } from '@/features/upload-app/queries/submission';
 import { useUploadAppStore } from '@/features/upload-app/store';
-import { buildUploadRows, countUploadOutcomes } from '@/features/upload-app/utils';
+import { buildUploadRows, countUploadOutcomes, isUploadInQueue } from '@/features/upload-app/utils';
+import { useProductFeatureId } from '@/hooks/use-product-feature-id';
 
 import { UploadRow } from './upload-row';
 import { UploadStatusCounts } from './upload-status-counts';
@@ -29,13 +30,14 @@ const SUBMISSION_APPEARS_AFTER_MS = 300;
 export function UploadStatus() {
   const queryClient = useQueryClient();
   const { uploads, shouldOpenUploadList, setShouldOpenUploadList } = useUploadAppStore();
+  const isOffsec = useProductFeatureId() === 'offensive-security';
 
   const [wsSubmissionRecords, setWsSubmissionRecords] = useState(
     new Map<ApiSubmission['id'], ApiSubmission>()
   );
 
   const { data: submissionResponse, refetch: refetchSubmissions } = useQuery(
-    uploadsInFlightOptions(queryClient)
+    uploadsInFlightOptions(queryClient, isOffsec)
   );
 
   const submissions = submissionResponse?.items ?? [];
@@ -47,28 +49,32 @@ export function UploadStatus() {
   useWebsocketSignal('SubmissionCounter', refetchSubmissions);
 
   /* The server sends the whole submission when it creates one, so take it in. */
-  useWebsocketRecord('submission', (submission: ApiSubmission) =>
-    setWsSubmissionRecords((received) => new Map(received).set(submission.id, submission))
-  );
+  useWebsocketRecord('submission', (submission: ApiSubmission) => {
+    if (isUploadInQueue(submission, isOffsec)) {
+      setWsSubmissionRecords((received) => new Map(received).set(submission.id, submission));
+    }
+  });
 
-  // Used to ensure that there's a slight delay between when the upload row
-  // leaves and when the submission record is added to the popover.
   useEffect(() => {
+    // Used to ensure that there's a slight delay between when the upload row
+    // leaves and when the submission record is added to the popover.
     if (wsSubmissionRecords.size === 0) {
       return;
     }
 
     // Appends the websocket submission to the list in the query client.
     const timer = setTimeout(() => {
+      const queryKey = submissionKeys.inFlight(isOffsec);
+
       wsSubmissionRecords.forEach((submission) =>
-        prependRecordToPage(queryClient, submissionKeys.inFlight(), 'submission', submission)
+        prependRecordToPage(queryClient, queryKey, 'submission', submission)
       );
 
       setWsSubmissionRecords(new Map());
     }, SUBMISSION_APPEARS_AFTER_MS);
 
     return () => clearTimeout(timer);
-  }, [wsSubmissionRecords, queryClient]);
+  }, [wsSubmissionRecords, queryClient, isOffsec]);
 
   /*
     Close the popover once there is nothing to show. Without this it would open
@@ -102,7 +108,7 @@ export function UploadStatus() {
             <AkPopoverContent
               arrow
               align="center"
-              className="w-105 border-neutral-100 p-0 shadow-9"
+              className="w-107 border-neutral-100 p-0 shadow-9"
               data-test-upload-status-popover
             >
               <div className="flex items-center justify-between p-3.5">

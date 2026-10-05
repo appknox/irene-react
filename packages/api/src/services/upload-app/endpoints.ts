@@ -16,4 +16,8 @@ export const UploadAppEndpoints = {
   /** The same, for an offensive-security upload, which is a separate queue. */
   offsecUpload: (organizationId: number | string) =>
     `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/offsec/upload_app` as const,
+
+  /** Where an offensive-security app is uploaded from a store listing. */
+  offsecUploadFromStore: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/offsec/upload_app_url` as const,
 };

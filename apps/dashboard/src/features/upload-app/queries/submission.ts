@@ -11,10 +11,18 @@ export const UPLOADS_IN_FLIGHT_LIMIT = 20;
 /** An upload as the popover holds it, tagged so the server can update it in place. */
 type CachedUpload = ApiTaggedRecord<ApiSubmission>;
 
-/** The cache keys for the account's uploads. */
+/**
+ * The cache keys for the account's uploads.
+ *
+ * The offensive-security queue is listed separately from the rest, so it is
+ * held under a key of its own rather than sharing one list with them.
+ */
 export const submissionKeys = {
   all: () => ['submission'] as const,
-  inFlight: () => [...submissionKeys.all(), 'in-flight'] as const,
+  inFlight: (isOffsec?: boolean) =>
+    isOffsec
+      ? ([...submissionKeys.all(), 'in-flight', 'offsec'] as const)
+      : ([...submissionKeys.all(), 'in-flight'] as const),
 };
 
 /**
@@ -49,21 +57,23 @@ function withUploadsAlreadyShown(
  * without this query running again.
  *
  * @param queryClient - The cache, read to keep what is already on screen.
+ * @param isOffsec - Whether to read the offensive-security queue instead of the rest.
  * @returns Query options resolving to the uploads to show.
  */
-export const uploadsInFlightOptions = (queryClient: QueryClient) =>
+export const uploadsInFlightOptions = (queryClient: QueryClient, isOffsec?: boolean) =>
   queryOptions({
-    queryKey: submissionKeys.inFlight(),
+    queryKey: submissionKeys.inFlight(isOffsec),
     queryFn: async () => {
       const submissions = await SubmissionService.getSubmissions({
         limit: UPLOADS_IN_FLIGHT_LIMIT,
         offset: 0,
         status: ENUMS.SUBMISSION_STATUS.VALIDATING,
+        ...(isOffsec ? { offsec: true } : {}),
       });
 
       // Appends the validating submissions to the list of submissions already in the popover.
       return withUploadsAlreadyShown(
-        queryClient.getQueryData<ApiPage<CachedUpload>>(submissionKeys.inFlight()),
+        queryClient.getQueryData<ApiPage<CachedUpload>>(submissionKeys.inFlight(isOffsec)),
         submissions
       );
     },

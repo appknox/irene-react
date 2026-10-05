@@ -49,22 +49,34 @@ function _validateStoreLink(link: string) {
   return akMT('uploadAppModule.unsupportedStoreLink');
 }
 
+/** What is wrong with a link that only has to be a URL, if anything. */
+function _validateAnyLink(link: string) {
+  if (link === '') {
+    return akMT('uploadAppModule.blankLink');
+  }
+
+  return _readUrl(link) ? undefined : akMT('uploadAppModule.invalidLink');
+}
+
 /**
- * The store listing to fetch an app from. Built per render, so its messages
- * follow the active locale.
+ * The link to fetch an app from. Built per render, so its messages follow the
+ * active locale.
  *
- * A link has to name a store this client knows, and then name an app within
- * it, because the server fetches the app from the listing the link points at.
+ * A store link has to name a store this client knows and then an app within
+ * it, because the server fetches the app from the listing it points at. An
+ * offensive-security run takes the app from wherever the link leads, so there
+ * only has to be a URL there.
  *
+ * @param isOffsec - Whether the link is for an offensive-security run.
  * @returns The schema.
  */
-export const buildStoreLinkSchema = () =>
+export const buildStoreLinkSchema = (isOffsec?: boolean) =>
   z.object({
     url: z
       .string()
       .trim()
       .superRefine((link, context) => {
-        const problem = _validateStoreLink(link);
+        const problem = isOffsec ? _validateAnyLink(link) : _validateStoreLink(link);
 
         if (problem) {
           context.addIssue({ code: 'custom', message: problem });

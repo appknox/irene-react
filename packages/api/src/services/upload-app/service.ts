@@ -23,11 +23,18 @@ interface UploadOptions {
   isOffsec?: boolean;
 }
 
-/** Resolves the endpoint to upload an app to. */
-function _resolveUploadeAppEndpoint({ organizationId, isOffsec }: UploadOptions) {
+/** Resolves the endpoint to upload a binary to. */
+function _resolveUploadAppEndpoint({ organizationId, isOffsec }: UploadOptions) {
   return isOffsec
     ? UploadAppEndpoints.offsecUpload(organizationId)
     : UploadAppEndpoints.upload(organizationId);
+}
+
+/** Resolves the endpoint to upload a store listing to. */
+function _resolveStoreUploadEndpoint({ organizationId, isOffsec }: UploadOptions) {
+  return isOffsec
+    ? UploadAppEndpoints.offsecUploadFromStore(organizationId)
+    : UploadAppEndpoints.uploadFromStore(organizationId);
 }
 
 /** Uploads app binaries, in the three steps the server expects. */
@@ -40,7 +47,7 @@ export default class UploadAppService {
    * @returns The URL to upload to, and the key naming the upload.
    */
   public static readonly getPresignedUpload = (options: UploadOptions) =>
-    apiRequest.get<ApiPresignedUpload>(_resolveUploadeAppEndpoint(options));
+    apiRequest.get<ApiPresignedUpload>(_resolveUploadAppEndpoint(options));
 
   /**
    * Uploads the binary itself.
@@ -78,7 +85,7 @@ export default class UploadAppService {
   public static readonly confirmUpload = (
     upload: Pick<ApiPresignedUpload, 'file_key' | 'file_key_signed'>,
     options: UploadOptions
-  ) => apiRequest.post<ApiUploadedApp>(_resolveUploadeAppEndpoint(options), upload);
+  ) => apiRequest.post<ApiUploadedApp>(_resolveUploadAppEndpoint(options), upload);
 
   /**
    * Asks the server to fetch an app from a store, by the link to it.
@@ -88,8 +95,9 @@ export default class UploadAppService {
    *
    * @param url - The store listing to fetch the app from.
    * @param options.organizationId - The organization the app belongs to.
+   * @param options.isOffsec - Whether this joins the offensive-security queue.
    * @returns The upload the server created for it.
    */
-  public static readonly uploadFromStore = (url: string, { organizationId }: UploadOptions) =>
-    apiRequest.post<ApiUploadedAppUrl>(UploadAppEndpoints.uploadFromStore(organizationId), { url });
+  public static readonly uploadFromStore = (url: string, options: UploadOptions) =>
+    apiRequest.post<ApiUploadedAppUrl>(_resolveStoreUploadEndpoint(options), { url });
 }

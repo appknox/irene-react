@@ -4,9 +4,10 @@ import { isPluginEnabled } from '@irene/config';
 
 import { SideNav } from '@/components/side-nav';
 import { TopNav } from '@/components/top-nav';
-import { getProductFeatureIdForPath } from '@/features/dashboard/utils/product-features';
+import { OnboardingGuides } from '@/features/onboarding-guides';
 import { UploadApp } from '@/features/upload-app';
 import { useOrganization } from '@/hooks/use-organization';
+import { useProductFeatureId } from '@/hooks/use-product-feature-id';
 import { useServerConfiguration } from '@/hooks/use-server-configuration';
 import { useSidebarState } from '@/hooks/use-sidebar-state';
 import { useSignedInUser } from '@/hooks/use-signed-in-user';
@@ -33,7 +34,7 @@ export function DashboardLayout() {
   const features = organization.features();
   const upsellStatus = organization.upsellStatus();
 
-  /* The dashboard's own items. Each product's layout builds its own list. */
+  /* The dashboard's own items. Store monitoring is its own product, with its own. */
   const items = buildDashboardNavItems({
     hasPublicApis: features.public_apis,
     hasPrivacy: features.privacy,
@@ -52,22 +53,32 @@ export function DashboardLayout() {
     canAccessPartnerDashboard: organization.canAccessPartnerDashboard(),
   });
 
+  const product = useProductFeatureId();
+
   /*
-    Uploading an app belongs to the VAPT product. The other products render
-    this same layout, and the partner screens sit beside it, so neither offers
-    an upload the account would have nowhere to put.
+    The partner screens share this layout without being a product that can be
+    scanned, so they offer neither an upload nor the walkthroughs.
   */
-  const isVaptProduct =
-    getProductFeatureIdForPath(pathname) === 'appknox' &&
-    !pathname.startsWith(PARTNER_DASHBOARD_PATH);
+  const isPartnerScreen = pathname.startsWith(PARTNER_DASHBOARD_PATH);
+
+  /* Offensive security takes its own uploads, into a queue of its own. */
+  const canUploadApp =
+    !isPartnerScreen && (product === 'appknox' || product === 'offensive-security');
+
+  /* Offensive security has no walkthroughs recorded, so it does not list any. */
+  const hasOnboardingGuides = !isPartnerScreen && product === 'appknox';
 
   return (
     <div className="flex h-screen w-full overflow-hidden" data-test-dashboard-layout>
       <SideNav items={items} isCollapsed={isCollapsed} onSidebarToggle={toggle} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopNav username={user?.username ?? ''} email={user?.email ?? ''}>
-          {isVaptProduct && <UploadApp />}
+        <TopNav
+          username={user?.username ?? ''}
+          email={user?.email ?? ''}
+          actions={hasOnboardingGuides && <OnboardingGuides product="appknox" />}
+        >
+          {canUploadApp && <UploadApp />}
         </TopNav>
 
         <main className="flex-1 overflow-y-auto bg-background-subtle" data-test-dashboard-main>

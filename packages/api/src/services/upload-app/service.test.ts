@@ -13,6 +13,11 @@ const ORGANIZATION_ID = 42;
 
 const uploadUrl = buildAPITestURL(UploadAppEndpoints.upload(ORGANIZATION_ID));
 const offsecUploadUrl = buildAPITestURL(UploadAppEndpoints.offsecUpload(ORGANIZATION_ID));
+const storeUploadUrl = buildAPITestURL(UploadAppEndpoints.uploadFromStore(ORGANIZATION_ID));
+
+const offsecStoreUploadUrl = buildAPITestURL(
+  UploadAppEndpoints.offsecUploadFromStore(ORGANIZATION_ID)
+);
 
 const buildBinary = () =>
   new File(['an apk'], 'app.apk', { type: 'application/vnd.android.package-archive' });
@@ -220,5 +225,38 @@ describe('UploadAppService.confirmUpload', () => {
     ).catch((reason: unknown) => reason);
 
     expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.TOO_MANY_REQUESTS);
+  });
+});
+
+describe('UploadAppService.uploadFromStore', () => {
+  const STORE_LINK = 'https://play.google.com/store/apps/details?id=com.appknox.mfva';
+
+  it('sends the link for the server to fetch the app from', async () => {
+    server.use(
+      http.post(storeUploadUrl, async ({ request }) => {
+        const body = (await request.json()) as { url: string };
+
+        return HttpResponse.json({ id: 7, url: body.url }, { status: HTTP_STATUS_CODES.CREATED });
+      })
+    );
+
+    await expect(
+      UploadAppService.uploadFromStore(STORE_LINK, { organizationId: ORGANIZATION_ID })
+    ).resolves.toEqual({ id: 7, url: STORE_LINK });
+  });
+
+  it('posts to the offensive-security path instead when the upload is for it', async () => {
+    server.use(
+      http.post(offsecStoreUploadUrl, () =>
+        HttpResponse.json({ id: 8, url: STORE_LINK }, { status: HTTP_STATUS_CODES.CREATED })
+      )
+    );
+
+    await expect(
+      UploadAppService.uploadFromStore(STORE_LINK, {
+        organizationId: ORGANIZATION_ID,
+        isOffsec: true,
+      })
+    ).resolves.toEqual({ id: 8, url: STORE_LINK });
   });
 });

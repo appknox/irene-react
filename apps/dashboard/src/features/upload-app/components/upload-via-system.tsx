@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Fragment, useRef, type ChangeEvent } from 'react';
 
 import { getApiErrorStatus } from '@irene/api/utils/errors';
@@ -14,8 +14,10 @@ import {
   uploadAppBinary,
 } from '@/features/upload-app/actions/upload';
 
+import { submissionKeys } from '@/features/upload-app/queries/submission';
 import { useUploadAppStore } from '@/features/upload-app/store';
 import { useOrganization } from '@/hooks/use-organization';
+import { useProductFeatureId } from '@/hooks/use-product-feature-id';
 
 /** What the file picker offers, as the input wants it. */
 const ACCEPTED_EXTENSIONS = UPLOADABLE_EXTENSIONS.map((extension) => `.${extension}`).join(',');
@@ -29,8 +31,10 @@ const ACCEPTED_EXTENSIONS = UPLOADABLE_EXTENSIONS.map((extension) => `.${extensi
  */
 export function UploadViaSystem() {
   const fileInput = useRef<HTMLInputElement>(null);
-  const organizationId = useOrganization().selected?.id;
+  const queryClient = useQueryClient();
+  const organizationId = useOrganization().selectedId();
   const uploadAppStore = useUploadAppStore();
+  const isOffsec = useProductFeatureId() === 'offensive-security';
 
   // Upload the file to the server
   const { mutate: uploadFile } = useMutation({
@@ -40,7 +44,8 @@ export function UploadViaSystem() {
       try {
         await uploadAppBinary({
           file,
-          organizationId: organizationId ?? '',
+          organizationId,
+          isOffsec,
           onProgress: (progress) => uploadAppStore.setUploadProgress(uploadId, progress),
         });
       } catch (error) {
@@ -52,8 +57,15 @@ export function UploadViaSystem() {
       return uploadId;
     },
 
-    onSuccess: (uploadId) => {
+    onSuccess: async (uploadId) => {
       akNotify.success(akMT('fileUploadedSuccessfully'));
+
+      /*
+        Read the list again before the row goes, so the submission this upload
+        became is already in it. Removing the row first empties the list for a
+        moment, which closes the popover the upload itself opened.
+      */
+      await queryClient.refetchQueries({ queryKey: submissionKeys.inFlight(isOffsec) });
       uploadAppStore.finishUpload(uploadId);
     },
 
@@ -82,7 +94,7 @@ export function UploadViaSystem() {
       <AkButton
         variant="filled"
         color="primary"
-        leftIcon={<AkIcon name="material-symbols:cloud-upload" className="size-4" />}
+        leftIcon={<AkIcon name="material-symbols:cloud-upload" className="size-5.25" />}
         onClick={() => fileInput.current?.click()}
         data-test-upload-via-system
       >

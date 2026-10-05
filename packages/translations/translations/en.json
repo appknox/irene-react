@@ -3151,7 +3151,10 @@
     "stores": "Google Play Store, Apple App Store",
     "linkUploadPopupHeader": "Upload using a link",
     "linkInputLabel": "Add a link",
-    "validURLFormatTitle": "Valid URL Format :"
+    "validURLFormatTitle": "Valid URL Format :",
+    "blankLink": "URL is required",
+    "invalidLink": "Please enter a valid URL",
+    "offsecLinkUploadStarted": "Offsec app upload via URL initiated!"
   },
   "uploadCount": "Upload Count",
   "uploadStatus": "Upload Status",

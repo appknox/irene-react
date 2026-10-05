@@ -22,6 +22,41 @@ describe('DashboardLayout', () => {
     expect(await screen.findByText(akMT('startNewScan'))).toBeInTheDocument();
   });
 
+  it('shows the dashboard items on a VAPT page', async () => {
+    renderAtRoute('/dashboard/projects');
+
+    expect(await screen.findByRole('link', { name: akMT('allProjects') })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: akMT('inventory') })).not.toBeInTheDocument();
+  });
+
+  it('renders the upload section on an offensive security page', async () => {
+    mockOrganizationFeatures({ offensive_security: true });
+
+    renderAtRoute('/dashboard/offensive-security');
+
+    expect(await screen.findByText(akMT('startNewScan'))).toBeInTheDocument();
+  });
+
+  it('renders no onboarding guides on an offensive security page', async () => {
+    mockOrganizationFeatures({ offensive_security: true });
+
+    renderAtRoute('/dashboard/offensive-security');
+
+    await screen.findByText(akMT('startNewScan'));
+
+    expect(
+      screen.queryByRole('button', { name: akMT('onboardingGuides') })
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders the notification bell on a dashboard page', async () => {
+    renderAtRoute('/dashboard/projects');
+
+    await screen.findByText(akMT('startNewScan'));
+
+    expect(document.querySelector('[data-test-notifications-bell]')).toBeInTheDocument();
+  });
+
   it.each([
     ['store monitoring', '/dashboard/storeknox/inventory/app-list'],
     ['the partner screens', '/partner/clients'],

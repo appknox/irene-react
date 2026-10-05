@@ -44,4 +44,5 @@ export interface ApiSubmissionListRequest {
   limit: number;
   offset: number;
   status?: ApiSubmissionStatus;
+  offsec?: true;
 }

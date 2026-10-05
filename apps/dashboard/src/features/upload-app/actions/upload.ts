@@ -4,6 +4,7 @@ import { UploadAppService } from '@irene/api/services/upload-app';
 interface UploadAppOptions {
   file: File;
   organizationId: number | string;
+  isOffsec?: boolean;
   onProgress?: (percent: number) => void;
 }
 
@@ -20,12 +21,9 @@ export const UPLOADABLE_EXTENSIONS = ['apk', 'aab', 'ipa'] as const;
  * @returns Whether it is a kind of app the server accepts.
  */
 export function isUploadableApp(file: File) {
-  const extension = file.name
-    .toLowerCase()
-    .split('.')
-    .pop() as (typeof UPLOADABLE_EXTENSIONS)[number];
+  const extension = file.name.toLowerCase().split('.').pop();
 
-  return UPLOADABLE_EXTENSIONS.includes(extension);
+  return UPLOADABLE_EXTENSIONS.includes(extension as (typeof UPLOADABLE_EXTENSIONS)[number]);
 }
 
 /**
@@ -34,18 +32,27 @@ export function isUploadableApp(file: File) {
  *
  * The POST creates the submission that the status popover and the socket read.
  *
+ * Both requests to our own server name the same queue, so the binary is
+ * confirmed into the queue it was granted a URL for.
+ *
  * @param options.file - The binary to upload.
  * @param options.organizationId - The organization the app belongs to.
+ * @param options.isOffsec - Whether this joins the offensive-security queue.
  * @param options.onProgress - Called with how much of the file has gone.
  * @returns The submission the server created.
  */
-export async function uploadAppBinary({ file, organizationId, onProgress }: UploadAppOptions) {
-  const presignedUpload = await UploadAppService.getPresignedUpload({ organizationId });
+export async function uploadAppBinary({
+  file,
+  organizationId,
+  isOffsec,
+  onProgress,
+}: UploadAppOptions) {
+  const presignedUpload = await UploadAppService.getPresignedUpload({ organizationId, isOffsec });
 
   await UploadAppService.uploadBinary({ url: presignedUpload.url, file, onProgress });
 
   return UploadAppService.confirmUpload(
     { file_key: presignedUpload.file_key, file_key_signed: presignedUpload.file_key_signed },
-    { organizationId }
+    { organizationId, isOffsec }
   );
 }
