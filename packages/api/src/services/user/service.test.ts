@@ -56,6 +56,8 @@ describe('UserService.getUser', () => {
 
 describe('the timeout on the account', () => {
   it('abandons the request after 30 seconds, so a hung server does not hold the page', async () => {
+    server.use(http.get(detailUrl(1), () => HttpResponse.json(buildUserResponse(buildUser()))));
+
     const recorder = recordRequestConfigs();
 
     await UserService.getUser(1).catch(() => undefined);

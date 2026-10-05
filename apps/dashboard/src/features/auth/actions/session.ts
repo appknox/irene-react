@@ -9,6 +9,7 @@ import {
 import { configurationStore } from '@irene/api/stores/configuration';
 import { organizationStore } from '@irene/api/stores/organization';
 import { vulnerabilityStore } from '@irene/api/stores/vulnerability';
+import { closeWebsocketConnection } from '@irene/websocket';
 import type { ApiSessionResponse } from '@irene/api/services/auth';
 
 import { sessionCheckOptions } from '@/features/auth/queries/session';
@@ -48,6 +49,9 @@ export function endSession(queryClient: QueryClient) {
   /* Both widgets hold the account, so they go with the session. */
   destroyFreshchat();
   signOutOfFreshdesk();
+
+  /* The room belongs to the account, so a connection outliving it would carry one account's events into the next. */
+  closeWebsocketConnection();
 
   clearStoredSession();
   queryClient.clear();

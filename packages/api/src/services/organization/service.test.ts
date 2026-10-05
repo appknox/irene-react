@@ -129,6 +129,12 @@ describe('OrganizationService.getStoreknoxOrganization', () => {
 
 describe('the timeout on the organization setup', () => {
   it('abandons the request after 30 seconds, so a hung server does not hold the page', async () => {
+    server.use(
+      http.get(buildAPITestURL(OrganizationEndpoints.list()), () =>
+        HttpResponse.json(buildDrfPage([]))
+      )
+    );
+
     const recorder = recordRequestConfigs();
 
     await OrganizationService.getOrganizations().catch(() => undefined);

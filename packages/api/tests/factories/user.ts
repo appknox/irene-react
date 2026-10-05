@@ -13,6 +13,7 @@ export const buildUser = (overrides: Partial<ApiUser> = {}): ApiUser => ({
   mfa_method: 0,
   can_disable_mfa: true,
   freshchat_hash: faker.string.alphanumeric(32),
+  socket_id: faker.string.uuid(),
   ...overrides,
 });
 
@@ -35,6 +36,7 @@ export const buildUserResponse = (overrides: Partial<ApiUser> = {}): ApiUserResp
         'is-trial': user.is_trial,
         'can-disable-mfa': user.can_disable_mfa,
         'freshchat-hash': user.freshchat_hash ?? undefined,
+        'socket-id': user.socket_id ?? undefined,
       },
     },
   };

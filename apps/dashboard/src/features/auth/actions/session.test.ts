@@ -5,6 +5,7 @@ import { configurationStore } from '@irene/api/stores/configuration';
 import { organizationStore } from '@irene/api/stores/organization';
 import { vulnerabilityStore } from '@irene/api/stores/vulnerability';
 import { getStoredSession } from '@irene/api/utils/session';
+import { getWebsocketConnection, openWebsocketConnection } from '@irene/websocket/testing';
 
 import {
   buildDashboardConfig,
@@ -44,6 +45,16 @@ describe('startSession', () => {
 });
 
 describe('endSession', () => {
+  it('closes the websocket connection, whose room belongs to the account', () => {
+    openWebsocketConnection('a-room');
+
+    expect(getWebsocketConnection()).not.toBeNull();
+
+    endSession(queryClient);
+
+    expect(getWebsocketConnection()).toBeNull();
+  });
+
   it('removes the session from localStorage', () => {
     startSession(queryClient, { token: 'tok3n', user_id: 42 });
 

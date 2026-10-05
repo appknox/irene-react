@@ -11,6 +11,7 @@ import {
 } from '@irene/api/services/auth';
 
 import { ConfigurationEndpoints } from '@irene/api/services/configuration/endpoints';
+import { OidcEndpoints } from '@irene/api/services/oidc/endpoints';
 import { formatWaitTime, rateLimitStore } from '@irene/api/stores/rate-limit';
 import { APPKNOX_SUPPORT_EMAIL, HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
@@ -454,7 +455,15 @@ describe('LoginPage', () => {
     /* A sign-in that succeeds, so the navigation afterwards is what is under test. */
     const signsIn = () => {
       checkReturns({});
-      server.use(http.post(LOGIN_URL, () => HttpResponse.json({ token: 'tok3n', user_id: 42 })));
+
+      server.use(
+        http.post(LOGIN_URL, () => HttpResponse.json({ token: 'tok3n', user_id: 42 })),
+
+        /* One case lands on the OIDC redirect, which validates its token on arrival. */
+        http.post(buildAPITestURL(OidcEndpoints.validate()), () =>
+          HttpResponse.json({ redirect_url: 'https://sso.example.test' })
+        )
+      );
     };
 
     /* Each case signs in from a `/login` URL and names where the router lands. */
