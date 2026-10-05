@@ -1,6 +1,7 @@
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import betterTailwind from 'eslint-plugin-better-tailwindcss';
+import { getDefaultSelectors } from 'eslint-plugin-better-tailwindcss/api/defaults';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import { defineConfig, globalIgnores } from 'eslint/config';
@@ -11,6 +12,20 @@ import tseslint from 'typescript-eslint';
 import jsxSiblingBlankLine from './eslint/rules/jsx-sibling-blank-line.js';
 import maxComponentLines from './eslint/rules/max-component-lines.js';
 import noConditionalMessageId from './eslint/rules/no-conditional-message-id.js';
+
+/*
+  A component that hands classes to a part of itself takes them in an object
+  prop, as `labelProps={{ className: '...' }}`. The plugin reads class and
+  className attributes alone, so those lists are neither wrapped nor checked
+  until the shape is named here.
+*/
+const CLASSNAME_IN_PROPS_OBJECT = [
+  {
+    kind: 'attribute',
+    name: '.*Props$',
+    match: [{ type: 'objectValues', path: '^className$' }],
+  },
+];
 
 const MULTILINE_STATEMENTS = [
   'multiline-const',
@@ -43,6 +58,7 @@ export default defineConfig([
     settings: {
       'better-tailwindcss': {
         entryPoint: 'packages/ui/styles/index.css',
+        selectors: [...getDefaultSelectors(), ...CLASSNAME_IN_PROPS_OBJECT],
       },
     },
     rules: {
