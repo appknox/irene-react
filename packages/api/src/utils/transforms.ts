@@ -46,6 +46,7 @@ export function transformUserResponse({ data }: ApiUserResponse): ApiUser {
     is_trial: Boolean(attributes['is-trial']),
     can_disable_mfa: Boolean(attributes['can-disable-mfa']),
     freshchat_hash: attributes['freshchat-hash'] ?? null,
+    socket_id: attributes['socket-id'] ?? null,
   };
 }
 

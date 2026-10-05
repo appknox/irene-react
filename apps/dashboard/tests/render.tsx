@@ -15,6 +15,7 @@ import { TranslationsProvider } from '@irene/translations/provider';
 import { AkToaster } from '@irene/ui/ak-toaster';
 
 import { BootOverlay } from '@/components/boot-overlay';
+import { NormalizationProvider } from '@/components/normalization-provider';
 import { IRENE_DASHBOARD_ROUTER_DEFAULTS } from '@/router';
 import type { RootRouterContext } from '@/routes/__root';
 
@@ -33,7 +34,9 @@ export function renderWithProviders(ui: ReactNode) {
     queryClient,
     ...render(
       <TranslationsProvider>
-        <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+        <NormalizationProvider queryClient={queryClient}>
+          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+        </NormalizationProvider>
       </TranslationsProvider>,
       RENDER_OPTIONS
     ),
@@ -61,9 +64,11 @@ export function renderWithRouterContext(ui: ReactNode) {
 
   return render(
     <TranslationsProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterContextProvider router={router}>{ui}</RouterContextProvider>
-      </QueryClientProvider>
+      <NormalizationProvider queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <RouterContextProvider router={router}>{ui}</RouterContextProvider>
+        </QueryClientProvider>
+      </NormalizationProvider>
     </TranslationsProvider>,
     RENDER_OPTIONS
   );
@@ -109,13 +114,15 @@ export async function renderAtRoute(
 
   const rendered = render(
     <TranslationsProvider>
-      <QueryClientProvider client={routerContext.queryClient}>
-        <RouterProvider router={router} />
+      <NormalizationProvider queryClient={routerContext.queryClient}>
+        <QueryClientProvider client={routerContext.queryClient}>
+          <RouterProvider router={router} />
 
-        <BootOverlay router={router} />
+          <BootOverlay router={router} />
 
-        <AkToaster />
-      </QueryClientProvider>
+          <AkToaster />
+        </QueryClientProvider>
+      </NormalizationProvider>
     </TranslationsProvider>,
     RENDER_OPTIONS
   );
@@ -124,7 +131,7 @@ export async function renderAtRoute(
     A guard that redirects finishes after the first paint, so let the queue
     drain here rather than having React report it as an update outside a test.
   */
-  await act(async () => undefined);
+  await act(async () => await Promise.resolve(undefined));
 
   return { queryClient: routerContext.queryClient, router, ...rendered };
 }
