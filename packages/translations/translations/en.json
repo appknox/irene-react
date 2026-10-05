@@ -3141,6 +3141,10 @@
   "uploadAnApp": "Upload an App",
   "uploadAppModule": {
     "linkPastePlaceholder": "Paste the link here...",
+    "blankStoreLink": "Url can't be blank",
+    "unsupportedStoreLink": "Only valid Google Play Store or Apple App Store URLs are accepted",
+    "invalidPlayStoreLink": "Playstore url should be valid, the expected format is : https://play.google.com/store/apps/details?id='{package_name}'",
+    "invalidAppStoreLink": "App Store URL should be valid. Expected format: https://apps.apple.com/'{country_code}'/app/'{app_slug}'/id'{app_id}'",
     "viaLink": "Via Link",
     "supportedStores": "Supported Store",
     "stores": "Google Play Store, Apple App Store",
