@@ -2747,6 +2747,7 @@
   },
   "storeknox": {
     "fakeAppsTitle": "Brand Abuse & Fake Apps",
+    "thirdPartyScansTitle": "Third-Party App Risk Assessment",
     "yesIgnoreAndAddToInventory": "Yes, Ignore & Add to Inventory",
     "fakeAppIgnored": "Fake app has been ignored successfully",
     "fakeAppIgnoredAndAddedToInventory": "Fake app has been ignored and added to inventory successfully",

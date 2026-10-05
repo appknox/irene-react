@@ -100,16 +100,26 @@ describe('OrganizationService.getOrganizationMembership', () => {
 });
 
 describe('OrganizationService.getStoreknoxOrganization', () => {
-  it('returns the StoreKnox organization when the deployment has one', async () => {
+  it('returns the first organization the list holds, which is the one in use', async () => {
     const storeknox = buildStoreknoxOrganization();
 
     server.use(
       http.get(buildAPITestURL(OrganizationEndpoints.storeknoxOrganization()), () =>
-        HttpResponse.json(storeknox)
+        HttpResponse.json({ count: 1, next: null, previous: null, results: [storeknox] })
       )
     );
 
     await expect(OrganizationService.getStoreknoxOrganization()).resolves.toEqual(storeknox);
+  });
+
+  it('returns nothing when the account is in no StoreKnox organization', async () => {
+    server.use(
+      http.get(buildAPITestURL(OrganizationEndpoints.storeknoxOrganization()), () =>
+        HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
+      )
+    );
+
+    await expect(OrganizationService.getStoreknoxOrganization()).resolves.toBeNull();
   });
 
   it('rejects when the deployment has no StoreKnox organization', async () => {

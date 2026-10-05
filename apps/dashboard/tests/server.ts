@@ -68,8 +68,9 @@ export const server = setupServer(
     HttpResponse.json(buildVulnerabilityListResponse())
   ),
 
+  /* An account in no StoreKnox organization, which the list reports as empty. */
   http.get(`*/${OrganizationEndpoints.storeknoxOrganization()}`, () =>
-    HttpResponse.json({ detail: 'Not found.' }, { status: 404 })
+    HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
   ),
   http.get(`*/${UserEndpoints.detail('*')}`, () => HttpResponse.json(buildUserResponse())),
 

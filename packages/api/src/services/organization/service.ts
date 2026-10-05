@@ -97,11 +97,19 @@ export default class OrganizationService {
   ) => apiRequest.delete<void>(OrganizationEndpoints.namespace(organizationId, namespaceId));
 
   /**
-   * Fetches the StoreKnox organization.
-   * @returns The StoreKnox organization; rejects on a deployment without one.
+   * Fetches the StoreKnox organization an account belongs to.
+   *
+   * The endpoint lists them, and an account has at most one, so the first is
+   * the one in use.
+   *
+   * @returns The StoreKnox organization, or null when the account is in none.
    */
-  public static readonly getStoreknoxOrganization = () =>
-    apiRequest.get<ApiStoreknoxOrganization>(OrganizationEndpoints.storeknoxOrganization(), {
-      signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS),
-    });
+  public static readonly getStoreknoxOrganization = async () => {
+    const page = await apiRequest.get<ApiPageEnvelope<ApiStoreknoxOrganization>>(
+      OrganizationEndpoints.storeknoxOrganization(),
+      { signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS) }
+    );
+
+    return transformPaginatedResponse(page).items[0] ?? null;
+  };
 }
