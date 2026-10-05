@@ -68,6 +68,14 @@ describe('what the organization is entitled to', () => {
     expect(organization().aiFeatures().reporting).toBe(true);
   });
 
+  it('names the selected id as text, and an empty string before one is selected', () => {
+    expect(organization().selectedId()).toBe('');
+
+    organization().select(buildOrganization({ id: 42 }), buildOrganizationMe());
+
+    expect(organization().selectedId()).toBe('42');
+  });
+
   it('counts the projects, and none before one is selected', () => {
     expect(organization().projectsCount()).toBe(0);
 

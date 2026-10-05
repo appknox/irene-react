@@ -37,6 +37,7 @@ export interface OrganizationUpsellStatus {
  * @property {ApiOrganization} selected - The organization in use, or null before one is chosen.
  * @property {ApiOrganizationMe} me - What this account may do in the selected organization.
  * @property {function} select - Records the organization in use, and the account's standing in it.
+ * @property {function} selectedId - The selected organization's id, empty before one is chosen.
  * @property {function} clear - Forgets both, for signing out.
  * @property {function} features - What the organization is entitled to, all off before one arrives.
  * @property {function} aiFeatures - The AI entitlements, read the same way.
@@ -57,6 +58,7 @@ interface OrganizationStore {
   me: ApiOrganizationMe | null;
   select: (organization: ApiOrganization, me: ApiOrganizationMe) => void;
   clear: () => void;
+  selectedId: () => string;
 
   features: () => ApiOrganizationFeatures;
   aiFeatures: () => ApiOrganizationAiFeatures;
@@ -146,6 +148,7 @@ export const organizationStore = createStore<OrganizationStore>((set, get) => ({
   hasSecurityPermission: () => Boolean(get().me?.has_security_permission),
   canAccessPartnerDashboard: () => Boolean(get().me?.can_access_partner_dashboard),
 
+  selectedId: () => String(get().selected?.id ?? ''),
   billingHidden: () => Boolean(get().selected?.billing_hidden),
   showsSubscription: () => Boolean(get().selected?.show_subscription),
   projectsCount: () => get().selected?.projects_count ?? 0,
