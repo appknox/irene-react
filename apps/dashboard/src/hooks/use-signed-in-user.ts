@@ -15,5 +15,5 @@ export function useSignedInUser() {
   const { session } = useRouteContext({ from: '/_authenticated' });
   const { data } = useQuery(userOptions(session.userId));
 
-  return data;
+  return { ...data, email: data?.email ?? '', username: data?.username ?? '' };
 }

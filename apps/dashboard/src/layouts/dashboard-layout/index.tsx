@@ -1,4 +1,5 @@
 import { Outlet, useRouterState } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
 
 import { isPluginEnabled } from '@irene/config';
 
@@ -24,7 +25,7 @@ const PARTNER_DASHBOARD_PATH = '/partner';
  * The landing page is not one of these. It offers the products an account may
  * open, so it fills the window and carries no navigation into them.
  */
-export function DashboardLayout() {
+export function DashboardLayout({ children }: Readonly<{ children?: ReactNode }>) {
   const { isCollapsed, toggle } = useSidebarState();
   const { isEnterprise } = useServerConfiguration();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -53,20 +54,15 @@ export function DashboardLayout() {
     canAccessPartnerDashboard: organization.canAccessPartnerDashboard(),
   });
 
-  const product = useProductFeatureId();
-
   /*
-    The partner screens share this layout without being a product that can be
-    scanned, so they offer neither an upload nor the walkthroughs.
+  The partner screens share this layout without being a product that can be
+  scanned, so they offer neither an upload nor the walkthroughs.
   */
   const isPartnerScreen = pathname.startsWith(PARTNER_DASHBOARD_PATH);
 
-  /* Offensive security takes its own uploads, into a queue of its own. */
-  const canUploadApp =
-    !isPartnerScreen && (product === 'appknox' || product === 'offensive-security');
-
-  /* Offensive security has no walkthroughs recorded, so it does not list any. */
-  const hasOnboardingGuides = !isPartnerScreen && product === 'appknox';
+  /* Every other product renders a layout of its own, with the bar it needs. */
+  const productId = useProductFeatureId();
+  const isVaptProduct = !isPartnerScreen && productId === 'appknox';
 
   return (
     <div className="flex h-screen w-full overflow-hidden" data-test-dashboard-layout>
@@ -74,14 +70,16 @@ export function DashboardLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopNav
-          username={user?.username ?? ''}
-          email={user?.email ?? ''}
-          actions={hasOnboardingGuides && <OnboardingGuides product="appknox" />}
+          username={user.username}
+          email={user.email}
+          actions={isVaptProduct && <OnboardingGuides product="appknox" />}
         >
-          {canUploadApp && <UploadApp />}
+          {isVaptProduct && <UploadApp />}
         </TopNav>
 
         <main className="flex-1 overflow-y-auto bg-background-subtle" data-test-dashboard-main>
+          {children}
+
           <Outlet />
         </main>
       </div>

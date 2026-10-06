@@ -29,26 +29,6 @@ describe('DashboardLayout', () => {
     expect(screen.queryByRole('link', { name: akMT('inventory') })).not.toBeInTheDocument();
   });
 
-  it('renders the upload section on an offensive security page', async () => {
-    mockOrganizationFeatures({ offensive_security: true });
-
-    renderAtRoute('/dashboard/offensive-security');
-
-    expect(await screen.findByText(akMT('startNewScan'))).toBeInTheDocument();
-  });
-
-  it('renders no onboarding guides on an offensive security page', async () => {
-    mockOrganizationFeatures({ offensive_security: true });
-
-    renderAtRoute('/dashboard/offensive-security');
-
-    await screen.findByText(akMT('startNewScan'));
-
-    expect(
-      screen.queryByRole('button', { name: akMT('onboardingGuides') })
-    ).not.toBeInTheDocument();
-  });
-
   it('renders the notification bell on a dashboard page', async () => {
     renderAtRoute('/dashboard/projects');
 
