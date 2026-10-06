@@ -62,6 +62,9 @@ Two layers, deliberately separate:
   --color-orange-500: #f98746;
   --color-cyan-400: #46cef9;
 
+  --color-teal-400: #14badc;
+  --color-teal-500: #139ab5;
+
   /* ---------------------------------------------------------------------
      Semantic colours — what a colour means, not which colour it is.
      Components reference these. Only this block changes when the palette does.
@@ -110,6 +113,11 @@ Two layers, deliberately separate:
 
   --color-disabled-field: var(--color-neutral-100);
   --color-disabled-button: var(--color-neutral-400);
+
+  /* What the AI features are marked with, wherever one is offered. */
+  --color-ai: var(--color-teal-400);
+  --color-ai-hover: var(--color-teal-500);
+  --color-ai-foreground: var(--color-white);
 
   /* ---------------------------------------------------------------------
      Severity — how a finding is ranked. A scan reports counts at each.

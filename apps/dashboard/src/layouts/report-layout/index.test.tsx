@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -62,6 +62,26 @@ describe('ReportLayout', () => {
     expect(
       screen.queryByRole('link', { name: akMT('reportModule.title') })
     ).not.toBeInTheDocument();
+  });
+
+  it('names the product in the bar', async () => {
+    await openReports();
+
+    expect(await screen.findByText(akMT('reportModule.reportingEngine'))).toBeInTheDocument();
+  });
+
+  it('marks the bar as AI powered, and explains what that means', async () => {
+    await openReports();
+
+    await userEvent.click(await screen.findByRole('button', { name: akMT('aiPoweredFeatures') }));
+
+    const drawer = await screen.findByRole('dialog', { name: akMT('aiPoweredFeatures') });
+
+    expect(within(drawer).getByText(akMT('reportModule.aiDataAccess'))).toBeInTheDocument();
+    expect(within(drawer).getByText(akMT('reportModule.aiDataUsage'))).toBeInTheDocument();
+    expect(within(drawer).getByText(akMT('reportModule.aiDataProtection'))).toBeInTheDocument();
+
+    expect(within(drawer).getAllByRole('listitem')).toHaveLength(3);
   });
 
   it('renders no notification bell on a reporting page', async () => {
