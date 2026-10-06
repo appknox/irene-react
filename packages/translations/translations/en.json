@@ -3247,5 +3247,10 @@
   "yesTurnOn": "Yes, Turn On",
   "youCanCreateTeam": "you can create a new team by",
   "youWillBeChargedOn": "You will be charged on",
-  "yourPlan": "Your Plan"
+  "yourPlan": "Your Plan",
+  "securityModule": {
+    "downloadApp": "Download App",
+    "purgeApiAnalyses": "Purge API Analyses"
+  },
+  "partnerDashboard": "Partner Dashboard"
 }

@@ -13,6 +13,7 @@ export {
   buildStoreknoxOrganization,
 } from '@tests/factories/organization';
 
+export { buildPartner } from '@tests/factories/partner';
 export { buildProject } from '@tests/factories/project';
 export { buildSubmission, buildSubmissionAppData } from '@tests/factories/submission';
 export { buildSsoCheck } from '@tests/factories/sso';
