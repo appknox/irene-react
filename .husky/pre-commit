@@ -1,1 +1,5 @@
+# Fixes what it can in the staged files, then checks what is left: a fix that
+# cannot be made, or a type error anywhere, stops the commit rather than
+# reaching CI.
 pnpm lint-staged
+pnpm lint:types
