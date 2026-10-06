@@ -150,4 +150,12 @@ describe('StoreknoxLayout', () => {
       await screen.findByRole('button', { name: akMT('onboardingGuides') })
     ).toBeInTheDocument();
   });
+
+  it('opens on the inventory, store monitoring having no landing page', async () => {
+    const { router } = await renderAtRoute('/dashboard/storeknox');
+
+    await screen.findByRole('link', { name: akMT('inventory') });
+
+    expect(router.state.location.pathname).toBe('/dashboard/storeknox/inventory/app-list');
+  });
 });

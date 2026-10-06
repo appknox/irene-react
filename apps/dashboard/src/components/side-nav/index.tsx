@@ -22,6 +22,7 @@ interface SideNavProps {
   items: SideNavItemDefinition[];
   isCollapsed: boolean;
   onSidebarToggle: () => void;
+  pendoContainerId?: string;
 }
 
 /**
@@ -39,8 +40,14 @@ interface SideNavProps {
  * @param props.items - The product's navigation items, in the order they are shown.
  * @param props.isCollapsed - Whether only the icons are shown.
  * @param props.onSidebarToggle - Switches between the two widths.
+ * @param props.pendoContainerId - Which set of product guides the release row carries.
  */
-export function SideNav({ items, isCollapsed, onSidebarToggle }: Readonly<SideNavProps>) {
+export function SideNav({
+  items,
+  isCollapsed,
+  onSidebarToggle,
+  pendoContainerId = PENDO_CONTAINER_ID,
+}: Readonly<SideNavProps>) {
   const organization = useOrganization();
   const { favicon, logo } = useWhitelabel();
 
@@ -129,7 +136,7 @@ export function SideNav({ items, isCollapsed, onSidebarToggle }: Readonly<SideNa
         )}
 
         <LowerNavItem
-          id={hasProductGuides ? PENDO_CONTAINER_ID : undefined}
+          id={hasProductGuides ? pendoContainerId : undefined}
           onClick={hasProductGuides ? showProductGuides : undefined}
           label={`${akMT('version')} - ${PRODUCT_VERSIONS.appknox}`}
           icon="material-symbols:info"

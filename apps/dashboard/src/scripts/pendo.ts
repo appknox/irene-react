@@ -30,8 +30,10 @@ declare global {
 /*
   The badge a guide attaches itself to. Pendo looks the element up by id, so the
   release row in the navigation carries it wherever the guides are enabled.
+  Store monitoring is guided separately, under an id of its own.
 */
 export const PENDO_CONTAINER_ID = 'ak-pendo-version-container';
+export const STOREKNOX_PENDO_CONTAINER_ID = 'sk-pendo-version-container';
 const PENDO_SCRIPT_ID = 'pendo-agent';
 
 /**
