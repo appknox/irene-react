@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import { coverageConfig } from '../../vitest.coverage';
+import { coverageConfig } from '../../vitest.coverage.ts';
 
 export default defineConfig({
   define: {

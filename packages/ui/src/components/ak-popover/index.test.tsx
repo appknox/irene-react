@@ -5,6 +5,7 @@ import type { ComponentProps } from 'react';
 
 import {
   AkPopover,
+  AkPopoverAnchor,
   AkPopoverClose,
   AkPopoverContent,
   AkPopoverTrigger,
@@ -133,5 +134,29 @@ describe('AkPopover', () => {
     await openSwitcher();
 
     expect(document.querySelector('[data-slot="popover-content"]')).toHaveClass('w-50');
+  });
+
+  it('anchors the panel to what it is given rather than to the trigger', async () => {
+    render(
+      <AkPopover>
+        <AkPopoverAnchor asChild>
+          <span>The row this belongs to</span>
+        </AkPopoverAnchor>
+
+        <AkPopoverTrigger asChild>
+          <button type="button">Switch to</button>
+        </AkPopoverTrigger>
+
+        <AkPopoverContent>
+          <a href="/dashboard/projects">Appknox</a>
+        </AkPopoverContent>
+      </AkPopover>
+    );
+
+    expect(document.querySelector('[data-slot="popover-anchor"]')).toBeInTheDocument();
+
+    await openSwitcher();
+
+    expect(await screen.findByRole('link', { name: 'Appknox' })).toBeInTheDocument();
   });
 });

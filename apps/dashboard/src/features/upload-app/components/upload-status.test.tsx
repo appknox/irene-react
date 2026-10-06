@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -67,9 +67,16 @@ const uploadCounts = () => document.querySelectorAll('[data-test-upload-status-c
 /** What the one row on screen says the server last did with it. */
 const rowStatus = () => document.querySelector('[data-test-upload-status-text]');
 
-/** Plays an event through the handlers the connection registered. */
+/**
+ * Plays an event through the handlers the connection registered.
+ *
+ * Wrapped in `act`, because a pushed record is taken into state the moment it
+ * arrives, outside anything the test awaited.
+ */
 const serverSends = (event: string, payload: unknown) => {
-  websocketTransport.emit(event, payload);
+  act(() => {
+    websocketTransport.emit(event, payload);
+  });
 };
 
 describe('UploadStatus', () => {

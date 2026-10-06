@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config';
 
 import { svgrPlugin } from '@irene/ui/vite';
 
-import { coverageConfig } from '../../vitest.coverage';
+import { coverageConfig } from '../../vitest.coverage.ts';
 
 const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 

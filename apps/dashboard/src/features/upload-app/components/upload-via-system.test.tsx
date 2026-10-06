@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -169,9 +169,15 @@ describe('UploadViaSystem', () => {
       expect(document.querySelector('[data-test-upload-sending-row]')).not.toBeInTheDocument()
     );
 
-    websocketTransport.emit(WEBSOCKET_EVENTS.modelCreated, {
-      model_name: 'submission',
-      data: buildSubmission({ id: 1, app_data: buildSubmissionAppData({ name: 'Just Uploaded' }) }),
+    /* Wrapped, because the record is taken into state the moment it arrives. */
+    act(() => {
+      websocketTransport.emit(WEBSOCKET_EVENTS.modelCreated, {
+        model_name: 'submission',
+        data: buildSubmission({
+          id: 1,
+          app_data: buildSubmissionAppData({ name: 'Just Uploaded' }),
+        }),
+      });
     });
 
     await userEvent.click(await screen.findByRole('button', { name: akMT('uploadStatus') }));

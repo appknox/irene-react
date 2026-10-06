@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 
 import { svgrPlugin } from '@irene/ui/vite';
 
-import { coverageConfig } from '../../vitest.coverage';
+import { coverageConfig } from '../../vitest.coverage.ts';
 
 /*
   Handed to the tests, since a test that reads a file cannot rely on the

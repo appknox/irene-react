@@ -54,6 +54,21 @@ describe('AkTooltip', () => {
     );
   });
 
+  it('fills the pointer to match the surface it points from', async () => {
+    render(
+      <AkTooltip title="All projects" color="light" arrow>
+        <button type="button">Open</button>
+      </AkTooltip>
+    );
+
+    await userEvent.hover(screen.getByRole('button', { name: 'Open' }));
+    await screen.findByRole('tooltip');
+
+    await waitFor(() =>
+      expect(document.querySelector('[data-slot="tooltip-arrow"]')).toHaveClass('fill-background')
+    );
+  });
+
   it('draws on the light surface when asked for one', async () => {
     render(
       <AkTooltip title="All projects" color="light">

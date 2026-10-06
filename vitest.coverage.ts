@@ -49,7 +49,10 @@ const UNMEASURED = [
  * The coverage settings every workspace shares.
  *
  * The thresholds fail the run rather than print a number nobody reads: a change
- * that leaves a branch untested is a failing test, not a report to skim.
+ * that leaves a branch untested is a failing test, not a report to skim. Each
+ * one sits just under what the least-covered package reaches today — statements
+ * and lines at `@irene/config`, branches at `@irene/dashboard`, functions at
+ * `@irene/api` — so a package that drops fails rather than coasting on the rest.
  */
 export const coverageConfig: CoverageOptions = {
   provider: 'v8',
@@ -62,5 +65,5 @@ export const coverageConfig: CoverageOptions = {
   */
   include: ['src/**/*.{ts,tsx}', 'scripts/**/*.{ts,tsx}'],
   exclude: UNMEASURED,
-  thresholds: { statements: 90, branches: 90, functions: 90, lines: 90 },
+  thresholds: { statements: 93, branches: 95, functions: 94, lines: 91 },
 };

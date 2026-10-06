@@ -6,6 +6,8 @@ import { ConfigurationEndpoints } from '@irene/api/services/configuration/endpoi
 import { FreshdeskEndpoints } from '@irene/api/services/freshdesk/endpoints';
 import { NotificationEndpoints } from '@irene/api/services/notification/endpoints';
 import { OrganizationEndpoints } from '@irene/api/services/organization/endpoints';
+import { PartnerEndpoints } from '@irene/api/services/partner/endpoints';
+import { SubmissionEndpoints } from '@irene/api/services/submission/endpoints';
 import { UserEndpoints } from '@irene/api/services/user/endpoints';
 import { VulnerabilityEndpoints } from '@irene/api/services/vulnerability/endpoints';
 import { getConfigValue } from '@irene/config';
@@ -17,6 +19,7 @@ import {
   buildOrganizationMe,
   buildOrganizationMembership,
   buildOrganizationNamespace,
+  buildPartner,
   buildServerConfiguration,
   buildUserResponse,
   buildVulnerabilityListResponse,
@@ -67,6 +70,14 @@ export const server = setupServer(
   http.get(`*/${VulnerabilityEndpoints.list()}`, () =>
     HttpResponse.json(buildVulnerabilityListResponse())
   ),
+
+  /* The upload status reads this on every signed-in page, so an account with nothing in flight. */
+  http.get(`*/${SubmissionEndpoints.list()}`, () =>
+    HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
+  ),
+
+  /* The partner band reads this, so a partner entitled to nothing beyond its clients. */
+  http.get(`*/${PartnerEndpoints.detail('*')}`, () => HttpResponse.json(buildPartner())),
 
   /* An account in no StoreKnox organization, which the list reports as empty. */
   http.get(`*/${OrganizationEndpoints.storeknoxOrganization()}`, () =>
