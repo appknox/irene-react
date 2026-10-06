@@ -205,65 +205,89 @@ Where the product names matter, open the same URL on
 `http://secure.appknox.com.localhost:4200` for the Appknox names and on
 `http://localhost:4200` for the whitelabel ones.
 
-| Scenario                    | Open                                                          | Expected                                                                            |
-| --------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `home:all`                  | `/dashboard/home?mock=home:all`                               | Five cards: VAPT, StoreKnox, offensive security, reporting, security                |
-| `home:appknox-only`         | `/dashboard/home?mock=home:appknox-only`                      | Redirected to `/dashboard/projects`, no card shown                                  |
-| `home:storeknox`            | `/dashboard/home?mock=home:storeknox`                         | Two cards                                                                           |
-| `home:security`             | `/dashboard/home?mock=home:security`                          | Two cards; the security one opens `/security/projects` in a new tab                 |
-| `home:enterprise`           | `/dashboard/home?mock=home:enterprise`                        | Reporting is entitled but withheld — two cards                                      |
-| `home:whitelabel`           | `/dashboard/home?mock=home:whitelabel`                        | The Sentinel logo above the heading                                                 |
-| `status:all-up`             | `/dashboard/status?mock=status:all-up`                        | Three rows, all Operational                                                         |
-| `status:all-down`           | `/dashboard/status?mock=status:all-down`                      | All three Unavailable; storage carries the proxy hint                               |
-| `status:storage-down`       | `/dashboard/status?mock=status:storage-down`                  | Storage Unavailable, the other two Operational                                      |
-| `status:devicefarm-down`    | `/dashboard/status?mock=status:devicefarm-down`               | Device farm Unavailable                                                             |
-| `status:api-down`           | `/dashboard/status?mock=status:api-down`                      | API server Unavailable                                                              |
-| `status:checking`           | `/dashboard/status?mock=status:checking`                      | All three rows stay on Checking                                                     |
-| `login:success`             | `/login?mock=login:success`                                   | Any password signs in and lands on the dashboard                                    |
-| `login:wrong-password`      | `/login?mock=login:wrong-password`                            | Both fields marked, message under the password                                      |
-| `login:locked`              | `/login?mock=login:locked`                                    | Locked message, password reset offered in place of the button                       |
-| `login:server-error`        | `/login?mock=login:server-error`                              | Notification carrying the server's message                                          |
-| `login:rate-limited`        | `/login?mock=login:rate-limited`                              | 30-second countdown, no password error beside it                                    |
-| `login:sso-optional`        | `/login?mock=login:sso-optional`                              | Password field and SSO button together                                              |
-| `login:sso-only`            | `/login?mock=login:sso-only`                                  | No password field; the SSO button submits                                           |
-| `login:mfa-app`             | `/login?mock=login:mfa-app`                                   | Authenticator code step — `123456` passes, anything else is refused                 |
-| `login:mfa-email`           | `/login?mock=login:mfa-email`                                 | Same, worded for email                                                              |
-| `login:mfa-mandatory`       | `/login?mock=login:mfa-mandatory`                             | Same, with the notice that the organization mandates it                             |
-| `login:mfa-mandatory-email` | `/login?mock=login:mfa-mandatory-email`                       | Same, worded for email                                                              |
-| `login:check-held`          | `/login?mock=login:check-held`                                | The username step keeps its spinner for 15 seconds, then moves on                   |
-| `recover:sent`              | `/recover?mock=recover:sent`                                  | Confirmation telling the user to read their email                                   |
-| `recover:unknown-account`   | `/recover?mock=recover:unknown-account`                       | The same check-your-email confirmation, which never says who has an account         |
-| `recover:server-error`      | `/recover?mock=recover:server-error`                          | Notification, and the form keeps what was typed                                     |
-| `recover:rate-limited`      | `/recover?mock=recover:rate-limited`                          | 30-second countdown, nothing else                                                   |
-| `reset:valid-link`          | `/reset/mock-reset-token?mock=reset:valid-link`               | Password form; a valid password returns to `/login`                                 |
-| `reset:spent-link`          | `/reset/anything?mock=reset:spent-link`                       | Invalid-link message, no form                                                       |
-| `reset:check-fails`         | `/reset/anything?mock=reset:check-fails`                      | Server-error message with an enabled Retry                                          |
-| `reset:check-held`          | `/reset/anything?mock=reset:check-held`                       | The form holds its shape for 15 seconds, then renders                               |
-| `reset:password-refused`    | `/reset/mock-reset-token?mock=reset:password-refused`         | Message under the password field                                                    |
-| `register:accepted`         | `/register?mock=register:accepted`                            | "Registration has been initiated." and check-your-email                             |
-| `register:field-refused`    | `/register?mock=register:field-refused`                       | Message under the company field                                                     |
-| `register:disabled`         | `/register?mock=register:disabled`                            | Generic notification                                                                |
-| `register:elsewhere`        | `/register?mock=register:elsewhere`                           | Leaves for the registration link the configuration names                            |
-| `invite:open`               | `/register-via-invite/mock-token?mock=invite:open`            | Email and company read-only, name prefilled                                         |
-| `invite:no-company`         | `/register-via-invite/mock-token?mock=invite:no-company`      | Company field editable                                                              |
-| `invite:spent`              | `/register-via-invite/mock-token?mock=invite:spent`           | Invalid-invitation state                                                            |
-| `orginvite:open`            | `/invite/mock-invitation-token?mock=orginvite:open`           | Read-only email and organization; accepting asks the user to sign in                |
-| `orginvite:sso`             | `/invite/mock-invitation-token?mock=orginvite:sso`            | No password fields                                                                  |
-| `orginvite:username-taken`  | `/invite/mock-invitation-token?mock=orginvite:username-taken` | Message under the username field                                                    |
-| `orginvite:spent`           | `/invite/anything?mock=orginvite:spent`                       | Invalid-invitation state                                                            |
-| `boot:setup-fails`          | `/?mock=boot:setup-fails`                                     | Failure screen naming Error 500, with a support mailto carrying it                  |
-| `boot:setup-unreachable`    | `/?mock=boot:setup-unreachable`                               | Failure screen with no status named                                                 |
-| `boot:retry-succeeds`       | `/?mock=boot:retry-succeeds`                                  | Failure screen; Retry loads the page                                                |
-| `boot:setup-held`           | `/?mock=boot:setup-held`                                      | Loading overlay stays up for 15 seconds, its bar advancing, then the page renders   |
-| `boot:setup-timeout`        | `/?mock=boot:setup-timeout`                                   | Overlay for 30 seconds, then the failure card with no status, and no second attempt |
-| `boot:wait-messages`        | `/?mock=boot:wait-messages`                                   | Overlay for 28 seconds: the waiting message at 10s, the next at 25s, then the page  |
-| `boot:slow-page`            | `/dashboard/status?mock=boot:slow-page`                       | Progress bar at the top for three seconds                                           |
-| `boot:session-expired`      | `/?mock=boot:session-expired`                                 | Session cleared, back to `/login` with the expiry alert                             |
-| `boot:config-held`          | `/login?mock=boot:config-held`                                | Logo and footer hold their space                                                    |
-| `boot:whitelabel-failure`   | `/?mock=boot:whitelabel-failure`                              | Failure screen with no Appknox support address                                      |
+| Scenario                     | Open                                                            | Expected                                                                             |
+| ---------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `home:all`                   | `/dashboard/home?mock=home:all`                                 | Five cards: VAPT, StoreKnox, offensive security, reporting, security                 |
+| `home:appknox-only`          | `/dashboard/home?mock=home:appknox-only`                        | Redirected to `/dashboard/projects`, no card shown                                   |
+| `home:storeknox`             | `/dashboard/home?mock=home:storeknox`                           | Two cards                                                                            |
+| `home:security`              | `/dashboard/home?mock=home:security`                            | Two cards; the security one opens `/security/projects` in a new tab                  |
+| `home:enterprise`            | `/dashboard/home?mock=home:enterprise`                          | Reporting is entitled but withheld — two cards                                       |
+| `home:whitelabel`            | `/dashboard/home?mock=home:whitelabel`                          | The Sentinel logo above the heading                                                  |
+| `status:all-up`              | `/dashboard/status?mock=status:all-up`                          | Three rows, all Operational                                                          |
+| `status:all-down`            | `/dashboard/status?mock=status:all-down`                        | All three Unavailable; storage carries the proxy hint                                |
+| `status:storage-down`        | `/dashboard/status?mock=status:storage-down`                    | Storage Unavailable, the other two Operational                                       |
+| `status:devicefarm-down`     | `/dashboard/status?mock=status:devicefarm-down`                 | Device farm Unavailable                                                              |
+| `status:api-down`            | `/dashboard/status?mock=status:api-down`                        | API server Unavailable                                                               |
+| `status:checking`            | `/dashboard/status?mock=status:checking`                        | All three rows stay on Checking                                                      |
+| `login:success`              | `/login?mock=login:success`                                     | Any password signs in and lands on the dashboard                                     |
+| `login:wrong-password`       | `/login?mock=login:wrong-password`                              | Both fields marked, message under the password                                       |
+| `login:locked`               | `/login?mock=login:locked`                                      | Locked message, password reset offered in place of the button                        |
+| `login:server-error`         | `/login?mock=login:server-error`                                | Notification carrying the server's message                                           |
+| `login:rate-limited`         | `/login?mock=login:rate-limited`                                | 30-second countdown, no password error beside it                                     |
+| `login:sso-optional`         | `/login?mock=login:sso-optional`                                | Password field and SSO button together                                               |
+| `login:sso-only`             | `/login?mock=login:sso-only`                                    | No password field; the SSO button submits                                            |
+| `login:mfa-app`              | `/login?mock=login:mfa-app`                                     | Authenticator code step — `123456` passes, anything else is refused                  |
+| `login:mfa-email`            | `/login?mock=login:mfa-email`                                   | Same, worded for email                                                               |
+| `login:mfa-mandatory`        | `/login?mock=login:mfa-mandatory`                               | Same, with the notice that the organization mandates it                              |
+| `login:mfa-mandatory-email`  | `/login?mock=login:mfa-mandatory-email`                         | Same, worded for email                                                               |
+| `login:check-held`           | `/login?mock=login:check-held`                                  | The username step keeps its spinner for 15 seconds, then moves on                    |
+| `recover:sent`               | `/recover?mock=recover:sent`                                    | Confirmation telling the user to read their email                                    |
+| `recover:unknown-account`    | `/recover?mock=recover:unknown-account`                         | The same check-your-email confirmation, which never says who has an account          |
+| `recover:server-error`       | `/recover?mock=recover:server-error`                            | Notification, and the form keeps what was typed                                      |
+| `recover:rate-limited`       | `/recover?mock=recover:rate-limited`                            | 30-second countdown, nothing else                                                    |
+| `reset:valid-link`           | `/reset/mock-reset-token?mock=reset:valid-link`                 | Password form; a valid password returns to `/login`                                  |
+| `reset:spent-link`           | `/reset/anything?mock=reset:spent-link`                         | Invalid-link message, no form                                                        |
+| `reset:check-fails`          | `/reset/anything?mock=reset:check-fails`                        | Server-error message with an enabled Retry                                           |
+| `reset:check-held`           | `/reset/anything?mock=reset:check-held`                         | The form holds its shape for 15 seconds, then renders                                |
+| `reset:password-refused`     | `/reset/mock-reset-token?mock=reset:password-refused`           | Message under the password field                                                     |
+| `register:accepted`          | `/register?mock=register:accepted`                              | "Registration has been initiated." and check-your-email                              |
+| `register:field-refused`     | `/register?mock=register:field-refused`                         | Message under the company field                                                      |
+| `register:disabled`          | `/register?mock=register:disabled`                              | Generic notification                                                                 |
+| `register:elsewhere`         | `/register?mock=register:elsewhere`                             | Leaves for the registration link the configuration names                             |
+| `invite:open`                | `/register-via-invite/mock-token?mock=invite:open`              | Email and company read-only, name prefilled                                          |
+| `invite:no-company`          | `/register-via-invite/mock-token?mock=invite:no-company`        | Company field editable                                                               |
+| `invite:spent`               | `/register-via-invite/mock-token?mock=invite:spent`             | Invalid-invitation state                                                             |
+| `orginvite:open`             | `/invite/mock-invitation-token?mock=orginvite:open`             | Read-only email and organization; accepting asks the user to sign in                 |
+| `orginvite:sso`              | `/invite/mock-invitation-token?mock=orginvite:sso`              | No password fields                                                                   |
+| `orginvite:username-taken`   | `/invite/mock-invitation-token?mock=orginvite:username-taken`   | Message under the username field                                                     |
+| `orginvite:spent`            | `/invite/anything?mock=orginvite:spent`                         | Invalid-invitation state                                                             |
+| `boot:setup-fails`           | `/?mock=boot:setup-fails`                                       | Failure screen naming Error 500, with a support mailto carrying it                   |
+| `boot:setup-unreachable`     | `/?mock=boot:setup-unreachable`                                 | Failure screen with no status named                                                  |
+| `boot:retry-succeeds`        | `/?mock=boot:retry-succeeds`                                    | Failure screen; Retry loads the page                                                 |
+| `boot:setup-held`            | `/?mock=boot:setup-held`                                        | Loading overlay stays up for 15 seconds, its bar advancing, then the page renders    |
+| `boot:setup-timeout`         | `/?mock=boot:setup-timeout`                                     | Overlay for 30 seconds, then the failure card with no status, and no second attempt  |
+| `boot:wait-messages`         | `/?mock=boot:wait-messages`                                     | Overlay for 28 seconds: the waiting message at 10s, the next at 25s, then the page   |
+| `boot:slow-page`             | `/dashboard/status?mock=boot:slow-page`                         | Progress bar at the top for three seconds                                            |
+| `boot:session-expired`       | `/?mock=boot:session-expired`                                   | Session cleared, back to `/login` with the expiry alert                              |
+| `boot:config-held`           | `/login?mock=boot:config-held`                                  | Logo and footer hold their space                                                     |
+| `boot:whitelabel-failure`    | `/?mock=boot:whitelabel-failure`                                | Failure screen with no Appknox support address                                       |
+| `layout:vapt`                | `/dashboard/projects?mock=layout:vapt`                          | The dashboard's own bar: the upload section with both controls, and the walkthroughs |
+| `layout:vapt-no-link-upload` | `/dashboard/projects?mock=layout:vapt-no-link-upload`           | The same, with no link control: uploading from a store link is sold separately       |
+| `layout:offensive-security`  | `/dashboard/offensive-security?mock=layout:offensive-security`  | Its own navigation of one item, the upload section, and no walkthroughs              |
+| `layout:security`            | `/security/projects?mock=layout:security`                       | Its own three items, and no bell: the product keeps no notifications                 |
+| `layout:reporting`           | `/dashboard/reports/generate?mock=layout:reporting`             | "Reporting Engine" and the AI chip in the bar, no bell; the chip opens the drawer    |
+| `layout:storeknox`           | `/dashboard/storeknox/inventory/app-list?mock=layout:storeknox` | Its own four items, and its own walkthroughs                                         |
+| `layout:partner`             | `/partner/clients?mock=layout:partner`                          | The partner band above the page, with the clients tab alone                          |
+| `layout:partner-analytics`   | `/partner/clients?mock=layout:partner-analytics`                | The same band, with the analytics tab beside it                                      |
+| `layout:enterprise`          | `/dashboard/projects?mock=layout:enterprise`                    | A self-hosted install, which is offered no walkthroughs                              |
+| `layout:every-product`       | `/dashboard/projects?mock=layout:every-product`                 | Every product entitled, so the switcher leads to all of them from any layout         |
 
 The not-found page needs no scenario: open `/not-a-real-page`. `/status` should
 replace itself with `/dashboard/status`.
+
+## Product layouts
+
+Each product renders its own layout: the navigation beside the page, and what
+the bar carries. The scenarios above under `layout:` put each one on screen
+with the entitlements it needs.
+
+| Scenario                               | How to get there                                            | Expected                                                                          |
+| -------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Switch product, keep the width         | Collapse the navigation in one product, open another        | The other product opens collapsed too: one width is stored for all of them        |
+| The product being shown is not offered | Open the switcher in any product                            | That product is missing from the list; there is nothing to switch to in it        |
+| Partner screens keep the dashboard     | `/partner/clients`                                          | The dashboard's own navigation, with the partner band above the page              |
+| Partner screens offer no upload        | `/partner/clients`                                          | No upload section and no walkthroughs: the screens are not a scannable product    |
+| Reporting explains its AI              | `/dashboard/reports/generate`, press the Powered by AI chip | A drawer titled "AI Powered Features", three sections, the last a three-item list |
 
 ## Dashboard navigation
 
