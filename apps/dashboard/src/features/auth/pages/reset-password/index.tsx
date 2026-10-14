@@ -168,6 +168,7 @@ function ResetFormSkeleton() {
       {[0, 1].map((field) => (
         <div key={field} className="grid gap-1.5">
           <AkSkeleton width="8rem" height="1rem" />
+
           <AkSkeleton height="2.25rem" />
         </div>
       ))}

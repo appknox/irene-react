@@ -5,11 +5,15 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./normalization": "./src/normalization/index.ts",
     "./services/*": "./src/services/*/index.ts",
     "./services/*/endpoints": "./src/services/*/endpoints.ts",
     "./stores/*": "./src/stores/*/index.ts",
     "./utils/*": "./src/utils/*.ts",
     "./*": "./src/*.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0"
   },
   "scripts": {
     "lint": "eslint .",
@@ -21,12 +25,17 @@
     "@irene/constants": "workspace:*",
     "@irene/enums": "workspace:*",
     "@irene/translations": "workspace:*",
+    "@normy/react-query": "^0.21.0",
     "@tanstack/react-query": "^5.102.8",
     "axios": "^1.20.0",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "@types/node": "catalog:",
     "msw": "^2.15.0"
   }

@@ -7,7 +7,7 @@ export interface IreneAuthSession {
   b64token: string;
 }
 
-export const IRENE_AUTH_SESSION_KEY = 'appknox-session';
+export const IRENE_AUTH_SESSION_KEY = 'irene:auth-session';
 
 /**
  * Checks that a parsed value has the shape of a stored session.
@@ -58,7 +58,7 @@ const _parseJsonSafely = (text: string): unknown => {
  * @param value - The string to encode.
  * @returns The base64 encoding of the string's UTF-8 bytes.
  */
-export const encodeBase64Utf8 = (value: string) =>
+const _encodeBase64Utf8 = (value: string) =>
   btoa(String.fromCodePoint(...new TextEncoder().encode(value)));
 
 /**
@@ -69,7 +69,7 @@ export const encodeBase64Utf8 = (value: string) =>
  * @returns The base64-encoded `userId:token` pair.
  */
 export const buildBasicCredential = (userId: number, token: string) =>
-  encodeBase64Utf8(`${userId}:${token}`);
+  _encodeBase64Utf8(`${userId}:${token}`);
 
 /**
  * Turns a login or check response into the session that gets stored.

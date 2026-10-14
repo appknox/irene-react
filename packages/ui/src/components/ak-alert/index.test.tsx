@@ -20,6 +20,7 @@ describe('rendering', () => {
     render(
       <AkAlert>
         <AkAlertTitle>Scan failed</AkAlertTitle>
+
         <AkAlertDescription>The binary could not be read.</AkAlertDescription>
       </AkAlert>
     );
@@ -32,6 +33,7 @@ describe('rendering', () => {
     render(
       <AkAlert>
         <AkAlertTitle>Scan failed</AkAlertTitle>
+
         <AkAlertDescription>Details</AkAlertDescription>
       </AkAlert>
     );

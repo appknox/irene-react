@@ -16,7 +16,6 @@ import { AkLabel } from '@irene/ui/ak-label';
 const meta = {
   title: 'Components/AkSelect',
   component: AkSelect,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
   argTypes: { disabled: { control: 'boolean' } },
 } satisfies Meta<typeof AkSelect>;
@@ -30,10 +29,14 @@ const Severity = (props: React.ComponentProps<typeof AkSelect>) => (
     <AkSelectTrigger className="w-56">
       <AkSelectValue placeholder="Any severity" />
     </AkSelectTrigger>
+
     <AkSelectContent>
       <AkSelectItem value="critical">Critical</AkSelectItem>
+
       <AkSelectItem value="high">High</AkSelectItem>
+
       <AkSelectItem value="medium">Medium</AkSelectItem>
+
       <AkSelectItem value="low">Low</AkSelectItem>
     </AkSelectContent>
   </AkSelect>
@@ -44,7 +47,9 @@ export const AllStates: Story = {
   render: () => (
     <div className="flex flex-col gap-3">
       <Severity />
+
       <Severity value="high" />
+
       <Severity disabled />
     </div>
   ),
@@ -63,15 +68,21 @@ export const Grouped: Story = {
       <AkSelectTrigger className="w-56">
         <AkSelectValue placeholder="Any platform" />
       </AkSelectTrigger>
+
       <AkSelectContent>
         <AkSelectGroup>
           <AkSelectLabel>Mobile</AkSelectLabel>
+
           <AkSelectItem value="android">Android</AkSelectItem>
+
           <AkSelectItem value="ios">iOS</AkSelectItem>
         </AkSelectGroup>
+
         <AkSelectSeparator />
+
         <AkSelectGroup>
           <AkSelectLabel>Other</AkSelectLabel>
+
           <AkSelectItem value="web">Web</AkSelectItem>
         </AkSelectGroup>
       </AkSelectContent>
@@ -84,6 +95,7 @@ export const WithLabel: Story = {
   render: () => (
     <div className="flex flex-col gap-2">
       <AkLabel htmlFor="severity">Severity</AkLabel>
+
       <Severity />
     </div>
   ),

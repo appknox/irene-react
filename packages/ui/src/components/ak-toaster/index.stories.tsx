@@ -8,7 +8,6 @@ import { akNotify } from '@irene/ui/notify';
 const meta = {
   title: 'Components/AkToaster',
   component: AkToaster,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
 } satisfies Meta<typeof AkToaster>;
 

@@ -1,0 +1,14 @@
+/*
+  The Freshdesk support widget mounts on document.body, outside the React tree,
+  and ships its own floating-card layout. This docks it to the right edge as a
+  full-height panel instead.
+*/
+#freshworks-frame-wrapper {
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  max-width: 568px !important;
+  height: 100vh !important;
+  max-height: unset !important;
+  border-radius: 0 !important;
+}

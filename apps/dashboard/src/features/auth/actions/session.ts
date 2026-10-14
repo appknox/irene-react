@@ -9,9 +9,12 @@ import {
 import { configurationStore } from '@irene/api/stores/configuration';
 import { organizationStore } from '@irene/api/stores/organization';
 import { vulnerabilityStore } from '@irene/api/stores/vulnerability';
+import { closeWebsocketConnection } from '@irene/websocket';
 import type { ApiSessionResponse } from '@irene/api/services/auth';
 
 import { sessionCheckOptions } from '@/features/auth/queries/session';
+import { destroyFreshchat } from '@/scripts/freshchat';
+import { signOutOfFreshdesk } from '@/scripts/freshdesk';
 
 /**
  * Records a session the app has just been granted: stored for the next visit,
@@ -43,6 +46,13 @@ export function startSession(queryClient: QueryClient, response: ApiSessionRespo
  * @param queryClient - The cache to clear.
  */
 export function endSession(queryClient: QueryClient) {
+  /* Both widgets hold the account, so they go with the session. */
+  destroyFreshchat();
+  signOutOfFreshdesk();
+
+  /* The room belongs to the account, so a connection outliving it would carry one account's events into the next. */
+  closeWebsocketConnection();
+
   clearStoredSession();
   queryClient.clear();
   queryClient.setQueryData(sessionCheckOptions().queryKey, null);

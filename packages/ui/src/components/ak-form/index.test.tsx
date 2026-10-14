@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import * as z from 'zod';
 import type { ReactNode } from 'react';
 
-import { AkFormField, AkFormProvider } from '@irene/ui/ak-form';
+import { AkFormField, AkFormProvider, type AkFormLabelProps } from '@irene/ui/ak-form';
 import { useAkFormField } from '@irene/ui/ak-form/context';
 import { AkInput } from '@irene/ui/ak-input';
 
@@ -23,10 +23,12 @@ function TestForm({
   onValid = vi.fn(),
   children = <AkInput />,
   labelAction,
+  labelProps,
 }: {
   onValid?: (values: Values) => void;
   children?: ReactNode;
   labelAction?: ReactNode;
+  labelProps?: AkFormLabelProps;
 }) {
   const form = useForm<Values>({
     resolver: zodResolver(schema),
@@ -39,6 +41,7 @@ function TestForm({
         <AkFormField
           name="email"
           label="Email"
+          labelProps={labelProps}
           labelAction={labelAction}
           description="We only use this to sign you in."
         >
@@ -71,6 +74,32 @@ describe('the control as a child', () => {
       expect.objectContaining({ email: 'a@b.com' }),
       expect.anything()
     );
+  });
+
+  it('draws the label with the classes the field passes, beside its own', () => {
+    render(<TestForm labelProps={{ className: 'text-primary' }} />);
+
+    const label = screen.getByText('Email', { selector: 'label' });
+
+    expect(label).toHaveClass('text-primary');
+    expect(label).toHaveClass('font-medium');
+  });
+
+  it('passes the label an attribute the field sets on it', () => {
+    render(<TestForm labelProps={{ title: 'The address you sign in with' }} />);
+
+    expect(screen.getByText('Email', { selector: 'label' })).toHaveAttribute(
+      'title',
+      'The address you sign in with'
+    );
+  });
+
+  it('keeps the label pointing at the control when the field passes label props', () => {
+    render(<TestForm labelProps={{ className: 'text-primary', title: 'Email' }} />);
+
+    const label = screen.getByText('Email', { selector: 'label' });
+
+    expect(label).toHaveAttribute('for', screen.getByRole('textbox').id);
   });
 
   it('renders an action opposite the label', () => {

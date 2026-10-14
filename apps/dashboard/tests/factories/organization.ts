@@ -6,6 +6,7 @@ import type {
   ApiOrganizationFeatures,
   ApiOrganizationMe,
   ApiOrganizationMembership,
+  ApiOrganizationNamespace,
   ApiStoreknoxOrganization,
 } from '@irene/api/services/organization';
 
@@ -99,5 +100,19 @@ export const buildStoreknoxOrganization = (
     use_ai_validation: false,
     third_party_scanning: false,
   },
+  ...overrides,
+});
+
+export const buildOrganizationNamespace = (
+  overrides: Partial<ApiOrganizationNamespace> = {}
+): ApiOrganizationNamespace => ({
+  id: faker.number.int({ min: 1, max: 9999 }),
+  value: faker.internet.domainName(),
+  created_on: faker.date.recent().toISOString(),
+  approved_on: null,
+  is_approved: false,
+  platform: 0,
+  approved_by: null,
+  requested_by: faker.number.int({ min: 1, max: 9999 }),
   ...overrides,
 });

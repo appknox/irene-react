@@ -3,7 +3,11 @@ import { setupServer } from 'msw/node';
 
 import { AuthEndpoints } from '@irene/api/services/auth/endpoints';
 import { ConfigurationEndpoints } from '@irene/api/services/configuration/endpoints';
+import { FreshdeskEndpoints } from '@irene/api/services/freshdesk/endpoints';
+import { NotificationEndpoints } from '@irene/api/services/notification/endpoints';
 import { OrganizationEndpoints } from '@irene/api/services/organization/endpoints';
+import { PartnerEndpoints } from '@irene/api/services/partner/endpoints';
+import { SubmissionEndpoints } from '@irene/api/services/submission/endpoints';
 import { UserEndpoints } from '@irene/api/services/user/endpoints';
 import { VulnerabilityEndpoints } from '@irene/api/services/vulnerability/endpoints';
 import { getConfigValue } from '@irene/config';
@@ -14,6 +18,8 @@ import {
   buildOrganization,
   buildOrganizationMe,
   buildOrganizationMembership,
+  buildOrganizationNamespace,
+  buildPartner,
   buildServerConfiguration,
   buildUserResponse,
   buildVulnerabilityListResponse,
@@ -65,8 +71,36 @@ export const server = setupServer(
     HttpResponse.json(buildVulnerabilityListResponse())
   ),
 
-  http.get(`*/${OrganizationEndpoints.storeknoxOrganization()}`, () =>
-    HttpResponse.json({ detail: 'Not found.' }, { status: 404 })
+  /* The upload status reads this on every signed-in page, so an account with nothing in flight. */
+  http.get(`*/${SubmissionEndpoints.list()}`, () =>
+    HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
   ),
-  http.get(`*/${UserEndpoints.detail('*')}`, () => HttpResponse.json(buildUserResponse()))
+
+  /* The partner band reads this, so a partner entitled to nothing beyond its clients. */
+  http.get(`*/${PartnerEndpoints.detail('*')}`, () => HttpResponse.json(buildPartner())),
+
+  /* An account in no StoreKnox organization, which the list reports as empty. */
+  http.get(`*/${OrganizationEndpoints.storeknoxOrganization()}`, () =>
+    HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
+  ),
+  http.get(`*/${UserEndpoints.detail('*')}`, () => HttpResponse.json(buildUserResponse())),
+
+  /* The namespace-request notifications read the namespace to state where it stands. */
+  http.get(`*/${OrganizationEndpoints.namespace('*', '*')}`, () =>
+    HttpResponse.json(buildOrganizationNamespace())
+  ),
+
+  /* The bar's bell asks for the unread count on every signed-in page, for whichever product it is on. */
+  http.get(`*/${NotificationEndpoints.list('appknox')}`, () =>
+    HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
+  ),
+
+  http.get(`*/${NotificationEndpoints.list('storeknox')}`, () =>
+    HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
+  ),
+
+  /* Every signed-in page installs the support widget, which signs in on load. */
+  http.post(`*/${FreshdeskEndpoints.authenticate()}`, () =>
+    HttpResponse.json({ token: 'a-widget-token', name: 'ada', email: 'ada@appknox.com' })
+  )
 );

@@ -9,7 +9,7 @@ import { cva } from 'class-variance-authority';
   one follows `borderColor`.
 */
 export const akTableVariants = cva(
-  'w-full border-collapse text-left [&_td]:align-middle [&_th]:align-middle [&_th]:font-medium',
+  ['w-full border-collapse text-left [&_td]:align-middle [&_th]:align-middle [&_th]:font-medium'],
   {
     variants: {
       variant: {
@@ -22,8 +22,12 @@ export const akTableVariants = cva(
           already draws that line, and two rules meeting there collapse to
           whichever is stronger rather than to the header's own.
         */
-        'full-bordered':
-          '[&_tbody_td]:border [&_tbody_tr:first-child_td]:border-t-0 [&_thead_th:not(:last-child)]:border-r [&_thead_tr]:border',
+        'full-bordered': `
+          [&_tbody_td]:border
+          [&_tbody_tr:first-child_td]:border-t-0
+          [&_thead_th:not(:last-child)]:border-r
+          [&_thead_tr]:border
+        `,
 
         /** No rules at all, for a table inside a card that draws its own. */
         borderless: '',

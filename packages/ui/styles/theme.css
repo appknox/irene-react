@@ -62,11 +62,15 @@ Two layers, deliberately separate:
   --color-orange-500: #f98746;
   --color-cyan-400: #46cef9;
 
+  --color-teal-400: #14badc;
+  --color-teal-500: #139ab5;
+
   /* ---------------------------------------------------------------------
      Semantic colours — what a colour means, not which colour it is.
      Components reference these. Only this block changes when the palette does.
      --------------------------------------------------------------------- */
   --color-primary: var(--color-red-500);
+  --color-primary-strong: var(--color-red-600);
   --color-primary-hover: var(--color-red-600);
   --color-primary-foreground: var(--color-white);
 
@@ -110,6 +114,21 @@ Two layers, deliberately separate:
   --color-disabled-field: var(--color-neutral-100);
   --color-disabled-button: var(--color-neutral-400);
 
+  /* What the AI features are marked with, wherever one is offered. */
+  --color-ai: var(--color-teal-400);
+  --color-ai-hover: var(--color-teal-500);
+  --color-ai-foreground: var(--color-white);
+
+  /* ---------------------------------------------------------------------
+     Severity — how a finding is ranked. A scan reports counts at each.
+     --------------------------------------------------------------------- */
+  --color-severity-critical: var(--color-red-700);
+  --color-severity-high: var(--color-orange-500);
+  --color-severity-medium: var(--color-yellow-400);
+  --color-severity-low: var(--color-cyan-400);
+  --color-severity-passed: var(--color-green-500);
+  --color-severity-untested: #a0a0a0;
+
   /* ---------------------------------------------------------------------
      Radius — six sizes plus a capsule.
      --------------------------------------------------------------------- */
@@ -145,6 +164,9 @@ Two layers, deliberately separate:
   --shadow-15: 0px 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-16: 0 5px 5px 0 rgba(64, 64, 64, 0.1);
   --shadow-17: 0 4px 12px rgba(64, 64, 64, 0.25);
+
+  /* The layout: the top bar, the side navigation, and the panels they open. */
+  --shadow-18: 4px 4px 20px rgba(222, 222, 222, 0.25);
 
   /* ---------------------------------------------------------------------
      Typography — px for the same reason as spacing.

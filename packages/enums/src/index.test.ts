@@ -4,12 +4,12 @@ import { ENUMS, ENUMS_DISPLAY, UNKNOWN } from '@irene/enums';
 const groups = Object.entries(ENUMS);
 
 describe('ENUMS', () => {
-  it('carries 80 groups and 332 declared keys', () => {
+  it('carries 80 groups and 337 declared keys', () => {
     expect(groups).toHaveLength(80);
 
     const declared = groups.reduce((total, [, group]) => total + group.BASE_CHOICES.length, 0);
 
-    expect(declared).toBe(332);
+    expect(declared).toBe(337);
   });
 
   it('adds CHOICES, BASE_CHOICES and VALUES to every group', () => {

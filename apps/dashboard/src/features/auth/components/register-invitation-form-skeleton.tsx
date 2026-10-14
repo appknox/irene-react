@@ -13,6 +13,7 @@ function FieldSkeleton() {
   return (
     <div className="grid gap-1.5">
       <AkSkeleton width="7rem" height="13px" />
+
       <AkSkeleton height="36px" />
     </div>
   );
@@ -32,6 +33,7 @@ export function RegisterInvitationFormSkeleton() {
 
       {/* Email and company, which the invitation fills in. */}
       <FieldSkeleton />
+
       <FieldSkeleton />
 
       {/* First and last name, side by side. */}
@@ -47,12 +49,15 @@ export function RegisterInvitationFormSkeleton() {
 
       {/* Username, password and its confirmation. */}
       <FieldSkeleton />
+
       <FieldSkeleton />
+
       <FieldSkeleton />
 
       {/* The terms, which are a box beside a line of text rather than a field. */}
       <div className="flex items-center gap-2">
         <AkSkeleton width="16px" height="16px" />
+
         <AkSkeleton width="14rem" height="14px" />
       </div>
 

@@ -1506,6 +1506,15 @@
   "note": "Note",
   "notifications": "通知",
   "notificationModule": {
+    "markAllAsRead": "Mark all as read",
+    "noUnreadNotifications": "No unread notifications",
+    "viewAllNotifications": "View All Notifications",
+    "advisory": "Advisory",
+    "affects": "Affects",
+    "fixedInVersion": "Fixed in version",
+    "newVersion": "New version",
+    "viewComponent": "View component",
+    "viewDirectory": "View Directory",
     "currentRiskStatusFile": "Current risk status of file",
     "messages": {
       "nf-am-newversn": "Unscanned version of {platform_display} app <strong>{app_name} ({package_name})</strong> detected via storeknox. Please <strong>upload app binary of version {version_unscanned} to perform scan.</strong>",
@@ -1523,6 +1532,8 @@
       "nf-nsreqstd1": "{requester_username} has <strong>requested for {platform_display} namespace {namespace_value}</strong>.",
       "nf-nsreqstd2": "{current_requester_username} has <strong>requested for an unapproved {platform_display} namespace {namespace_value}</strong> (initially requested by {initial_requester_username} on {namespace_created_on}).",
       "nf-sastcmpltd1": "<strong>Static scan completed</strong> for {platform_display} app <strong>{file_name} ({package_name})</strong>.",
+      "nf-sbom-comp-update": "A new version is available for this component",
+      "nf-sbom-vuln-update": "New vulnerability advisory <strong>{max_severity}</strong> detected",
       "nf-sbomcmpltd": {
         "prefix": "<strong>SBOM generated successfully</strong> for the ",
         "suffix": ", {platform_display} app <strong>{file_name} ({package_name})</strong>.",
@@ -2274,7 +2285,7 @@
   "saveAndProceed": "Save and Proceed",
   "saveCredentials": "資格情報の保存",
   "savedPreferences": "設定を保存しました",
-  "SBOM": "SBOM",
+  "SBOM": "SCA",
   "sbomModule": {
     "applicationName": "Application Name",
     "applicationVersion": "Application Version",
@@ -2736,6 +2747,7 @@
   },
   "storeknox": {
     "fakeAppsTitle": "Brand Abuse & Fake Apps",
+    "thirdPartyScansTitle": "Third-Party App Risk Assessment",
     "yesIgnoreAndAddToInventory": "Yes, Ignore & Add to Inventory",
     "fakeAppIgnored": "Fake app has been ignored successfully",
     "fakeAppIgnoredAndAddedToInventory": "Fake app has been ignored and added to inventory successfully",
@@ -3130,12 +3142,19 @@
   "uploadAnApp": "Upload an App",
   "uploadAppModule": {
     "linkPastePlaceholder": "Paste the link here...",
+    "blankStoreLink": "Url can't be blank",
+    "unsupportedStoreLink": "Only valid Google Play Store or Apple App Store URLs are accepted",
+    "invalidPlayStoreLink": "Playstore url should be valid, the expected format is : https://play.google.com/store/apps/details?id='{package_name}'",
+    "invalidAppStoreLink": "App Store URL should be valid. Expected format: https://apps.apple.com/'{country_code}'/app/'{app_slug}'/id'{app_id}'",
     "viaLink": "Via Link",
     "supportedStores": "Supported Store",
     "stores": "Google Play Store, Apple App Store",
     "linkUploadPopupHeader": "Upload using a link",
     "linkInputLabel": "Add a link",
-    "validURLFormatTitle": "Valid URL Format :"
+    "validURLFormatTitle": "Valid URL Format :",
+    "blankLink": "URL is required",
+    "invalidLink": "Please enter a valid URL",
+    "offsecLinkUploadStarted": "Offsec app upload via URL initiated!"
   },
   "uploadCount": "Upload Count",
   "uploadStatus": "Upload Status",
@@ -3228,5 +3247,10 @@
   "yesTurnOn": "Yes, Turn On",
   "youCanCreateTeam": "you can create a new team by",
   "youWillBeChargedOn": "次のとおり請求されます：",
-  "yourPlan": "Your Plan"
+  "yourPlan": "Your Plan",
+  "securityModule": {
+    "downloadApp": "Download App",
+    "purgeApiAnalyses": "Purge API Analyses"
+  },
+  "partnerDashboard": "Partner Dashboard"
 }

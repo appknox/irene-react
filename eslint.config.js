@@ -1,14 +1,31 @@
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import betterTailwind from 'eslint-plugin-better-tailwindcss';
+import { getDefaultSelectors } from 'eslint-plugin-better-tailwindcss/api/defaults';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+// Custom rules
+import jsxSiblingBlankLine from './eslint/rules/jsx-sibling-blank-line.js';
 import maxComponentLines from './eslint/rules/max-component-lines.js';
 import noConditionalMessageId from './eslint/rules/no-conditional-message-id.js';
+
+/*
+  A component that hands classes to a part of itself takes them in an object
+  prop, as `labelProps={{ className: '...' }}`. The plugin reads class and
+  className attributes alone, so those lists are neither wrapped nor checked
+  until the shape is named here.
+*/
+const CLASSNAME_IN_PROPS_OBJECT = [
+  {
+    kind: 'attribute',
+    name: '.*Props$',
+    match: [{ type: 'objectValues', path: '^className$' }],
+  },
+];
 
 const MULTILINE_STATEMENTS = [
   'multiline-const',
@@ -41,6 +58,7 @@ export default defineConfig([
     settings: {
       'better-tailwindcss': {
         entryPoint: 'packages/ui/styles/index.css',
+        selectors: [...getDefaultSelectors(), ...CLASSNAME_IN_PROPS_OBJECT],
       },
     },
     rules: {
@@ -67,6 +85,16 @@ export default defineConfig([
         palette lands it has to be found by hand rather than changed in one
         file. Add a token instead.
       */
+      /*
+        A class list longer than the line is read by scrolling, and its diff
+        shows the whole list rather than the state that changed. Wrapped by
+        variant group, both read at a glance. Autofixable, so it costs nothing.
+      */
+      'better-tailwindcss/enforce-consistent-line-wrapping': [
+        'error',
+        { printWidth: 100, group: 'newLine', preferSingleLine: true, strictness: 'loose' },
+      ],
+
       'better-tailwindcss/no-restricted-classes': [
         'error',
         {
@@ -90,7 +118,10 @@ export default defineConfig([
               message: 'Hardcoded radius. Use rounded-xs through rounded-2xl, or rounded-full.',
             },
             {
-              pattern: String.raw`(^|:)(p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y|w|h|size|min-w|min-h|max-w|max-h|inset|inset-x|inset-y|top|right|bottom|left)-\[(?!var\()`,
+              // Only the rhythm is held to the scale. A size, a limit or an offset is
+              // set against the viewport, the content or a percentage, none of which
+              // the scale can express, so those take an arbitrary value instead.
+              pattern: String.raw`(^|:)(p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y)-\[(?!var\()`,
               message:
                 'Hardcoded spacing. The scale is driven by --spacing; add a token if none fits.',
             },
@@ -123,14 +154,20 @@ export default defineConfig([
     plugins: {
       irene: {
         rules: {
+          'jsx-sibling-blank-line': jsxSiblingBlankLine,
           'max-component-lines': maxComponentLines,
           'no-conditional-message-id': noConditionalMessageId,
         },
       },
     },
 
-    // A message id chosen by a ternary hides both ids from the reader and the extractor.
-    rules: { 'irene/no-conditional-message-id': 'error' },
+    rules: {
+      // Element children written on their own lines read as one block without a blank line between them.
+      'irene/jsx-sibling-blank-line': 'error',
+
+      // A message id chosen by a ternary hides both ids from the reader and the extractor.
+      'irene/no-conditional-message-id': 'error',
+    },
   },
 
   {

@@ -22,17 +22,25 @@ function AkFormItem({ className, ...props }: ComponentProps<'div'>) {
   );
 }
 
-function AkFormLabel({ className, ...props }: ComponentProps<typeof LabelPrimitive.Root>) {
+/**
+ * What the label itself accepts, so a field can pass its own through.
+ *
+ * `htmlFor` is left out: the label points at the control the field generated
+ * an id for, and anything else unlinks the two.
+ */
+export type AkFormLabelProps = Omit<ComponentProps<typeof LabelPrimitive.Root>, 'htmlFor'>;
+
+function AkFormLabel({ className, ...props }: AkFormLabelProps) {
   const { error, formItemId } = useAkFormField();
 
   return (
     <AkLabel
+      className={className}
+      {...props}
       data-slot="form-label"
       // The message below the field carries the error; the label stays neutral.
       data-error={!!error}
-      className={className}
       htmlFor={formItemId}
-      {...props}
     />
   );
 }
@@ -103,6 +111,7 @@ export type AkFormFieldProps<
   name: TName;
   children: ReactNode;
   label?: ReactNode;
+  labelProps?: AkFormLabelProps;
   labelAction?: ReactNode;
   description?: ReactNode;
 };
@@ -119,6 +128,7 @@ export type AkFormFieldProps<
  * @param props.name - The form value to bind.
  * @param props.children - The control.
  * @param props.label - The field's label.
+ * @param props.labelProps - Passed to the label, to draw it differently from the default.
  * @param props.labelAction - Rendered opposite the label.
  * @param props.description - Help text under the control.
  */
@@ -126,6 +136,7 @@ function AkFormField<TFieldValues extends FieldValues, TName extends FieldPath<T
   name,
   children,
   label,
+  labelProps,
   labelAction,
   description,
   ...props
@@ -138,7 +149,13 @@ function AkFormField<TFieldValues extends FieldValues, TName extends FieldPath<T
       <AkFormItem {...props}>
         {(label || labelAction) && (
           <div className="flex items-center justify-between gap-2">
-            <AkFormLabel className="text-md font-medium">{label}</AkFormLabel>
+            <AkFormLabel
+              {...labelProps}
+              className={cn('text-md font-medium', labelProps?.className)}
+            >
+              {label}
+            </AkFormLabel>
+
             {labelAction}
           </div>
         )}

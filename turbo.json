@@ -30,10 +30,10 @@
     },
     "lint": {},
     "type-check": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "build"]
     },
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "build"]
     }
   }
 }

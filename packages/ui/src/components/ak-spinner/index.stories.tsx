@@ -4,7 +4,6 @@ import { AkSpinner } from '@irene/ui/ak-spinner';
 const meta = {
   title: 'Components/AkSpinner',
   component: AkSpinner,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
 } satisfies Meta<typeof AkSpinner>;
 
@@ -19,8 +18,11 @@ export const Sizes: Story = {
   render: () => (
     <div className="flex items-center gap-4 text-primary">
       <AkSpinner className="size-3" />
+
       <AkSpinner />
+
       <AkSpinner className="size-6" />
+
       <AkSpinner className="size-8 text-foreground-muted" />
     </div>
   ),

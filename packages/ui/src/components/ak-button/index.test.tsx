@@ -155,6 +155,57 @@ describe('noPadding', () => {
   });
 });
 
+describe('icons', () => {
+  it('renders one before the label and one after it', () => {
+    render(
+      <AkButton leftIcon={<span data-testid="left" />} rightIcon={<span data-testid="right" />}>
+        Login
+      </AkButton>
+    );
+
+    expect(screen.getByTestId('left')).toBeInTheDocument();
+    expect(screen.getByTestId('right')).toBeInTheDocument();
+  });
+
+  it('stands in for the left icon while loading', () => {
+    render(
+      <AkButton loading leftIcon={<span data-testid="left" />}>
+        Login
+      </AkButton>
+    );
+
+    expect(screen.queryByTestId('left')).toBeNull();
+    expect(screen.getByRole('button').querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('keeps the right icon while loading', () => {
+    render(
+      <AkButton loading rightIcon={<span data-testid="right" />}>
+        Login
+      </AkButton>
+    );
+
+    expect(screen.getByTestId('right')).toBeInTheDocument();
+  });
+
+  it('renders neither slot when the button is given no icons', () => {
+    const { container } = render(<AkButton>Login</AkButton>);
+
+    expect(container.querySelector('[data-slot="button-left-icon"]')).toBeNull();
+    expect(container.querySelector('[data-slot="button-right-icon"]')).toBeNull();
+  });
+
+  it('leaves the icons out of a button that renders its child', () => {
+    render(
+      <AkButton asChild leftIcon={<span data-testid="left" />}>
+        <a href="/scans">Scans</a>
+      </AkButton>
+    );
+
+    expect(screen.queryByTestId('left')).toBeNull();
+  });
+});
+
 describe('loading', () => {
   it('shows a spinner and disables the button', () => {
     render(<AkButton loading>Login</AkButton>);

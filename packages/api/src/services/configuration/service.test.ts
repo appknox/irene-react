@@ -88,6 +88,8 @@ describe('ConfigurationService.getServerConfiguration', () => {
 
 describe('the timeout on the dashboard configuration', () => {
   it('abandons the request after 30 seconds, so a hung server does not hold the page', async () => {
+    server.use(http.get(dashboardUrl, () => HttpResponse.json({})));
+
     const recorder = recordRequestConfigs();
 
     await ConfigurationService.getDashboardConfiguration().catch(() => undefined);

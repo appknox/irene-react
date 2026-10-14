@@ -1,0 +1,11 @@
+/*
+  The bar's elevation, which irene draws from --ak-appbar-box-shadow. It is a
+  light grey at a quarter opacity, so it reads as a soft edge under the bar
+  rather than a visible shadow; the border beneath does most of the separating.
+
+  Written here rather than as a utility class so the shadow the bar uses is
+  stated once, where anyone comparing it against irene will find it.
+*/
+.elevated {
+  box-shadow: var(--shadow-18);
+}

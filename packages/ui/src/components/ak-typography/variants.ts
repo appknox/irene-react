@@ -3,6 +3,10 @@ import { cva } from 'class-variance-authority';
 /*
   The design system's type scale. Each variant fixes a size and a weight, both
   of which a caller can override with a class.
+
+  Its medium is 600, which Tailwind calls semibold. The scale is the design
+  system's rather than Tailwind's, and `font-medium` at 500 reads too light
+  beside the rest of it.
 */
 export const akTypographyVariants = cva('m-0 p-0', {
   variants: {
@@ -10,11 +14,11 @@ export const akTypographyVariants = cva('m-0 p-0', {
       h1: 'text-5xl font-normal',
       h2: 'text-4xl font-normal',
       h3: 'text-3xl font-bold',
-      h4: 'text-2xl font-medium',
+      h4: 'text-2xl font-semibold',
       h5: 'text-lg font-bold',
-      h6: 'text-base font-medium',
+      h6: 'text-base font-semibold',
       subtitle1: 'text-base font-bold',
-      subtitle2: 'text-md font-medium',
+      subtitle2: 'text-md font-semibold',
       body1: 'text-base font-normal',
       body2: 'text-md font-normal',
       body3: 'text-2xs leading-none font-normal',
@@ -36,7 +40,7 @@ export const akTypographyVariants = cva('m-0 p-0', {
     fontWeight: {
       light: 'font-light',
       regular: 'font-normal',
-      medium: 'font-medium',
+      medium: 'font-semibold',
       bold: 'font-bold',
     },
 

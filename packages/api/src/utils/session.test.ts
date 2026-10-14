@@ -4,7 +4,6 @@ import {
   buildBasicCredential,
   clearStoredSession,
   createSessionFromResponse,
-  encodeBase64Utf8,
   getAuthorizationHeader,
   getSignedInUserId,
   getStoredSession,
@@ -130,34 +129,24 @@ describe('getAuthorizationHeader', () => {
   });
 });
 
-describe('encodeBase64Utf8', () => {
-  it('encodes plain ascii', () => {
-    expect(encodeBase64Utf8('1:abc')).toBe('MTphYmM=');
-  });
-
-  /**
-   * The expected values come from the Ember implementation, so a token minted
-   * by either app is accepted by the backend unchanged.
-   */
-  it.each([
-    ['7:пароль', 'NzrQv9Cw0YDQvtC70Yw='],
-    ['9:日本語-token', 'OTrml6XmnKzoqp4tdG9rZW4='],
-    ['3:café', 'MzpjYWbDqQ=='],
-  ])('encodes %s beyond latin1', (input, expected) => {
-    expect(encodeBase64Utf8(input)).toBe(expected);
-  });
-
-  it('encodes an empty string', () => {
-    expect(encodeBase64Utf8('')).toBe('');
-  });
-});
-
 describe('buildBasicCredential', () => {
   it('joins the user id and token with a colon', () => {
     expect(buildBasicCredential(42, 'tok3n')).toBe('NDI6dG9rM24=');
   });
 
-  it('matches a credential built with btoa', () => {
-    expect(buildBasicCredential(1, 'abc')).toBe(encodeBase64Utf8('1:abc'));
+  it('encodes a token that is empty', () => {
+    expect(buildBasicCredential(1, '')).toBe('MTo=');
+  });
+
+  /*
+    The expected values are what the backend already accepts, so a token minted
+    here is read the same way as one minted anywhere else.
+  */
+  it.each([
+    ['cyrillic', 7, 'пароль', 'NzrQv9Cw0YDQvtC70Yw='],
+    ['japanese', 9, '日本語-token', 'OTrml6XmnKzoqp4tdG9rZW4='],
+    ['an accent', 3, 'café', 'MzpjYWbDqQ=='],
+  ])('encodes %s, which btoa rejects on its own', (_label, userId, token, expected) => {
+    expect(buildBasicCredential(userId, token)).toBe(expected);
   });
 });

@@ -29,7 +29,6 @@ const COLORS = [
 const meta = {
   title: 'Components/AkTypography',
   component: AkTypography,
-  parameters: { layout: 'padded' },
   tags: ['autodocs'],
   argTypes: {
     variant: { control: 'select', options: VARIANTS },
@@ -54,6 +53,7 @@ export const Variants: Story = {
       {VARIANTS.map((variant) => (
         <div key={variant} className="flex items-baseline gap-4">
           <code className="w-24 shrink-0 text-xs text-foreground-muted">{variant}</code>
+
           <AkTypography {...args} variant={variant} />
         </div>
       ))}

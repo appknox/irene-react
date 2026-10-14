@@ -38,6 +38,14 @@ describe('akNotify', () => {
     expect(alert).toHaveTextContent('Invalid username or password.');
   });
 
+  it('shows a long message in full rather than clipping it to one line', async () => {
+    akNotify.success('File Uploaded Successfully. Please wait while we process your file.');
+
+    const alert = await screen.findByRole('alert');
+
+    expect(alert.querySelector('[data-slot="alert-title"]')).not.toHaveClass('line-clamp-1');
+  });
+
   it('renders a React node as the message', async () => {
     akNotify.info(<span data-testid="translated">ログイン</span>);
 

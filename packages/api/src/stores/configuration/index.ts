@@ -45,9 +45,11 @@ type FrontendData = Omit<ApiFrontendConfiguration, 'images' | 'theme' | 'integra
  * @property {function} logo - The logo for the current scheme.
  * @property {function} showRegistrationLink - Whether the login page offers a way to register.
  * @property {function} registrationLink - Where signing up sends them.
+ * @property {function} freshchatKey - The key the chat widget is installed with, empty where chat is off.
+ * @property {function} supportWidgetId - The Freshdesk widget the knowledge base opens, empty where it is off.
  * @property {function} isAppknoxUrl - Whether this tab is on an Appknox host, where Appknox answers its own support.
  * @property {function} isEnterprise - Whether this install is self-hosted, which suppresses every upsell.
- * @property {function} socketHost - The host the realtime connection opens against.
+ * @property {function} socketHost - The host the websocket connection opens against.
  * @property {function} deviceFarmUrl - The host device farm sessions run on.
  * @property {function} dashboardUrl - Where this organization's dashboard lives.
  */
@@ -74,6 +76,8 @@ interface ConfigurationStore {
   logo: () => string;
   showRegistrationLink: () => boolean;
   registrationLink: () => string;
+  freshchatKey: () => string;
+  supportWidgetId: () => string;
   isAppknoxUrl: () => boolean;
   isEnterprise: () => boolean;
   socketHost: () => string;
@@ -153,7 +157,7 @@ const DEFAULT_CONFIGURATION_DATA = {
  * All configuration data about the deployment, organization, and client.
  *
  * Lives outside React because the document title and favicon are set from it,
- * and because the realtime connection and the device farm client are opened
+ * and because the websocket connection and the device farm client are opened
  * from plain modules rather than from a component.
  */
 export const configurationStore = createStore<ConfigurationStore>((set, get) => ({
@@ -161,6 +165,8 @@ export const configurationStore = createStore<ConfigurationStore>((set, get) => 
 
   name: () => get().frontendData.name || WHITELABEL_DEFAULTS.name,
   registrationLink: () => get().frontendData.registration_link,
+  freshchatKey: () => get().integrationData.freshchat_key,
+  supportWidgetId: () => get().integrationData.freshdesk_configuration.widget_id,
   isAppknoxUrl: () => APPKNOX_HOSTS.some((host) => window.location.href.includes(host)),
   isEnterprise: () => Boolean(get().serverData.enterprise),
   socketHost: () => get().serverData.websocket || getConfigValue('IRENE_API_HOST') || SAME_ORIGIN,

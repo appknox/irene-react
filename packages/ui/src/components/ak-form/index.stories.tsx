@@ -57,7 +57,6 @@ function EmailField({ description, invalid = false }: Readonly<EmailFieldProps>)
 const meta = {
   title: 'Components/AkFormProvider',
   component: EmailField,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
   argTypes: { invalid: { control: 'boolean' } },
 } satisfies Meta<typeof EmailField>;
@@ -71,7 +70,9 @@ export const AllStates: Story = {
   render: () => (
     <div className="flex flex-col gap-8">
       <EmailField />
+
       <EmailField description="We only use this to sign you in." />
+
       <EmailField invalid />
     </div>
   ),

@@ -6,7 +6,6 @@ import { iconNamesBySet } from '@irene/ui/icons/sets';
 const meta = {
   title: 'Components/AkIcon',
   component: AkIcon,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
   argTypes: {
     size: { control: 'text' },
@@ -27,6 +26,7 @@ export const AllIcons: Story = {
           <h3 className="mb-2 text-sm font-semibold">
             {set} <span className="text-foreground-muted">({names.length})</span>
           </h3>
+
           <div className="flex flex-wrap gap-3">
             {names.map((name) => (
               <span
@@ -60,8 +60,11 @@ export const Colours: Story = {
   render: () => (
     <div className="flex items-center gap-4 text-2xl">
       <AkIcon name="material-symbols:error" className="text-danger" />
+
       <AkIcon name="material-symbols:check-circle" className="text-success" />
+
       <AkIcon name="material-symbols:info" className="text-info" />
+
       <AkIcon name="material-symbols:warning" className="text-warning" />
     </div>
   ),

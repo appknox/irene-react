@@ -49,6 +49,7 @@ function renderPages({ variant }: { variant?: RouteTransitionVariant } = {}) {
     component: () => (
       <Fragment>
         <RouteTransitionIndicator variant={variant ?? 'wash'} />
+
         <Outlet />
       </Fragment>
     ),

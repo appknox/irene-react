@@ -6,7 +6,6 @@ import { AkLabel } from '@irene/ui/ak-label';
 const meta = {
   title: 'Components/AkLabel',
   component: AkLabel,
-  parameters: { layout: 'centered' },
   tags: ['autodocs'],
   args: { children: 'ApiProject name' },
 } satisfies Meta<typeof AkLabel>;
@@ -20,6 +19,7 @@ export const WithControl: Story = {
   render: () => (
     <div className="flex w-64 flex-col gap-2">
       <AkLabel htmlFor="project">ApiProject name</AkLabel>
+
       <AkInput id="project" placeholder="Acme Mobile" />
     </div>
   ),

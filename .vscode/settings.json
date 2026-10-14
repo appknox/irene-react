@@ -10,6 +10,13 @@
   "tailwindCSS.classFunctions": ["cva", "cn", "clsx", "twMerge", "cx"],
 
   /*
+    A className nested in an object prop, as labelProps={{ className: '...' }},
+    is not an attribute, so IntelliSense ignores it. This matches the property
+    itself wherever it appears and gives those lists completions too.
+  */
+  "tailwindCSS.experimental.classRegex": ["className:\\s*['\"`]([^'\"`]*)['\"`]"],
+
+  /*
     Each Tailwind entry only scans its own folder, so the ui package's entry never
     sees packages/ui/src and IntelliSense stays silent there. Pointing each part of
     the repo at its entry gives both packages completions and hovers.

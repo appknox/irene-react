@@ -6,6 +6,7 @@ import type {
   ApiOrganization,
   ApiOrganizationMe,
   ApiOrganizationMembership,
+  ApiOrganizationNamespace,
   ApiStoreknoxOrganization,
 } from '@irene/api/services/organization';
 
@@ -54,11 +55,61 @@ export default class OrganizationService {
     );
 
   /**
-   * Fetches the StoreKnox organization.
-   * @returns The StoreKnox organization; rejects on a deployment without one.
+   * Fetches one namespace an organization has claimed.
+   *
+   * @param organizationId - The organization the namespace belongs to.
+   * @param namespaceId - The namespace to read.
+   * @returns The namespace; rejects when it has been rejected and removed.
    */
-  public static readonly getStoreknoxOrganization = () =>
-    apiRequest.get<ApiStoreknoxOrganization>(OrganizationEndpoints.storeknoxOrganization(), {
-      signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS),
-    });
+  public static readonly getOrganizationNamespace = (
+    organizationId: number | string,
+    namespaceId: number | string
+  ) =>
+    apiRequest.get<ApiOrganizationNamespace>(
+      OrganizationEndpoints.namespace(organizationId, namespaceId)
+    );
+
+  /**
+   * Approves a namespace, which lets uploads under it through.
+   *
+   * @param organizationId - The organization the namespace belongs to.
+   * @param namespaceId - The namespace to approve.
+   * @returns The approved namespace.
+   */
+  public static readonly approveOrganizationNamespace = (
+    organizationId: number | string,
+    namespaceId: number | string
+  ) =>
+    apiRequest.put<ApiOrganizationNamespace>(
+      OrganizationEndpoints.namespace(organizationId, namespaceId),
+      { is_approved: true }
+    );
+
+  /**
+   * Rejects a namespace, which removes it.
+   *
+   * @param organizationId - The organization the namespace belongs to.
+   * @param namespaceId - The namespace to reject.
+   */
+  public static readonly rejectOrganizationNamespace = (
+    organizationId: number | string,
+    namespaceId: number | string
+  ) => apiRequest.delete<void>(OrganizationEndpoints.namespace(organizationId, namespaceId));
+
+  /**
+   * Fetches the StoreKnox organization an account belongs to.
+   *
+   * The endpoint lists them, and an account has at most one, so the first is
+   * the one in use.
+   *
+   * @returns The StoreKnox organization, or null when the account is in none.
+   */
+  public static readonly getStoreknoxOrganization = async () => {
+    const page = await apiRequest.get<ApiPageEnvelope<ApiStoreknoxOrganization>>(
+      OrganizationEndpoints.storeknoxOrganization(),
+      { signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS) }
+    );
+
+    return transformPaginatedResponse(page).items[0] ?? null;
+  };
 }

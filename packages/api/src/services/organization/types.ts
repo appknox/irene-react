@@ -107,3 +107,15 @@ export interface ApiStoreknoxOrganization {
   auto_discovery_enabled: boolean;
   sk_features: ApiStoreknoxFeatures;
 }
+
+/** One namespace an organization has claimed, as the API sends it. */
+export interface ApiOrganizationNamespace {
+  id: number;
+  value: string;
+  created_on: string;
+  approved_on: string | null;
+  is_approved: boolean;
+  platform: number;
+  approved_by: number | null;
+  requested_by: number | null;
+}
