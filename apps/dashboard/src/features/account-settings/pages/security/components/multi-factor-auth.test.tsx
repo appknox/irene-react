@@ -210,6 +210,39 @@ describe('MultiFactorAuth', () => {
       ).toBeInTheDocument();
     });
 
+    it('names the address the code goes to, in bold, before sending it', async () => {
+      const user = mockSignedInUser();
+
+      await renderAtRoute(SECURITY_SETTINGS);
+      await pressInRow(EMAIL, akMT('enable'));
+
+      const confirmation = (await dialog()).querySelector(
+        '[data-test-mfa-email-enable-send-confirm]'
+      );
+
+      expect(confirmation?.querySelector('strong')).toHaveTextContent(user.email ?? '');
+    });
+
+    it('names the address the code was sent to, in bold, once it is sent', async () => {
+      const user = mockSignedInUser();
+
+      answerPosts(() => HttpResponse.json(buildMfaSetupToken()));
+
+      await renderAtRoute(SECURITY_SETTINGS);
+      await pressInRow(EMAIL, akMT('enable'));
+      await pressInDialog(akMT('continue'));
+
+      const sent = await waitFor(() => {
+        const box = document.querySelector('[data-test-mfa-email-sent]');
+
+        expect(box).toBeInTheDocument();
+
+        return box;
+      });
+
+      expect(sent?.querySelector('strong')).toHaveTextContent(user.email ?? '');
+    });
+
     it('says so when the code cannot be sent', async () => {
       mockSignedInUser();
       answerPosts(() => HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR }));
@@ -413,8 +446,8 @@ describe('MultiFactorAuth', () => {
   });
 
   describe('turning MFA off', () => {
-    it('emails a code for email MFA, then turns it off with that code', async () => {
-      mockSignedInUser();
+    it('says where the code will go for email MFA, then turns it off with the code sent there', async () => {
+      const user = mockSignedInUser();
       mockMfaMethods(EMAIL);
       const code = otp();
 
@@ -426,6 +459,11 @@ describe('MultiFactorAuth', () => {
 
       await renderAtRoute(SECURITY_SETTINGS);
       await pressInRow(EMAIL, akMT('disable'));
+
+      expect(
+        (await dialog()).querySelector('[data-test-mfa-disable-send-confirm] strong')
+      ).toHaveTextContent(user.email ?? '');
+
       await pressInDialog(akMT('continue'));
 
       expect(await dialog()).toHaveTextContent(
@@ -447,11 +485,14 @@ describe('MultiFactorAuth', () => {
 
       await renderAtRoute(SECURITY_SETTINGS);
       await pressInRow(APP, akMT('disable'));
-      await pressInDialog(akMT('continue'));
 
       expect(await dialog()).toHaveTextContent(
         `${akMT('modalCard.disableMFA.enterOTP')} ${akMT('modalCard.disableMFA.viaApp')}`
       );
+
+      expect(
+        within(await dialog()).queryByRole('button', { name: akMT('continue') })
+      ).not.toBeInTheDocument();
 
       await typeCode(code);
       await pressInDialog(akMT('confirm'));
@@ -466,7 +507,6 @@ describe('MultiFactorAuth', () => {
 
       await renderAtRoute(SECURITY_SETTINGS);
       await pressInRow(APP, akMT('disable'));
-      await pressInDialog(akMT('continue'));
 
       expect(await dialog()).toHaveTextContent(akMT('disableMFADenied'));
     });
@@ -494,7 +534,6 @@ describe('MultiFactorAuth', () => {
 
       await renderAtRoute(SECURITY_SETTINGS);
       await pressInRow(APP, akMT('disable'));
-      await pressInDialog(akMT('continue'));
       await typeCode(otp());
       await pressInDialog(akMT('confirm'));
 

@@ -1304,8 +1304,8 @@
       "enterCode": "After scanning the barcode image, the app will display a six-digit code, enter that code below."
     },
     "enableMFAEmail": {
-      "sendMailMsg": "An OTP code will be send to email ",
-      "description": "We have sent a security code to email ",
+      "sendMailMsg": "We will send a one-time code to <strong>{email}</strong>.",
+      "description": "We have sent a security code to <strong>{email}</strong>.",
       "enterCode": "Enter OTP"
     },
     "disableMFA": {
