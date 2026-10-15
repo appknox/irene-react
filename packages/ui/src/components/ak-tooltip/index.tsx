@@ -6,7 +6,8 @@ import { cn } from '@irene/ui/cn';
 
 import { akTooltipVariants } from './variants';
 
-type AkTooltipProps = ComponentProps<typeof TooltipPrimitive.Content> &
+/* `title` is the tooltip's content, not the HTML attribute, so it takes markup as well as text. */
+type AkTooltipProps = Omit<ComponentProps<typeof TooltipPrimitive.Content>, 'title'> &
   VariantProps<typeof akTooltipVariants> & {
     title: ReactNode;
     children: ReactNode;
