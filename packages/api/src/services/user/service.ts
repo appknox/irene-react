@@ -1,6 +1,6 @@
 import { apiRequest, REQUEST_ABORT_TIMEOUT_MS } from '@irene/api/request';
 import { transformUserResponse } from '@irene/api/utils/transforms';
-import type { ApiUserResponse } from '@irene/api/services/user';
+import type { ApiUserLanguage, ApiUserResponse } from '@irene/api/services/user';
 
 import { UserEndpoints } from './endpoints';
 
@@ -22,4 +22,16 @@ export default class UserService {
 
     return transformUserResponse(response);
   };
+
+  /**
+   * Sets the language the account reads the product in.
+   *
+   * Sent form-encoded, as irene sends it: the endpoint reads `lang` from a form
+   * body. The server stores it on the account, so every session and device
+   * follows it from the next load.
+   *
+   * @param lang - The language to read in.
+   */
+  public static readonly setLanguage = (lang: ApiUserLanguage) =>
+    apiRequest.post(UserEndpoints.language(), new URLSearchParams({ lang }));
 }

@@ -5,7 +5,7 @@ import { type ComponentProps, type ReactNode } from 'react';
 import { cn } from '@irene/ui/cn';
 
 import { AK_TABLE_FEATURES, type AkTableColumn } from './helpers';
-import { akTableVariants } from './variants';
+import { akTableCellVariants, akTableVariants } from './variants';
 
 type AkTableProps<TData extends RowData> = Omit<ComponentProps<'table'>, 'children'> &
   VariantProps<typeof akTableVariants> & {
@@ -84,7 +84,11 @@ function AkTable<TData extends RowData>({
           {table.getHeaderGroups().map((group) => (
             <tr key={group.id}>
               {group.headers.map((header) => (
-                <th key={header.id} scope="col">
+                <th
+                  key={header.id}
+                  scope="col"
+                  className={akTableCellVariants({ align: header.column.columnDef.meta?.align })}
+                >
                   {header.isPlaceholder ? null : <table.FlexRender header={header} />}
                 </th>
               ))}
@@ -96,7 +100,10 @@ function AkTable<TData extends RowData>({
           {rows.map((row) => (
             <tr key={row.id} data-slot="table-row">
               {row.getAllCells().map((cell) => (
-                <td key={cell.id}>
+                <td
+                  key={cell.id}
+                  className={akTableCellVariants({ align: cell.column.columnDef.meta?.align })}
+                >
                   <table.FlexRender cell={cell} />
                 </td>
               ))}

@@ -372,3 +372,57 @@ nothing, so an unported message is visible rather than silent.
 | Account language       | `/login`, sign in with a Japanese account           | Dashboard opens in Japanese                   |
 | Whitelabel branding    | `/login` on a deployment with its own configuration | Its name, logo, favicon and colours           |
 | No branding configured | `/login` on a plain deployment                      | Appknox name and logo                         |
+
+## Account settings
+
+Every tab has content.
+
+| Scenario                   | How to get there                                                                  | Expected                                                                                     |
+| -------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Opens on general           | `/dashboard/settings`, or the side navigation's settings item                     | Lands on `/dashboard/settings/general` with the General tab underlined                       |
+| Switch tabs                | Press any tab                                                                     | The URL and the tab title follow the tab                                                     |
+| Keyboard                   | Tab into the row, then the arrow keys, then Enter                                 | Arrows move focus without navigating; Enter opens the focused tab                            |
+| CYOD hidden                | Organization without the `cyod` feature                                           | Four tabs: General, Security, Developer Settings, Notification Preferences                   |
+| CYOD shown                 | Organization with the `cyod` feature                                              | CYOD Settings sits between Developer Settings and Notification Preferences                   |
+| CYOD by URL, tab hidden    | `/dashboard/settings/cyod-settings` without the feature                           | The page opens with no tab underlined, as in irene                                           |
+| Account language shown     | General tab, signed in as a Japanese account                                      | The language control reads 日本語                                                            |
+| Change language            | General tab, pick the other language                                              | The page switches at once, the control locks, then the page reloads in that language         |
+| Language follows account   | Change language, then sign in on another browser                                  | That browser opens in the chosen language too                                                |
+| Language refused           | General tab with the `lang` request failing                                       | The server's message, or "Something went wrong, please try again"; no reload                 |
+| Password fields required   | Security tab, press Change Password with the fields empty                         | "Enter Current Password" and "Enter New Password" under their fields; nothing sent           |
+| Passwords differ           | Security tab, two different new passwords                                         | "Passwords doesnt match" under Confirm Password                                              |
+| Wrong current password     | Security tab, a wrong current password                                            | The server's message under Current Password                                                  |
+| Weak new password          | Security tab, a new password the server rejects                                   | The server's reasons under New Password                                                      |
+| Password changed           | Security tab, valid passwords                                                     | Lands on `/login` with "Your password has been changed"; the old session no longer works     |
+| MFA methods listed         | Security tab                                                                      | Authenticator App and Email, the active one marked with an "Enabled" chip                    |
+| Enable email MFA           | Security tab, no MFA, Enable on Email                                             | Continue emails a code; entering it turns Email on                                           |
+| Enable app MFA             | Security tab, no MFA, Enable on Authenticator App                                 | QR code to scan; the app's code turns it on                                                  |
+| Switch email → app         | Security tab, Email active, Enable on Authenticator App                           | Emailed code, then QR, then the app's code                                                   |
+| Switch app → email         | Security tab, app active, Enable on Email                                         | App code, then emailed code                                                                  |
+| Disable MFA                | Security tab, Disable on the active method                                        | A code (emailed for Email), then the method turns off                                        |
+| Wrong or empty code        | Any MFA modal                                                                     | "Please enter a valid OTP", or "Enter the six digit OTP" when empty                          |
+| MFA mandated               | Account in an organization that mandates MFA                                      | No Disable button; a yellow notice says why, with an Organization Settings link for an owner |
+| No tokens yet              | Developer Settings tab, account with no API tokens                                | The name field and Generate token button; no table                                           |
+| Generate a token           | Developer Settings tab, type a name, Generate token                               | "Personal access token generated successfully."; the token tops the table; the field clears  |
+| Empty token name           | Generate token with the field empty or only spaces                                | "Please enter the token name" under the field; nothing sent                                  |
+| Duplicate token name       | Generate a token with a name already used                                         | "Duplicate token name…" under the field                                                      |
+| Copy a key                 | Copy icon on a row                                                                | "Token Copied!"; the key is on the clipboard                                                 |
+| Revoke a token             | Delete icon on a row, then Delete                                                 | Asks first; "Personal access token revoked successfully"; the row goes                       |
+| Cancel a revoke            | Delete icon, then Cancel                                                          | The modal closes; the token stays                                                            |
+| More than ten tokens       | Account with eleven or more tokens                                                | Only the newest ten are listed, as in irene                                                  |
+| Preferences shown          | Notification Preferences tab                                                      | Each toggle matches the account's preference; toggles hold with a spinner until they arrive  |
+| Flip a preference          | Flip any toggle                                                                   | It moves at once; "Notification preference updated"                                          |
+| VA notification on         | Turn the VA notification on                                                       | SAST, DAST and API Scan turn off and lock; hovering one explains why                         |
+| VA notification off        | Turn the VA notification off                                                      | The three individual toggles unlock                                                          |
+| Update refused             | Flip a toggle with the request failing                                            | It moves back; "Failed to update notification preference…"                                   |
+| Preferences unavailable    | Tab with the preferences request failing                                          | "Failed to fetch notification preferences."; every toggle off                                |
+| Group tooltips             | Hover or Tab to the info icon beside each group title                             | Explains how the two groups interact                                                         |
+| CYOD off                   | Organization without the `cyod` feature, open `/dashboard/settings/cyod-settings` | No CYOD tab; the URL opens an empty panel                                                    |
+| Registration off, member   | CYOD on, registration off, as a member                                            | "Turn on CYOD", asking them to contact the owner                                             |
+| Registration off, owner    | The same, as the owner                                                            | "Turn on CYOD", pointing at Organization Settings                                            |
+| Connected devices          | CYOD on, registration on, a device online                                         | The device with its registration date and an "Online" chip; offline devices are left out     |
+| No device online           | No device, or only offline ones                                                   | "No Device Registered", pointing at the Register a device button                             |
+| Device farm not configured | Organization with CYOD but no device-farm token                                   | "CYOD device farm is not configured…"                                                        |
+| Refresh devices            | Refresh icon beside the heading                                                   | Loading, then the list as it now stands                                                      |
+| Register a device          | Register a device                                                                 | A drawer with five numbered steps; macOS, Windows and Linux Mercer downloads                 |
+| Copy server URL            | Copy icon in step 3                                                               | "Copied to clipboard!"; the API host is on the clipboard                                     |

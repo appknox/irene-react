@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
@@ -67,5 +68,39 @@ describe('the timeout on the account', () => {
     // intercepted request never honours.
     expect(recorder.latest()?.signal).toBeInstanceOf(AbortSignal);
     expect(recorder.latest()?.signal?.aborted).toBe(false);
+  });
+});
+
+describe('UserService.setLanguage', () => {
+  const languageUrl = buildAPITestURL(UserEndpoints.language());
+
+  it('posts the language form-encoded, as the endpoint reads it', async () => {
+    const lang = faker.helpers.arrayElement(['en', 'ja'] as const);
+    let contentType: string | null = null;
+    let body = '';
+
+    server.use(
+      http.post(languageUrl, async ({ request }) => {
+        contentType = request.headers.get('content-type');
+        body = await request.text();
+
+        return HttpResponse.json({});
+      })
+    );
+
+    await UserService.setLanguage(lang);
+
+    expect(contentType).toContain('application/x-www-form-urlencoded');
+    expect(new URLSearchParams(body).get('lang')).toBe(lang);
+  });
+
+  it('rejects when the request is refused', async () => {
+    server.use(
+      http.post(languageUrl, () => HttpResponse.json({}, { status: HTTP_STATUS_CODES.BAD_REQUEST }))
+    );
+
+    const error = await UserService.setLanguage('en').catch((reason: unknown) => reason);
+
+    expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.BAD_REQUEST);
   });
 });

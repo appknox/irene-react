@@ -98,6 +98,7 @@ export function buildDashboardNavItems(access: DashboardNavAccess): DashboardNav
       label: akMT('organization'),
       icon: 'material-symbols:group',
       to: '/dashboard/organization/namespaces',
+      activeWhen: ['/dashboard/organization/settings'],
     },
 
     access.hasPublicApis && {
@@ -110,8 +111,9 @@ export function buildDashboardNavItems(access: DashboardNavAccess): DashboardNav
     {
       id: 'account-settings',
       label: akMT('accountSettings'),
-      icon: 'material-symbols:account-box',
+      icon: 'material-symbols:settings-account-box-outline-rounded',
       to: '/dashboard/settings/general',
+      activeWhen: ['/dashboard/settings'],
     },
 
     hasMarketplace && {

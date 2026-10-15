@@ -217,10 +217,14 @@ describe('verb helpers', () => {
     expect(seen.url).toContain('api/ping');
   });
 
-  it('post, put and patch carry the body; get and delete do not', async () => {
+  it('post, put, patch and delete carry the body; get does not', async () => {
     const posted = intercept('post');
     await apiRequest.post('api/ping', { a: 1 });
     expect(JSON.parse(posted.body)).toEqual({ a: 1 });
+
+    const deleted = intercept('delete');
+    await apiRequest.delete('api/ping', { b: 2 });
+    expect(JSON.parse(deleted.body)).toEqual({ b: 2 });
 
     const got = intercept('get');
     await apiRequest.get('api/ping');

@@ -230,7 +230,7 @@ describe('what each item carries', () => {
     {
       id: 'account-settings',
       label: akMT('accountSettings'),
-      icon: 'material-symbols:account-box',
+      icon: 'material-symbols:settings-account-box-outline-rounded',
       to: '/dashboard/settings/general',
     },
     {
