@@ -1,9 +1,8 @@
 import { faker } from '@faker-js/faker';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ReactNode } from 'react';
 
 import { ConfigurationEndpoints } from '@irene/api/services/configuration/endpoints';
 import { RegistrationEndpoints } from '@irene/api/services/registration/endpoints';
@@ -15,18 +14,34 @@ import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
 /*
-  The widget's script never loads in a test environment, so the real hook hands
-  back no `executeRecaptcha` and the page sends its disabled placeholder. Held
-  here so a test can put a score in its place.
-*/
-const recaptcha: { score?: string } = {};
+  The widget's script never loads in a test environment, so the provider hands
+  back no `executeRecaptcha` and the page sends its disabled placeholder.
 
-vi.mock('react-google-recaptcha-v3', () => ({
-  GoogleReCaptchaProvider: ({ children }: { children: ReactNode }) => children,
-  useGoogleReCaptcha: () => ({
-    executeRecaptcha: recaptcha.score ? () => Promise.resolve(recaptcha.score) : undefined,
-  }),
-}));
+  A test that needs a score loads the widget the way a browser would, through
+  the real provider, rather than mocking the module: workers share modules
+  across files (`isolate: false`), so a module mock here is ignored whenever
+  another file in the same worker loaded the page first.
+*/
+const RECAPTCHA_SCRIPT_ID = 'google-recaptcha-v3';
+
+/**
+ * Puts the widget's global in place and fires the load event the provider
+ * waits for on its script, so the page gets a working `executeRecaptcha`.
+ *
+ * @param token - The token the widget issues for any action.
+ */
+function loadRecaptchaWidget(token: string) {
+  Object.assign(window, {
+    grecaptcha: {
+      ready: (onReady: () => void) => onReady(),
+      execute: () => Promise.resolve(token),
+    },
+  });
+
+  act(() => {
+    document.getElementById(RECAPTCHA_SCRIPT_ID)?.dispatchEvent(new Event('load'));
+  });
+}
 
 const registrationUrl = buildAPITestURL(RegistrationEndpoints.register());
 
@@ -59,12 +74,10 @@ describe('RegisterPage', () => {
   });
 
   afterEach(() => {
-    delete recaptcha.score;
+    Reflect.deleteProperty(window, 'grecaptcha');
   });
 
   it('posts the token the reCAPTCHA widget issued', async () => {
-    recaptcha.score = 'recaptcha-score-token';
-
     let sent: Record<string, string> | undefined;
 
     server.use(
@@ -76,6 +89,7 @@ describe('RegisterPage', () => {
     );
 
     await renderAtRoute('/register');
+    loadRecaptchaWidget('recaptcha-score-token');
     await register();
 
     await waitFor(() => expect(sent?.recaptcha).toBe('recaptcha-score-token'));
