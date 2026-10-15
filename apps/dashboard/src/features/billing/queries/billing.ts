@@ -9,6 +9,8 @@ export const billingKeys = {
     [...billingKeys.all(organizationId), 'subscriptions'] as const,
   invoices: (organizationId: string) => [...billingKeys.all(organizationId), 'invoices'] as const,
   license: (organizationId: string) => [...billingKeys.all(organizationId), 'license'] as const,
+  subscriptionInfo: (organizationId: string) =>
+    [...billingKeys.all(organizationId), 'subscription-info'] as const,
 };
 
 /**
@@ -61,4 +63,19 @@ export const licenseOptions = (organizationId: string) =>
   queryOptions({
     queryKey: billingKeys.license(organizationId),
     queryFn: () => BillingService.getLicense(organizationId).catch(() => null),
+  });
+
+/**
+ * Builds the query for the subscription term and license counts.
+ *
+ * Any refusal reads as "nothing to show", as irene's route reads it: the usual
+ * one is the 404 an organization that does not show its subscription gets.
+ *
+ * @param organizationId - The organization.
+ * @returns Query options resolving to the term and counts, or null where there are none.
+ */
+export const subscriptionInfoOptions = (organizationId: string) =>
+  queryOptions({
+    queryKey: billingKeys.subscriptionInfo(organizationId),
+    queryFn: () => BillingService.getSubscriptionInfo(organizationId).catch(() => null),
   });

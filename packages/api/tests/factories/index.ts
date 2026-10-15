@@ -13,7 +13,13 @@ export {
   buildStoreknoxOrganization,
 } from '@tests/factories/organization';
 
-export { buildInvoice, buildLicense, buildPlan, buildSubscription } from '@tests/factories/billing';
+export {
+  buildInvoice,
+  buildLicense,
+  buildPlan,
+  buildSubscription,
+  buildSubscriptionInfo,
+} from '@tests/factories/billing';
 
 export { buildPartner } from '@tests/factories/partner';
 export { buildProject } from '@tests/factories/project';

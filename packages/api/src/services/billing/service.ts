@@ -8,6 +8,7 @@ import type {
   ApiLicense,
   ApiPlan,
   ApiSubscription,
+  ApiSubscriptionInfo,
 } from '@irene/api/services/billing';
 
 import { BillingEndpoints } from './endpoints';
@@ -79,6 +80,18 @@ export default class BillingService {
    */
   public static readonly getInvoiceDownload = (downloadPath: string) =>
     apiRequest.get<ApiInvoiceDownload>(downloadPath.replace(/^\/+/, ''));
+
+  /**
+   * Fetches the subscription term and license counts. The server answers 404
+   * to anyone but an owner, and where the organization does not show them.
+   *
+   * @param organizationId - The organization.
+   * @returns The term and the counts.
+   */
+  public static readonly getSubscriptionInfo = (organizationId: number | string) =>
+    apiRequest.get<ApiSubscriptionInfo>(BillingEndpoints.subscriptionInfo(organizationId), {
+      signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS),
+    });
 
   /**
    * Fetches the enterprise license. The server answers 404 where there is none
