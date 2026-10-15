@@ -454,3 +454,19 @@ Owners only: the side navigation offers it to an owner of an organization whose 
 | Copy license key       | Copy beside the license key                             | "Copied to clipboard!"                                                                             |
 | License expiring       | License ending within 30 days                           | A warning naming the date                                                                          |
 | License expired        | License past its expiry date                            | An error saying it has expired                                                                     |
+
+## Subscription
+
+Owners only, where the organization shows its subscription: the side navigation offers it to them alone.
+
+| Scenario             | How to get there                                        | Expected                                                       |
+| -------------------- | ------------------------------------------------------- | -------------------------------------------------------------- |
+| Subscription details | `/dashboard/subscription` as such an owner              | Start date, end date, licenses procured and licenses remaining |
+| Values missing       | Subscription without dates or counts                    | A dash in place of each                                        |
+| Not available        | The server has no subscription to show                  | "Subscription information is not available"                    |
+| Member               | The URL as a member                                     | Sent to `/dashboard/projects`                                  |
+| Subscription hidden  | The URL as an owner whose organization does not show it | Sent to `/dashboard/projects`                                  |
+| Term ending          | Term ending within 30 days                              | A warning naming the date                                      |
+| Term ended           | Term already ended                                      | An error naming the date                                       |
+| No licenses left     | Licenses remaining at 0                                 | An error that new apps cannot be added                         |
+| Few licenses left    | A tenth or fewer of the licenses left                   | A warning with the count left                                  |

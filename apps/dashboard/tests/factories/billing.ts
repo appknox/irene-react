@@ -1,5 +1,12 @@
 import { faker } from '@faker-js/faker';
-import type { ApiInvoice, ApiLicense, ApiPlan, ApiSubscription } from '@irene/api/services/billing';
+
+import type {
+  ApiInvoice,
+  ApiLicense,
+  ApiPlan,
+  ApiSubscription,
+  ApiSubscriptionInfo,
+} from '@irene/api/services/billing';
 
 /** A plan, with a price and a checkout link for each billing period. */
 export const buildPlan = (overrides: Partial<ApiPlan> = {}): ApiPlan => {
@@ -79,3 +86,19 @@ export const buildLicense = (overrides: Partial<ApiLicense> = {}): ApiLicense =>
   per_scan_quantity: 0,
   ...overrides,
 });
+
+/** A subscription term with some of its licenses still free. */
+export const buildSubscriptionInfo = (
+  overrides: Partial<ApiSubscriptionInfo> = {}
+): ApiSubscriptionInfo => {
+  const procured = faker.number.int({ min: 5, max: 100 });
+
+  return {
+    id: faker.number.int({ min: 1, max: 9999 }),
+    start_date: faker.date.past().toISOString(),
+    expiry_date: faker.date.future().toISOString(),
+    original_licenses: procured,
+    licenses_remaining: faker.number.int({ min: 0, max: procured }),
+    ...overrides,
+  };
+};
