@@ -69,8 +69,7 @@ export function MfaEmailEnable({ email, onClose }: Readonly<MfaEmailEnableProps>
         <>
           <AkModalBody>
             <AkTypography data-test-mfa-email-enable-send-confirm>
-              {akMT('modalCard.enableMFAEmail.sendMailMsg')}
-              <strong>{email}</strong>
+              {akMT('modalCard.enableMFAEmail.sendMailMsg', { email })}
             </AkTypography>
           </AkModalBody>
 
