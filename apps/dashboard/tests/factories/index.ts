@@ -1,4 +1,5 @@
 export * from '@tests/factories/analytics';
+export * from '@tests/factories/billing';
 export * from '@tests/factories/configuration';
 export * from '@tests/factories/mfa';
 export * from '@tests/factories/notification';

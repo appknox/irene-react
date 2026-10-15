@@ -15,6 +15,7 @@ export {
   buildStoreknoxOrganization,
 } from '@tests/factories/organization';
 
+export { buildInvoice, buildLicense, buildPlan, buildSubscription } from '@tests/factories/billing';
 export { buildMfa, buildMfaSetupToken } from '@tests/factories/mfa';
 export { buildVaNotificationPreference } from '@tests/factories/notification-preference';
 export { buildPartner } from '@tests/factories/partner';

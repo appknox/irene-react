@@ -426,3 +426,31 @@ Every tab has content.
 | Refresh devices            | Refresh icon beside the heading                                                   | Loading, then the list as it now stands                                                      |
 | Register a device          | Register a device                                                                 | A drawer with five numbered steps; macOS, Windows and Linux Mercer downloads                 |
 | Copy server URL            | Copy icon in step 3                                                               | "Copied to clipboard!"; the API host is on the clipboard                                     |
+
+## Billing
+
+Owners only: the side navigation offers it to an owner of an organization whose billing is not hidden.
+
+| Scenario               | How to get there                                        | Expected                                                                                           |
+| ---------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Plans                  | `/dashboard/billing`, organization with no subscription | A card per plan, listing what it includes, with a quantity stepper and a Pay button                |
+| Billing period         | Choose Quarterly, Half Yearly or Yearly                 | Every plan's Pay button shows that period's price                                                  |
+| Quantity               | + and − on a plan                                       | The price multiplies by the quantity; − is disabled at one                                         |
+| Pay                    | Pay on a plan, production build                         | The payment provider's checkout opens with the quantity chosen                                     |
+| Pay outside production | Pay on a development or staging build                   | Nothing happens, as in irene                                                                       |
+| Active subscription    | Organization with a subscription                        | Current plan, billing period, and when it renews; no plans                                         |
+| Trial                  | Subscription in trial                                   | "Your free trial will be converted into paid subscription on" and the date                         |
+| Cancel subscription    | Cancel Subscription, then confirm                       | "Subscription Cancelled Successfully"; the card now says when it will expire; the button goes      |
+| Keep subscription      | Cancel Subscription, then Keep subscription             | The modal closes; nothing changes                                                                  |
+| Invoices               | Organization with invoices                              | A row each: id, plan, amount in dollars, date or Pending, Paid or Unpaid                           |
+| Download invoice       | Download on a row                                       | The PDF opens                                                                                      |
+| Enterprise license     | Self-hosted deployment with `IRENE_SHOW_LICENSE` on     | The license: plan and status, apps or scans, validity dates, key and licensee, in place of billing |
+| License hidden         | The same, with the organization's billing hidden        | Billing instead of the license                                                                     |
+| Invoice due            | Unpaid invoice with a due date ahead                    | "Due" and the date; an "Unpaid" chip                                                               |
+| Invoice overdue        | Unpaid invoice past its due date                        | An "Overdue" chip                                                                                  |
+| No invoices            | Organization with no invoices                           | "No invoices yet"                                                                                  |
+| Subscription status    | Active, trial or cancelled subscription                 | The card shows an Active, Trial or Cancelled chip, and the number of apps                          |
+| Subscription ending    | Cancelled subscription or trial ending within 30 days   | A warning that paid features stop on that date                                                     |
+| Copy license key       | Copy beside the license key                             | "Copied to clipboard!"                                                                             |
+| License expiring       | License ending within 30 days                           | A warning naming the date                                                                          |
+| License expired        | License past its expiry date                            | An error saying it has expired                                                                     |
