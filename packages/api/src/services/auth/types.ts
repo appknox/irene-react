@@ -49,6 +49,13 @@ export interface ApiResetTokenResponse {
   username: string;
 }
 
+/* Request shape for the change password endpoint: the current password, then the new one twice. */
+export interface ApiChangePasswordRequest {
+  old_password: string;
+  password: string;
+  confirm_password: string;
+}
+
 /* Request shape for the reset password endpoint.*/
 export interface ApiResetPasswordRequest {
   token: string;
