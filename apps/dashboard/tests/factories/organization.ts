@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 import type {
+  ApiCyodRegisteredDevice,
   ApiOrganization,
   ApiOrganizationAiFeatures,
   ApiOrganizationFeatures,
@@ -114,5 +115,18 @@ export const buildOrganizationNamespace = (
   platform: 0,
   approved_by: null,
   requested_by: faker.number.int({ min: 1, max: 9999 }),
+  ...overrides,
+});
+
+/** A device registered through Mercer, online unless the test says otherwise. */
+export const buildCyodRegisteredDevice = (
+  overrides: Partial<ApiCyodRegisteredDevice> = {}
+): ApiCyodRegisteredDevice => ({
+  name: faker.commerce.productName(),
+  serial_number: faker.string.alphanumeric({ length: 12, casing: 'upper' }),
+  model: faker.commerce.product(),
+  platform: faker.helpers.arrayElement([0, 1]),
+  is_connected: true,
+  created_on: faker.date.past().toISOString(),
   ...overrides,
 });

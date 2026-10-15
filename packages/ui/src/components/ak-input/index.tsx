@@ -84,9 +84,11 @@ function AkInput({
               'transition-colors hover:text-foreground disabled:pointer-events-none'
             )}
           >
+            {/* The icon shows the field's state: a struck-through eye while the password is hidden. */}
             <AkIcon
-              name={isRevealed ? 'material-symbols:visibility-off' : 'material-symbols:visibility'}
+              name={isRevealed ? 'material-symbols:visibility' : 'material-symbols:visibility-off'}
               className="size-4"
+              data-test-reveal-icon={isRevealed ? 'visible' : 'hidden'}
             />
           </button>
         )}

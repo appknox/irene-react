@@ -5,6 +5,7 @@ import { UserService } from '@irene/api/services/user';
 export const userKeys = {
   all: () => ['user'] as const,
   detail: (userId: number | string) => [...userKeys.all(), 'detail', userId] as const,
+  language: () => [...userKeys.all(), 'language'] as const,
 };
 
 /**

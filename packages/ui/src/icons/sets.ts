@@ -18,7 +18,6 @@
 /** https://icon-sets.iconify.design/material-symbols/ */
 export const materialSymbols = [
   'account-balance',
-  'account-box',
   'account-circle',
   'account-tree',
   'add',
@@ -168,6 +167,7 @@ export const materialSymbols = [
   'security',
   'send',
   'settings',
+  'settings-account-box-outline-rounded',
   'settings-applications',
   'shape-line',
   'shield',
@@ -209,6 +209,7 @@ export const materialSymbols = [
 
 /** https://icon-sets.iconify.design/mdi/ */
 export const mdi = [
+  'apple',
   'calendar-month-outline',
   'close-circle-outline',
   'checkbox-blank-outline',
@@ -217,7 +218,9 @@ export const mdi = [
   'file-certificate-outline',
   'fire',
   'insert-drive-file',
+  'linux',
   'microsoft-excel',
+  'microsoft-windows',
   'minus-box',
   'progress-clock',
   'radio-button-checked',
