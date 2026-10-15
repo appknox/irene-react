@@ -20,10 +20,7 @@ export function MfaEmailCode({ email, value, onChange }: Readonly<MfaEmailCodePr
   return (
     <div className="flex flex-col gap-5.25">
       <div className="rounded-sm bg-divider px-4 py-3" data-test-mfa-email-sent>
-        <AkTypography>
-          {akMT('modalCard.enableMFAEmail.description')}
-          <strong>{email}</strong>
-        </AkTypography>
+        <AkTypography>{akMT('modalCard.enableMFAEmail.description', { email })}</AkTypography>
       </div>
 
       <MfaOtpInput

@@ -131,6 +131,7 @@ export function MultiFactorAuth() {
 
       {openModal === 'disable' && (
         <MfaDisable
+          email={user.email}
           isEmailMfaEnabled={isEnabled(ENUMS.MFA_METHOD.HOTP)}
           isAppMfaEnabled={isEnabled(ENUMS.MFA_METHOD.TOTP)}
           canDisableMfa={canDisableMfa}

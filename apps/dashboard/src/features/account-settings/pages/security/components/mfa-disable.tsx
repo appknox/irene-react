@@ -23,6 +23,7 @@ import { MfaModal, MfaModalFooter } from './mfa-modal';
 import { MfaOtpInput } from './mfa-otp-input';
 
 interface MfaDisableProps {
+  email: string;
   isEmailMfaEnabled: boolean;
   isAppMfaEnabled: boolean;
   canDisableMfa: boolean;
@@ -32,29 +33,33 @@ interface MfaDisableProps {
 /**
  * Turns the active second factor off, once a code from it confirms the request.
  *
- * For email, Continue asks the server to send the code: it emails one and
- * refuses the request with an `otp` error, which is the expected answer, not a
- * failure. For the app there is nothing to send.
+ * For email, a first step says where the code will go, and Continue asks the
+ * server to send it: it emails one and refuses the request with an `otp`
+ * error, which is the expected answer, not a failure. For the app there is
+ * nothing to send, so the modal opens on the code. irene opens both on the
+ * email notice, which tells an app user to expect an email that never comes.
  *
- * Two of irene's quirks are kept so the screens match: the confirmation step
- * says a code will be emailed whichever factor is active, and the code step
- * repeats the notice that MFA cannot be disabled. The notice is irene's
- * fallback for an account that may not disable MFA, which never reaches this
- * modal, and irene's own tests assert it on the code step.
+ * One of irene's quirks is kept so the screens match: the code step repeats
+ * the notice that MFA cannot be disabled. The notice is irene's fallback for
+ * an account that may not disable MFA, which never reaches this modal, and
+ * irene's own tests assert it on the code step.
  *
+ * @param props.email - The account's address, which the email confirmation step names.
  * @param props.isEmailMfaEnabled - Whether email is the active factor.
  * @param props.isAppMfaEnabled - Whether an authenticator app is.
  * @param props.canDisableMfa - Whether the organization lets this account turn MFA off.
  * @param props.onClose - Called when the modal closes, whether or not MFA was turned off.
  */
 export function MfaDisable({
+  email,
   isEmailMfaEnabled,
   isAppMfaEnabled,
   canDisableMfa,
   onClose,
 }: Readonly<MfaDisableProps>) {
   const queryClient = useQueryClient();
-  const [isCodeStep, setIsCodeStep] = useState(false);
+  /* Only email has anything to send first, so the app opens on the code. */
+  const [isCodeStep, setIsCodeStep] = useState(!isEmailMfaEnabled);
   const [otp, setOtp] = useState('');
 
   /* irene checks email first, so an account somehow on both disables email. */
@@ -66,10 +71,6 @@ export function MfaDisable({
 
   const sendCode = useMutation({
     mutationFn: async () => {
-      if (!isEmailMfaEnabled) {
-        return;
-      }
-
       try {
         await MfaService.disableMfa({ method: ENUMS.MFA_METHOD.HOTP });
       } catch (error) {
@@ -112,7 +113,7 @@ export function MfaDisable({
         <AkModalBody className="flex flex-col">
           {isConfirmStep ? (
             <AkTypography data-test-mfa-disable-send-confirm>
-              {akMT('modalCard.enableMFAEmail.sendMailMsg')}
+              {akMT('modalCard.enableMFAEmail.sendMailMsg', { email })}
             </AkTypography>
           ) : (
             <AkAlert variant="success" className="mb-3.5 w-112.5" data-test-mfa-disable-denied>
