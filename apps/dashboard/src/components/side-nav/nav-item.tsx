@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useMatchRoute } from '@tanstack/react-router';
 import { Fragment } from 'react';
 
 import { AkChip } from '@irene/ui/ak-chip';
@@ -18,6 +18,12 @@ export interface SideNavItemDefinition {
   to: FileRouteTypes['to'];
   search?: Record<string, number>;
   badge?: string;
+  /**
+   * Other pages, and every page beneath each, that also mark the item as the
+   * one the account is on: irene's `currentWhen`. The tabs of a settings page
+   * each have a route of their own, and all of them belong to one item.
+   */
+  activeWhen?: FileRouteTypes['to'][];
 }
 
 /**
@@ -32,6 +38,17 @@ export function SideNavItem({
   isCollapsed,
   onClick,
 }: Readonly<{ item: SideNavItemDefinition; isCollapsed: boolean; onClick?: () => void }>) {
+  const matchRoute = useMatchRoute();
+
+  /*
+    The link marks itself when the page is its own `to`. On a page it only
+    covers through `activeWhen` it is marked here instead, with the same two
+    attributes the router sets, so the styling below reads one state.
+  */
+  const isActiveElsewhere = (item.activeWhen ?? []).some((to) =>
+    Boolean(matchRoute({ to, fuzzy: true }))
+  );
+
   return (
     <li>
       <AkTooltip title={item.label} side="right" disabled={!isCollapsed} arrow>
@@ -40,6 +57,8 @@ export function SideNavItem({
           search={item.search}
           onClick={onClick}
           aria-label={item.label}
+          data-status={isActiveElsewhere ? 'active' : undefined}
+          aria-current={isActiveElsewhere ? 'page' : undefined}
           className={cn(
             'flex w-full items-center gap-2 px-4 py-2.5 hover:bg-hover-light',
             'group relative text-foreground',

@@ -369,3 +369,49 @@ describe('AuthService reset password', () => {
     expect(body).toEqual({ password: 'correct-horse', confirm_password: 'correct-horse' });
   });
 });
+
+describe('AuthService.changePassword', () => {
+  const CHANGE_PASSWORD_URL = buildAPITestURL(AuthEndpoints.changePassword());
+
+  it('posts the current password and the new one twice', async () => {
+    const newPassword = faker.internet.password();
+
+    const request = {
+      old_password: faker.internet.password(),
+      password: newPassword,
+      confirm_password: newPassword,
+    };
+
+    let body: unknown;
+
+    server.use(
+      http.post(CHANGE_PASSWORD_URL, async ({ request: sent }) => {
+        body = await sent.json();
+
+        return new HttpResponse(null, { status: HTTP_STATUS_CODES.NO_CONTENT });
+      })
+    );
+
+    await AuthService.changePassword(request);
+
+    expect(body).toEqual(request);
+  });
+
+  it('rejects with the field the server refused', async () => {
+    const message = faker.lorem.sentence();
+
+    server.use(
+      http.post(CHANGE_PASSWORD_URL, () =>
+        HttpResponse.json({ old_password: [message] }, { status: HTTP_STATUS_CODES.BAD_REQUEST })
+      )
+    );
+
+    const error = await AuthService.changePassword({
+      old_password: faker.internet.password(),
+      password: '',
+      confirm_password: '',
+    }).catch((reason: unknown) => reason);
+
+    expect(getApiErrorPayload(error)).toEqual({ old_password: [message] });
+  });
+});

@@ -153,6 +153,18 @@ describe('the password reveal control', () => {
     );
   });
 
+  it('shows a struck-through eye while the password is hidden, and an open one once it shows', async () => {
+    render(<AkInput type="password" />);
+
+    const icon = () => document.querySelector('[data-test-reveal-icon]');
+
+    expect(icon()).toHaveAttribute('data-test-reveal-icon', 'hidden');
+
+    await userEvent.click(revealButton());
+
+    expect(icon()).toHaveAttribute('data-test-reveal-icon', 'visible');
+  });
+
   it('renders the control disabled while the field is disabled', () => {
     render(<AkInput type="password" disabled />);
 

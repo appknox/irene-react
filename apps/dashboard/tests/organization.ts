@@ -5,6 +5,7 @@ import { buildOrganization, buildOrganizationMe } from '@tests/factories';
 import { server } from '@tests/server';
 
 import type {
+  ApiOrganization,
   ApiOrganizationAiFeatures,
   ApiOrganizationFeatures,
   ApiOrganizationMe,
@@ -21,12 +22,14 @@ import type {
  *
  * @param features - Feature flags to enable, merged over `buildOrganization`'s defaults.
  * @param aiFeatures - AI feature flags to enable, merged the same way.
+ * @param organizationOverrides - Other organization fields to pin, such as `cyod_registration_enabled`.
  */
 export function mockOrganizationFeatures(
   features: Partial<ApiOrganizationFeatures>,
-  aiFeatures: Partial<ApiOrganizationAiFeatures> = {}
+  aiFeatures: Partial<ApiOrganizationAiFeatures> = {},
+  organizationOverrides: Partial<ApiOrganization> = {}
 ) {
-  const organization = buildOrganization();
+  const organization = buildOrganization(organizationOverrides);
 
   server.use(
     http.get(`*/${OrganizationEndpoints.list()}`, () =>

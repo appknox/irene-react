@@ -2,6 +2,7 @@ import { apiRequest } from '@irene/api/request';
 
 import {
   AuthEndpoints,
+  type ApiChangePasswordRequest,
   type ApiLoginRequest,
   type ApiOidcCallbackRequest,
   type ApiOidcCallbackResponse,
@@ -74,6 +75,18 @@ export default class AuthService {
    */
   public static readonly resetPassword = ({ token, ...password }: ApiResetPasswordRequest) =>
     apiRequest.put<void>(AuthEndpoints.resetPassword(token), password);
+
+  /**
+   * Changes the signed-in user's password.
+   *
+   * The server deletes every token the account holds once it is changed, so
+   * the session making this request ends with it.
+   *
+   * @param request - The current password, and the new one twice.
+   * @returns Resolves once the password is changed.
+   */
+  public static readonly changePassword = (request: ApiChangePasswordRequest) =>
+    apiRequest.post<void>(AuthEndpoints.changePassword(), request);
 
   /**
    * Asks how a user signs in. Runs before the user has any credential.

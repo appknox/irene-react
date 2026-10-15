@@ -34,3 +34,13 @@ export const G_RECAPTCHA = {
   siteKey: '6LffPdIaAAAAANWL4gm7J6j9EJzKSuYEDAQ0Ry2x',
   jsUrl: 'https://recaptcha.net/recaptcha/api.js?render=explicit',
 } as const;
+
+/**
+ * Where the Mercer desktop app is downloaded from: the latest release of each
+ * build sits under it by file name. CYOD devices are registered through Mercer.
+ *
+ * irene reads this from `IRENE_MERCER_DOWNLOAD_URL` so a deployment can point
+ * at a mirror. No deployment does, so it is fixed here rather than added as a
+ * configuration key; add the key if one ever needs to.
+ */
+export const MERCER_DOWNLOAD_URL = 'https://appknox-mercer.s3.amazonaws.com/mercer/releases/latest';
