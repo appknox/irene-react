@@ -3,9 +3,16 @@ import { describe, expect, it } from 'vitest';
 
 import { HTTP_STATUS_CODES } from '@irene/constants';
 
+import {
+  buildInvoice,
+  buildLicense,
+  buildPlan,
+  buildSubscription,
+  buildSubscriptionInfo,
+} from '@tests/factories';
+
 import { BillingEndpoints, BillingService } from '@irene/api/services/billing';
 import { getApiErrorStatus } from '@irene/api/utils/errors';
-import { buildInvoice, buildLicense, buildPlan, buildSubscription } from '@tests/factories';
 import { buildAPITestURL, server } from '@tests/server';
 
 const ORGANIZATION_ID = 42;
@@ -108,5 +115,19 @@ describe('BillingService.getLicense', () => {
     );
 
     expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.NOT_FOUND);
+  });
+});
+
+describe('BillingService.getSubscriptionInfo', () => {
+  it('returns the term and the license counts', async () => {
+    const info = buildSubscriptionInfo();
+
+    server.use(
+      http.get(buildAPITestURL(BillingEndpoints.subscriptionInfo(ORGANIZATION_ID)), () =>
+        HttpResponse.json(info)
+      )
+    );
+
+    await expect(BillingService.getSubscriptionInfo(ORGANIZATION_ID)).resolves.toEqual(info);
   });
 });

@@ -75,3 +75,17 @@ export interface ApiLicense {
   per_scan_description: string;
   per_scan_quantity: number;
 }
+
+/**
+ * The subscription term and license counts shown to an owner whose
+ * organization has the subscription page turned on. Licenses count projects:
+ * `licenses_remaining` is the procured number less the active projects, never
+ * below zero. Any field the subscription does not set arrives empty.
+ */
+export interface ApiSubscriptionInfo {
+  id: number;
+  start_date: string | null;
+  expiry_date: string | null;
+  original_licenses: number | null;
+  licenses_remaining: number | null;
+}

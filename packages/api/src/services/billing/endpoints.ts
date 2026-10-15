@@ -21,6 +21,10 @@ export const BillingEndpoints = {
   invoices: (organizationId: number | string) =>
     `${organization(organizationId)}/invoices` as const,
 
+  /** The subscription term and license counts an owner is shown on the subscription page. */
+  subscriptionInfo: (organizationId: number | string) =>
+    `${organization(organizationId)}/subscription-info` as const,
+
   /** The enterprise license, on a deployment that has one. */
   license: (organizationId: number | string) => `${organization(organizationId)}/license` as const,
 };
