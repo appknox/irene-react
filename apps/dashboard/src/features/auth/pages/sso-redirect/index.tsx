@@ -11,7 +11,7 @@ export function SsoRedirectPage() {
   return (
     <AuthLayout>
       <div className="flex flex-col items-center gap-4 py-2 text-center">
-        <AkSpinner className="size-8 text-primary" />
+        <AkSpinner className="size-8" />
 
         <AkTypography tag="h1" variant="h5">
           <AkMessageTranslate id="signingYouIn" />

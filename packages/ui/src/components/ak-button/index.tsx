@@ -67,7 +67,7 @@ function AkButton({
         children
       ) : (
         <Fragment>
-          {loading && <AkSpinner aria-hidden className="size-4" />}
+          {loading && <AkSpinner aria-hidden color="inherit" className="size-4" />}
 
           {!loading && leftIcon && (
             <span data-slot="button-left-icon" className="inline-flex items-center">
