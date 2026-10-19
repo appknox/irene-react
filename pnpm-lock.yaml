@@ -272,6 +272,9 @@ importers:
 
   packages/translations:
     dependencies:
+      dayjs:
+        specifier: ^1.11.23
+        version: 1.11.23
       react-intl:
         specifier: ^11.0.1
         version: 11.0.1(@types/react@19.3.0)(react@19.3.0)

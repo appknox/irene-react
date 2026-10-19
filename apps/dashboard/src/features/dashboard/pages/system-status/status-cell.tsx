@@ -18,7 +18,7 @@ export function SystemStatusCell({
   if (isChecking) {
     return (
       <span className="flex items-center gap-1" data-test-system-status-checking>
-        <AkSpinner className="size-3.5 text-primary" aria-hidden />
+        <AkSpinner className="size-3.5" aria-hidden />
 
         <AkTypography tag="span">
           <AkMessageTranslate id="checking" />

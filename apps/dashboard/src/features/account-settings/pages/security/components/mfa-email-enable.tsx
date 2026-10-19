@@ -19,6 +19,7 @@ import { mfaKeys } from '@/features/account-settings/queries/mfa';
 
 import { MfaEmailCode } from './mfa-email-code';
 import { MfaModal, MfaModalFooter } from './mfa-modal';
+import { useMfaModal } from './use-mfa-modal';
 
 interface MfaEmailEnableProps {
   email: string;
@@ -36,6 +37,8 @@ interface MfaEmailEnableProps {
  * @param props.onClose - Called when the modal closes, whether or not MFA was turned on.
  */
 export function MfaEmailEnable({ email, onClose }: Readonly<MfaEmailEnableProps>) {
+  const { closeModal, modalProps } = useMfaModal(onClose);
+
   const queryClient = useQueryClient();
   const [setupToken, setSetupToken] = useState<string | null>(null);
   const [otp, setOtp] = useState('');
@@ -57,14 +60,14 @@ export function MfaEmailEnable({ email, onClose }: Readonly<MfaEmailEnableProps>
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: mfaKeys.methods() });
-      onClose();
+      closeModal();
     },
 
     onError: notifyOtpStepFailed,
   });
 
   return (
-    <MfaModal title={akMT('modalCard.mfaTitle.enable')} onClose={onClose}>
+    <MfaModal title={akMT('modalCard.mfaTitle.enable')} {...modalProps}>
       {setupToken === null ? (
         <>
           <AkModalBody>
@@ -78,7 +81,7 @@ export function MfaEmailEnable({ email, onClose }: Readonly<MfaEmailEnableProps>
               {akMT('continue')}
             </AkButton>
 
-            <AkButton type="button" variant="outlined" color="neutral" onClick={onClose}>
+            <AkButton type="button" variant="outlined" color="neutral" onClick={closeModal}>
               {akMT('cancel')}
             </AkButton>
           </MfaModalFooter>

@@ -18,6 +18,7 @@ import { mfaKeys } from '@/features/account-settings/queries/mfa';
 import { MfaEmailCode } from './mfa-email-code';
 import { MfaModal, MfaModalFooter } from './mfa-modal';
 import { MfaOtpInput } from './mfa-otp-input';
+import { useMfaModal } from './use-mfa-modal';
 
 type SwitchToEmailStep = 'confirm' | 'app';
 
@@ -37,6 +38,8 @@ interface MfaSwitchToEmailProps {
  * @param props.onClose - Called when the modal closes, whether or not the switch completed.
  */
 export function MfaSwitchToEmail({ email, onClose }: Readonly<MfaSwitchToEmailProps>) {
+  const { closeModal, modalProps } = useMfaModal(onClose);
+
   const queryClient = useQueryClient();
   const [step, setStep] = useState<SwitchToEmailStep>('confirm');
   const [appOtp, setAppOtp] = useState('');
@@ -58,7 +61,7 @@ export function MfaSwitchToEmail({ email, onClose }: Readonly<MfaSwitchToEmailPr
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: mfaKeys.methods() });
-      onClose();
+      closeModal();
     },
 
     onError: notifyOtpStepFailed,
@@ -71,7 +74,7 @@ export function MfaSwitchToEmail({ email, onClose }: Readonly<MfaSwitchToEmailPr
   };
 
   return (
-    <MfaModal title={akMT('mfaSwitchToEmailTitle')} onClose={onClose}>
+    <MfaModal title={akMT('mfaSwitchToEmailTitle')} {...modalProps}>
       {!emailToken && step === 'confirm' && (
         <>
           <AkModalBody>
@@ -85,7 +88,7 @@ export function MfaSwitchToEmail({ email, onClose }: Readonly<MfaSwitchToEmailPr
               {akMT('continue')}
             </AkButton>
 
-            <AkButton type="button" variant="outlined" color="neutral" onClick={onClose}>
+            <AkButton type="button" variant="outlined" color="neutral" onClick={closeModal}>
               {akMT('cancel')}
             </AkButton>
           </MfaModalFooter>
@@ -110,7 +113,7 @@ export function MfaSwitchToEmail({ email, onClose }: Readonly<MfaSwitchToEmailPr
               {akMT('confirm')}
             </AkButton>
 
-            <AkButton type="button" variant="outlined" color="neutral" onClick={onClose}>
+            <AkButton type="button" variant="outlined" color="neutral" onClick={closeModal}>
               {akMT('cancel')}
             </AkButton>
           </MfaModalFooter>

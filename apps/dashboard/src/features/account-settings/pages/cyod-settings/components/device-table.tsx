@@ -3,7 +3,9 @@ import { type ReactNode } from 'react';
 
 import { getApiErrorStatus } from '@irene/api/utils/errors';
 import { HTTP_STATUS_CODES } from '@irene/constants';
-import { akMT, getIntl } from '@irene/translations/intl';
+import { formatDateTime } from '@irene/translations/date-time';
+import { akMT } from '@irene/translations/intl';
+import { AkChip } from '@irene/ui/ak-chip';
 import { AkIcon } from '@irene/ui/ak-icon';
 import { AkIconButton } from '@irene/ui/ak-icon-button';
 import { AkSpinner } from '@irene/ui/ak-spinner';
@@ -16,27 +18,11 @@ import type { ApiCyodRegisteredDevice } from '@irene/api/services/organization';
 import { registeredDevicesOptions } from '@/features/account-settings/queries/cyod';
 import { useOrganization } from '@/hooks/use-organization';
 
-import { DeviceStatus } from './device-status';
-
 /** The statuses that mean the organization has no device farm of its own, rather than a failure. */
 const NOT_CONFIGURED_STATUSES = new Set<number>([
   HTTP_STATUS_CODES.BAD_REQUEST,
   HTTP_STATUS_CODES.FORBIDDEN,
 ]);
-
-/**
- * The day a device was registered, or a dash when the device farm has none.
- *
- * @param createdOn - The ISO 8601 timestamp, if any.
- * @returns The date, in the active locale.
- */
-const _formatRegisteredOn = (createdOn: string | null) => {
-  const date = createdOn ? new Date(createdOn) : null;
-
-  return date && !Number.isNaN(date.getTime())
-    ? getIntl().formatDate(date, { format: 'longDate' })
-    : '-';
-};
 
 const deviceColumn = createAkTableColumns<ApiCyodRegisteredDevice>();
 
@@ -62,7 +48,7 @@ const DEVICE_COLUMNS = deviceColumn.columns([
     meta: { width: '130px' },
     cell: ({ getValue }) => (
       <AkTypography tag="span" noWrap>
-        {_formatRegisteredOn(getValue())}
+        {formatDateTime(getValue(), 'longDate') || '-'}
       </AkTypography>
     ),
   }),
@@ -70,7 +56,24 @@ const DEVICE_COLUMNS = deviceColumn.columns([
   deviceColumn.accessor('is_connected', {
     header: () => akMT('cyod.deviceTable.status'),
     meta: { width: '120px', align: 'center' },
-    cell: ({ getValue }) => <DeviceStatus isConnected={getValue()} />,
+    cell: ({ getValue }) => {
+      const isConnected = getValue();
+
+      const label = isConnected
+        ? akMT('cyod.deviceRegistration.online')
+        : akMT('cyod.deviceRegistration.offline');
+
+      return (
+        <AkChip
+          variant="semi-filled"
+          size="small"
+          fontWeight="medium"
+          color={isConnected ? 'success' : 'secondary'}
+          label={label}
+          data-test-cyod-device-status
+        />
+      );
+    },
   }),
 ]);
 
@@ -94,12 +97,7 @@ interface DeviceTableProps {
  */
 export function DeviceTable({ heading, subheading, emptyHint }: Readonly<DeviceTableProps>) {
   const organizationId = useOrganization().selectedId();
-
-  const devices = useQuery({
-    ...registeredDevicesOptions(organizationId),
-    enabled: Boolean(organizationId),
-  });
-
+  const devices = useQuery(registeredDevicesOptions(organizationId));
   const isNotConfigured = NOT_CONFIGURED_STATUSES.has(getApiErrorStatus(devices.error) ?? 0);
   const connectedDevices = (devices.data ?? []).filter((device) => device.is_connected);
 
@@ -131,7 +129,7 @@ export function DeviceTable({ heading, subheading, emptyHint }: Readonly<DeviceT
           "
           data-test-cyod-device-loading
         >
-          <AkSpinner />
+          <AkSpinner color="primary" />
 
           <AkTypography variant="body2" color="textSecondary">
             {akMT('loading')}

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { akMT, getIntl } from '@irene/translations/intl';
+import { formatDateTime } from '@irene/translations/date-time';
+import { akMT } from '@irene/translations/intl';
 import { AkTable } from '@irene/ui/ak-table';
 import { createAkTableColumns } from '@irene/ui/ak-table/helpers';
 import { AkTypography } from '@irene/ui/ak-typography';
@@ -10,19 +11,6 @@ import { personalTokensOptions } from '@/features/account-settings/queries/perso
 
 import { CopyToken } from './copy-token';
 import { RevokeToken } from './revoke-token';
-
-/**
- * The day a token was generated, or nothing when the server's timestamp cannot
- * be read, rather than "Invalid Date".
- *
- * @param created - The ISO 8601 timestamp.
- * @returns The date, formatted for the active locale.
- */
-const _formatCreated = (created: string) => {
-  const date = new Date(created);
-
-  return Number.isNaN(date.getTime()) ? '' : getIntl().formatDate(date, { format: 'mediumDate' });
-};
 
 const tokenColumn = createAkTableColumns<ApiPersonalToken>();
 
@@ -43,7 +31,7 @@ const TOKEN_COLUMNS = tokenColumn.columns([
     meta: { width: '120px' },
     cell: ({ getValue }) => (
       <AkTypography tag="span" noWrap>
-        {_formatCreated(getValue())}
+        {formatDateTime(getValue(), 'mediumDate')}
       </AkTypography>
     ),
   }),
