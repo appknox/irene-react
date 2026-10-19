@@ -426,3 +426,21 @@ Every tab has content.
 | Refresh devices            | Refresh icon beside the heading                                                   | Loading, then the list as it now stands                                                      |
 | Register a device          | Register a device                                                                 | A drawer with five numbered steps; macOS, Windows and Linux Mercer downloads                 |
 | Copy server URL            | Copy icon in step 3                                                               | "Copied to clipboard!"; the API host is on the clipboard                                     |
+
+## Marketplace
+
+On a deployment with the marketplace (`IRENE_ENABLE_MARKETPLACE`, or a hosted deployment where it is unset); the side navigation offers it there alone.
+
+| Scenario                | How to get there                           | Expected                                                                                                 |
+| ----------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Marketplace             | `/dashboard/marketplace`                   | Plugins (nine CI/CD tools) and Integrations (six tools), each a card with its logo, name and description |
+| Marketplace off         | The URL on a deployment without it         | Sent home                                                                                                |
+| Published plugin        | Azure, Jenkins, GitHub Action or Codemagic | The tool's own page opens in a new tab                                                                   |
+| CLI steps               | CircleCI, Bitbucket or GitLab              | A drawer, "Integrate To CI/CD Pipeline", with the token, download, upload and cicheck steps              |
+| App Center steps        | App Center                                 | The post-build script and two screenshots                                                                |
+| Bitrise steps           | Bitrise                                    | The secret, the script step and two screenshots                                                          |
+| ArmorCode steps         | ArmorCode, under Integrations              | A drawer, "Integration Steps", with ArmorCode's configuration steps                                      |
+| Copy a command          | Copy beside any command in the steps       | "Copied to clipboard!"; the command pastes without a `$` prompt                                          |
+| Developer Settings link | The first step of any guide                | Developer Settings opens in a new tab                                                                    |
+| Integration as an admin | GitHub, Jira, ServiceNow, Splunk or Slack  | The organization's integration settings (a route shell until that screen is migrated)                    |
+| Integration as a member | The same cards, as a non-admin             | "You dont have permission to add integrations…", and the page stays put                                  |
