@@ -43,7 +43,6 @@ export function SelectLanguage() {
   const saveLanguage = useMutation({
     mutationKey: userKeys.language(),
     mutationFn: UserService.setLanguage,
-    onSuccess: () => window.location.reload(),
     onError: unlessRateLimited((error) => {
       akNotify.error(getApiErrorMessage(error) ?? akMT('somethingWentWrong'));
     }),

@@ -50,7 +50,7 @@ export function SettingsItem({
       </div>
 
       <div className="flex shrink-0 items-center gap-1.75">
-        {isLoading && <AkSpinner className="size-4 text-foreground-muted" />}
+        {isLoading && <AkSpinner color="neutral" />}
 
         <AkTooltip
           disabled={!isLocked}

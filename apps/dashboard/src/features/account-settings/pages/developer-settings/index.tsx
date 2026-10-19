@@ -1,4 +1,5 @@
 import { akMT } from '@irene/translations/intl';
+import { AkDivider } from '@irene/ui/ak-divider';
 import { AkTypography } from '@irene/ui/ak-typography';
 
 import { CreateTokenForm } from './components/create-token-form';
@@ -18,6 +19,8 @@ export function DeveloperSettingsPage() {
       </div>
 
       <CreateTokenForm />
+
+      <AkDivider className="my-1.25" />
 
       <PersonalTokenList />
     </section>

@@ -16,6 +16,7 @@ import { mfaKeys } from '@/features/account-settings/queries/mfa';
 
 import { MfaAppVerify, MfaAppVerifySkeleton } from './mfa-app-verify';
 import { MfaModal } from './mfa-modal';
+import { useMfaModal } from './use-mfa-modal';
 
 interface MfaAppEnableProps {
   email: string;
@@ -35,6 +36,8 @@ interface MfaAppEnableProps {
  * @param props.onClose - Called when the modal closes, whether or not MFA was turned on.
  */
 export function MfaAppEnable({ email, onClose }: Readonly<MfaAppEnableProps>) {
+  const { closeModal, modalProps } = useMfaModal(onClose);
+
   const queryClient = useQueryClient();
   const [otp, setOtp] = useState('');
 
@@ -48,10 +51,10 @@ export function MfaAppEnable({ email, onClose }: Readonly<MfaAppEnableProps>) {
 
   useEffect(() => {
     if (setup.isError) {
-      onClose();
+      closeModal();
       akNotify.error(akMT('somethingWentWrong'));
     }
-  }, [setup.isError, onClose]);
+  }, [setup.isError, closeModal]);
 
   const verifyCode = useMutation({
     mutationFn: (token: string) =>
@@ -59,14 +62,14 @@ export function MfaAppEnable({ email, onClose }: Readonly<MfaAppEnableProps>) {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: mfaKeys.methods() });
-      onClose();
+      closeModal();
     },
 
     onError: notifyOtpStepFailed,
   });
 
   return (
-    <MfaModal title={akMT('modalCard.mfaTitle.enable')} onClose={onClose}>
+    <MfaModal title={akMT('modalCard.mfaTitle.enable')} {...modalProps}>
       <AkModalBody>
         {setup.data ? (
           <MfaAppVerify
@@ -75,7 +78,7 @@ export function MfaAppEnable({ email, onClose }: Readonly<MfaAppEnableProps>) {
             otp={otp}
             onOtpChange={setOtp}
             onContinue={() => sendOtpIfTyped(otp, () => verifyCode.mutate(setup.data.token))}
-            onCancel={onClose}
+            onCancel={closeModal}
             isVerifying={verifyCode.isPending}
           />
         ) : (

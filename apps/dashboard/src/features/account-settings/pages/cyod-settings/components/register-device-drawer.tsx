@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { getConfigValue } from '@irene/config';
 import { MERCER_DOWNLOAD_URL } from '@irene/config/product';
 import { akMT } from '@irene/translations/intl';
@@ -6,10 +8,11 @@ import { AkDrawerBody, AkDrawerContent, AkDrawerHeader } from '@irene/ui/ak-draw
 import { AkIcon } from '@irene/ui/ak-icon';
 import { AkIconButton } from '@irene/ui/ak-icon-button';
 import { AkTypography } from '@irene/ui/ak-typography';
-import { akNotify } from '@irene/ui/notify';
 import type { IconName } from '@irene/ui/icons/sets';
 
-import { Step } from './step';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+
+import { CYODSetupStep } from './cyod-setup-step';
 
 /** The Mercer build for each desktop, as irene offers them, with the note under each. */
 const MERCER_DOWNLOADS: {
@@ -43,31 +46,17 @@ const MERCER_DOWNLOADS: {
 ];
 
 /**
- * The address Mercer signs in to: the API host this deployment talks to, or
- * this page's own origin where the API is served beside it, as irene reads it.
- *
- * @returns The server URL.
- */
-const _serverUrl = () => getConfigValue('IRENE_API_HOST') || window.location.origin;
-
-/**
  * Walks the user through registering a device with Mercer: install it, sign in
  * with a personal token and this server's address, register, and run.
  *
  * It is the drawer's content only; the page holds the drawer and its trigger.
  */
 export function RegisterDeviceDrawer() {
-  const serverUrl = _serverUrl();
+  const serverUrl = useMemo(() => {
+    return getConfigValue('IRENE_API_HOST') || window.location.origin;
+  }, []);
 
-  const copyServerUrl = async () => {
-    try {
-      await navigator.clipboard.writeText(serverUrl);
-      akNotify.success(akMT('copiedToClipboard'));
-    } catch {
-      /* A browser that refuses the clipboard (an insecure origin, a denied permission) says so here. */
-      akNotify.error(akMT('pleaseTryAgain'));
-    }
-  };
+  const { copy } = useCopyToClipboard();
 
   return (
     <AkDrawerContent aria-describedby={undefined} className="w-125" data-test-cyod-register-drawer>
@@ -81,13 +70,13 @@ export function RegisterDeviceDrawer() {
         </div>
 
         <ol className="flex flex-col gap-5.25">
-          <Step number={1} title={akMT('cyod.settings.stepCertificate')}>
+          <CYODSetupStep number={1} title={akMT('cyod.settings.stepCertificate')}>
             <AkTypography variant="body2" color="textSecondary">
               {akMT('cyod.settings.stepCertificateNote')}
             </AkTypography>
-          </Step>
+          </CYODSetupStep>
 
-          <Step number={2} title={akMT('cyod.settings.stepDownload')}>
+          <CYODSetupStep number={2} title={akMT('cyod.settings.stepDownload')}>
             <div className="flex flex-wrap items-start gap-5.25">
               {MERCER_DOWNLOADS.map((download) => (
                 <div key={download.id} className="flex w-31.25 flex-col items-start gap-0.75">
@@ -113,9 +102,9 @@ export function RegisterDeviceDrawer() {
             <AkTypography variant="body2" color="textSecondary">
               {akMT('cyod.settings.stepDownloadNote')}
             </AkTypography>
-          </Step>
+          </CYODSetupStep>
 
-          <Step number={3} title={akMT('cyod.settings.stepSignIn')}>
+          <CYODSetupStep number={3} title={akMT('cyod.settings.stepSignIn')}>
             <div
               className="
                 flex w-full items-center justify-between gap-1.75 rounded-sm border
@@ -130,7 +119,7 @@ export function RegisterDeviceDrawer() {
                 size="small"
                 aria-label={akMT('copy')}
                 className="text-primary"
-                onClick={copyServerUrl}
+                onClick={() => copy(serverUrl)}
                 data-test-cyod-server-url-copy
               >
                 <AkIcon name="material-symbols:content-copy" />
@@ -140,11 +129,11 @@ export function RegisterDeviceDrawer() {
             <AkTypography variant="body2" color="textSecondary" className="text-sm">
               {akMT('cyod.settings.stepSignInNote')}
             </AkTypography>
-          </Step>
+          </CYODSetupStep>
 
-          <Step number={4} title={akMT('cyod.settings.stepRegister')} />
+          <CYODSetupStep number={4} title={akMT('cyod.settings.stepRegister')} />
 
-          <Step number={5} title={akMT('cyod.settings.stepRun')} />
+          <CYODSetupStep number={5} title={akMT('cyod.settings.stepRun')} />
         </ol>
       </AkDrawerBody>
     </AkDrawerContent>

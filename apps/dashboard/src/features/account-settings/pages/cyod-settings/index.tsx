@@ -38,7 +38,7 @@ export function CyodSettingsPage() {
                 {akMT('cyod.settings.deviceRegistration')}
               </AkTypography>
 
-              <AkTypography color="textSecondary">
+              <AkTypography color="textSecondary" className="max-w-10/12">
                 {akMT('cyod.settings.deviceRegistrationDesc')}
               </AkTypography>
             </div>
@@ -75,7 +75,7 @@ export function CyodSettingsPage() {
               {akMT('cyod.settings.turnOnTitle')}
             </AkTypography>
 
-            <AkTypography color="textSecondary" align="center" className="max-w-86.25">
+            <AkTypography color="textSecondary" align="center" className="max-w-100">
               {me?.is_owner
                 ? akMT('cyod.settings.turnOnDescOwner')
                 : akMT('cyod.settings.turnOnDesc')}

@@ -1,10 +1,17 @@
-import { type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 import { akMT } from '@irene/translations/intl';
 import { AkModal, AkModalContent, AkModalFooter, AkModalHeader } from '@irene/ui/ak-modal';
 
+interface CloseOnUnmountProps {
+  isOpen: boolean;
+  onUnmount: () => void;
+}
+
 interface MfaModalProps {
   title: string;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
   onClose: () => void;
   children: ReactNode;
 }
@@ -12,24 +19,61 @@ interface MfaModalProps {
 /**
  * The modal every MFA step runs in.
  *
- * It is open for as long as it is rendered: the caller mounts it to open it
- * and unmounts it to close it, so each opening starts from its first step, as
- * irene's `{{#if}}` around each modal does.
+ * The caller mounts it to open it, so each opening starts from its first step.
+ * Its props come from `useMfaModal`, which is what the step closes it with.
  *
  * @param props.title - What the steps are for.
- * @param props.onClose - Called when the close control, Escape or the backdrop closes it.
+ * @param props.isOpen - Whether the panel is showing or closing.
+ * @param props.onOpenChange - Called when the close control, Escape or the backdrop closes it.
+ * @param props.onClose - Called once the panel has left the DOM.
  * @param props.children - The current step: its body, and its footer when it has one.
  */
-export function MfaModal({ title, onClose, children }: Readonly<MfaModalProps>) {
+export function MfaModal({
+  title,
+  isOpen,
+  onOpenChange,
+  onClose,
+  children,
+}: Readonly<MfaModalProps>) {
   return (
-    <AkModal open onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <AkModal open={isOpen} onOpenChange={onOpenChange}>
       <AkModalContent aria-describedby={undefined}>
         <AkModalHeader title={title} closeLabel={akMT('close')} />
 
         {children}
+
+        <CloseOnUnmount isOpen={isOpen} onUnmount={onClose} />
       </AkModalContent>
     </AkModal>
   );
+}
+
+/**
+ * Reports the panel's removal from the DOM, which happens after its closing
+ * animation has finished.
+ *
+ * @param props.isOpen - Whether the panel is still meant to be showing.
+ * @param props.onUnmount - Called when the panel is removed after being closed.
+ */
+function CloseOnUnmount({ isOpen, onUnmount }: Readonly<CloseOnUnmountProps>) {
+  const latestProps = useRef({ isOpen, onUnmount });
+
+  useEffect(() => {
+    latestProps.current = { isOpen, onUnmount };
+  });
+
+  useEffect(
+    () => () => {
+      // A panel still marked open is being torn down by something other than a
+      // close, such as the page unmounting or a development remount.
+      if (!latestProps.current.isOpen) {
+        latestProps.current.onUnmount();
+      }
+    },
+    []
+  );
+
+  return null;
 }
 
 /**
