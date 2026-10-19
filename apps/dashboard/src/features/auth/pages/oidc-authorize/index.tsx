@@ -89,7 +89,7 @@ export function OidcAuthorizePage() {
           aria-busy
           data-test-oidc-authorize-pending
         >
-          <AkSpinner className="size-6 text-primary" aria-hidden />
+          <AkSpinner className="size-6" aria-hidden />
 
           <AkTypography color="textSecondary">{akMT('loading')}</AkTypography>
         </div>

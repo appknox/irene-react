@@ -26,23 +26,27 @@ describe('formatDateTime', () => {
     });
 
     it('shortens the month, so the day and month are never read the wrong way round', () => {
-      expect(formatDateTime(APRIL_THIRD, DateTimeFormat.ll)).toBe('Apr 3, 2026');
+      expect(formatDateTime(APRIL_THIRD, 'mediumDate')).toBe('Apr 3, 2026');
     });
 
     it('writes the month out in full', () => {
+      expect(formatDateTime(APRIL_THIRD, 'longDate')).toBe('April 3, 2026');
+    });
+
+    it('takes a format token in place of a named style', () => {
       expect(formatDateTime(APRIL_THIRD, DateTimeFormat.LL)).toBe('April 3, 2026');
     });
 
     it('writes the time on a twelve-hour clock', () => {
-      expect(formatDateTime(APRIL_THIRD, DateTimeFormat.LT)).toBe('8:02 PM');
+      expect(formatDateTime(APRIL_THIRD, 'time')).toBe('8:02 PM');
     });
 
     it('writes a date and a time together', () => {
-      expect(formatDateTime(APRIL_THIRD, DateTimeFormat.lll)).toBe('Apr 3, 2026 8:02 PM');
+      expect(formatDateTime(APRIL_THIRD, 'dateTime')).toBe('04/03/2026 8:02 PM');
     });
 
     it('names the month and writes the time', () => {
-      expect(formatDateTime(APRIL_THIRD, DateTimeFormat.LLL)).toBe('April 3, 2026 8:02 PM');
+      expect(formatDateTime(APRIL_THIRD, 'longDateTime')).toBe('April 3, 2026 8:02 PM');
     });
   });
 
@@ -50,35 +54,35 @@ describe('formatDateTime', () => {
     it('orders the shortest date as the language does', async () => {
       await setLocale('ja');
 
-      expect(formatDateTime(APRIL_THIRD)).toBe('04/03/2026');
+      expect(formatDateTime(APRIL_THIRD)).toBe('2026/04/03');
     });
 
     it('names the month as the language does', async () => {
       await setLocale('ja');
 
-      expect(formatDateTime(APRIL_THIRD, DateTimeFormat.LL)).toBe('4月 3, 2026');
+      expect(formatDateTime(APRIL_THIRD, 'longDate')).toBe('2026年4月3日');
     });
 
     it('shortens the month as the language does, which does not shorten it', async () => {
       await setLocale('ja');
 
-      expect(formatDateTime(APRIL_THIRD, DateTimeFormat.ll)).toBe('4月 3, 2026');
+      expect(formatDateTime(APRIL_THIRD, 'mediumDate')).toBe('2026年4月3日');
     });
 
     it('writes the time on the clock the language keeps', async () => {
       await setLocale('ja');
 
-      expect(formatDateTime(APRIL_THIRD, DateTimeFormat.LT)).toBe('8:02 午後');
+      expect(formatDateTime(APRIL_THIRD, 'time')).toBe('20:02');
     });
   });
 
   describe('what it is given', () => {
     it('reads a timestamp as well as a Date', () => {
-      expect(formatDateTime(APRIL_THIRD.toISOString(), DateTimeFormat.LL)).toBe('April 3, 2026');
+      expect(formatDateTime(APRIL_THIRD.toISOString(), 'longDate')).toBe('April 3, 2026');
     });
 
     it('reads milliseconds since the epoch', () => {
-      expect(formatDateTime(APRIL_THIRD.getTime(), DateTimeFormat.LL)).toBe('April 3, 2026');
+      expect(formatDateTime(APRIL_THIRD.getTime(), 'longDate')).toBe('April 3, 2026');
     });
 
     it('answers nothing for a timestamp it cannot read, rather than "Invalid Date"', () => {

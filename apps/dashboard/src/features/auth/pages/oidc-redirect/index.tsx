@@ -55,7 +55,7 @@ export function OidcRedirectPage() {
   return (
     <AuthLayout>
       <div className="flex flex-col items-center gap-3" aria-busy data-test-oidc-redirect-pending>
-        <AkSpinner className="size-6 text-primary" aria-hidden />
+        <AkSpinner className="size-6" aria-hidden />
 
         <AkTypography color="textSecondary">{akMT('loading')}</AkTypography>
       </div>

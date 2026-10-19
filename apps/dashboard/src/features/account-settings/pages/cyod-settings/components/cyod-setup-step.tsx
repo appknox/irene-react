@@ -14,7 +14,7 @@ interface StepProps {
  * @param props.title - What to do.
  * @param props.children - Anything the step needs beyond its title: links, notes, a value to copy.
  */
-export function Step({ number, title, children }: Readonly<StepProps>) {
+export function CYODSetupStep({ number, title, children }: Readonly<StepProps>) {
   return (
     <li className="flex w-full items-start gap-3.5" data-test-cyod-step={number}>
       <span

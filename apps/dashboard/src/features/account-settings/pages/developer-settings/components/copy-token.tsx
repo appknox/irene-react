@@ -1,7 +1,7 @@
 import { akMT } from '@irene/translations/intl';
 import { AkIcon } from '@irene/ui/ak-icon';
 import { AkIconButton } from '@irene/ui/ak-icon-button';
-import { akNotify } from '@irene/ui/notify';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 
 /**
  * Copies a token's key to the clipboard.
@@ -13,20 +13,12 @@ export function CopyToken({
   tokenKey,
   tokenName,
 }: Readonly<{ tokenKey: string; tokenName: string }>) {
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(tokenKey);
-      akNotify.info(akMT('tokenCopied'));
-    } catch {
-      /* A browser that refuses the clipboard (an insecure origin, a denied permission) says so here. */
-      akNotify.error(akMT('pleaseTryAgain'));
-    }
-  };
+  const { copy } = useCopyToClipboard({ successMessage: akMT('tokenCopied') });
 
   return (
     <AkIconButton
       size="small"
-      onClick={copy}
+      onClick={() => copy(tokenKey)}
       aria-label={`${akMT('copy')} ${tokenName}`}
       className="text-info"
       data-test-personal-token-copy

@@ -43,7 +43,13 @@ export default defineConfig({
       workspace package reaches is named here. Discovering one mid-session
       reloads the dependency graph under the running page.
     */
-    include: ['dayjs', 'dayjs/locale/ja', 'dayjs/plugin/relativeTime', 'dayjs/plugin/utc'],
+    include: [
+      'dayjs',
+      'dayjs/locale/ja',
+      'dayjs/plugin/localizedFormat',
+      'dayjs/plugin/relativeTime',
+      'dayjs/plugin/utc',
+    ],
   },
   server: { port: 4200, strictPort: true },
 });

@@ -1,1 +1,1 @@
-export { AccountSettingsLayout } from './components/account-settings-layout';
+export { AccountSettingsLayout } from './layout/account-settings';
