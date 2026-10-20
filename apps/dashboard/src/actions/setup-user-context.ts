@@ -159,7 +159,7 @@ export async function setupUserAndOrgContext(queryClient: QueryClient, userId: n
   _installProductGuides(user);
 
   /* The knowledge base is opened from the top bar, so the widget loads with the page. */
-  installFreshdesk(configurationStore.getState().supportWidgetId());
+  void installFreshdesk(configurationStore.getState().supportWidgetId());
 
   return user;
 }
