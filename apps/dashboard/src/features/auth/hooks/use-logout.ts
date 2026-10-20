@@ -1,26 +1,22 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useRouter } from '@tanstack/react-router';
+import { useMutation } from '@tanstack/react-query';
 
 import { AuthService } from '@irene/api/services/auth';
 import { getStoredSession } from '@irene/api/utils/session';
-import { endSession } from '@/features/auth/actions/session';
+import { releaseSession } from '@/features/auth/actions/session';
 
 /**
- * Signs the user out and returns them to the login page.
+ * Signs the user out and loads the login page.
  *
  * The local session is dropped whether or not the server acknowledged it: a
  * user who asked to sign out must not be left signed in by a failed request.
  *
- * @param options.replaceRoute - Swaps the current history entry for `/login`
- * instead of adding one, so the browser's back button cannot return to a page
- * the signed-out user can no longer load.
+ * The login page is loaded rather than navigated to, so the signed-in pages
+ * are gone before the cache and the stores they read are. Clearing those under
+ * a mounted page sends every query off again without a credential to send.
+ *
  * @returns The mutation.
  */
-export function useLogout({ replaceRoute = false }: Readonly<{ replaceRoute?: boolean }> = {}) {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const router = useRouter();
-
+export function useLogout() {
   return useMutation({
     mutationFn: async () => {
       // Nothing to release when there is no session to begin with.
@@ -29,10 +25,11 @@ export function useLogout({ replaceRoute = false }: Readonly<{ replaceRoute?: bo
       }
     },
 
-    onSettled: async () => {
-      endSession(queryClient);
-      await navigate({ to: '/login', replace: replaceRoute });
-      router.clearCache(); // Clears the cached route matches.
+    onSettled: () => {
+      releaseSession();
+
+      /* Replaced, so the back button cannot return to a page this user can no longer load. */
+      window.location.replace('/login');
     },
   });
 }

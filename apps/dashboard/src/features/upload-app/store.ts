@@ -15,6 +15,7 @@ interface UploadAppStore {
   setUploadProgress: (id: string, progress: number) => void;
   finishUpload: (id: string) => void;
   setShouldOpenUploadList: (shouldOpen: boolean) => void;
+  clear: () => void;
 }
 
 /**
@@ -27,6 +28,8 @@ interface UploadAppStore {
 export const uploadAppStore = createStore<UploadAppStore>((set) => ({
   uploads: [],
   shouldOpenUploadList: false,
+
+  clear: () => set({ uploads: [], shouldOpenUploadList: false }),
 
   startUpload: (name) => {
     const id = crypto.randomUUID();

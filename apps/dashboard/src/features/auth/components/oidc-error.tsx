@@ -26,7 +26,7 @@ import { sessionCheckOptions } from '@/features/auth/queries/session';
  */
 export function OidcError({ description }: Readonly<{ description?: string }>) {
   const { data: session } = useQuery(sessionCheckOptions());
-  const logout = useLogout({ replaceRoute: true });
+  const logout = useLogout();
 
   return (
     <div className="flex flex-col items-center gap-8" data-test-oidc-error>

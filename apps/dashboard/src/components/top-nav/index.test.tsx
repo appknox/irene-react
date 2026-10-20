@@ -18,6 +18,7 @@ import {
 } from '@tests/factories';
 
 import { mockOrganizationFeatures } from '@tests/organization';
+import { watchPageLoad } from '@tests/page-load';
 import { renderAtRoute } from '@tests/render';
 import { server } from '@tests/server';
 
@@ -144,13 +145,17 @@ describe('TopNav', () => {
   it('signs the account out and returns it to the login page', async () => {
     server.use(http.post(`*/${AuthEndpoints.logout()}`, () => HttpResponse.json({})));
 
-    const { router } = await openProjects();
+    const pageLoad = watchPageLoad();
+
+    await openProjects();
 
     await waitFor(() => expect(screen.getByRole('button', { name: user.username })).toBeEnabled());
     await openProfileMenu();
 
     await userEvent.click(await screen.findByRole('menuitem', { name: akMT('logout') }));
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+    await waitFor(() => expect(pageLoad.replace).toHaveBeenCalledWith('/login'));
+
+    pageLoad.restore();
   });
 });
