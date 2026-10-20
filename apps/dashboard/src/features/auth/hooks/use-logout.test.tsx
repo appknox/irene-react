@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { AuthEndpoints } from '@irene/api/services/auth';
 import { clearStoredSession, getStoredSession, storeSession } from '@irene/api/utils/session';
@@ -9,6 +9,7 @@ import { HTTP_STATUS_CODES } from '@irene/constants';
 
 import { buildSession } from '@tests/factories';
 import { mockOrganizationFeatures } from '@tests/organization';
+import { watchPageLoad } from '@tests/page-load';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
@@ -35,6 +36,16 @@ async function logout() {
 }
 
 describe('useLogout', () => {
+  let pageLoad: ReturnType<typeof watchPageLoad>;
+
+  beforeEach(() => {
+    pageLoad = watchPageLoad();
+  });
+
+  afterEach(() => {
+    pageLoad.restore();
+  });
+
   it('posts the stored credential to api/logout when the user clicks Logout', async () => {
     let released = false;
 
@@ -51,25 +62,25 @@ describe('useLogout', () => {
     await waitFor(() => expect(released).toBe(true));
   });
 
-  it('clears the stored session and navigates to /login', async () => {
+  it('clears the stored session and loads the login page', async () => {
     server.use(http.post(buildAPITestURL(AuthEndpoints.logout()), () => HttpResponse.json({})));
 
-    const { router } = await logout();
+    await logout();
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+    await waitFor(() => expect(pageLoad.replace).toHaveBeenCalledWith('/login'));
     expect(getStoredSession()).toBeNull();
   });
 
-  it('clears the stored session and navigates to /login when api/logout answers 401', async () => {
+  it('clears the stored session and loads the login page when api/logout answers 401', async () => {
     server.use(
       http.post(buildAPITestURL(AuthEndpoints.logout()), () =>
         HttpResponse.json({}, { status: HTTP_STATUS_CODES.UNAUTHORIZED })
       )
     );
 
-    const { router } = await logout();
+    await logout();
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+    await waitFor(() => expect(pageLoad.replace).toHaveBeenCalledWith('/login'));
     expect(getStoredSession()).toBeNull();
   });
 
@@ -87,14 +98,14 @@ describe('useLogout', () => {
     signedIn();
     mockOrganizationFeatures({ storeknox: true });
 
-    const rendered = await renderAtRoute('/');
+    await renderAtRoute('/');
 
     /* Cleared between the page rendering and the control being pressed. */
     clearStoredSession();
 
     await userEvent.click(await screen.findByRole('button', { name: 'Logout' }));
 
-    await waitFor(() => expect(rendered.router.state.location.pathname).toBe('/login'));
+    await waitFor(() => expect(pageLoad.replace).toHaveBeenCalledWith('/login'));
 
     expect(released).toBe(false);
   });

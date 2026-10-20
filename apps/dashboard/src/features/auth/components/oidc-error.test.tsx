@@ -18,6 +18,7 @@ import { akMT } from '@irene/translations/intl';
 
 import { OidcError } from '@/features/auth/components/oidc-error';
 import { buildSession } from '@tests/factories';
+import { watchPageLoad } from '@tests/page-load';
 import { renderWithProviders } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
@@ -101,13 +102,15 @@ describe('OidcError', () => {
 
       server.use(http.post(buildAPITestURL(AuthEndpoints.logout()), () => HttpResponse.json({})));
 
-      const { router } = renderError();
+      const pageLoad = watchPageLoad();
+
+      renderError();
 
       await userEvent.click(await screen.findByRole('button', { name: akMT('loginAgain') }));
 
-      await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+      await waitFor(() => expect(pageLoad.replace).toHaveBeenCalledWith('/login'));
 
-      expect(router.history).toHaveLength(1);
+      pageLoad.restore();
     });
   });
 
