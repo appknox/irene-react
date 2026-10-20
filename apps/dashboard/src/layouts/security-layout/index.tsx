@@ -69,7 +69,9 @@ export function SecurityLayout() {
         <TopNav username={user.username} email={user.email} showNotifications={false} />
 
         <main className="flex-1 overflow-y-auto bg-background-subtle" data-test-security-main>
-          <Outlet />
+          <div className="mx-auto w-full max-w-300">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
