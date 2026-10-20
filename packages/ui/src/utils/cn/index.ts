@@ -28,6 +28,7 @@ const SHADOW_SCALE = [
   '16',
   '17',
   '18',
+  '19',
 ];
 
 const twMerge = extendTailwindMerge({
