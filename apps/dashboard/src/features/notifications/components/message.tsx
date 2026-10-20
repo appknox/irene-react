@@ -3,11 +3,11 @@ import { useId } from 'react';
 
 import { patchPaginationItem } from '@irene/api/normalization';
 import { NotificationService, type ApiNotification } from '@irene/api/services/notification';
+import { formatRelativeTime } from '@irene/translations/date-time';
 import { AkTypography } from '@irene/ui/ak-typography';
 
 import { unreadNotificationsOptions } from '@/features/notifications/queries/notification';
 import { useProductNotifications } from '@/hooks/use-product-notifications';
-import { formatRelativeTime } from '@/utils/relative-time';
 
 import { NotificationErrorMessage } from './messages/error';
 import { NOTIFICATION_MAP, type NotificationCode } from './notification-map';

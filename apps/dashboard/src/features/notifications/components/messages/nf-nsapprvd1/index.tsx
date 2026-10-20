@@ -1,6 +1,6 @@
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
+import { DateTimeFormat, formatDateTime } from '@irene/translations/date-time';
 import { AkTypography } from '@irene/ui/ak-typography';
-import { formatNotificationDate } from '@/features/notifications/utils';
 
 import type { NfNsapprvd1Context } from './context';
 
@@ -17,7 +17,7 @@ export function NfNsapprvd1({ context }: Readonly<{ context: NfNsapprvd1Context 
         values={{
           platform_display: context.platform_display,
           namespace_value: context.namespace_value,
-          namespace_created_on: formatNotificationDate(context.namespace_created_on),
+          namespace_created_on: formatDateTime(context.namespace_created_on, DateTimeFormat.LL),
           moderator_username: context.moderator_username,
         }}
       />
