@@ -2,12 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { akMT } from '@irene/translations/intl';
 
-import {
-  formatExpiryDate,
-  formatNotificationDate,
-  sbomComponentNameWithoutRegistry,
-  storeNameForUrl,
-} from './utils';
+import { sbomComponentNameWithoutRegistry, storeNameForUrl } from './utils';
 
 describe('storeNameForUrl', () => {
   it('names the Play Store for a Google listing', () => {
@@ -26,30 +21,6 @@ describe('storeNameForUrl', () => {
 
   it('names a store generically for a listing that is not a URL', () => {
     expect(storeNameForUrl('not-a-url')).toBe(akMT('storeLowercase'));
-  });
-});
-
-describe('formatNotificationDate', () => {
-  it('writes the date out in full', () => {
-    expect(formatNotificationDate('2026-10-01T12:23:17.587707Z')).toBe('1 October 2026');
-  });
-
-  it('returns nothing for a date it cannot read', () => {
-    expect(formatNotificationDate('not-a-date')).toBe('');
-  });
-
-  it('returns nothing for a date the notification left empty', () => {
-    expect(formatNotificationDate('')).toBe('');
-  });
-});
-
-describe('formatExpiryDate', () => {
-  it('shortens the date', () => {
-    expect(formatExpiryDate('2026-10-01T12:23:17.587707Z')).toBe('Oct 1, 2026');
-  });
-
-  it('returns nothing for a date it cannot read', () => {
-    expect(formatExpiryDate('not-a-date')).toBe('');
   });
 });
 

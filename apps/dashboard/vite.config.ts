@@ -30,6 +30,20 @@ export default defineConfig({
     // Turns `@irene/ui/svgs/*.svg?react` imports into components.
     svgrPlugin(),
   ],
-  resolve: { alias: { '@': resolvePath('./src') } },
+  resolve: {
+    alias: { '@': resolvePath('./src') },
+
+    // Two copies of React answer hooks from two dispatchers, which fails as an invalid hook call.
+    dedupe: ['react', 'react-dom'],
+  },
+
+  optimizeDeps: {
+    /*
+      Vite pre-bundles what the app's own source imports, so a dependency only a
+      workspace package reaches is named here. Discovering one mid-session
+      reloads the dependency graph under the running page.
+    */
+    include: ['dayjs', 'dayjs/locale/ja', 'dayjs/plugin/relativeTime', 'dayjs/plugin/utc'],
+  },
   server: { port: 4200, strictPort: true },
 });

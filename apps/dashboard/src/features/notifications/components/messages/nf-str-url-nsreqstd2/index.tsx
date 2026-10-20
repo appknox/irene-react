@@ -1,7 +1,7 @@
 import { AkMessageTranslate } from '@irene/translations/ak-message-translate';
+import { DateTimeFormat, formatDateTime } from '@irene/translations/date-time';
 import { AkTypography } from '@irene/ui/ak-typography';
 import { NotificationNamespaceMessage } from '@/features/notifications/components/namespace-message';
-import { formatNotificationDate } from '@/features/notifications/utils';
 
 import type { NfStrUrlNsreqstd2Context } from './context';
 
@@ -21,7 +21,7 @@ export function NfStrUrlNsreqstd2({ context }: Readonly<{ context: NfStrUrlNsreq
             initial_requester_username: context.initial_requester_username,
             platform_display: context.platform_display,
             namespace_value: context.namespace_value,
-            namespace_created_on: formatNotificationDate(context.namespace_created_on),
+            namespace_created_on: formatDateTime(context.namespace_created_on, DateTimeFormat.LL),
           }}
         />
       </AkTypography>

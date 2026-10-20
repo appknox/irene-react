@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import { DateTimeFormat, formatDateTime } from '@irene/translations/date-time';
 import { akMT } from '@irene/translations/intl';
 import { textForRichTextMessage } from '@irene/translations/test-utils';
 
-import { formatExpiryDate } from '@/features/notifications/utils';
 import { buildNfSkSubexpContext } from '@tests/factories';
 import { notificationElement as element } from '@tests/notification';
 import { renderWithRouterContext } from '@tests/render';
@@ -21,7 +21,7 @@ describe('NfSkSubexp', () => {
     expect(element('message-body')).toHaveTextContent(
       textForRichTextMessage(
         akMT('notificationModule.messages.nf-sk-subexp', {
-          sub_expiry_date: formatExpiryDate(subscription.subscription_end_date),
+          sub_expiry_date: formatDateTime(subscription.subscription_end_date, DateTimeFormat.ll),
         })
       )
     );
@@ -35,7 +35,7 @@ describe('NfSkSubexp', () => {
     expect(element('message-body')).toHaveTextContent(
       textForRichTextMessage(
         akMT('notificationModule.messages.nf-sk-subexp-trial', {
-          sub_expiry_date: formatExpiryDate(trial.subscription_end_date),
+          sub_expiry_date: formatDateTime(trial.subscription_end_date, DateTimeFormat.ll),
         })
       )
     );

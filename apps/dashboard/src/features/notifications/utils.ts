@@ -1,31 +1,4 @@
-import dayjs from 'dayjs';
-import { z } from 'zod';
-
 import { akMT } from '@irene/translations/intl';
-
-/**
- * States a date in full, as a notification names when something was requested.
- *
- * @param value - The date, as the API sends it.
- * @returns The date written out, or an empty string for one it cannot read.
- */
-export function formatNotificationDate(value: string): string {
-  const date = dayjs(value);
-
-  return date.isValid() ? date.format('D MMMM YYYY') : '';
-}
-
-/**
- * States a date shortened, as a subscription names when it expires.
- *
- * @param value - The date, as the API sends it.
- * @returns The date, or an empty string for one it cannot read.
- */
-export function formatExpiryDate(value: string): string {
-  const date = dayjs(value);
-
-  return date.isValid() ? date.format('MMM D, YYYY') : '';
-}
 
 /**
  * Strips the registry from an SBOM component's name.
@@ -69,12 +42,3 @@ export function storeNameForUrl(storeUrl: string): string {
 
   return akMT('storeLowercase');
 }
-
-/**
- * An identifier or version code, which the API sends as a number.
- *
- * Accepted as a string too: a notification's context is stored as it was built,
- * so rows written by an earlier backend keep whatever that version sent, and a
- * message that only shows the value or puts it in a route path reads either.
- */
-export const notificationScalarSchema = z.union([z.number(), z.string()]);
