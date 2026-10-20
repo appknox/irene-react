@@ -23,6 +23,9 @@ import { server } from '@tests/server';
 
 const ANALYTICS = '/dashboard/analytics';
 
+/* A day inside the span the page opens on, so the calendar always has one to draw. */
+const THIS_YEAR = new Date(new Date().getFullYear(), 5, 15).toISOString();
+
 /* The organization is whichever one the page selected, so the id is matched rather than named. */
 const SCAN_COUNT_URL = '*/api/organizations/*/scancount';
 const APP_SCAN_URL = '*/api/organizations/*/appscan';
@@ -31,7 +34,7 @@ const RECENT_ISSUES_URL = '*/api/organizations/*/recent_issues';
 /** Answers all three analytics endpoints, and reports what the app scan was asked for. */
 const serverHasAnalytics = ({
   scanCount = buildScanCount(),
-  appScans = [buildAppScan()],
+  appScans = [buildAppScan({ created_on_date: THIS_YEAR })],
   issues = [buildRecentIssue()],
 } = {}) => {
   const asked = { appScanSearch: '' };
