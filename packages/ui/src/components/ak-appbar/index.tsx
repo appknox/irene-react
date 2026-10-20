@@ -4,7 +4,7 @@ import { type ComponentProps } from 'react';
 import { cn } from '@irene/ui/cn';
 
 import { akAppbarVariants } from './variants';
-import styles from '@irene/ui/ak-appbar/styles.module.css';
+import styles from './styles.module.css';
 
 type AkAppbarProps = Omit<ComponentProps<'header'>, 'color'> &
   VariantProps<typeof akAppbarVariants> & {

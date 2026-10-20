@@ -40,7 +40,13 @@
       }
     ],
     "color-hex-length": null,
-    "at-rule-empty-line-before": null
+    "at-rule-empty-line-before": null,
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global", "local"]
+      }
+    ]
   },
   "overrides": [
     {
@@ -54,6 +60,12 @@
       "rules": {
         "selector-id-pattern": null,
         "declaration-property-value-disallowed-list": null
+      }
+    },
+    {
+      "files": ["**/*.module.css"],
+      "rules": {
+        "selector-class-pattern": null
       }
     }
   ]
