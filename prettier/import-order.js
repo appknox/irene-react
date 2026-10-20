@@ -4,10 +4,19 @@
   2. other workspace packages
   3. this package's own modules by absolute path
   4. this package's own modules by relative path
-  5. stylesheets
+  5. stylesheets, in the same order, so a rule repainting a dependency comes after it
 */
 
 export const STYLES = String.raw`(\.s?css$|^@irene/ui/styles($|/))`;
+
+/*
+  Stylesheets keep the order the groups above keep, so a rule that repaints a
+  dependency's stylesheet is imported after it: third-party, then workspace,
+  then this file's own folder.
+*/
+const THIRD_PARTY_STYLES = String.raw`^(?![.]|@irene/).*\.s?css$`;
+const WORKSPACE_STYLES = String.raw`^@irene/.*(\.s?css$|/styles($|/))`;
+const RELATIVE_STYLES = String.raw`^[.].*\.s?css$`;
 
 const NOT_STYLES = `(?!.*${STYLES})`;
 
@@ -32,7 +41,9 @@ export function importOrderFor(ownPatterns) {
     ...ownGroup,
     `^[.]${NOT_STYLES}`,
     '',
-    STYLES,
+    THIRD_PARTY_STYLES,
+    WORKSPACE_STYLES,
+    RELATIVE_STYLES,
   ];
 }
 
