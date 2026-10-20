@@ -36,7 +36,9 @@ export function OffensiveSecurityLayout() {
           className="flex-1 overflow-y-auto bg-background-subtle"
           data-test-offensive-security-main
         >
-          <Outlet />
+          <div className="mx-auto w-full max-w-300">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

@@ -48,7 +48,9 @@ export function StoreknoxLayout() {
         />
 
         <main className="flex-1 overflow-y-auto bg-background-subtle" data-test-storeknox-main>
-          <Outlet />
+          <div className="mx-auto w-full max-w-300">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
