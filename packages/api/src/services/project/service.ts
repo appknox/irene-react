@@ -3,7 +3,7 @@ import { transformPaginatedResponse } from '@irene/api/utils/transforms';
 import type { ApiProject, ApiProjectListRequest } from '@irene/api/services/project';
 import type { ApiPageEnvelope } from '@irene/api/utils/pagination';
 
-import { ProjectEndpoints } from './config';
+import { ProjectEndpoints } from './endpoints';
 
 /** Talks to the project endpoints. */
 export default class ProjectService {
