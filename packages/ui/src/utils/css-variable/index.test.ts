@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getCSSVariableValue } from '@irene/ui/css-variable';
 
 describe('getCSSVariableValue', () => {
@@ -10,5 +10,15 @@ describe('getCSSVariableValue', () => {
     document.documentElement.style.setProperty('--a-test-token', '#abcdef');
 
     expect(getCSSVariableValue('--a-test-token', '#000000')).toBe('#abcdef');
+  });
+
+  it('falls back where there is no document to read, as on a server', () => {
+    vi.stubGlobal('window', undefined);
+
+    expect(getCSSVariableValue('--color-primary', '#ff4d3f')).toBe('#ff4d3f');
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 });
