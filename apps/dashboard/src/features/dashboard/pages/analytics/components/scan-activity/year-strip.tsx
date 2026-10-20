@@ -118,7 +118,11 @@ export function YearStrip({
         </AkTypography>
       )}
 
-      <div className="h-44">
+      {/*
+        The days are the calendar's own rects, which it offers no way to class.
+        Only they carry a corner radius; the one behind them is the background.
+      */}
+      <div className="h-44 [&_rect[rx]]:cursor-pointer">
         <ResponsiveTimeRange
           data={filesByDate}
           theme={calendarTheme()}
