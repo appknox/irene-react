@@ -10,10 +10,20 @@ import {
   IRENE_AUTH_SESSION_KEY,
   isSignedIn,
   storeSession,
+  syncEmberSession,
   type IreneAuthSession,
 } from '@irene/api/utils/session';
 
 const session: IreneAuthSession = { token: 'tok3n', userId: 42, b64token: 'NDI6dG9rM24=' };
+
+/* The key and shape the Ember app restores its own session from. */
+const EMBER_KEY = 'ember_simple_auth-session';
+
+const readEmberSession = () => {
+  const stored = window.localStorage.getItem(EMBER_KEY);
+
+  return stored ? JSON.parse(stored) : null;
+};
 
 afterEach(() => {
   window.localStorage.clear();
@@ -148,5 +158,53 @@ describe('buildBasicCredential', () => {
     ['an accent', 3, 'café', 'MzpjYWbDqQ=='],
   ])('encodes %s, which btoa rejects on its own', (_label, userId, token, expected) => {
     expect(buildBasicCredential(userId, token)).toBe(expected);
+  });
+});
+
+describe("the Ember app's session entry", () => {
+  it('is written beside ours, in the shape its authenticator restores from', () => {
+    storeSession(session);
+
+    expect(readEmberSession()).toEqual({
+      authenticated: {
+        authenticator: 'authenticator:login',
+        token: 'tok3n',
+        user_id: 42,
+        b64token: 'NDI6dG9rM24=',
+      },
+    });
+  });
+
+  it('is removed when the session is cleared, so the Ember app signs out too', () => {
+    storeSession(session);
+    clearStoredSession();
+
+    expect(readEmberSession()).toBeNull();
+  });
+
+  it('is written for a session stored before both apps shared an origin', () => {
+    window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, JSON.stringify(session));
+
+    syncEmberSession();
+
+    expect(readEmberSession()?.authenticated.b64token).toBe('NDI6dG9rM24=');
+  });
+
+  it('is removed by a sync that finds nothing stored here', () => {
+    window.localStorage.setItem(EMBER_KEY, 'stale');
+
+    syncEmberSession();
+
+    expect(readEmberSession()).toBeNull();
+  });
+
+  it('leaves this app signed in where the browser refuses storage', () => {
+    storeSession(session);
+
+    vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => {
+      throw new Error('denied');
+    });
+
+    expect(() => clearStoredSession()).not.toThrow();
   });
 });

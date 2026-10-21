@@ -8,6 +8,8 @@ import { buildConfigDefine } from '@irene/config';
 import { translationsPlugin } from '@irene/translations/vite';
 import { svgrPlugin } from '@irene/ui/vite';
 
+import { emberProxy } from './vite/ember-proxy';
+
 // Resolve paths to files in the src directory.
 const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -31,5 +33,5 @@ export default defineConfig({
     svgrPlugin(),
   ],
   resolve: { alias: { '@': resolvePath('./src') } },
-  server: { port: 4200, strictPort: true },
+  server: { port: 4200, strictPort: true, proxy: emberProxy() },
 });

@@ -9,6 +9,49 @@ export interface IreneAuthSession {
 
 export const IRENE_AUTH_SESSION_KEY = 'irene:auth-session';
 
+/*
+  The Ember app reads its session from its own entry, under the key Ember
+  Simple Auth keeps it at and in the shape its authenticator restores from.
+  Both apps are served from one origin while the migration runs, so the entry
+  is written beside ours and a sign-in here is a sign-in there.
+*/
+const EMBER_AUTH_SESSION_KEY = 'ember_simple_auth-session';
+
+/** The authenticator the Ember app restores a session with. */
+const EMBER_AUTHENTICATOR = 'authenticator:login';
+
+/**
+ * Writes the Ember app's own session entry, or removes it.
+ *
+ * Storage the browser refuses leaves this app signed in and the other signed
+ * out, which is the same state as before one origin served both.
+ *
+ * @param session - The session to mirror, or null to sign the Ember app out.
+ */
+function _mirrorSessionForEmber(session: IreneAuthSession | null) {
+  try {
+    if (!session) {
+      window.localStorage.removeItem(EMBER_AUTH_SESSION_KEY);
+
+      return;
+    }
+
+    window.localStorage.setItem(
+      EMBER_AUTH_SESSION_KEY,
+      JSON.stringify({
+        authenticated: {
+          authenticator: EMBER_AUTHENTICATOR,
+          token: session.token,
+          user_id: session.userId,
+          b64token: session.b64token,
+        },
+      })
+    );
+  } catch {
+    /* Nothing to mirror into, which the Ember app reads as signed out. */
+  }
+}
+
 /**
  * Checks that a parsed value has the shape of a stored session.
  *
@@ -103,6 +146,8 @@ export function getStoredSession() {
  */
 export function storeSession(session: IreneAuthSession) {
   window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, JSON.stringify(session));
+
+  _mirrorSessionForEmber(session);
 }
 
 /** Forgets the stored session. Safe to call when nothing is stored. */
@@ -112,6 +157,19 @@ export function clearStoredSession() {
   } catch {
     // Nothing stored means nothing to clear.
   }
+
+  _mirrorSessionForEmber(null);
+}
+
+/**
+ * Brings the Ember app's session entry in line with this app's.
+ *
+ * Called as the app starts, for a session stored before both apps shared an
+ * origin: it was written without an Ember entry beside it, and nothing writes
+ * one again until the next sign-in.
+ */
+export function syncEmberSession() {
+  _mirrorSessionForEmber(getStoredSession());
 }
 
 /**

@@ -2,6 +2,10 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
+  # The Ember app, cloned in so one origin can serve both. It keeps its own npm
+  # install and its own tasks, so it is not a package of this workspace.
+  - '!apps/irene'
+
 # pnpm 10 blocks dependency build scripts by default. esbuild needs its to fetch
 # the platform binary Vite runs on.
 onlyBuiltDependencies:
