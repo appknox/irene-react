@@ -1,10 +1,18 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
+import { isPluginEnabled } from '@irene/config';
 import { akMT } from '@irene/translations/intl';
-import { RouteShell } from '@/components/route-shell';
+import { MarketplacePage } from '@/features/marketplace/pages/marketplace';
 
-/* A shell until this screen is migrated; the side navigation links here. */
 export const Route = createFileRoute('/_authenticated/dashboard/marketplace')({
   staticData: { pageTitle: () => akMT('marketplace') },
-  component: () => <RouteShell name={akMT('marketplace')} />,
+
+  /* A deployment without the marketplace sends the URL home, as irene's route does. */
+  beforeLoad: () => {
+    if (!isPluginEnabled('IRENE_ENABLE_MARKETPLACE')) {
+      throw redirect({ to: '/', replace: true });
+    }
+  },
+
+  component: MarketplacePage,
 });
