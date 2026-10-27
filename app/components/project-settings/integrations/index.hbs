@@ -1,0 +1,17 @@
+<AkStack
+  @direction='column'
+  class='mb-3 py-3'
+  local-class='prj-settings-integrations-root'
+>
+  <AkStack @alignItems='center' @flexWrap='wrap'>
+    <ProjectSettings::Integrations::GithubProject @project={{this.project}} />
+
+    <ProjectSettings::Integrations::JiraProject @project={{this.project}} />
+
+    <ProjectSettings::Integrations::ServiceNow @project={{this.project}} />
+
+    <ProjectSettings::Integrations::Splunk @project={{this.project}} />
+
+    <ProjectSettings::Integrations::Slack @project={{this.project}} />
+  </AkStack>
+</AkStack>

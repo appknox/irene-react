@@ -1,0 +1,54 @@
+<div {{style width='400px'}}>
+  {{#if this.isNotPerScan}}
+    <AkTable class='my-2' @variant='full-bordered' @borderColor='dark' as |t|>
+      <t.head @columns={{this.columns}} as |h|>
+        <h.row as |r|>
+          <r.cell colspan='2' as |columnValue|>
+            {{columnValue.name}}
+          </r.cell>
+        </h.row>
+      </t.head>
+
+      <t.body @rows={{this.rows}} as |b|>
+        <b.row as |r|>
+          <r.cell>{{r.rowValue.label}}</r.cell>
+          <r.cell>{{r.rowValue.value}}</r.cell>
+        </b.row>
+      </t.body>
+    </AkTable>
+
+    <AkStack
+      @width='full'
+      @direction='column'
+      @alignItems='center'
+      @justifyContent='center'
+      @spacing='1.5'
+    >
+      <AkTypography @tag='span' @color='textSecondary'>
+        {{@subscription.subscriptionText}}
+        {{@subscription.expiryDateOnHumanized}}
+      </AkTypography>
+
+      {{#if @subscription.isNotCancelled}}
+        <AkButton
+          @variant='outlined'
+          {{on 'click' this.openCancelSubscriptionConfirmBox}}
+        >
+          <:leftIcon>
+            <AkIcon @iconName='close' />
+          </:leftIcon>
+
+          <:default>{{t 'cancelSubsciption'}}</:default>
+        </AkButton>
+      {{/if}}
+    </AkStack>
+  {{/if}}
+
+  <ConfirmBox
+    @isActive={{this.showCancelSubscriptionConfirmBox}}
+    @description={{t 'confirmBox.cancelSubsciption'}}
+    @confirmAction={{perform this.confirmCancelSubscription}}
+    @cancelAction={{this.closeCancelSubscriptionConfirmBox}}
+    @disabled={{this.confirmCancelSubscription.isRunning}}
+  />
+</div>

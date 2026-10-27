@@ -1,0 +1,97 @@
+<AkButton
+  @variant='outlined'
+  {{on 'click' this.toggleInviteModal}}
+  data-test-invite-client-button
+>
+  <:leftIcon>
+    <AkIcon @iconName='email' />
+  </:leftIcon>
+
+  <:default>
+    {{t 'inviteClients'}}
+  </:default>
+</AkButton>
+
+{{#if this.showInviteModal}}
+  <AkModal
+    @onClose={{this.toggleInviteModal}}
+    @showHeader={{true}}
+    @headerTitle={{t 'inviteClient'}}
+    @disableOverlayClick={{true}}
+  >
+    <div
+      local-class='invite-container'
+      data-test-invite-client-form
+      {{did-insert this.initForm}}
+    >
+      <div class='mt-1 mb-2' data-test-input-email-container>
+        <AkTextField
+          @placeholder='{{t "email"}}'
+          @label={{t 'email'}}
+          @labelTypographyColor='secondary'
+          @labelTypographyVariant='subtitle2'
+          @value={{this.changeset.email}}
+          @error={{if this.changeset.error.email true false}}
+          @helperText={{this.getHelperText 'email'}}
+          @required={{true}}
+          data-test-input-email
+        />
+      </div>
+
+      <AkStack @spacing='2' @width='full'>
+        <AkTextField
+          @label={{t 'firstName'}}
+          @placeholder={{t 'firstName'}}
+          @autofocus={{true}}
+          @value={{this.changeset.first_name}}
+          @error={{if this.changeset.error.first_name true false}}
+          @helperText={{this.getHelperText 'first_name'}}
+          @labelTypographyColor='secondary'
+          @labelTypographyVariant='subtitle2'
+          autocomplete='fname'
+          data-test-input-firstname
+        />
+
+        <AkTextField
+          data-test-registration-input-lname
+          @label={{t 'lastName'}}
+          @placeholder={{t 'lastName'}}
+          @value={{this.changeset.last_name}}
+          @error={{if this.changeset.error.last_name true false}}
+          @helperText={{this.getHelperText 'last_name'}}
+          @labelTypographyColor='secondary'
+          @labelTypographyVariant='subtitle2'
+          autocomplete='lname'
+          data-test-input-lastname
+        />
+      </AkStack>
+
+      <div class='my-2' data-test-input-company-container>
+        <AkTextField
+          @placeholder='{{t "companyName"}}'
+          @label={{t 'companyName'}}
+          @labelTypographyColor='secondary'
+          @labelTypographyVariant='subtitle2'
+          @value={{this.changeset.company}}
+          @error={{if this.changeset.error.company true false}}
+          @helperText={{this.getHelperText 'company'}}
+          @required={{true}}
+          autocomplete='company'
+          data-test-input-company
+        />
+      </div>
+
+      <div local-class='submit'>
+        <AkButton
+          @disabled={{this.sendInvite.isRunning}}
+          {{on 'click' (fn this.sendInvitation this.changeset)}}
+          data-test-input-send-btn
+        >
+          <:leftIcon><AkIcon @iconName='send' /></:leftIcon>
+
+          <:default>{{t 'sendInvitation'}}</:default>
+        </AkButton>
+      </div>
+    </div>
+  </AkModal>
+{{/if}}

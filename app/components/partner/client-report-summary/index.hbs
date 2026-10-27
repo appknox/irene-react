@@ -1,0 +1,66 @@
+{{#if this.partner.access.list_files}}
+  <div
+    {{did-insert (perform this.getFileSummary)}}
+    data-test-report-summary
+    ...attributes
+  >
+    {{#if this.getFileSummary.isRunning}}
+      <AkLoader @size={{13}} />
+    {{else if this.fileSummary}}
+      <AkTooltip
+        @arrow={{true}}
+        @placement={{this.popoverPlacement}}
+        @color='light'
+        {{style width='100%'}}
+        data-test-risk-summary-popover
+      >
+        <:tooltipContent>
+          <div local-class='popover' class='p-1' data-test-risk-summary-tooltip>
+            <div local-class='index' data-test-riskindex>
+              {{#each this.riskProps as |rProps|}}
+                <div local-class='riskkey' data-test-riskindex={{rProps.key}}>
+                  <div local-class='riskkey-label'>
+                    <div
+                      local-class='riskkey-color riskkey-color--{{rProps.key}}'
+                      data-test-riskindex-key={{rProps.key}}
+                    ></div>
+
+                    <div
+                      local-class='riskkey-text'
+                      data-test-riskindex-label={{rProps.key}}
+                    >
+                      {{rProps.label}}
+                    </div>
+                  </div>
+
+                  <div
+                    local-class='riskkey-count'
+                    data-test-riskindex-count={{rProps.key}}
+                  >
+                    {{rProps.riskCount}}
+                  </div>
+                </div>
+              {{/each}}
+            </div>
+          </div>
+        </:tooltipContent>
+
+        <:default>
+          <div local-class='summary' data-test-risk-summary>
+            <div local-class='riskbar' data-test-risk-summary-bar>
+              {{#each this.riskProps as |rProps|}}
+                {{#if rProps.riskCount}}
+                  <div
+                    local-class='riskblock riskblock--{{rProps.key}}'
+                    data-test-riskblock={{rProps.key}}
+                    {{style width=rProps.width}}
+                  ></div>
+                {{/if}}
+              {{/each}}
+            </div>
+          </div>
+        </:default>
+      </AkTooltip>
+    {{/if}}
+  </div>
+{{/if}}

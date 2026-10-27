@@ -1,0 +1,54 @@
+<AkPopover
+  @arrow={{true}}
+  @anchorRef={{@anchorRef}}
+  @placement='bottom-end'
+  @clickOutsideToClose={{true}}
+  @closeHandler={{this.closeNotifications}}
+  @unmountOnClose={{false}}
+  @modifiers={{this.modifiers}}
+  local-class='notification-popover-container'
+>
+  <div
+    data-test-notification-dropdown
+    local-class='notification-dropdown-container'
+  >
+    <NotificationsDropdown::Header @product={{@product}} />
+
+    <AkStack
+      @tag='main'
+      @direction='column'
+      local-class='notification_main_list'
+    >
+      {{#if this.isLoading}}
+        <AkDivider @color='dark' />
+
+        <AkStack
+          @width='full'
+          @alignItems='center'
+          @justifyContent='center'
+          local-class='loading'
+        >
+          <AkLoader />
+        </AkStack>
+      {{else if this.isEmpty}}
+        <AkDivider @color='dark' />
+
+        <NotificationsPage::Empty @message='No unread notifications' />
+      {{else}}
+        {{#each
+          this.notificationService.notifications_drop_down
+          as |notification|
+        }}
+          <AkDivider @color='dark' />
+
+          <NotificationsPage::Message @notification={{notification}} />
+        {{/each}}
+      {{/if}}
+    </AkStack>
+
+    <NotificationsDropdown::Footer
+      @onViewAllNotificationClick={{this.closeNotifications}}
+      @product={{@product}}
+    />
+  </div>
+</AkPopover>

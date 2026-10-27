@@ -1,0 +1,94 @@
+<div class='py-2 mt-2'>
+  <AkPaginationProvider
+    @results={{this.namespaceList}}
+    @onItemPerPageChange={{this.handleItemPerPageChange}}
+    @totalItems={{this.totalNamespaceCount}}
+    @nextAction={{this.handleNextAction}}
+    @prevAction={{this.handlePrevAction}}
+    @itemPerPageOptions={{array 10 25 50}}
+    @defaultLimit={{@queryParams.namespaceLimit}}
+    @offset={{@queryParams.namespaceOffset}}
+    as |pgc|
+  >
+    {{#if this.fetchNamespace.isRunning}}
+      <AkStack @alignItems='center' @justifyContent='center'>
+        <AkStack
+          local-class='loading-container'
+          @alignItems='center'
+          @justifyContent='center'
+          @spacing='1.5'
+        >
+          <AkLoader @size={{16}} />
+          <AkTypography local-class='loading-text' @color='textSecondary'>
+            {{t 'loading'}}...
+          </AkTypography>
+        </AkStack>
+      </AkStack>
+    {{else if this.hasNoNamespace}}
+      <AkStack
+        local-class='no-result-container'
+        @direction='column'
+        @alignItems='center'
+        @justifyContent='center'
+        @spacing='2'
+      >
+        <AkSvg::OrgNamespaceEmpty data-test-ns-empty-icon />
+
+        <AkTypography data-test-ns-empty-title @variant='h5'>
+          {{if
+            this.me.org.is_admin
+            (t 'noNamespace')
+            (t 'noNamespaceRequested')
+          }}
+        </AkTypography>
+
+        <AkTypography
+          data-test-ns-empty-description
+          @align='center'
+          class='w-9/12'
+        >
+          {{t 'noNamespaceDescription'}}
+        </AkTypography>
+      </AkStack>
+    {{else}}
+      <AkTable local-class='organization-namespace-table-container' as |t|>
+        <t.head data-test-namespace-thead @columns={{this.columns}} />
+        <t.body @rows={{pgc.currentPageResults}} as |b|>
+          <b.row data-test-namespace-row as |r|>
+            <r.cell data-test-namespace-cell>
+              {{#let (component r.columnValue.component) as |Component|}}
+                <Component
+                  @onRejectNamespace={{this.rejectNamespaceConfirm}}
+                  @namespace={{r.rowValue}}
+                />
+              {{/let}}
+            </r.cell>
+          </b.row>
+        </t.body>
+      </AkTable>
+
+      <AkPagination
+        @disableNext={{pgc.disableNext}}
+        @nextAction={{pgc.nextAction}}
+        @disablePrev={{pgc.disablePrev}}
+        @prevAction={{pgc.prevAction}}
+        @endItemIdx={{pgc.endItemIdx}}
+        @startItemIdx={{pgc.startItemIdx}}
+        @itemPerPageOptions={{pgc.itemPerPageOptions}}
+        @onItemPerPageChange={{pgc.onItemPerPageChange}}
+        @selectedOption={{pgc.selectedOption}}
+        @tableItemLabel={{t 'namespaces'}}
+        @perPageTranslation={{t 'recordPerPage'}}
+        @totalItems={{pgc.totalItems}}
+      />
+
+      <ConfirmBox
+        @isActive={{this.showRejectNamespaceConfirm}}
+        @disabled={{this.confirmReject.isRunning}}
+        @description={{t 'confirmBox.rejectNamespace'}}
+        @confirmAction={{perform this.confirmReject}}
+        @cancelAction={{this.rejectNamespaceCancel}}
+      />
+    {{/if}}
+  </AkPaginationProvider>
+</div>

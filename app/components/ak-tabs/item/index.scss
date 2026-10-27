@@ -1,0 +1,112 @@
+.ak-tab-item {
+  height: 40px;
+  width: fit-content;
+
+  a,
+  button {
+    height: 100%;
+    padding: 0em 1.143em;
+    font-family: var(--ak-tabs-font-family);
+    color: var(--ak-tabs-text-color-secondary);
+    font-weight: var(--ak-tabs-font-weight-regular);
+
+    &:hover {
+      color: var(--ak-tabs-text-color-secondary);
+    }
+  }
+
+  .ak-tab-badge {
+    font-size: 0.857em;
+    min-width: 24px;
+    min-height: 20px;
+    padding: 0em 0.357em;
+    margin-left: 0.7em;
+    border-radius: var(--ak-tabs-border-radius);
+    font-weight: var(--ak-tabs-font-weight-regular);
+    background-color: transparent;
+
+    &.ak-tab-badge-background {
+      background-color: var(--ak-tabs-neutral-background);
+      color: var(--ak-tabs-text-color-secondary);
+    }
+  }
+
+  .ak-tab-icon {
+    :global(.ak-icon) {
+      font-size: 1.29rem !important;
+      color: var(--ak-tabs-text-color-secondary);
+    }
+  }
+
+  .active-line {
+    position: relative;
+    color: var(--ak-tabs-text-color-primary);
+    font-weight: var(--ak-tabs-font-weight-bold);
+
+    &:hover,
+    &:focus {
+      background-color: unset;
+      color: var(--ak-tabs-text-color-primary);
+    }
+
+    .ak-tab-badge {
+      background-color: transparent;
+
+      &.ak-tab-badge-background {
+        background-color: var(--ak-tabs-color-primary-light);
+        color: var(--ak-tabs-text-color-primary);
+      }
+    }
+
+    .ak-tab-icon {
+      :global(.ak-icon) {
+        color: var(--ak-tabs-text-color-primary);
+      }
+    }
+
+    &::after {
+      display: block;
+      width: 100%;
+      height: 3px;
+      content: '';
+      position: absolute;
+      left: 0px;
+      bottom: 0px;
+      border-radius: 3px 3px 0px 0px;
+      background-color: var(--ak-tabs-color-primary);
+    }
+  }
+
+  .active-shadow {
+    position: relative;
+    color: var(--ak-tabs-color-primary);
+    border: 1px solid var(--ak-tabs-border-color);
+    box-shadow: var(--ak-tabs-active-box-shadow);
+    border-bottom: 0;
+    border-top-right-radius: 0.357em;
+    border-top-left-radius: 0.357em;
+    font-weight: var(--ak-tabs-font-weight-bold);
+    background-color: var(--ak-tabs-background-main);
+
+    &:hover,
+    &:focus {
+      background-color: unset;
+      color: var(--ak-tabs-color-primary);
+    }
+
+    .ak-tab-badge {
+      background-color: transparent;
+
+      &.ak-tab-badge-background {
+        background-color: var(--ak-tabs-color-primary-light);
+        color: var(--ak-tabs-text-color-primary);
+      }
+    }
+
+    .ak-tab-icon {
+      :global(.ak-icon) {
+        color: var(--ak-tabs-text-color-primary);
+      }
+    }
+  }
+}

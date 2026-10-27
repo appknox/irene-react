@@ -1,0 +1,91 @@
+{{#if @loading}}
+  <AkStack
+    data-test-privacyReport-loader
+    class='p-2'
+    @alignItems='center'
+    @justifyContent='center'
+  >
+    <AkLoader @size={{18}} />
+  </AkStack>
+{{else}}
+  <AkList::Item
+    data-test-privacyReport-reportlistItem
+    class='px-3 pt-3 pb-2 flex-column'
+    as |li|
+  >
+    {{#if this.showGenerateReport}}
+      <AkStack @direction='column' @spacing='2' @width='full' class='mb-3'>
+        <AkStack
+          local-class='generate-container'
+          @direction='column'
+          @spacing='2'
+        >
+          <AkSvg::GenerateReport data-test-privacyReport-reportGenerateSvg />
+
+          <AkTypography data-test-privacyReport-reportGenerateDescription>
+            {{t 'privacyModule.generateReportDescription' htmlSafe=true}}
+          </AkTypography>
+
+          <AkButton
+            {{on 'click' (perform this.handleGenerateReport)}}
+            @loading={{this.isGenerateButtonLoading}}
+            @disabled={{this.isGenerateButtonLoading}}
+            data-test-privacyReport-reportGenerateBtn
+          >
+            {{this.generateButtonLabel}}
+          </AkButton>
+        </AkStack>
+      </AkStack>
+    {{/if}}
+
+    {{#if this.isReportGenerated}}
+      <AkStack @alignItems='center' @width='full'>
+        <li.leftIcon>
+          <AkSvg::PdfReport data-test-privacyReport-reportIcon />
+        </li.leftIcon>
+
+        <AkStack @direction='column' @width='full' @spacing='0.5' class='pl-1'>
+          <AkTypography
+            data-test-privacyReport-reportPrimaryText
+            @variant='subtitle1'
+          >
+            {{t 'privacyModule.downloadPdfPrimaryText'}}
+          </AkTypography>
+
+          <AkStack @alignItems='center' @spacing='0.5'>
+            <AkTypography data-test-privacyReport-reportSecondaryText>
+              {{this.reportPasswordText}}
+            </AkTypography>
+
+            {{#if this.privacyReport.reportPassword}}
+              <AkClipboard
+                @onSuccess={{this.handleCopySuccess}}
+                @onError={{this.handleCopyError}}
+                as |cb|
+              >
+                <AkIconButton
+                  id={{cb.triggerId}}
+                  @size='small'
+                  data-clipboard-text={{this.privacyReport.reportPassword}}
+                  data-test-privacyReport-reportCopyBtn
+                >
+                  <AkIcon @iconName='content-copy-outline' @color='primary' />
+                </AkIconButton>
+              </AkClipboard>
+            {{/if}}
+          </AkStack>
+        </AkStack>
+
+        <li.rightIcon>
+          <AkIconButton
+            {{on 'click' (perform this.handleDownloadReport)}}
+            disabled={{this.handleDownloadReport.isRunning}}
+            data-test-privacyReport-reportDownloadBtn
+          >
+            <AkIcon @iconName='download' />
+          </AkIconButton>
+        </li.rightIcon>
+      </AkStack>
+    {{/if}}
+  </AkList::Item>
+{{/if}}

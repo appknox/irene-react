@@ -1,0 +1,15 @@
+{{! @glint-nocheck: or}}
+<EmberTable
+  data-test-ak-table
+  ...attributes
+  local-class='
+    ak-table-root
+    ak-table-header-color-{{or @headerColor "neutral"}}
+    ak-table-variant-{{or @variant "semi-bordered"}}
+    ak-table-border-color-{{or @borderColor "light"}}
+    {{if @hoverable "ak-table-hoverable"}}
+    ak-table-padding-{{if @dense "dense" "default"}}'
+  as |et|
+>
+  {{yield et}}
+</EmberTable>

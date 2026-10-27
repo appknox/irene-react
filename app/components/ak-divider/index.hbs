@@ -1,0 +1,13 @@
+{{! @glint-nocheck : or}}
+{{#let (element (or @tag (if this.isVertical 'div' 'hr'))) as |Tag|}}
+  <Tag
+    data-test-ak-divider
+    ...attributes
+    {{style width=this.width height=this.height}}
+    local-class='
+      ak-divider-root
+      ak-divider-variant-{{or @variant "fullWidth"}}
+      ak-divider-color-{{or @color "light"}}
+      ak-divider-direction-{{or @direction "horizontal"}}'
+  />
+{{/let}}

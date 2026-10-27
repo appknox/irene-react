@@ -1,0 +1,48 @@
+<div local-class='organization-settings-root'>
+  <div
+    local-class='organization-settings-breadcrumbs-container'
+    class='pt-2 pb-3'
+  >
+    <AkBreadcrumbs::AutoTrail
+      data-test-fileDetails-apiScan-breadcrumbContainer
+    />
+  </div>
+
+  <OrganizationNameHeader @organization={{@organization}}>
+    <:actionBtn as |ab|>
+      {{#if this.showOrgNameActionBtn}}
+        <AkButton
+          @variant='outlined'
+          data-test-org-name-action-btn
+          {{on 'click' ab.openEditOrgNameModal}}
+        >
+          <:leftIcon>
+            <AkIcon @iconName='edit' />
+          </:leftIcon>
+
+          <:default>
+            {{t 'editName'}}
+          </:default>
+        </AkButton>
+      {{/if}}
+    </:actionBtn>
+  </OrganizationNameHeader>
+
+  <div class='my-3'>
+    <AkTabs local-class='organization-settings-tabs-container' as |Akt|>
+      {{#each this.tabItems as |item|}}
+        <Akt.tabItem
+          @id={{item.id}}
+          @route={{item.route}}
+          @currentWhen={{item.currentWhen}}
+          @indicatorVariant='shadow'
+          data-test-organization-settingsWrapper-tabs='{{item.id}}-tab'
+        >
+          {{item.label}}
+        </Akt.tabItem>
+      {{/each}}
+    </AkTabs>
+
+    {{yield}}
+  </div>
+</div>

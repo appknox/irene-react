@@ -1,0 +1,15 @@
+{{#if @loading}}
+  <AkStack @justifyContent='center'>
+    <AkSkeleton @width='30px' @height='30px' @variant='circular' />
+  </AkStack>
+{{else}}
+  {{#if @data.isIos}}
+    <AkSvg::AppstoreLogo data-test-storeknoxTableColumns-store-iosIcon />
+  {{/if}}
+
+  {{#if @data.isAndroid}}
+    <AkSvg::StoreknoxPlaystoreLogo
+      data-test-storeknoxTableColumns-store-playStoreIcon
+    />
+  {{/if}}
+{{/if}}

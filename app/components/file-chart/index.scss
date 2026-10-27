@@ -1,0 +1,61 @@
+.severity-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.severity-critical {
+  background-color: var(--file-chart-severity-level-color-critical);
+}
+
+.severity-high {
+  background-color: var(--file-chart-severity-level-color-high);
+}
+
+.severity-medium {
+  background-color: var(--file-chart-severity-level-color-medium);
+}
+
+.severity-low {
+  background-color: var(--file-chart-severity-level-color-low);
+}
+
+.severity-passed {
+  background-color: var(--file-chart-severity-level-color-passed);
+}
+
+.severity-none {
+  background-color: var(--file-chart-severity-level-color-none);
+}
+
+.severity-empty {
+  background-color: var(--file-chart-severity-level-color-empty);
+}
+
+.loading-circle-container {
+  &.large {
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .hollow-circular-loader {
+    width: 145px;
+    height: 145px;
+    border-radius: 50%;
+    border: 26px solid var(--file-chart-severity-level-color-empty);
+    box-sizing: border-box;
+  }
+
+  .hollow-circular-loader.large {
+    width: 200px;
+    height: 200px;
+    border: 32px solid var(--file-chart-severity-level-color-empty);
+  }
+}
+
+.tooltip-content-container {
+  width: 320px;
+  padding: 0.5em;
+  box-sizing: border-box;
+  white-space: normal;
+}

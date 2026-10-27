@@ -1,0 +1,17 @@
+<div local-class='org-integration-settings-integrations-container'>
+  <AkStack @alignItems='center' @flexWrap='wrap'>
+    <Organization::Integrations::GithubAccount
+      @integratedUser={{@model.integratedUser}}
+      @reconnect={{@model.reconnect}}
+      @user={{@model.user}}
+    />
+
+    <Organization::Integrations::JiraAccount @user={{@model.user}} />
+
+    <Organization::Integrations::ServiceNow @user={{@model.user}} />
+
+    <Organization::Integrations::Splunk @user={{@model.user}} />
+
+    <Organization::Integrations::Slack @user={{@model.user}} />
+  </AkStack>
+</div>

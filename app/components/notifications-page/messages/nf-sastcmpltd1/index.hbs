@@ -1,0 +1,82 @@
+<div>
+  <div data-test-nf-sastcmpltd1-primary-message>
+    {{t
+      'notificationModule.messages.nf-sastcmpltd1'
+      htmlSafe=true
+      platform_display=@context.platform_display
+      file_name=@context.file_name
+      package_name=@context.package_name
+    }}
+  </div>
+
+  <div data-test-nf-sastcmpltd1-version class='pt-1' local-class='meta-info'>
+    {{t 'versionLowercase'}}:
+    {{@context.version}}
+    <span local-class='pipe'>|</span>
+    {{t 'versionCode'}}:
+    {{@context.version_code}}
+  </div>
+
+  <div data-test-nf-sastcmpltd1-risk-count local-class='vulnerability-stats'>
+    <AkTypography @variant='subtitle2' class='pb-2'>{{t
+        'notificationModule.riskStatus'
+      }}</AkTypography>
+    <ul local-class='severity-levels'>
+      <li local-class='severity-level'>
+        <div local-class='severity-label'>
+          <div local-class='severity-color severity-color--critical'></div>
+          <div local-class='severity-text'>{{t 'critical'}}</div>
+        </div>
+        <div local-class='severity-count'>{{@context.critical_count}}</div>
+      </li>
+      <li local-class='severity-level'>
+        <div local-class='severity-label'>
+          <div local-class='severity-color severity-color--high'></div>
+          <div local-class='severity-text'>{{t 'high'}}</div>
+        </div>
+        <div local-class='severity-count'>{{@context.high_count}}</div>
+      </li>
+      <li local-class='severity-level'>
+        <div local-class='severity-label'>
+          <div local-class='severity-color severity-color--medium'></div>
+          <div local-class='severity-text'>{{t 'medium'}}</div>
+        </div>
+        <div local-class='severity-count'>{{@context.medium_count}}</div>
+      </li>
+      <li local-class='severity-level'>
+        <div local-class='severity-label'>
+          <div local-class='severity-color severity-color--low'></div>
+          <div local-class='severity-text'>{{t 'low'}}</div>
+        </div>
+        <div local-class='severity-count'>{{@context.low_count}}</div>
+      </li>
+      <li local-class='severity-level'>
+        <div local-class='severity-label'>
+          <div local-class='severity-color severity-color--passed'></div>
+          <div local-class='severity-text'>{{t 'passed'}}</div>
+        </div>
+        <div local-class='severity-count'>{{@context.passed_count}}</div>
+      </li>
+      <li local-class='severity-level'>
+        <div local-class='severity-label'>
+          <div local-class='severity-color severity-color--untested'></div>
+          <div local-class='severity-text'>{{t 'untested'}}</div>
+        </div>
+        <div local-class='severity-count'>{{@context.untested_count}}</div>
+      </li>
+    </ul>
+  </div>
+
+  <div data-test-nf-sastcmpltd1-link>
+    <AkLink
+      @color='primary'
+      @route='authenticated.dashboard.file'
+      @model={{@context.file_id}}
+      @underline='always'
+      @title='{{t "viewFile"}} {{@context.file_id}}'
+    >
+      {{t 'viewFile'}}:
+      {{@context.file_id}}
+    </AkLink>
+  </div>
+</div>

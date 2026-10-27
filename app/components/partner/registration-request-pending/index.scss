@@ -1,0 +1,16 @@
+.request {
+  display: grid;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.3rem 0.8rem;
+  grid-template-columns: 1fr 21% 14% 12rem;
+  @media (min-width: 1200px) {
+    grid-template-columns: 1fr 30% 11.5rem 12rem;
+  }
+}
+
+.invite-btn {
+  border: 1px solid var(--success-main) !important;
+  color: var(--success-main) !important;
+}

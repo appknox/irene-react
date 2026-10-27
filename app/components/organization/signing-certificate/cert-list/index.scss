@@ -1,0 +1,20 @@
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.section-header {
+  padding-top: 0.5em;
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.empty-state-block {
+  border: 1px solid var(--organization-signing-certificate-border-color);
+}
+
+.empty-description {
+  max-width: 350px;
+}

@@ -1,0 +1,81 @@
+<AkStack @width='full' @direction='column' @alignItems='center'>
+  <Security::FileSearchList::Header />
+
+  <AkStack
+    @width='full'
+    @direction='column'
+    @alignItems='center'
+    local-class='min-width-content'
+  >
+    <AkPaginationProvider
+      @results={{this.sortedSecurityFiles}}
+      @onItemPerPageChange={{this.handleItemPerPageChange}}
+      @totalItems={{this.totalFiles}}
+      @nextAction={{this.handlePrevNextAction}}
+      @prevAction={{this.handlePrevNextAction}}
+      @itemPerPageOptions={{array 10 25 50}}
+      @defaultLimit={{this.limit}}
+      @offset={{this.offset}}
+      as |pgc|
+    >
+      {{#if this.fetchSecurityFiles.isRunning}}
+        <AkStack
+          {{style height='500px'}}
+          @alignItems='center'
+          @justifyContent='center'
+          @direction='column'
+          @spacing='2.5'
+        >
+          <AkSvg::EmptyLoadingList
+            height='50%'
+            data-test-security-file-list-loadingSvg
+          />
+          <AkStack @alignItems='center' @justifyContent='center' @spacing='1.5'>
+            <AkLoader data-test-security-file-list-loader @size={{16}} />
+
+            <AkTypography data-test-security-file-list-loadingText>
+              Loading...
+            </AkTypography>
+          </AkStack>
+        </AkStack>
+      {{else}}
+        <AkTable data-test-security-file-list-table as |t|>
+          <t.head
+            data-test-security-file-list-thead
+            @columns={{this.columns}}
+          />
+          <t.body @rows={{pgc.currentPageResults}} as |b|>
+            <b.row data-test-security-file-list-row as |r|>
+              <r.cell as |value|>
+                {{#if r.columnValue.component}}
+                  {{#let (component r.columnValue.component) as |Component|}}
+                    <Component @file={{r.rowValue}} />
+                  {{/let}}
+                {{else}}
+                  <AkTypography title={{value}} @noWrap={{true}}>
+                    {{value}}
+                  </AkTypography>
+                {{/if}}
+              </r.cell>
+            </b.row>
+          </t.body>
+        </AkTable>
+
+        <AkPagination
+          @disableNext={{pgc.disableNext}}
+          @nextAction={{pgc.nextAction}}
+          @disablePrev={{pgc.disablePrev}}
+          @prevAction={{pgc.prevAction}}
+          @endItemIdx={{pgc.endItemIdx}}
+          @startItemIdx={{pgc.startItemIdx}}
+          @itemPerPageOptions={{pgc.itemPerPageOptions}}
+          @onItemPerPageChange={{pgc.onItemPerPageChange}}
+          @selectedOption={{pgc.selectedOption}}
+          @tableItemLabel={{t 'files'}}
+          @perPageTranslation={{t 'recordPerPage'}}
+          @totalItems={{pgc.totalItems}}
+        />
+      {{/if}}
+    </AkPaginationProvider>
+  </AkStack>
+</AkStack>

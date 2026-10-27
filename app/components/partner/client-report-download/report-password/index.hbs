@@ -1,0 +1,78 @@
+{{#if this.partner.access.view_reports}}
+  <div data-test-dropdown ...attributes>
+    <AkTooltip @placement='top' @arrow={{true}}>
+      <:tooltipContent>
+        <span data-test-dropdown-tooltip-text>{{t 'reportPassword'}}</span>
+      </:tooltipContent>
+
+      <:default>
+        <AkIconButton
+          local-class='dropdown-toggle'
+          id='password-toggle-{{@reportId}}'
+          {{on 'click' this.togglePassTrayVisibility}}
+          data-test-dropdown-toggle
+        >
+          <AkIcon @iconName='key' />
+        </AkIconButton>
+      </:default>
+    </AkTooltip>
+
+    <AkPopover
+      @arrow={{true}}
+      @anchorRef={{this.anchorRef}}
+      @placement='bottom-start'
+      @clickOutsideToClose={{true}}
+      @closeHandler={{this.closeReportPassTray}}
+      @unmountOnClose={{false}}
+    >
+      <div local-class='dropdown-tray' class='p-2' data-test-dropdown-tray>
+        <div data-test-report-password>
+          {{#if this.getUnlockKey.isRunning}}
+            <div local-class='password-loading' data-test-loading>
+              <AkLoader @size={{13}} />
+
+              {{t 'loading'}}
+            </div>
+          {{else if this.unlockKey}}
+            <div local-class='password-title' data-test-report-password-title>
+              {{t 'reportPassword'}}
+            </div>
+
+            <div local-class='password-display'>
+              <input
+                type='text'
+                id='unlock-key-{{@reportId}}'
+                local-class='password-input'
+                value={{this.unlockKey.unlockKey}}
+                data-test-report-password-value
+              />
+
+              <AkButton
+                {{on 'click' this.onCopyPassword}}
+                class='copy-unlock-key-button-{{@reportId}}'
+                local-class='copy-button button-small'
+                data-clipboard-target='#unlock-key-{{@reportId}}'
+                data-clipboard-action='copy'
+                data-test-report-password-copy-button
+              >
+                <:leftIcon>
+                  <AkIcon @iconName='content-copy-outline' />
+                </:leftIcon>
+
+                <:default>
+                  {{t 'copy'}}
+                </:default>
+              </AkButton>
+            </div>
+          {{else if this.apiError}}
+            <div local-class='password-loading-error' data-test-api-error>
+              <AkIcon @iconName='warning' />
+
+              <div>{{t 'somethingWentWrong'}}</div>
+            </div>
+          {{/if}}
+        </div>
+      </div>
+    </AkPopover>
+  </div>
+{{/if}}

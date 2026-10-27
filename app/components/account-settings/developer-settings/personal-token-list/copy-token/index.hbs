@@ -1,0 +1,14 @@
+<AkClipboard
+  @onSuccess={{this.handleCopySuccess}}
+  @onError={{this.handleCopyError}}
+  as |ac|
+>
+  <AkIconButton
+    data-clipboard-text={{@personalToken.key}}
+    id={{ac.triggerId}}
+    @size='small'
+    data-test-developerSettingsPersonalToken-copyButton
+  >
+    <AkIcon @iconName='content-copy-outline' @color='info' />
+  </AkIconButton>
+</AkClipboard>

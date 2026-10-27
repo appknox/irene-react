@@ -1,0 +1,42 @@
+{{page-title 'Project Files'}}
+
+<Partner::ClientsNav />
+
+<div class='px-2 pt-3 pb-6'>
+  <div class='pb-3'>
+    <LinkTo
+      {{style color='var(--primary-main)'}}
+      @route='authenticated.partner.clients'
+    >
+      {{t 'clients'}}
+    </LinkTo>
+    /
+    <LinkTo
+      {{style color='var(--primary-main)'}}
+      @route='authenticated.partner.client'
+      @model={{this.model.client.id}}
+    >
+      {{#if this.model.isEmptyTitle}}
+        <em>{{t 'noName'}}</em>
+      {{else}}
+        {{this.model.client.name}}
+      {{/if}}
+    </LinkTo>
+
+    /
+    <span
+      title='Project ID: {{this.model.project.id}}'
+    >{{this.model.project.id}}</span>
+  </div>
+  <div class='pb-6'>
+    <Partner::ClientProjectDetail @project={{this.model.project}} />
+  </div>
+  <div class='pb-6'>
+    <Partner::ClientUploadsList
+      @clientId={{this.model.client.id}}
+      @projectId={{this.model.project.id}}
+    />
+  </div>
+
+  {{outlet}}
+</div>

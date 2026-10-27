@@ -1,0 +1,18 @@
+.system-status-root {
+  height: 100vh;
+
+  .root-container {
+    border: 1px solid var(--system-status-root-container-border-color);
+    border-radius: var(--system-status-root-container-border-radius);
+    min-width: 35em;
+    max-width: 35em;
+    box-shadow: var(--system-status-root-container-box-shadow);
+
+    .logo-container {
+      img {
+        max-width: 12em;
+        max-height: 7em;
+      }
+    }
+  }
+}

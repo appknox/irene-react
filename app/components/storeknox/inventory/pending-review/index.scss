@@ -1,0 +1,24 @@
+.review-header {
+  border: 1px solid
+    var(--storeknox-inventory-pending-review-header-border-color);
+  background-color: var(--storeknox-inventory-pending-review-header-bg-color);
+  padding: 1em;
+}
+
+.approve-button {
+  width: 7.714em;
+  background-color: var(
+    --storeknox-inventory-pending-review-approve-button-color
+  ) !important;
+}
+
+.reject-button {
+  width: 7.714em;
+  background-color: var(
+    --storeknox-inventory-pending-review-reject-button-color
+  ) !important;
+}
+
+.divider {
+  margin: 0 0.35em;
+}
