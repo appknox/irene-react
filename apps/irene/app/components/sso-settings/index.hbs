@@ -1,0 +1,47 @@
+<div local-class='sso-settings-container'>
+  <AkTypography
+    data-test-ssoSettings-title
+    @variant='h5'
+    @gutterBottom={{true}}
+  >
+    {{t 'singleSignOn'}}
+  </AkTypography>
+
+  <AkTabs data-test-ssoSettings-tabs class='w-full mb-2' as |Akt|>
+    {{#each this.tabItems as |item|}}
+      <Akt.tabItem
+        data-test-ssoSettings-tab='{{item.id}}'
+        @id={{item.id}}
+        @isActive={{eq this.activeTab item.id}}
+        @buttonVariant={{true}}
+        @onTabClick={{this.onTabClick}}
+      >
+        {{item.label}}
+      </Akt.tabItem>
+    {{/each}}
+  </AkTabs>
+
+  {{#let (component this.activeTabComponent) as |Component|}}
+    {{#if (and this.hasOidcOrSaml this.showAlternativeTabHelpSteps)}}
+      {{! Show warning and steps for opposite tab }}
+      <SsoSettings::WarningBanner @text={{this.warningText}} />
+
+      <SsoSettings::StepsDisplay
+        @title={{this.stepsTitle}}
+        @steps={{this.stepsData}}
+      />
+    {{else}}
+      {{! Show main component }}
+      <Component
+        @organization={{@organization}}
+        @user={{@user}}
+        @sso={{this.sso}}
+        @idpMetadata={{this.idpMetadata}}
+        @providers={{this.provider}}
+        @deleteProvider={{this.deleteProvider}}
+        @deleteIdpMetadata={{this.deleteIdpMetadata}}
+        @refreshSsoData={{this.refreshSsoData}}
+      />
+    {{/if}}
+  {{/let}}
+</div>

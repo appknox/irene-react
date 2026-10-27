@@ -1,0 +1,13 @@
+.settings-analysis-container {
+  background: var(--project-settings-analysis-settings-background-color);
+  border: 1px solid var(--project-settings-analysis-settings-border-color);
+  border-top: 0;
+  border-radius: var(--project-settings-analysis-settings-border-radius);
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+}
+
+.section-divider {
+  border-bottom: 1px solid
+    var(--project-settings-analysis-settings-border-color);
+}

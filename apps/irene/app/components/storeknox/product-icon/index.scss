@@ -1,0 +1,15 @@
+.product-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--storeknox-product-icon-border-color);
+  border-radius: 100%;
+  cursor: default;
+
+  &.product-vapt,
+  &.product-sm {
+    border: none;
+  }
+}

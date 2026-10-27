@@ -1,0 +1,11 @@
+<div class='px-3 py-2'>
+  <Textarea
+    data-test-manualScan-additionalCommentInput
+    id='manual-scan-additional-comments'
+    class='mt-1'
+    local-class='textarea-input'
+    rows='5'
+    @value={{@manualscan.additionalComments}}
+    disabled={{not @file.isActive}}
+  />
+</div>

@@ -1,0 +1,101 @@
+<AkStack
+  @width='full'
+  @direction='column'
+  @spacing='2'
+  @alignItems='stretch'
+  local-class='drawer-body'
+  class='py-2 px-4'
+  data-test-orgSigningCert-certList
+  ...attributes
+>
+  {{#if @isLoading}}
+    <Organization::SigningCertificate::CertList::SkeletonLoader />
+
+  {{else if this.hasCerts}}
+    {{#if @isProjectScope}}
+      {{#if @projectCerts.length}}
+        <AkStack
+          @alignItems='center'
+          @spacing='0.5'
+          local-class='section-header'
+        >
+          <AkIcon @iconName='folder' @size='small' @color='textPrimary' />
+
+          <AkTypography
+            @variant='body2'
+            @fontWeight='bold'
+            data-test-orgSigningCert-projectCertsHeading
+          >
+            {{t 'cyod.signingCert.projectCertificatesHeading'}}
+          </AkTypography>
+        </AkStack>
+
+        {{#each @projectCerts as |row|}}
+          <Organization::SigningCertificate::CertList::CertCard
+            @row={{row}}
+            @isActivating={{@isActivating}}
+            @onActivate={{@onActivate}}
+            @onDelete={{@onDelete}}
+          />
+        {{/each}}
+      {{/if}}
+
+      <AkStack @alignItems='center' @spacing='0.5' local-class='section-header'>
+        <AkIcon @iconName='apps' @size='small' @color='textPrimary' />
+
+        <AkTypography
+          @variant='body2'
+          @fontWeight='bold'
+          data-test-orgSigningCert-orgCertsHeading
+        >
+          {{t 'cyod.signingCert.organizationCertificatesHeading'}}
+        </AkTypography>
+      </AkStack>
+    {{/if}}
+
+    {{#each @orgCerts as |row|}}
+      <Organization::SigningCertificate::CertList::CertCard
+        @row={{row}}
+        @isActivating={{@isActivating}}
+        @onActivate={{@onActivate}}
+        @onDelete={{@onDelete}}
+      />
+    {{/each}}
+  {{else}}
+    <div local-class='empty-state-block' data-test-orgSigningCert-empty>
+      <AkStack
+        @direction='column'
+        @alignItems='center'
+        @justifyContent='center'
+        @spacing='2'
+        class='py-7 px-4'
+      >
+        <AkSvg::ProjectListEmpty
+          width='155px'
+          height='63px'
+          data-test-orgSigningCert-emptySvg
+        />
+
+        <AkStack @direction='column' @alignItems='center' @spacing='0.5'>
+          <AkTypography
+            @variant='body1'
+            @tag='h5'
+            @fontWeight='medium'
+            data-test-orgSigningCert-emptyTitle
+          >
+            {{t 'cyod.signingCert.noneTitle'}}
+          </AkTypography>
+
+          <AkTypography
+            local-class='empty-description'
+            @variant='body2'
+            @align='center'
+            data-test-orgSigningCert-emptyDescription
+          >
+            {{t 'cyod.signingCert.none'}}
+          </AkTypography>
+        </AkStack>
+      </AkStack>
+    </div>
+  {{/if}}
+</AkStack>

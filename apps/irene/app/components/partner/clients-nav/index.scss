@@ -1,0 +1,27 @@
+.subnav {
+  background-color: var(--neutral-grey-200);
+  margin: 0 -10px;
+  padding: 0.4rem 1.5rem 0;
+  border-bottom: 1px solid var(--border-color-1);
+}
+
+.subnav-link {
+  padding: 0.45rem 1.2rem 0.5rem;
+  margin-right: 0.1rem;
+  display: inline-block;
+  color: inherit;
+  margin-bottom: -1px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--border-color-1);
+  border-top-left-radius: 0.3rem;
+  border-top-right-radius: 0.3rem;
+  background-color: var(--neutral-grey-100);
+
+  &.active {
+    background-color: var(--background-main);
+    color: var(--primary-main);
+    border-color: var(--border-color-1) var(--border-color-1)
+      var(--common-white) var(--border-color-1);
+  }
+}

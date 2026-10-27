@@ -1,0 +1,56 @@
+<span
+  ...attributes
+  {{style width=(concat this.size 'px') height=(concat this.size 'px')}}
+  local-class='ak-loader-root'
+  role='progressbar'
+  data-test-ak-loader
+  data-test-ak-loader-progress='{{this.progress}}'
+>
+  {{#if (has-block 'label')}}
+    <span local-class='ak-loader-svg-label'>
+      {{yield to='label'}}
+    </span>
+  {{/if}}
+
+  <svg
+    local-class='
+      ak-loader-svg 
+      {{if this.isIndeterminateLoader "indeterminate"}}
+    '
+    role='presentation'
+    viewBox={{this.viewBox}}
+    data-test-ak-loader-svg
+  >
+    <g role='presentation'>
+      <circle
+        data-test-ak-loader-svg-track
+        local-class='ak-loader-svg-track ak-loader-track-color-{{this.color}}'
+        role='presentation'
+        class='ak-loader-svg-track'
+        cx='{{this.viewPortSize}}'
+        cy='{{this.viewPortSize}}'
+        r='{{this.radius}}'
+        fill='none'
+        stroke-width='{{this.thickness}}'
+      />
+
+      <circle
+        data-test-ak-loader-svg-indicator
+        local-class='
+          ak-loader-svg-indicator 
+          ak-loader-indicator-color-{{this.color}}
+          {{if this.isIndeterminateLoader "indeterminate"}}
+        '
+        role='presentation'
+        class='ak-loader-circle-indicator'
+        cx='{{this.viewPortSize}}'
+        cy='{{this.viewPortSize}}'
+        r='{{this.radius}}'
+        stroke-width={{this.thickness}}
+        stroke-dasharray={{this.dashArray}}
+        stroke-dashoffset={{this.dashOffset}}
+        data-test-ak-loader-circle-indicator
+      />
+    </g>
+  </svg>
+</span>

@@ -1,0 +1,60 @@
+<AkStack
+  data-test-system-status
+  @alignItems='center'
+  @justifyContent='center'
+  local-class='system-status-root'
+>
+  <AkStack @direction='column' local-class='root-container'>
+    <AkStack
+      @width='full'
+      @justifyContent='center'
+      class='pt-3 pb-2'
+      local-class='logo-container'
+    >
+      <AuthAssets />
+    </AkStack>
+
+    <AkDivider @color='dark' />
+
+    <AkStack class='p-2' @direction='column' @width='full'>
+      <AkStack class='pb-2'>
+        <AkTypography
+          data-test-system-status-title
+          @variant='h5'
+          @fontWeight='bold'
+        >
+          {{t 'systemStatus'}}
+        </AkTypography>
+      </AkStack>
+
+      <AkTable @variant='semi-bordered' @borderColor='dark' as |t|>
+        <t.head @columns={{this.columns}} />
+
+        <t.body @rows={{this.rows}} as |b|>
+          <b.row data-test-system-status-rows='{{b.rowValue.id}}' as |r|>
+            <r.cell>
+              {{#if r.columnValue.component}}
+                {{#let (component r.columnValue.component) as |Component|}}
+                  <Component
+                    @isWorking={{r.rowValue.isWorking}}
+                    @isRunning={{r.rowValue.isRunning}}
+                    @message={{r.rowValue.message}}
+                  />
+                {{/let}}
+
+              {{else}}
+                <AkTypography
+                  data-test-system-status-systems
+                  title={{r.cellValue}}
+                  @noWrap={{true}}
+                >
+                  {{r.cellValue}}
+                </AkTypography>
+              {{/if}}
+            </r.cell>
+          </b.row>
+        </t.body>
+      </AkTable>
+    </AkStack>
+  </AkStack>
+</AkStack>

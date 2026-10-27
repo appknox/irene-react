@@ -1,0 +1,263 @@
+/* eslint-disable ember/no-observers */
+// eslint-disable-next-line ember/use-ember-data-rfc-395-imports
+import type DS from 'ember-data';
+
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
+import { task } from 'ember-concurrency';
+import { service } from '@ember/service';
+import { action } from '@ember/object';
+import { addObserver, removeObserver } from '@ember/object/observers';
+import type Store from '@ember-data/store';
+import type RouterService from '@ember/routing/router-service';
+import type IntlService from 'ember-intl/services/intl';
+
+import type ProjectModel from 'irene/models/project';
+import type FileModel from 'irene/models/file';
+import type OrganizationService from 'irene/services/organization';
+import type RealtimeService from 'irene/services/realtime';
+import type { PaginationProviderActionsArgs } from 'irene/components/ak-pagination-provider';
+import type { ProjectFilesQueryParams } from 'irene/routes/authenticated/dashboard/project/files';
+import parseError from 'irene/utils/parse-error';
+import styles from './index.scss';
+
+type FilesQueryResponse = DS.AdapterPopulatedRecordArray<FileModel> & {
+  meta: { count: number };
+};
+
+interface FileListSignature {
+  Args: {
+    project: ProjectModel | null;
+    queryParams: ProjectFilesQueryParams;
+  };
+}
+
+interface ScanTypeObject {
+  key: string;
+  value: number;
+}
+
+export default class FileListComponent extends Component<FileListSignature> {
+  @service declare store: Store;
+  @service declare router: RouterService;
+  @service declare intl: IntlService;
+  @service declare realtime: RealtimeService;
+  @service('notifications') declare notify: NotificationService;
+  @service declare organization: OrganizationService;
+
+  @tracked filesResponse: FilesQueryResponse | null = null;
+  @tracked baseFile: FileModel | null = null;
+  @tracked fileToCompare: FileModel | null = null;
+  @tracked overallFilesCount: number = 0;
+
+  @tracked selectedScanType;
+
+  @tracked scanTypeValue = -1;
+
+  constructor(owner: unknown, args: FileListSignature['Args']) {
+    super(owner, args);
+
+    this.selectedScanType = {
+      key: this.intl.t('all'),
+      value: -1,
+    };
+
+    addObserver(this.realtime, 'FileCounter', this, this.observeFileCounter);
+
+    const { files_limit, files_offset } = args.queryParams;
+
+    this.getFiles.perform(files_limit, files_offset, this.scanTypeValue, false);
+  }
+
+  get limit() {
+    return Number(this.args.queryParams.files_limit);
+  }
+
+  get offset() {
+    return Number(this.args.queryParams.files_offset);
+  }
+
+  get project() {
+    return this.args.project;
+  }
+
+  get files() {
+    return this.filesResponse?.slice();
+  }
+
+  get totalFilesCount() {
+    return this.filesResponse?.meta.count || 0;
+  }
+
+  get hasFiles() {
+    return Number(this.filesResponse?.length) > 0;
+  }
+
+  get disableCompareBtn() {
+    return !this.baseFile || !this.fileToCompare;
+  }
+
+  get clearFilterIconClass() {
+    return styles['clear-filter-icon'];
+  }
+
+  get showClearFilter() {
+    return this.selectedScanType.value !== -1 && !this.getFiles.isRunning;
+  }
+
+  get hasNoFiles() {
+    return this.totalFilesCount === 0;
+  }
+
+  get isKnoxIqEnabled() {
+    return this.organization.isKnoxIqEnabled;
+  }
+
+  // Reloads the files list whenever the file counter changes
+  observeFileCounter() {
+    this.getFiles.perform(this.limit, this.offset, this.scanTypeValue);
+  }
+
+  removeFileCounterObserver() {
+    removeObserver(this.realtime, 'FileCounter', this, this.observeFileCounter);
+  }
+
+  willDestroy() {
+    super.willDestroy();
+    this.removeFileCounterObserver();
+  }
+
+  // Table Actions
+  @action goToPage(args: PaginationProviderActionsArgs) {
+    const { limit, offset } = args;
+
+    this.getFiles.perform(limit, offset, this.scanTypeValue);
+  }
+
+  @action onItemPerPageChange(args: PaginationProviderActionsArgs) {
+    const { limit } = args;
+    const offset = 0;
+
+    this.getFiles.perform(limit, offset, this.scanTypeValue);
+  }
+
+  @action onCompareBtnClick() {
+    this.router.transitionTo(
+      'authenticated.dashboard.compare',
+      `${this.baseFile?.id}...${this.fileToCompare?.id}`
+    );
+  }
+
+  @action handleFileSelect(file: FileModel | null) {
+    const fileIsCompareFile = file?.id === this.fileToCompare?.id;
+
+    if (!this.baseFile && !fileIsCompareFile) {
+      this.baseFile = file;
+
+      return;
+    }
+
+    if (file?.id === this.baseFile?.id) {
+      this.baseFile = null;
+
+      return;
+    }
+
+    if (fileIsCompareFile) {
+      this.fileToCompare = null;
+
+      return;
+    }
+
+    this.fileToCompare = file;
+  }
+
+  @action handleFile1Delete() {
+    this.baseFile = null;
+  }
+
+  @action handleFile2Delete() {
+    this.fileToCompare = null;
+  }
+
+  @action filterScanTypeChange(scanType: ScanTypeObject) {
+    this.handleFile1Delete();
+
+    this.handleFile2Delete();
+
+    this.selectedScanType = scanType;
+
+    this.scanTypeValue = this.selectedScanType.value;
+
+    this.getFiles.perform(this.limit, 0, this.scanTypeValue);
+  }
+
+  @action clearFilters() {
+    this.filterScanTypeChange({
+      key: this.intl.t('all'),
+      value: -1,
+    });
+  }
+
+  setRouteQueryParams(limit: string | number, offset: string | number) {
+    this.router.transitionTo({
+      queryParams: {
+        files_limit: limit,
+        files_offset: offset,
+      },
+    });
+  }
+
+  getFiles = task(
+    async (
+      limit: string | number,
+      offset: string | number,
+      scanType: number,
+      setQueryParams = true
+    ) => {
+      if (setQueryParams) {
+        this.setRouteQueryParams(limit, offset);
+      }
+
+      const query = {
+        projectId: this.project?.get('id'),
+        limit: limit,
+        offset: offset,
+        ...(scanType !== null && scanType !== -1
+          ? { scan_type: scanType }
+          : {}),
+      };
+
+      try {
+        const files = (await this.store.query(
+          'file',
+          query
+        )) as FilesQueryResponse;
+
+        this.filesResponse = files;
+
+        if (scanType === -1) {
+          this.overallFilesCount = this.filesResponse?.meta.count || 0;
+        }
+      } catch (err) {
+        const error = err as AdapterError;
+        const status = Number(error?.errors?.[0]?.status);
+
+        const isRateLimit = status === 429;
+
+        if (isRateLimit) {
+          return;
+        }
+
+        this.notify.error(parseError(error));
+        this.filesResponse = null;
+      }
+    }
+  );
+}
+
+declare module '@glint/environment-ember-loose/registry' {
+  export default interface Registry {
+    FileList: typeof FileListComponent;
+  }
+}

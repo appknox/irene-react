@@ -1,0 +1,59 @@
+<AkDrawer
+  @open={{@open}}
+  @onClose={{@onClose}}
+  @anchor='right'
+  data-test-fileReportDrawer
+  as |dr|
+>
+  <div {{style width='428px'}}>
+    <AkAppbar @justifyContent='space-between' class='px-3' as |ab|>
+      <AkTypography
+        data-test-fileReportDrawer-title
+        @color='inherit'
+        @variant='h5'
+      >
+        {{t 'downloadReport'}}
+      </AkTypography>
+
+      <AkIconButton
+        data-test-fileReportDrawer-closeBtn
+        {{on 'click' dr.closeHandler}}
+        class={{ab.classes.defaultIconBtn}}
+      >
+        <AkIcon @iconName='close' data-test-fileReportDrawer-closeBtn-icon />
+      </AkIconButton>
+    </AkAppbar>
+
+    <AkTypography
+      @variant='subtitle2'
+      class='px-3 py-2'
+      data-test-fileReportDrawer-headerText
+    >
+      {{t 'fileReport.reportDrawerHeaderText'}}
+    </AkTypography>
+
+    <AkAccordion::Group
+      @defaultOpen={{array 'va-reports'}}
+      @openMultiple={{true}}
+      as |actx|
+    >
+      {{#each this.reportGroupList as |group|}}
+        {{#unless group.hideGroup}}
+          <AkAccordion
+            @id={{group.id}}
+            @accordionCtx={{actx}}
+            @summaryText={{group.title}}
+            data-test-fileReportDrawer-group
+            data-test-fileReportDrawer-groupItem='{{group.id}}'
+          >
+            <:content>
+              {{#let (component group.contentComponent) as |GroupContent|}}
+                <GroupContent @file={{@file}} @closeDrawer={{@onClose}} />
+              {{/let}}
+            </:content>
+          </AkAccordion>
+        {{/unless}}
+      {{/each}}
+    </AkAccordion::Group>
+  </div>
+</AkDrawer>

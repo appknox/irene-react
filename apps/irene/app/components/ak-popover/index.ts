@@ -1,0 +1,244 @@
+/* eslint-disable ember/no-observers */
+import Component from '@glimmer/component';
+import { action } from '@ember/object';
+import type {
+  Placement,
+  Modifier,
+  Instance as PopperInstance,
+} from '@popperjs/core';
+import { createPopper } from '@popperjs/core';
+import { inject as service } from '@ember/service';
+import { tracked } from '@glimmer/tracking';
+import { addObserver, removeObserver } from '@ember/object/observers';
+
+export interface AkPopoverSignature {
+  Element: HTMLDivElement;
+  Args: {
+    anchorRef?: HTMLElement | null;
+    arrow?: boolean;
+    arrowColor?: 'light' | 'dark';
+    arrowClass?: string;
+    sameWidthAsRef?: boolean;
+    placement?: Placement;
+    modifiers?: Partial<Modifier<string, object>>[];
+    renderInPlace?: boolean;
+    containerClass?: string;
+    hasBackdrop?: boolean;
+    onBackdropClick?: (event: MouseEvent) => void;
+    clickOutsideToClose?: boolean;
+    closeHandler?: () => void;
+    mountOnOpen?: boolean;
+    unmountOnClose?: boolean;
+  };
+  Blocks: { default: [] };
+}
+
+type SameWidthFunc = (enabled: boolean) => Modifier<'sameWidth', object>;
+
+const sameWidth: SameWidthFunc = (enabled: boolean) => ({
+  name: 'sameWidth',
+  enabled,
+  phase: 'beforeWrite',
+  requires: ['computeStyles'],
+  fn: ({ state }) => {
+    if (state.styles['popper']) {
+      state.styles['popper'].width = `${state.rects.reference.width}px`;
+    }
+  },
+  effect: ({ state }) => {
+    const refElement = state.elements.reference as HTMLElement;
+    state.elements.popper.style.width = `${refElement.offsetWidth}px`;
+  },
+});
+
+export default class PopoverComponent extends Component<AkPopoverSignature> {
+  @service('browser/window') declare window: Window;
+
+  defaultPlacement: Placement = 'auto';
+  defaultModifiers = [];
+
+  popper: PopperInstance | null = null;
+  popperElement: HTMLElement | null = null;
+
+  @tracked mountContent = false;
+
+  constructor(owner: unknown, args: AkPopoverSignature['Args']) {
+    super(owner, args);
+
+    if (!this.mountOnOpen) {
+      this.mountContent = true;
+    }
+
+    // Mounts and unmounts the content based on the value of the anchor ref
+    addObserver(this.args, 'anchorRef', this, this.toggleMountContent);
+  }
+
+  isEmpty(value: unknown) {
+    return (
+      value === null ||
+      value === undefined ||
+      (typeof value === 'string' && !value.trim())
+    );
+  }
+
+  get anchorRef() {
+    return this.args.anchorRef;
+  }
+
+  /**
+   * Determines whether the content should be mounted as soon as AkPopover is instantiated.
+   *
+   * If `mountOnOpen` is `true` or `undefined`, the content is mounted only when an `anchorRef` is provided (i.e an `element`).
+   *
+   * If `mountOnOpen` is `false`, the content is mounted by default whether the anchorRef is an `element` or `null`
+   * (i.e whether the popover is opened or closed).
+   *
+   * @see `this.toggleMountContent` for info about the content toggle logic
+   *
+   */
+  get mountOnOpen() {
+    if (this.isEmpty(this.args.mountOnOpen)) {
+      return true;
+    }
+
+    return this.args.mountOnOpen;
+  }
+
+  /**
+   * Determines whether the content should be unmounted when the popover is closed.
+   *
+   * If `unmountOnClose` is `true` or `undefined`, the content is unmounted whenever the popover is closed.
+   *
+   * If `unmountOnClose` is `false`, the content is left unmounted after being rendered whether the anchorRef is an `element` or `null`
+   * (i.e whether the popover is opened or closed).
+   *
+   * @see `this.toggleMountContent` for info about the content toggle logic
+   *
+   */
+  get unmountOnClose() {
+    if (this.isEmpty(this.args.unmountOnClose)) {
+      return true;
+    }
+
+    return this.args.unmountOnClose;
+  }
+
+  @action
+  elementInserted(element: HTMLDivElement) {
+    this.popperElement = element;
+    this.createPopperInstance();
+  }
+
+  // The addObserver below can miss updates to a @tracked-driven anchorRef
+  // after the first one; this re-targets the popper on every real change.
+  @action
+  handleAnchorRefUpdate() {
+    if (this.anchorRef) {
+      this.createPopperInstance();
+    } else {
+      this.popper?.destroy();
+      this.popper = null;
+    }
+  }
+
+  @action createPopperInstance() {
+    if (this.anchorRef && this.popperElement) {
+      this.popper?.destroy();
+
+      this.popper = createPopper(this.anchorRef, this.popperElement, {
+        placement: this.args.placement || this.defaultPlacement,
+        // Wormholed content needs 'fixed' -- AkPopover's own root forces
+        // `width: 0`, which corrupts 'absolute' strategy's rect. Rendered
+        // in place, the content stays under its local ancestors, so 'fixed'
+        // would measure wrong if one of those is transformed; 'absolute'
+        // is correct there instead.
+        strategy: this.args.renderInPlace ? 'absolute' : 'fixed',
+        modifiers: [
+          ...this.defaultModifiers,
+          sameWidth(Boolean(this.args.sameWidthAsRef)),
+          ...(this.args.modifiers || []),
+        ],
+      });
+
+      // First computation after creation can still land wrong; a resize
+      // event self-corrects it immediately, so force one extra update.
+      requestAnimationFrame(() => {
+        void this.popper?.update();
+      });
+
+      if (this.args.closeHandler && this.args.clickOutsideToClose) {
+        // Register click outside event listener when popper instance is created
+        this.window.addEventListener('mousedown', this.handleOutsideClick);
+      }
+    }
+  }
+
+  /**
+   * Simply decides whether to show the content or not
+   * based on subsequent states of the `anchorRef` after `AkPopover` is instantiated
+   */
+  toggleMountContent() {
+    if (this.anchorRef) {
+      this.createPopperInstance();
+
+      this.mountContent = true;
+    } else {
+      this.popper?.destroy();
+      this.popper = null;
+
+      if (this.unmountOnClose) {
+        this.mountContent = false;
+      } else {
+        this.mountContent = true;
+      }
+    }
+  }
+
+  /**
+   * Handler for when the backdrop element is clicked
+   */
+  @action
+  handleBackdropClick(event: MouseEvent) {
+    this.args.onBackdropClick?.(event);
+  }
+
+  /**
+   * If `clickOutsideToClose` is `true`, this function simply triggers the close handler
+   * by checking if clicked element is not the trigger element or popover element
+   */
+  @action
+  handleOutsideClick(event: MouseEvent) {
+    if (this.popper) {
+      const anchorRef = this.popper.state.elements.reference as HTMLElement;
+
+      if (
+        !this.popperElement?.contains(event.target as Node) &&
+        anchorRef &&
+        !anchorRef.contains(event.target as Node)
+      ) {
+        this.args.closeHandler?.();
+      }
+    }
+  }
+
+  @action
+  handleWillDestroyCleanup() {
+    if (this.args.closeHandler && this.args.clickOutsideToClose) {
+      // Unregister click outside event listener when popover closes
+      this.window.removeEventListener('mousedown', this.handleOutsideClick);
+    }
+  }
+
+  willDestroy() {
+    super.willDestroy();
+
+    removeObserver(this.args, 'anchorRef', this, this.toggleMountContent);
+    this.handleWillDestroyCleanup();
+  }
+}
+
+declare module '@glint/environment-ember-loose/registry' {
+  export default interface Registry {
+    AkPopover: typeof PopoverComponent;
+  }
+}

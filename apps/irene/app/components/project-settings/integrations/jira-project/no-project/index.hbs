@@ -1,0 +1,22 @@
+<AkTypography
+  @color='textSecondary'
+  @variant='body2'
+  data-test-prjSettings-integrations-jiraProject-noProject
+>
+  {{#if @reconnect}}
+    {{t 'jira'}}
+    {{t 'reconnectGotoSettings'}}
+  {{else}}
+    {{t 'jiraNoProject'}}
+  {{/if}}
+
+  <AkLink
+    @typographyVariant='body2'
+    @route='authenticated.dashboard.organization-settings.integrations'
+    @color='primary'
+    @underline='always'
+    data-test-prjSettings-integrations-jiraProject-noProject-integrationLink
+  >
+    {{t 'clickingHere'}}
+  </AkLink>
+</AkTypography>

@@ -1,0 +1,18 @@
+.notification-dropdown-container {
+  width: 35em;
+  background: var(--notifications-dropdown-background-color);
+  border: 1px solid var(--notifications-dropdown-border-color);
+  box-shadow: var(--notifications-dropdown-box-shadow);
+  margin-top: 10px;
+}
+
+.notification_main_list {
+  min-height: 30em;
+  max-height: 70vh;
+  overflow-y: scroll;
+}
+
+// Loading styles
+.loading {
+  height: 12.5em;
+}

@@ -1,0 +1,53 @@
+<div local-class='request'>
+  <AkStack @direction='column' @spacing='0.5' class='pr-2' local-class='user'>
+    <AkTypography @noWrap={{true}}>
+      {{@request.email}}
+    </AkTypography>
+
+    <AkTypography @color='neutral' @variant='body2' @noWrap={{true}}>
+      {{@request.fullName}}
+    </AkTypography>
+  </AkStack>
+
+  <AkTypography
+    @color='neutral'
+    @variant='body2'
+    @noWrap={{true}}
+    data-test-pending-request-company
+  >
+    {{@request.data.company}}
+  </AkTypography>
+
+  <AkTypography
+    @color='neutral'
+    @variant='body2'
+    title='{{day-js date=@request.createdOn format='DD MMM YYYY HH:mm A'}}'
+    data-test-pending-request-createdon
+  >
+    <em>{{dayjs-from-now @request.createdOn}}</em>
+  </AkTypography>
+
+  <AkTypography
+    @color='neutral'
+    @variant='body2'
+    title='{{day-js date=@request.updatedOn format='DD MMM YYYY HH:mm A'}}'
+    data-test-pending-request-createdon
+  >
+    <em>{{dayjs-from-now @request.updatedOn}}</em>
+  </AkTypography>
+
+  <AkStack @justifyContent='flex-end' @alignItems='center' @spacing='1'>
+    <AkTooltip
+      @placement='top'
+      @arrow={{true}}
+      @title=' {{t "undo"}} {{t "reject"}}'
+    >
+      <AkIconButton
+        title='Move back to pending'
+        {{on 'click' (fn @onUndoReject @request)}}
+      >
+        <AkIcon @iconName='undo' local-class='undo-icon' />
+      </AkIconButton>
+    </AkTooltip>
+  </AkStack>
+</div>

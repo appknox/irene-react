@@ -1,0 +1,71 @@
+<AkStack
+  @width='full'
+  @direction='column'
+  local-class='ai-powered-features-wrapper'
+>
+  {{#each this.aiFeaturesList as |feature idx|}}
+    {{#if (gt idx 0)}}
+      <AkDivider @color='dark' class='my-2' />
+    {{/if}}
+
+    <AkStack
+      @direction='column'
+      @spacing='1'
+      @width='full'
+      local-class='ai-powered-feature-body'
+      data-test-organzation-aiPoweredFeatures-featureBody={{feature.featureKey}}
+    >
+      <PoweredByAi::Chip
+        @clickable={{feature.clickable}}
+        @drawerInfo={{feature.drawerInfo}}
+        data-test-organzation-aiPoweredFeatures-poweredByAiChip
+      />
+
+      <AkStack
+        @justifyContent='space-between'
+        @width='full'
+        @alignItems='center'
+      >
+        <AkTypography
+          @fontWeight='medium'
+          data-test-organzation-aiPoweredFeatures-header
+        >
+          {{feature.header}}
+        </AkTypography>
+
+        <AkStack @direction='row' @alignItems='center' @spacing='1'>
+          <AkToggle
+            @size='small'
+            @checked={{feature.isChecked}}
+            @onChange={{this.toggleAiFeature feature.featureKey}}
+            @disabled={{or feature.isToggling (not feature.enabled)}}
+            data-test-organzation-aiPoweredFeatures-featureToggle
+          />
+
+          {{#if feature.isToggling}}
+            <AkLoader @size={{14}} />
+          {{/if}}
+        </AkStack>
+      </AkStack>
+
+      <AkTypography
+        @variant='body2'
+        @color='textSecondary'
+        class='w-8/12'
+        data-test-organzation-aiPoweredFeatures-description
+      >
+        {{feature.description}}
+      </AkTypography>
+
+    </AkStack>
+  {{/each}}
+</AkStack>
+
+<PoweredByAi::Drawer
+  @aiDrawerOpen={{this.aiDrawerOpen}}
+  @onClose={{this.closeAiDrawer}}
+  @info={{this.drawerInfo}}
+  @showButtons={{true}}
+  @buttonText={{this.drawerButtonLabel}}
+  @onButtonClick={{this.confirmFeatureToggle}}
+/>

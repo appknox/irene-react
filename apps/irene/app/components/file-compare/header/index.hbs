@@ -1,0 +1,193 @@
+<AkStack
+  ...attributes
+  @direction='column'
+  @width='full'
+  local-class='file-compare-header-container'
+  data-test-fileCompare-header-root
+>
+  <div
+    local-class='file-compare-header-breadcrumbs'
+    class='pt-2 pb-3'
+    data-test-fileCompare-headerBreadcrumbs
+  >
+    {{yield to='breadcrumbs'}}
+  </div>
+
+  <AkStack @direction='column' @width='full'>
+    <AkStack
+      @width='full'
+      @justifyContent='space-between'
+      @alignItems='center'
+      local-class='file-compare-header-project-overview'
+      data-test-fileCompareHeader-projectOverview
+    >
+      <AkStack @width='full' @alignItems='center' @spacing={{1.5}}>
+        <AkStack @alignItems='center' @spacing={{1}}>
+          <div local-class='file-icon'>
+            <img
+              src='{{or @project.lastFile.iconUrl @file1.iconUrl}}'
+              role='none'
+              alt=''
+              data-test-fileCompareHeader-projectOverview-fileIconUrl
+            />
+          </div>
+
+          <AkTypography
+            @color='secondary'
+            @fontWeight='bold'
+            data-test-fileCompareHeader-projectOverview-fileName
+          >
+            {{or @project.lastFile.name @file1.name}}
+          </AkTypography>
+        </AkStack>
+
+        <AkDivider @direction='vertical' @height='26px' local-class='divider' />
+
+        <AkStack @alignItems='center' @spacing='0.5'>
+          <AkIcon @iconName='text-snippet-outline' />
+
+          <AkTypography data-test-fileCompareHeader-projectOverview-packageName>
+            {{or @project.packageName @file1.project.packageName}}
+          </AkTypography>
+        </AkStack>
+
+        {{#if @project}}
+          <AkDivider
+            @direction='vertical'
+            @height='26px'
+            local-class='divider'
+          />
+
+          <AkStack @alignItems='center' @spacing='0.5'>
+            <AkIcon @iconName='folder-outline' />
+
+            <AkTypography data-test-fileCompareHeader-projectOverview-projectID>
+              {{t 'projectID'}}
+              -
+              {{@project.id}}
+            </AkTypography>
+          </AkStack>
+        {{/if}}
+
+        <AkDivider @direction='vertical' @height='26px' local-class='divider' />
+
+        <AkStack @alignItems='center'>
+          <AppPlatformIcon
+            data-test-fileCompareHeader-projectOverview-platformIcon
+            @platform='{{this.platformIconClass}}'
+          />
+        </AkStack>
+      </AkStack>
+
+      {{#if @project}}
+        <AkStack @alignItems='center'>
+          <AkSelect
+            @onChange={{this.changeFilter}}
+            @options={{this.scanTypeObjects}}
+            @selected={{@selectedScanType}}
+            @verticalPosition='auto'
+            @triggerClass={{this.triggerClass}}
+            @dropdownClass={{this.dropDownClass}}
+            @optionTitle={{t 'scanType'}}
+            @extra={{hash
+              selectedItem=@selectedScanType.key
+              showLabel=true
+              iconName='filter-list'
+              fontSize='medium'
+            }}
+            @selectedItemComponent={{component
+              'project-list/filter-selected-item'
+            }}
+            {{style width='auto'}}
+            class='select-scan-type-class pl-1'
+            data-test-select-scan-type-container
+            as |scanTypeObject|
+          >
+            <AkStack @spacing='1' @alignItems='center'>
+              <AkRadio @checked={{eq @scanTypeValue scanTypeObject.value}} />
+
+              {{scanTypeObject.key}}
+            </AkStack>
+          </AkSelect>
+
+          <AkButton
+            @variant='outlined'
+            @color='neutral'
+            class='pr-2'
+            {{on 'click' this.goToSettings}}
+            data-test-fileCompareHeader-projectOverview-settingsBtn
+          >
+            <:leftIcon>
+              <AkIcon
+                @iconName='settings'
+                @color='secondary'
+                data-test-fileCompareHeader-projectOverview-settingsBtn-icon
+              />
+            </:leftIcon>
+
+            <:default>
+              {{t 'settings'}}
+            </:default>
+          </AkButton>
+        </AkStack>
+      {{/if}}
+    </AkStack>
+
+    <AkStack
+      @width='full'
+      @justifyContent='space-between'
+      @alignItems='center'
+      local-class='file-compare-header-info'
+    >
+      {{#if (has-block 'header')}}
+        {{yield to='header'}}
+      {{else}}
+        <AkStack
+          @direction='column'
+          @spacing='0.5'
+          data-test-fileCompareHeader-fileCompare-content
+        >
+          <AkTypography @variant='h5'>
+            {{t 'compare'}}
+          </AkTypography>
+
+          <AkStack @alignItems='center' @spacing='1' {{style minHeight='30px'}}>
+            <AkTypography @variant='body2' @color='textSecondary'>
+              {{t 'fileCompare.summary1'}}
+            </AkTypography>
+
+            {{yield to='file1Content'}}
+
+            <AkTypography @variant='body2' @color='textSecondary'>
+              {{t 'fileCompare.summary2'}}
+            </AkTypography>
+
+            {{yield to='file2Content'}}
+          </AkStack>
+        </AkStack>
+      {{/if}}
+
+      {{yield to='headerCTA'}}
+    </AkStack>
+  </AkStack>
+</AkStack>
+
+{{#if @expandFilesOverview}}
+  <AkStack local-class='files-overview-container'>
+    <AppFileCard
+      @file={{@file1}}
+      @showMenuButton={{false}}
+      @hideCTAs={{true}}
+      data-test-fileCompareHeader-file1Overview
+    />
+
+    {{#if @file2}}
+      <AppFileCard
+        @file={{@file2}}
+        @showMenuButton={{false}}
+        @hideCTAs={{true}}
+        data-test-fileCompareHeader-file2Overview
+      />
+    {{/if}}
+  </AkStack>
+{{/if}}

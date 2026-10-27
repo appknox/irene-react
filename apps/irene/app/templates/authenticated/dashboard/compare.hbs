@@ -1,0 +1,16 @@
+{{page-title (t 'fileCompare.title')}}
+
+<PageWrapper>
+  <FileCompare
+    @file1={{@model.file}}
+    @file2={{@model.fileOld}}
+    @file1Analyses={{@model.file1Analyses}}
+    @file2Analyses={{@model.file2Analyses}}
+    @unknownAnalysisStatus={{@model.unknownAnalysisStatus}}
+    @isInvalidCompare={{@model.isInvalidCompare}}
+  />
+
+  {{#unless @model.isInvalidCompare}}
+    {{outlet}}
+  {{/unless}}
+</PageWrapper>

@@ -1,0 +1,99 @@
+.map-container {
+  height: 35vw;
+  padding: 2.857em;
+}
+
+.map-body {
+  background-color: var(--privacy-module-geo-location-map-bg-color);
+}
+
+.map-header {
+  border-bottom: 1px solid var(--privacy-module-geo-location-map-border-color);
+  padding: 1.14em;
+}
+
+.empty-container {
+  padding-top: 4em;
+  padding-bottom: 4em;
+  background-color: var(--privacy-module-geo-location-map-bg-color);
+  border-top: 1px solid var(--privacy-module-geo-location-map-border-color);
+
+  .header {
+    margin-top: 1.25em;
+  }
+
+  .body-text {
+    text-align: center;
+    max-width: 500px;
+  }
+}
+
+.country-tooltip {
+  z-index: 1000 !important;
+  box-shadow: var(--privacy-module-geo-location-box-shadow) !important;
+  border-color: transparent !important;
+  width: 172px;
+  color: var(--privacy-module-geo-location-text-color) !important;
+  padding: 0 !important;
+  border-width: 0px !important;
+}
+
+.tooltip-body {
+  padding: 0.57em !important;
+}
+
+.tooltip-footer {
+  padding: 0.57em;
+  background-color: var(--privacy-module-geo-location-map-border-color);
+}
+
+.tooltip-know-more {
+  font-size: 1rem !important;
+  font-weight: var(--privacy-module-geo-location-text-fw-medium);
+  color: var(--privacy-module-geo-location-text-color);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.tooltip-country-name {
+  font-size: 1rem;
+}
+
+.tooltip-number-icon {
+  display: flex;
+  gap: 0.357em;
+  align-items: center;
+}
+
+.tooltip-number {
+  font-size: 0.928rem;
+  font-weight: var(--privacy-module-geo-location-text-fw-bold);
+}
+
+.switch-button {
+  border-color: var(
+    --privacy-module-geo-location-accordion-border-color
+  ) !important;
+
+  &.active {
+    background-color: var(
+      --privacy-module-geo-location-header-active-background-color
+    );
+  }
+
+  &.table {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+  }
+
+  &.map {
+    border-right: 0px !important;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+}
+
+.table-row:hover {
+  cursor: pointer;
+  background-color: var(--privacy-module-geo-location-table-hover-color);
+}

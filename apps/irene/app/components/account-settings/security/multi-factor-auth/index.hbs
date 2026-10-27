@@ -1,0 +1,186 @@
+<AkStack @direction='column' @width='8/12'>
+  <AkTypography
+    @variant='h5'
+    @gutterBottom={{true}}
+    class='mb-4'
+    data-test-mfa-title
+  >
+    {{t 'multiFactorAuth'}}
+  </AkTypography>
+
+  <AkTypography @color='neutral' data-test-mfa-description>
+    {{t 'mfaDescription'}}
+  </AkTypography>
+
+  <AkTypography @color='neutral' class='mt-2'>{{t 'mfaSelect'}}</AkTypography>
+
+  {{#if this.mfas.length}}
+    <AkStack
+      @width='full'
+      @direction='column'
+      local-class='mfa-records-container'
+      class='mt-2'
+      data-test-mfa-options
+    >
+      {{#each this.mfas as |mfa idx|}}
+        {{#if (gt idx 0)}}
+          <AkDivider @color='dark' />
+        {{/if}}
+
+        <AkStack
+          local-class='{{if mfa.enabled "mfa-enabled"}}'
+          @width='full'
+          class='p-2'
+        >
+          <AkStack @width='full' @alignItems='center' @spacing='2.5'>
+            <AkStack @direction='column' @width='full'>
+              <AkStack @alignItems='center' @spacing='1'>
+                <AkTypography data-test-title='{{mfa.display}}'>
+                  {{mfa.display}}
+                </AkTypography>
+
+                {{#if mfa.enabled}}
+                  <AkIcon @iconName='done' @color='success' />
+                {{/if}}
+              </AkStack>
+
+              {{#if mfa.isApp}}
+                <AkTypography @variant='body2' @color='neutral' class='mt-1'>
+                  {{t 'mfaAppDesc'}}
+                </AkTypography>
+
+                <AkStack @direction='column' class='mt-2'>
+                  {{#each this.mfaAppRecords as |record|}}
+                    <AkStack @spacing='0.5'>
+                      <AkTypography
+                        @variant='body2'
+                        @color='neutral'
+                        {{style fontSize='0.85714em'}}
+                      >
+                        {{record.osTypes}}
+                      </AkTypography>
+
+                      <a
+                        href={{record.infoURL}}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        {{style fontSize='0.85714em'}}
+                      >
+                        {{record.app}}
+                      </a>
+                    </AkStack>
+                  {{/each}}
+                </AkStack>
+              {{/if}}
+
+              {{#if mfa.isEmail}}
+                <AkTypography @variant='body2' @color='neutral' class='mt-1'>
+                  {{t 'mfaEmailDesc'}}
+                </AkTypography>
+              {{/if}}
+            </AkStack>
+
+            {{#if mfa.enabled}}
+              {{#if this.user.canDisableMfa}}
+                <AkButton
+                  @variant='outlined'
+                  @disabled={{not this.user.canDisableMfa}}
+                  {{on 'click' this.showMFADisable}}
+                  data-test-disable-button='{{mfa.method}}'
+                >
+                  {{t 'disable'}}
+                </AkButton>
+              {{/if}}
+            {{else}}
+              <AkButton
+                @variant='outlined'
+                @color='neutral'
+                {{on 'click' (perform this.enableMFA mfa.method)}}
+                data-test-enable-button='{{mfa.method}}'
+              >
+                {{t 'enable'}}
+              </AkButton>
+            {{/if}}
+          </AkStack>
+        </AkStack>
+      {{/each}}
+    </AkStack>
+  {{/if}}
+
+  {{#unless this.user.canDisableMfa}}
+    <AkStack
+      @alignItems='center'
+      class='my-4 p-2'
+      local-class='alert-warn'
+      data-test-button-aaa
+    >
+      <AkIcon @iconName='security' @color='inherit' />
+
+      <AkStack @direction='column' class='ml-2'>
+        <AkTypography @variant='body2' data-test-mfa-cannot-disable-text>
+          {{t 'disableMFADenied'}}
+        </AkTypography>
+
+        {{#if this.me.org.is_owner}}
+          <AkStack @spacing='0.5'>
+            <AkTypography @variant='body2'>
+              {{t 'disableThisIn'}}
+            </AkTypography>
+
+            <AkLink
+              @fontWeight='medium'
+              @typographyVariant='body2'
+              @route='authenticated.dashboard.organization-settings'
+              @underline='always'
+              local-class='alert-warn-link'
+            >
+              {{t 'organizationSettings'}}
+            </AkLink>
+          </AkStack>
+        {{/if}}
+      </AkStack>
+    </AkStack>
+  {{/unless}}
+</AkStack>
+
+{{#if this.showMFADisableModal}}
+  <AccountSettings::Security::MfaDisable
+    @user={{@user}}
+    @isEmailMFAEnabled={{this.isEmailMFAEnabled}}
+    @isAppMFAEnabled={{this.isAppMFAEnabled}}
+    @closeModal={{this.closeMFADisable}}
+    @reloadMfa={{perform this.loadMfaData}}
+  />
+{{/if}}
+
+{{#if this.showEmailEnableModal}}
+  <AccountSettings::Security::MfaEmailEnable
+    @user={{@user}}
+    @onCancel={{this.closeEmailEnable}}
+    @reloadMfa={{perform this.loadMfaData}}
+  />
+{{/if}}
+
+{{#if this.showAppEnableModal}}
+  <AccountSettings::Security::MfaAppEnable
+    @user={{@user}}
+    @closeModal={{this.closeAppEnable}}
+    @reloadMfa={{perform this.loadMfaData}}
+  />
+{{/if}}
+
+{{#if this.showSwitchToAppModal}}
+  <AccountSettings::Security::MfaSwitchToApp
+    @user={{@user}}
+    @closeModal={{this.staClose}}
+    @reloadMfa={{perform this.loadMfaData}}
+  />
+{{/if}}
+
+{{#if this.showSwitchToEmailModal}}
+  <AccountSettings::Security::MfaSwitchToEmail
+    @user={{@user}}
+    @closeModal={{this.closeSwitchToEmail}}
+    @reloadMfa={{perform this.loadMfaData}}
+  />
+{{/if}}

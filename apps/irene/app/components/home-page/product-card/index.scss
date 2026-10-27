@@ -1,0 +1,25 @@
+.product-card-container {
+  border-radius: var(--home-page-product-card-border-radius);
+  border: 1px solid var(--home-page-product-card-border-color);
+  max-width: 314px;
+  overflow: hidden;
+
+  .product-card-content {
+    background-color: var(--home-page-product-card-background-color);
+    padding: 1.5em;
+    width: 100%;
+    max-height: 200px;
+  }
+
+  .product-icon {
+    width: 42px;
+    height: 42px;
+    pointer-events: none;
+  }
+
+  .beta-chip {
+    border-color: var(--home-page-product-card-beta-tag-bg);
+    background-color: var(--home-page-product-card-beta-tag-bg);
+    color: var(--home-page-product-card-beta-tag-color) !important;
+  }
+}

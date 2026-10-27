@@ -1,0 +1,39 @@
+{{! @glint-nocheck : or}}
+<div
+  ...attributes
+  data-test-ak-tooltip-root
+  local-class='ak-tooltip-wrapper'
+  {{on 'mouseenter' this.handleShowTooltip}}
+  {{on 'mouseleave' this.handleHideTooltip}}
+>
+  {{yield}}
+
+  {{#unless @disabled}}
+    <AkPopover
+      data-test-ak-tooltip-popover
+      role='tooltip'
+      local-class='ak-tooltip-container-root'
+      @renderInPlace={{@renderInPlace}}
+      @anchorRef={{this.anchorRef}}
+      @placement={{@placement}}
+      @arrow={{@arrow}}
+      @arrowColor={{or @color 'dark'}}
+      @modifiers={{this.modifiers}}
+      @containerClass={{if @arrow this.classes.akTooltipArrowPopoverRoot}}
+    >
+      <div
+        data-test-ak-tooltip-content
+        local-class='ak-tooltip-root ak-tooltip-color-{{or @color "dark"}} {{if
+          @multiline
+          "ak-tooltip-multiline"
+        }}'
+      >
+        {{#if (has-block 'tooltipContent')}}
+          {{yield to='tooltipContent'}}
+        {{else}}
+          {{@title}}
+        {{/if}}
+      </div>
+    </AkPopover>
+  {{/unless}}
+</div>

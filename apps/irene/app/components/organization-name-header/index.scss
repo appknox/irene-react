@@ -1,0 +1,41 @@
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1em;
+  background-color: var(--organization-name-header-background-color);
+  border: 1px solid var(--organization-name-header-border-color);
+  border-radius: var(--organization-name-header-border-radius);
+  box-sizing: border-box;
+}
+
+.tooltip-content-container {
+  width: 320px;
+  padding: 0.5em;
+  box-sizing: border-box;
+  white-space: normal;
+}
+
+.add-button {
+  box-shadow: none;
+  border-style: dashed;
+  background-color: var(--organization-name-color-primary-light);
+
+  &:hover,
+  &:focus {
+    box-shadow: none;
+    border-style: dashed;
+
+    .add-button-text {
+      text-decoration: underline;
+    }
+  }
+
+  &:disabled {
+    box-shadow: none;
+    border-color: var(--organization-name-color-text-disabled);
+    background-color: var(--organization-name-add-btn-disabled-background);
+    color: var(--organization-name-color-text-disabled);
+    text-decoration: none;
+  }
+}

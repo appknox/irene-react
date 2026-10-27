@@ -1,0 +1,38 @@
+.invitation {
+  display: grid;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.3rem 0.8rem;
+  grid-template-columns: 1fr 20% 8rem 6rem 6.5rem 6rem;
+  @media (min-width: 1200px) {
+    grid-template-columns: 1fr 25% 9rem 7rem 6.5rem 6rem;
+  }
+}
+
+.invitation-expired {
+  background-color: var(--background-light);
+  opacity: 0.6;
+}
+
+.source {
+  font-size: 0.85rem;
+  padding: 0.1rem 0.6rem 0.2rem;
+  display: inline-block;
+  border-radius: 0.3rem;
+}
+
+.source-backoffice {
+  color: var(--primary-main);
+  background-color: var(--primary-light);
+}
+
+.source-invitation {
+  color: var(--success-main);
+  background-color: var(--success-light);
+}
+
+.source-registration {
+  color: var(--info-dark);
+  background-color: var(--info-light);
+}

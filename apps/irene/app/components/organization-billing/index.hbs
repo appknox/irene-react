@@ -1,0 +1,59 @@
+<div>
+  {{#if this.hasSubscription}}
+    <div class='px-3 py-2'>
+      <AkTypography @variant='h2'>
+        {{t 'activeSubscription'}}
+      </AkTypography>
+
+      <AkStack @alignItems='center' @justifyContent='center'>
+        <OrganizationBilling::Subscription
+          @subscription={{this.subscription}}
+        />
+      </AkStack>
+    </div>
+
+    <AkDivider class='my-2' @color='dark' />
+  {{/if}}
+
+  {{#if this.hasNoSubscription}}
+    <div class='px-3 py-2'>
+      <AkStack @alignItems='center' @flexWrap='wrap'>
+        <AkTypography @variant='h2'>
+          {{t 'plans'}}
+        </AkTypography>
+
+        <AkStack
+          {{style flex='1'}}
+          @alignItems='center'
+          @justifyContent='center'
+          @spacing='1.5'
+        >
+          {{#each this.durations as |duration|}}
+            {{#let (eq this.paymentDuration duration.value) as |isActive|}}
+              <AkButton
+                @variant='outlined'
+                @color={{if isActive 'primary' 'neutral'}}
+                {{on 'click' (fn this.selectDuration duration.value)}}
+              >
+                {{duration.label}}
+              </AkButton>
+            {{/let}}
+          {{/each}}
+        </AkStack>
+      </AkStack>
+
+      <AkStack class='pt-3' @alignItems='center' @justifyContent='center'>
+        {{#each this.sortedPlans as |plan|}}
+          <OrganizationBilling::Plan
+            @plan={{plan}}
+            @paymentDuration={{this.paymentDuration}}
+          />
+        {{/each}}
+      </AkStack>
+    </div>
+
+    <AkDivider class='my-2' @color='dark' />
+  {{/if}}
+
+  <OrganizationBilling::InvoiceList />
+</div>
