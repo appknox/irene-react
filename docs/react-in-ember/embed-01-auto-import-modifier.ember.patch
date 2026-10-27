@@ -1,0 +1,513 @@
+diff --git a/.gitignore b/.gitignore
+index b6d8f8a..f7b7398 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -47,4 +47,8 @@
+ cypress.env.json
+ /cypress/downloads/
+ /cypress/snapshots/actual
+-/cypress/snapshots/diff
+\ No newline at end of file
++/cypress/snapshots/diff
++
++# Built by `npm run build:react-css` from the @irene/embed package.
++/vendor/react-embed.css
++/public/assets/fonts
+diff --git a/app/authenticators/base.ts b/app/authenticators/base.ts
+index 249a0fb..b034186 100644
+--- a/app/authenticators/base.ts
++++ b/app/authenticators/base.ts
+@@ -8,6 +8,7 @@ import ENV from 'irene/config/environment';
+ import type OidcService from 'irene/services/oidc';
+ import type FreshdeskService from 'irene/services/freshdesk';
+ import { getB64Token } from 'irene/utils/b64-encode-unicode';
++import { syncReactSession } from 'irene/utils/react-session';
+ import type IreneAjaxService from 'irene/services/ajax';
+ import type { SessionService } from 'irene/adapters/auth-base';
+ 
+@@ -25,6 +26,9 @@ export interface IreneLastTransitionInfoProps {
+ export const processData = (data: LoginSuccessDataProps) => {
+   data.b64token = getB64Token(data.user_id, data.token);
+ 
++  /* The embedded React pages read their credential from their own entry. */
++  syncReactSession(data);
++
+   return data;
+ };
+ 
+@@ -62,6 +66,9 @@ export default class BaseAuthenticator extends Base {
+   }
+ 
+   async restore(data: LoginSuccessDataProps) {
++    /* A restored session is one the embedded React pages need too. */
++    syncReactSession(data);
++
+     const url = ENV['ember-simple-auth']['checkEndPoint'];
+ 
+     await this.ajax.post(url, {
+@@ -79,6 +86,8 @@ export default class BaseAuthenticator extends Base {
+ 
+     await this.ajax.post(url);
+ 
++    syncReactSession(null);
++
+     this.freshdesk.destroyFreshchatWidget();
+ 
+     location.reload();
+diff --git a/app/components/react-page.hbs b/app/components/react-page.hbs
+new file mode 100644
+index 0000000..48f0c39
+--- /dev/null
++++ b/app/components/react-page.hbs
+@@ -0,0 +1 @@
++<div data-react-root ...attributes {{react this.IrenePage path=@path}}></div>
+diff --git a/app/components/react-page.ts b/app/components/react-page.ts
+new file mode 100644
+index 0000000..0b9791a
+--- /dev/null
++++ b/app/components/react-page.ts
+@@ -0,0 +1,22 @@
++import Component from '@glimmer/component';
++
++import { IrenePage } from '@irene/dashboard/embed';
++
++interface ReactPageSignature {
++  Element: HTMLDivElement;
++  Args: {
++    /** The page to render, where it is not the one this app's URL names. */
++    path?: string;
++  };
++}
++
++/**
++ * Renders the React app's page for a route this app no longer draws itself.
++ *
++ * A migrated screen's template is this component and nothing else. The page is
++ * chosen by the URL, so there is nothing to register and nothing to pass.
++ */
++export default class ReactPageComponent extends Component<ReactPageSignature> {
++  /* A classic template cannot import, so the React component is reached through here. */
++  IrenePage = IrenePage;
++}
+diff --git a/app/index.html b/app/index.html
+index b5ae882..aaf19f3 100644
+--- a/app/index.html
++++ b/app/index.html
+@@ -15,6 +15,7 @@
+     <script src="{{rootURL}}runtimeconfig.js"></script>
+     <link rel="stylesheet" href="{{rootURL}}assets/vendor.css" />
+     <link rel="stylesheet" href="{{rootURL}}assets/irene.css" />
++    <link rel="stylesheet" href="{{rootURL}}assets/react-embed.css" />
+     {{content-for "head-footer"}}
+   </head>
+ 
+diff --git a/app/modifiers/react.ts b/app/modifiers/react.ts
+new file mode 100644
+index 0000000..933965b
+--- /dev/null
++++ b/app/modifiers/react.ts
+@@ -0,0 +1,95 @@
++import { registerDestructor } from '@ember/destroyable';
++import { service } from '@ember/service';
++import type RouterService from '@ember/routing/router-service';
++import Modifier from 'ember-modifier';
++import { createElement, type ComponentType } from 'react';
++import { createRoot, type Root } from 'react-dom/client';
++
++interface ReactModifierSignature {
++  Element: Element;
++  Args: {
++    Positional: [ComponentType<Record<string, unknown>>];
++    Named: Record<string, unknown>;
++  };
++}
++
++/** Whether a click asked for this document, rather than a new tab or a download. */
++function isPlainClick(event: MouseEvent) {
++  return (
++    !event.defaultPrevented &&
++    event.button === 0 &&
++    !event.metaKey &&
++    !event.ctrlKey &&
++    !event.shiftKey &&
++    !event.altKey
++  );
++}
++
++/**
++ * Renders a React component into the element this modifies.
++ *
++ * Glimmer only reconciles nodes bound to tracked values, so the element handed
++ * over here is left alone and React owns everything inside it. A changed
++ * argument renders again into the same root rather than replacing it, which is
++ * what lets the React tree keep its own state across an update.
++ *
++ * Links inside the tree are handed to this app's router. The React tree has a
++ * router of its own — its components need one — but that router holds only the
++ * screen being embedded, so a link left to it resolves to nothing.
++ */
++export default class ReactModifier extends Modifier<ReactModifierSignature> {
++  @service declare router: RouterService;
++
++  #root?: Root;
++
++  /* Capture phase, so the link is claimed before React's own handler sees the click. */
++  #claimLink = (event: MouseEvent) => {
++    if (!isPlainClick(event)) {
++      return;
++    }
++
++    const anchor = (event.target as Element | null)?.closest?.('a[href]');
++    const href = anchor?.getAttribute('href');
++
++    if (!href || anchor?.getAttribute('target') === '_blank') {
++      return;
++    }
++
++    /* Anything off this origin is the browser's to handle, as are mail and tel links. */
++    if (!href.startsWith('/')) {
++      return;
++    }
++
++    event.preventDefault();
++    event.stopPropagation();
++
++    if (this.router.recognize(href)) {
++      this.router.transitionTo(href);
++    } else {
++      window.location.assign(href);
++    }
++  };
++
++  modify(
++    element: Element,
++    [component]: [ComponentType<Record<string, unknown>>],
++    named: Record<string, unknown>
++  ) {
++    if (!this.#root) {
++      this.#root = createRoot(element);
++
++      element.addEventListener('click', this.#claimLink as EventListener, true);
++
++      registerDestructor(this, () => {
++        element.removeEventListener('click', this.#claimLink as EventListener, true);
++        this.#root?.unmount();
++      });
++    }
++
++    /*
++      Copied onto a plain object: React reads `key` and `ref` off whatever it
++      is given, and the args proxy throws for any name it was not passed.
++    */
++    this.#root.render(createElement(component, { ...named }));
++  }
++}
+diff --git a/app/templates/authenticated/home.hbs b/app/templates/authenticated/home.hbs
+index a23e756..1418533 100644
+--- a/app/templates/authenticated/home.hbs
++++ b/app/templates/authenticated/home.hbs
+@@ -1,3 +1,3 @@
+ {{page-title (t 'home')}}
+ 
+-<HomePage />
+\ No newline at end of file
++<ReactPage />
+diff --git a/app/templates/reset.hbs b/app/templates/reset.hbs
+index 5c6829b..23acf40 100644
+--- a/app/templates/reset.hbs
++++ b/app/templates/reset.hbs
+@@ -1,5 +1,3 @@
+ {{page-title 'Reset Password'}}
+ 
+-<div>
+-  <UserLogin::ResetPassword @token={{@model.token}} />
+-</div>
+\ No newline at end of file
++<ReactPage />
+diff --git a/app/utils/react-session.ts b/app/utils/react-session.ts
+new file mode 100644
+index 0000000..f9f132a
+--- /dev/null
++++ b/app/utils/react-session.ts
+@@ -0,0 +1,44 @@
++/*
++  The session entry the embedded React pages read.
++
++  Those pages make their own API calls, and their client takes its credential
++  from local storage under a key and a shape of its own. This app is the one
++  that signs in, so it writes that entry too.
++*/
++
++/** The key the embedded React pages take their credential from. */
++const REACT_AUTH_SESSION_KEY = 'irene:auth-session';
++
++interface ReactSessionData {
++  token: string;
++  user_id: number;
++  b64token?: string;
++}
++
++/**
++ * Writes the entry the embedded React pages read, or removes it.
++ *
++ * @param data - The session this app just took, or null once it is given up.
++ */
++export function syncReactSession(data: ReactSessionData | null) {
++  try {
++    if (!data?.b64token) {
++      window.localStorage.removeItem(REACT_AUTH_SESSION_KEY);
++
++      return;
++    }
++
++    const entry = JSON.stringify({
++      token: data.token,
++      userId: data.user_id,
++      b64token: data.b64token,
++    });
++
++    /* Only on a change, so nothing watching the key sees a write that changed nothing. */
++    if (window.localStorage.getItem(REACT_AUTH_SESSION_KEY) !== entry) {
++      window.localStorage.setItem(REACT_AUTH_SESSION_KEY, entry);
++    }
++  } catch {
++    /* Nothing to write into, which the embedded pages read as signed out. */
++  }
++}
+diff --git a/ember-cli-build.js b/ember-cli-build.js
+index 3141402..d1c05e4 100644
+--- a/ember-cli-build.js
++++ b/ember-cli-build.js
+@@ -1,8 +1,33 @@
+ 'use strict';
+ 
++const path = require('path');
++
+ const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+ const webpack = require('webpack');
+ 
++/* The React source this build compiles itself, since those packages ship TypeScript. */
++const reactRoot = path.resolve(__dirname, '../..');
++const reactSource = [
++  path.join(reactRoot, 'packages'),
++  path.join(reactRoot, 'apps/dashboard/src'),
++];
++
++/* The build-time config the React bundle reads, which `@irene/config` freezes in. */
++const reactConfigKeys = [
++  'IRENE_API_HOST',
++  'IRENE_SHOW_LICENSE',
++  'IRENE_ENABLE_PENDO',
++  'IRENE_ENABLE_MARKETPLACE',
++  'IRENE_POSTHOG_API_KEY',
++  'IRENE_POSTHOG_API_HOST',
++  'ENTERPRISE',
++  'WHITELABEL_ENABLED',
++  'WHITELABEL_NAME',
++  'WHITELABEL_LOGO',
++  'WHITELABEL_THEME',
++  'WHITELABEL_FAVICON',
++];
++
+ const defaultFingerprintExtensions =
+   require('broccoli-asset-rev/lib/default-options').extensions;
+ 
+@@ -64,17 +89,82 @@ module.exports = function (defaults) {
+       includeCSS: false,
+     },
+     autoImport: {
++      /* The React components import `*.module.css` beside themselves. */
++      cssLoaderOptions: {
++        modules: { auto: true, localIdentName: '[local]__[hash:base64:5]' },
++      },
+       webpack: {
+         // extra webpack configuration goes here
+         node: {
+           global: true,
+         },
++        module: {
++          rules: [
++            {
++              /* The React app imports SVGs as components, which Vite does with a suffix. */
++              test: /\.svg$/,
++              resourceQuery: /react/,
++              include: reactSource,
++              use: [require.resolve('@svgr/webpack')],
++            },
++            {
++              test: /\.(ts|tsx)$/,
++              include: reactSource,
++              use: {
++                loader: require.resolve('babel-loader'),
++                options: {
++                  babelrc: false,
++                  configFile: false,
++                  presets: [
++                    [
++                      require.resolve('@babel/preset-react'),
++                      { runtime: 'automatic' },
++                    ],
++                    require.resolve('@babel/preset-typescript'),
++                  ],
++                },
++              },
++            },
++          ],
++        },
+         plugins: [
+           new webpack.ProvidePlugin({
+             Buffer: ['buffer', 'Buffer'],
+           }),
++          new webpack.DefinePlugin({
++            /*
++              Parenthesised: this is substituted as source text, and it lands
++              in an arrow function's body, where a bare `{` opens a block
++              rather than an object.
++            */
++            __BUILD_CONFIG__: `(${JSON.stringify(
++              Object.fromEntries(
++                reactConfigKeys
++                  .filter((key) => process.env[key] !== undefined)
++                  .map((key) => [key, process.env[key]])
++              )
++            )})`,
++          }),
+         ],
+         resolve: {
++          extensions: ['.js', '.mjs', '.ts', '.tsx', '.json'],
++          /* The React app's dependencies are installed against its own app, not this one. */
++          modules: [
++            path.join(reactRoot, 'apps/dashboard/node_modules'),
++            path.join(reactRoot, 'node_modules'),
++            'node_modules',
++          ],
++          /*
++            The React packages are linked from outside this app, so they would
++            resolve React from their own directory and find none. Pinning both
++            here also guarantees the page holds a single React instance.
++          */
++          alias: {
++            react: path.resolve(__dirname, 'node_modules/react'),
++            'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
++            /* The React app's own alias for its source, which its pages import by. */
++            '@': path.join(reactRoot, 'apps/dashboard/src'),
++          },
+           fallback: {
+             fs: false,
+             stream: require.resolve('stream-browserify'),
+@@ -109,5 +199,12 @@ module.exports = function (defaults) {
+   app.options.minifyJS.enabled = minifyEnabled;
+   app.options.fingerprint.enabled = minifyEnabled;
+ 
++  /*
++    The embedded React components' stylesheet, built by `npm run build:react-css`.
++    Kept out of vendor.css and linked after irene.css in index.html: its base
++    rules carry the same weight as this app's own, so order decides.
++  */
++  app.import('vendor/react-embed.css', { outputFile: 'assets/react-embed.css' });
++
+   return app.toTree();
+ };
+diff --git a/package.json b/package.json
+index b051a57..25f2462 100644
+--- a/package.json
++++ b/package.json
+@@ -14,6 +14,7 @@
+     "build": "ember build --environment=production",
+     "build:test": "ember build --environment=test",
+     "build:icons": "tsx ./scripts/build-icons.mjs || node ./scripts/build-icons.mjs",
++    "build:react-css": "mkdir -p vendor public/assets/fonts && cp node_modules/@irene/dashboard/embed-dist/embed.css vendor/react-embed.css && cp node_modules/@irene/dashboard/embed-dist/fonts/*.woff2 public/assets/fonts/",
+     "lint": "concurrently \"npm:lint:*(!fix)\" --names \"lint:\"",
+     "lint:css": "stylelint \"**/*.{css,scss}\" --allow-empty-input",
+     "lint:css:fix": "concurrently \"npm:lint:css -- --fix\"",
+@@ -73,6 +74,7 @@
+     "@iconify-json/solar": "^1.2.4",
+     "@iconify-json/streamline-plump": "^1.2.0",
+     "@iconify/utils": "^3.0.1",
++    "@irene/dashboard": "file:../../apps/dashboard",
+     "@storybook/addon-actions": "8.4.6",
+     "@storybook/addon-docs": "8.4.6",
+     "@storybook/addon-essentials": "8.4.6",
+@@ -82,6 +84,7 @@
+     "@storybook/ember": "8.4.6",
+     "@storybook/ember-cli-storybook": "^0.6.1",
+     "@storybook/manager-webpack5": "6.5.16",
++    "@svgr/webpack": "^8.1.0",
+     "@testing-library/cypress": "^10.0.1",
+     "@tsconfig/ember": "^3.0.4",
+     "@types/ember": "^4.0.11",
+@@ -114,6 +117,7 @@
+     "@types/jquery": "^3.5.25",
+     "@types/luxon": "^3.7.1",
+     "@types/qunit": "^2.19.10",
++    "@types/react-dom": "^19.3.0",
+     "@types/rsvp": "^4.0.9",
+     "@typescript-eslint/eslint-plugin": "^7.0.2",
+     "@typescript-eslint/parser": "^7.0.2",
+@@ -201,6 +205,8 @@
+     "prettier": "^3.2.5",
+     "qunit": "^2.22.0",
+     "qunit-dom": "^3.2.1",
++    "react": "^19.3.0",
++    "react-dom": "^19.3.0",
+     "sass": "^1.77.8",
+     "semver": "^7.7.1",
+     "storybook": "8.4.6",
+@@ -235,7 +241,9 @@
+   "overrides": {
+     "@storybook/ember": {
+       "ember-source": "~5.12.0"
+-    }
++    },
++    "react": "^19.3.0",
++    "react-dom": "^19.3.0"
+   },
+   "engines": {
+     "node": ">=24",
+diff --git a/tsconfig.json b/tsconfig.json
+index 12244ca..049ceac 100644
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -1,6 +1,8 @@
+ {
+   "extends": "@tsconfig/ember/tsconfig.json",
+   "compilerOptions": {
++    // The React packages this app embeds are written in JSX.
++    "jsx": "react-jsx",
+     // `paths` maps Ember's classic package layout, which is not resolvable with
+     // the Node resolution algorithm, onto real directories. It is written
+     // relative to this file: `baseUrl` is deprecated and removed in TS 7.
+@@ -8,6 +10,13 @@
+     "resolveJsonModule": true,
+     "verbatimModuleSyntax": false, // TODO: remove this later
+     "paths": {
++      // The embedded React packages are linked from outside this app, so they
++      // resolve React from their own directory unless it is mapped here too.
++      "@irene/dashboard/embed": ["./types/irene-embed.d.ts"],
++      "react": ["./node_modules/@types/react"],
++      "react/*": ["./node_modules/@types/react/*"],
++      "react-dom": ["./node_modules/@types/react-dom"],
++      "react-dom/*": ["./node_modules/@types/react-dom/*"],
+       "fetch": ["./node_modules/ember-fetch"],
+       "irene/tests/*": ["./tests/*"],
+       "irene/mirage/*": ["./mirage/*"],
+diff --git a/types/irene-embed.d.ts b/types/irene-embed.d.ts
+new file mode 100644
+index 0000000..9dd13fe
+--- /dev/null
++++ b/types/irene-embed.d.ts
+@@ -0,0 +1,14 @@
++/*
++  What this app imports from the React side.
++
++  The React packages are type-checked by their own toolchain, against their own
++  dependencies. Following them from here would mean teaching this app's
++  TypeScript about every package the React app installs, so the boundary is
++  declared instead.
++*/
++declare module '@irene/dashboard/embed' {
++  import type { ComponentType, ReactNode } from 'react';
++
++  export const IrenePage: ComponentType<{ path?: string }>;
++  export const EmbedProviders: ComponentType<{ children: ReactNode }>;
++}

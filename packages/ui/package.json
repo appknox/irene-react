@@ -20,6 +20,7 @@
     "./icons/sets": "./src/icons/sets.ts",
     "./icons/register": "./src/icons/register.ts",
     "./styles/index.css": "./styles/index.css",
+    "./styles/*": "./styles/*",
     "./icons/icons.json": "./src/icons/icons.json"
   },
   "peerDependencies": {

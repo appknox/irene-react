@@ -1,0 +1,3 @@
+
+# Built by `pnpm build:embed`, for a host application that renders these pages.
+embed-dist
