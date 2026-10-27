@@ -49,4 +49,3 @@ packages/translations/src/generated/
 
 # The Ember app, cloned in for the proxy that serves both from one origin. It
 # has its own repository and its own npm install, so it is not committed here.
-apps/irene
