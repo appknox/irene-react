@@ -89,3 +89,14 @@ export const akTableVariants = cva(
     },
   }
 );
+
+/* Where a column sets its header and cells, as irene's `textAlign` column option does. */
+export const akTableCellVariants = cva('', {
+  variants: {
+    align: {
+      left: 'text-left',
+      center: 'text-center',
+      right: 'text-right',
+    },
+  },
+});

@@ -16,6 +16,10 @@ export const OrganizationEndpoints = {
   namespace: (organizationId: number | string, namespaceId: number | string) =>
     `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/namespaces/${encodeURIComponent(namespaceId)}` as const,
 
+  /** The CYOD devices registered to an organization through Mercer, online or not. */
+  registeredDevices: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/registered-devices` as const,
+
   /** The StoreKnox organization, which not every deployment has. */
   storeknoxOrganization: () => `${API_NAMESPACES.v2}/sk_organization` as const,
 };

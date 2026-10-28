@@ -67,6 +67,41 @@ describe('SideNav', () => {
     );
   });
 
+  it.each([
+    '/dashboard/settings/general',
+    '/dashboard/settings/security',
+    '/dashboard/settings/developersettings',
+    '/dashboard/settings/notification-settings',
+    '/dashboard/settings/cyod-settings',
+  ])('marks account settings on every one of its tabs: %s', async (path) => {
+    await renderAtRoute(path);
+
+    await waitFor(() =>
+      expect(navItem(akMT('accountSettings'))).toHaveAttribute('data-status', 'active')
+    );
+
+    expect(navItem(akMT('accountSettings'))).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('marks the organization on its settings page, which its link does not lead to', async () => {
+    await renderAtRoute('/dashboard/organization/settings');
+
+    await waitFor(() =>
+      expect(navItem(akMT('organization'))).toHaveAttribute('data-status', 'active')
+    );
+  });
+
+  it('marks nothing else while on a settings tab', async () => {
+    await renderAtRoute('/dashboard/settings/security');
+
+    await waitFor(() =>
+      expect(navItem(akMT('accountSettings'))).toHaveAttribute('data-status', 'active')
+    );
+
+    expect(navItem(akMT('allProjects'))).not.toHaveAttribute('data-status');
+    expect(navItem(akMT('organization'))).not.toHaveAttribute('data-status');
+  });
+
   it('leaves the API documentation out until the organization buys the public APIs', async () => {
     await openProjects();
 
