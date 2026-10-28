@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 
 import { ENUMS } from '@irene/enums';
+import { formatRelativeTime } from '@irene/translations/date-time';
 import { akMT } from '@irene/translations/intl';
 import { AkDivider } from '@irene/ui/ak-divider';
 import { AkIcon } from '@irene/ui/ak-icon';
@@ -15,8 +16,6 @@ import {
   getUploadStatusDisplayProps,
   type UploadRow,
 } from '@/features/upload-app/utils';
-
-import { formatRelativeTime } from '@/utils/relative-time';
 
 import { UploadRowAppPending } from './upload-row-app-pending';
 

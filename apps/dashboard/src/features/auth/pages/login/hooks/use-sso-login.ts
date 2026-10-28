@@ -32,6 +32,7 @@ export function useSsoLogin(check: ApiSsoCheck) {
         window.location.href = ssoUrl;
       }
     },
+
     onError: unlessRateLimited(() => akNotify.error(akMT('pleaseTryAgain'))),
   });
 

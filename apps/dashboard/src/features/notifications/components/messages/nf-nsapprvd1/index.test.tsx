@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import { DateTimeFormat, formatDateTime } from '@irene/translations/date-time';
 import { akMT } from '@irene/translations/intl';
 import { textForRichTextMessage } from '@irene/translations/test-utils';
 
-import { formatNotificationDate } from '@/features/notifications/utils';
 import { buildNfNsapprvd1Context } from '@tests/factories';
 import { notificationElement as element } from '@tests/notification';
 import { renderWithRouterContext } from '@tests/render';
@@ -21,7 +21,7 @@ describe('NfNsapprvd1', () => {
         akMT('notificationModule.messages.nf-nsapprvd1', {
           platform_display: context.platform_display,
           namespace_value: context.namespace_value,
-          namespace_created_on: formatNotificationDate(context.namespace_created_on),
+          namespace_created_on: formatDateTime(context.namespace_created_on, DateTimeFormat.LL),
           moderator_username: context.moderator_username,
         })
       )

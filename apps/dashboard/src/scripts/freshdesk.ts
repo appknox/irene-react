@@ -85,7 +85,7 @@ function _authenticateWidget(token: string) {
     token,
 
     callback: () => {
-      _requestWidgetToken().then((nextToken) => {
+      void _requestWidgetToken().then((nextToken) => {
         if (nextToken) {
           _authenticateWidget(nextToken);
         }

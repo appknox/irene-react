@@ -1,5 +1,4 @@
 import { act, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
@@ -11,7 +10,6 @@ import { akMT } from '@irene/translations/intl';
 
 import { sessionCheckOptions } from '@/features/auth/queries/session';
 import { buildSession } from '@tests/factories';
-import { mockOrganizationFeatures } from '@tests/organization';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
@@ -80,39 +78,6 @@ describe('BootOverlay', () => {
     const { router, queryClient } = await renderAtRoute('/login');
 
     expect(overlay()).not.toBeInTheDocument();
-
-    // What signing in does: stores the session and seeds the cache with it.
-    const session = buildSession();
-
-    storeSession(session);
-    queryClient.setQueryData(sessionCheckOptions().queryKey, session);
-    hold(buildAPITestURL(OrganizationEndpoints.list()));
-
-    act(() => {
-      router.navigate({ to: '/' });
-    });
-
-    await waitFor(() => expect(overlay()).toBeInTheDocument());
-  });
-
-  it('renders again on a second sign-in in the same tab', async () => {
-    storeSession(buildSession());
-
-    server.use(
-      http.get(buildAPITestURL(OrganizationEndpoints.list()), () =>
-        HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
-      ),
-      http.post(buildAPITestURL(AuthEndpoints.logout()), () => HttpResponse.json({}))
-    );
-
-    mockOrganizationFeatures({ storeknox: true }); // Logout lives on the home page.
-
-    const { router, queryClient } = await renderAtRoute('/');
-
-    await waitFor(() => expect(overlay()).not.toBeInTheDocument());
-
-    await userEvent.click(await screen.findByRole('button', { name: 'Logout' }));
-    await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
 
     // What signing in does: stores the session and seeds the cache with it.
     const session = buildSession();

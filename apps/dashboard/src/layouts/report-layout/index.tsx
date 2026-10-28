@@ -61,7 +61,9 @@ export function ReportLayout() {
         </TopNav>
 
         <main className="flex-1 overflow-y-auto bg-background-subtle" data-test-report-main>
-          <Outlet />
+          <div className="mx-auto w-full max-w-300">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

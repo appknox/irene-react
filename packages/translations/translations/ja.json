@@ -85,6 +85,33 @@
   "analysisPageTitle": "Analysis",
   "analysisSettings": "Analysis Settings",
   "analytics": "Analytics",
+  "analyticsModule": {
+    "totalAppScans": "Total App Scans",
+    "scansByPlatform": "Scans by platform",
+    "appsScanned": "Apps scanned",
+    "overallScanCount": "Overall Scan Count",
+    "topIssues": "Top Issues",
+    "noIssuesFound": "No issues found",
+    "nothingScannedYet": "Nothing has been scanned yet",
+    "nothingScannedInRange": "No apps were scanned in this range",
+    "foundInFiles": "Found in {count} file(s)",
+    "totalScansOfType": "Total {type} Scans",
+    "days": "Days",
+    "months": "Months",
+    "years": "Years",
+    "last3Months": "Last 3 months",
+    "last6Months": "Last 6 months",
+    "lastYear": "Last year",
+    "couldNotLoad": "This could not be loaded",
+    "appsScannedOverTime": "Scan activity",
+    "scanCoverage": "Scan coverage",
+    "mostFoundIssues": "Most found issues",
+    "acrossFiles": "{count} files",
+    "platformSplit": "Platform split",
+    "scansTotal": "app scans in total",
+    "clickToViewAll": "Click the day to view all",
+    "yearToDate": "Year to date"
+  },
   "analyzing": "分析中",
   "android": "Android",
   "any": "Any",
@@ -1698,6 +1725,7 @@
   "pageNotFoundHint": "The link may be broken, or the page may have moved.",
   "paid": "有料",
   "partner": "Partner",
+  "partnerDashboard": "Partner Dashboard",
   "partnerPrivilege": {
     "noListFiles": "You were not privileged to access files",
     "noListProjects": "You were not privileged to access projects"
@@ -2448,6 +2476,10 @@
   "security": "セキュリティ",
   "securityDashboard": "Security Dashboard",
   "securityDashboardDesc": "For security researchers to perform manual assessments (PT)",
+  "securityModule": {
+    "downloadApp": "Download App",
+    "purgeApiAnalyses": "Purge API Analyses"
+  },
   "selectAll": "Select All",
   "selectAnyTeam": "チームを選択してください",
   "selectThePath": "Select the path",
@@ -3247,10 +3279,5 @@
   "yesTurnOn": "Yes, Turn On",
   "youCanCreateTeam": "you can create a new team by",
   "youWillBeChargedOn": "次のとおり請求されます：",
-  "yourPlan": "Your Plan",
-  "securityModule": {
-    "downloadApp": "Download App",
-    "purgeApiAnalyses": "Purge API Analyses"
-  },
-  "partnerDashboard": "Partner Dashboard"
+  "yourPlan": "Your Plan"
 }

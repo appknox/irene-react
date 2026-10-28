@@ -8,11 +8,13 @@ import {
 
 import { configurationStore } from '@irene/api/stores/configuration';
 import { organizationStore } from '@irene/api/stores/organization';
+import { rateLimitStore } from '@irene/api/stores/rate-limit';
 import { vulnerabilityStore } from '@irene/api/stores/vulnerability';
 import { closeWebsocketConnection } from '@irene/websocket';
 import type { ApiSessionResponse } from '@irene/api/services/auth';
 
 import { sessionCheckOptions } from '@/features/auth/queries/session';
+import { uploadAppStore } from '@/features/upload-app/store';
 import { destroyFreshchat } from '@/scripts/freshchat';
 import { signOutOfFreshdesk } from '@/scripts/freshdesk';
 
@@ -34,6 +36,23 @@ export function startSession(queryClient: QueryClient, response: ApiSessionRespo
 }
 
 /**
+ * Releases what the session holds outside React: the support widgets, the
+ * socket connection and the stored credential.
+ *
+ * Enough on its own when the page is about to be loaded again, since the cache
+ * and the stores go with it.
+ */
+export function releaseSession() {
+  /* Both widgets hold the account, so they go with the session. */
+  destroyFreshchat();
+  signOutOfFreshdesk();
+
+  /* The room belongs to the account, so a connection outliving it would carry one account's events into the next. */
+  closeWebsocketConnection();
+  clearStoredSession();
+}
+
+/**
  * Forgets the session: the credential, the cache, and everything the stores
  * were told about the account. Safe to call when there is none, so a failed
  * sign-out can still leave the user signed out.
@@ -46,18 +65,16 @@ export function startSession(queryClient: QueryClient, response: ApiSessionRespo
  * @param queryClient - The cache to clear.
  */
 export function endSession(queryClient: QueryClient) {
-  /* Both widgets hold the account, so they go with the session. */
-  destroyFreshchat();
-  signOutOfFreshdesk();
+  releaseSession();
 
-  /* The room belongs to the account, so a connection outliving it would carry one account's events into the next. */
-  closeWebsocketConnection();
-
-  clearStoredSession();
   queryClient.clear();
   queryClient.setQueryData(sessionCheckOptions().queryKey, null);
 
   organizationStore.getState().clear();
   vulnerabilityStore.getState().clear();
   configurationStore.getState().clear();
+
+  /* The uploads are this account's files, and the throttle is its own clock. */
+  uploadAppStore.getState().clear();
+  rateLimitStore.getState().clearThrottle();
 }

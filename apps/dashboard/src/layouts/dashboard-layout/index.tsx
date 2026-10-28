@@ -78,9 +78,11 @@ export function DashboardLayout({ children }: Readonly<{ children?: ReactNode }>
         </TopNav>
 
         <main className="flex-1 overflow-y-auto bg-background-subtle" data-test-dashboard-main>
-          {children}
+          <div className="mx-auto w-full max-w-300">
+            {children}
 
-          <Outlet />
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

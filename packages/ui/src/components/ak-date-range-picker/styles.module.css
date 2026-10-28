@@ -1,0 +1,187 @@
+/*
+  react-datepicker ships its own stylesheet, which paints in its own blues and
+  greys. Everything here repaints it in the design system's tokens; nothing
+  here changes the calendar's layout, which its own stylesheet handles.
+
+  Its class names are its own, so they are reached through `:global`, under one
+  scoped class the component hands the calendar. Without it these rules would
+  repaint every react-datepicker on the page.
+*/
+
+.calendar {
+  border: 0;
+  border-radius: var(--radius-none);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.calendar :global(.react-datepicker__header) {
+  border-bottom: 0;
+  background-color: var(--color-background);
+  padding-top: 0.25rem;
+}
+
+.calendar :global(.react-datepicker__month) {
+  margin: 0.4rem 0.6rem 0.6rem;
+}
+
+.calendar :global(.react-datepicker__current-month) {
+  padding-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-bold);
+}
+
+.calendar :global(.react-datepicker__day-name) {
+  width: 2.25rem;
+  margin: 0.125rem 0;
+  font-size: 0.6875rem;
+  color: var(--color-foreground-muted);
+  font-weight: var(--font-weight-normal);
+  text-transform: uppercase;
+}
+
+.calendar :global(.react-datepicker__day) {
+  position: relative;
+  border-radius: var(--radius-full);
+  color: var(--color-foreground);
+  margin: 0.125rem 0;
+  width: 2.25rem;
+  line-height: 2.25rem;
+  transition:
+    background-color 120ms linear,
+    color 120ms linear;
+}
+
+/*
+  The calendar's own hover rule carries a radius of its own, and a class with a
+  pseudo-class outranks the plain classes below, so every rule that shapes a day
+  states its radius on hover too or the band re-rounds under the pointer.
+*/
+.calendar :global(.react-datepicker__day:hover:not(.react-datepicker__day--disabled)) {
+  border-radius: var(--radius-full);
+  background-color: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  color: var(--color-primary-strong);
+}
+
+/* Today is marked whether or not it is in the range, so the calendar is placed in time. */
+.calendar :global(.react-datepicker__day--today) {
+  font-weight: var(--font-weight-bold);
+}
+
+/* Taken out of the flow, so marking today does not make its cell taller than the rest. */
+.calendar :global(.react-datepicker__day--today::after) {
+  position: absolute;
+  bottom: 0.3rem;
+  left: 50%;
+  width: 0.25rem;
+  height: 0.25rem;
+  transform: translateX(-50%);
+  border-radius: var(--radius-full);
+  background-color: currentcolor;
+  content: '';
+}
+
+.calendar :global(.react-datepicker__day--outside-month) {
+  color: var(--color-foreground-disabled);
+}
+
+/*
+  Everything between the two ends is a continuous band: the days are square and
+  butt against each other so the band reads as one run, and only the ends are
+  rounded off.
+*/
+.calendar :global(.react-datepicker__day--in-range:hover),
+.calendar :global(.react-datepicker__day--in-selecting-range:hover) {
+  border-radius: var(--radius-none);
+  background-color: color-mix(in srgb, var(--color-primary) 28%, transparent);
+}
+
+.calendar :global(.react-datepicker__day--in-range),
+.calendar :global(.react-datepicker__day--in-selecting-range) {
+  border-radius: var(--radius-none);
+  background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-foreground);
+}
+
+/* The ends of the band are rounded off on the side the band does not run to. */
+.calendar :global(.react-datepicker__day--range-start),
+.calendar :global(.react-datepicker__day--range-start:hover),
+.calendar :global(.react-datepicker__day--selecting-range-start),
+.calendar :global(.react-datepicker__day--selecting-range-start:hover) {
+  border-top-left-radius: var(--radius-full);
+  border-bottom-left-radius: var(--radius-full);
+}
+
+.calendar :global(.react-datepicker__day--range-end),
+.calendar :global(.react-datepicker__day--range-end:hover),
+.calendar :global(.react-datepicker__day--selecting-range-end),
+.calendar :global(.react-datepicker__day--selecting-range-end:hover) {
+  border-top-right-radius: var(--radius-full);
+  border-bottom-right-radius: var(--radius-full);
+}
+
+/* A range of one day is a circle, not a square with two corners rounded. */
+.calendar :global(.react-datepicker__day--range-start.react-datepicker__day--range-end),
+.calendar :global(.react-datepicker__day--range-start.react-datepicker__day--range-end:hover),
+.calendar :global(.react-datepicker__day--selected:not(.react-datepicker__day--in-range)),
+.calendar :global(.react-datepicker__day--selected:not(.react-datepicker__day--in-range):hover) {
+  border-radius: var(--radius-full);
+}
+
+.calendar :global(.react-datepicker__day--range-start),
+.calendar :global(.react-datepicker__day--range-end),
+.calendar :global(.react-datepicker__day--selected),
+.calendar :global(.react-datepicker__day--selecting-range-start) {
+  background-color: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.calendar :global(.react-datepicker__day--range-start:hover),
+.calendar :global(.react-datepicker__day--range-end:hover),
+.calendar :global(.react-datepicker__day--selected:hover),
+.calendar :global(.react-datepicker__day--selecting-range-start:hover) {
+  background-color: var(--color-primary-hover);
+  color: var(--color-primary-foreground);
+}
+
+.calendar :global(.react-datepicker__day--keyboard-selected) {
+  background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  color: var(--color-foreground);
+}
+
+.calendar :global(.react-datepicker__day--disabled) {
+  color: var(--color-foreground-disabled);
+}
+
+.calendar :global(.react-datepicker__day--disabled:hover) {
+  background-color: transparent;
+}
+
+.calendar :global(.react-datepicker__navigation-icon::before) {
+  border-color: var(--color-foreground-muted);
+}
+
+.calendar :global(.react-datepicker__navigation:hover *::before) {
+  border-color: var(--color-foreground);
+}
+
+/* Inline, there is no input to point at, so the arrow would float. */
+.calendar :global(.react-datepicker__triangle) {
+  display: none;
+}
+
+/* The month is stepped by the header's own controls, so the built-in arrows are dropped. */
+.calendar :global(.react-datepicker__navigation) {
+  display: none;
+}
+
+.calendar :global(.react-datepicker__month-container) {
+  padding: 0.5rem 0.25rem;
+}
+
+.calendar :global(.react-datepicker__month-container + .react-datepicker__month-container) {
+  border-left: 1px solid var(--color-divider);
+}

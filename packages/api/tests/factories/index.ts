@@ -1,3 +1,4 @@
+export { buildAppScan, buildRecentIssue, buildScanCount } from '@tests/factories/analytics';
 export { buildSession } from '@tests/factories/session';
 
 export {

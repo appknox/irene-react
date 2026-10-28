@@ -23,6 +23,8 @@
     "@irene/translations": "workspace:*",
     "@irene/ui": "workspace:*",
     "@irene/websocket": "workspace:*",
+    "@nivo/calendar": "^0.99.0",
+    "@nivo/core": "^0.99.0",
     "@normy/react-query": "^0.21.0",
     "@tanem/react-nprogress": "^7.1.3",
     "@tanstack/react-query": "^5.102.8",
