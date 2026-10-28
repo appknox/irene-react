@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('path');
+
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 const webpack = require('webpack');
 
@@ -65,6 +67,26 @@ module.exports = function (defaults) {
     },
     autoImport: {
       webpack: {
+        /* The React components in `react-src/` are TypeScript this build compiles. */
+        module: {
+          rules: [
+            {
+              test: /\.(ts|tsx)$/,
+              include: [path.resolve(__dirname, 'react-src')],
+              use: {
+                loader: require.resolve('babel-loader'),
+                options: {
+                  babelrc: false,
+                  configFile: false,
+                  presets: [
+                    [require.resolve('@babel/preset-react'), { runtime: 'automatic' }],
+                    require.resolve('@babel/preset-typescript'),
+                  ],
+                },
+              },
+            },
+          ],
+        },
         // extra webpack configuration goes here
         node: {
           global: true,
@@ -75,6 +97,7 @@ module.exports = function (defaults) {
           }),
         ],
         resolve: {
+          extensions: ['.js', '.mjs', '.ts', '.tsx', '.json'],
           fallback: {
             fs: false,
             stream: require.resolve('stream-browserify'),

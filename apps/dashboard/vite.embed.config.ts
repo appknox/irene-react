@@ -1,5 +1,6 @@
 import { fileURLToPath, URL } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
@@ -25,7 +26,21 @@ const EMBED_BASE = '/assets/embed/';
 export default defineConfig({
   base: EMBED_BASE,
   define: { __BUILD_CONFIG__: "(globalThis.__IRENE_EMBED_CONFIG__ ?? {})" },
-  plugins: [translationsPlugin(), react(), tailwindcss(), svgrPlugin()],
+  plugins: [
+    /*
+      Splits each route's component into its own chunk, as the application's
+      own build does. Without it the whole route tree is one file, and a host
+      page loads every screen's code to render one.
+
+      Must run before the React plugin.
+    */
+    tanstackRouter({ autoCodeSplitting: true }),
+
+    translationsPlugin(),
+    react(),
+    tailwindcss(),
+    svgrPlugin(),
+  ],
   resolve: { alias: { '@': resolvePath('./src') } },
 
   build: {
