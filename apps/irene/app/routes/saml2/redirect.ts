@@ -1,41 +1,18 @@
 import Route from '@ember/routing/route';
-import type RouterService from '@ember/routing/router-service';
-import { service } from '@ember/service';
-import type { SessionService } from 'irene/adapters/auth-base';
 
-import ENV from 'irene/config/environment';
 import config from 'irene/config/environment';
 
-interface Saml2RedirectParams {
-  sso_token: string;
-  err?: string;
-}
-
+/**
+ * The provider sends the user back here with a token in the query.
+ *
+ * The exchange and everything it shows belong to the React page this route
+ * renders, which reads the query itself.
+ */
 export default class Saml2RedirectRoute extends Route {
-  @service declare session: SessionService;
-  @service declare router: RouterService;
-  @service('notifications') declare notify: NotificationService;
-
   title = `Redirect${config.platform}`;
 
   queryParams = {
-    sso_token: {
-      refreshModel: true,
-    },
-    err: {
-      refreshModel: true,
-    },
+    sso_token: { refreshModel: true },
+    err: { refreshModel: true },
   };
-
-  model(params: Saml2RedirectParams) {
-    if (params.err) {
-      this.router.transitionTo('login');
-
-      this.notify.error(params.err, ENV.notifications);
-
-      return;
-    }
-
-    this.session.authenticate('authenticator:saml2', params.sso_token);
-  }
 }

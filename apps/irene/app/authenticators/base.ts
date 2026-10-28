@@ -8,6 +8,7 @@ import ENV from 'irene/config/environment';
 import type OidcService from 'irene/services/oidc';
 import type FreshdeskService from 'irene/services/freshdesk';
 import { getB64Token } from 'irene/utils/b64-encode-unicode';
+import { syncReactSession } from 'irene/utils/react-session';
 import type IreneAjaxService from 'irene/services/ajax';
 import type { SessionService } from 'irene/adapters/auth-base';
 
@@ -24,6 +25,9 @@ export interface IreneLastTransitionInfoProps {
 
 export const processData = (data: LoginSuccessDataProps) => {
   data.b64token = getB64Token(data.user_id, data.token);
+
+  /* The embedded React pages read their credential from their own entry. */
+  syncReactSession(data);
 
   return data;
 };
@@ -62,6 +66,9 @@ export default class BaseAuthenticator extends Base {
   }
 
   async restore(data: LoginSuccessDataProps) {
+    /* A restored session is one the embedded React pages need too. */
+    syncReactSession(data);
+
     const url = ENV['ember-simple-auth']['checkEndPoint'];
 
     await this.ajax.post(url, {
@@ -78,6 +85,8 @@ export default class BaseAuthenticator extends Base {
     const url = ENV['ember-simple-auth']['logoutEndPoint'];
 
     await this.ajax.post(url);
+
+    syncReactSession(null);
 
     this.freshdesk.destroyFreshchatWidget();
 

@@ -1,2 +1,3 @@
-export { EmbedProviders } from './providers';
-export { IrenePage } from './irene-page';
+export { mountIrenePage } from './mount';
+export { prefetchIrenePage } from './prefetch';
+export type { MountOptions, MountedPage } from './mount';

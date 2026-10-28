@@ -31,6 +31,24 @@
   border: 0 solid;
 }
 
+/*
+  The design system's own base layer, applied to the mounted subtree rather
+  than to the document. `html { font-size: 14px }` cannot be scoped without
+  changing what `rem` means for the host, so the root element carries it: every
+  `em` inside the tree then resolves the way these components expect. An icon
+  sized `1em` is otherwise measured against the host's root instead.
+*/
+:where([data-react-root]) {
+  font-size: 14px;
+  font-family: var(--font-sans);
+  color: var(--color-foreground);
+}
+
+/* A link is text, so it takes the height of its content rather than its container. */
+:where([data-react-root]) a {
+  height: fit-content;
+}
+
 :where([data-react-root]) a {
   color: inherit;
   text-decoration: inherit;

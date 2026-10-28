@@ -8,6 +8,8 @@
     "resolveJsonModule": true,
     "verbatimModuleSyntax": false, // TODO: remove this later
     "paths": {
+      // Declared rather than followed: the React side ships built JavaScript.
+      "@irene/dashboard/embed": ["./types/irene-embed.d.ts"],
       "fetch": ["./node_modules/ember-fetch"],
       "irene/tests/*": ["./tests/*"],
       "irene/mirage/*": ["./mirage/*"],

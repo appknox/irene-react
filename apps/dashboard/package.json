@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "test": "vitest run --coverage",
     "type-check": "pnpm routes:generate && tsc -b --noEmit",
-    "build:embed": "tailwindcss -i src/embed/styles/index.css -o embed-dist/embed.css && mkdir -p embed-dist/fonts && cp ../../packages/ui/styles/fonts/*.woff2 embed-dist/fonts/"
+    "build:embed": "vite build --config vite.embed.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -56,7 +56,6 @@
     "vite-plugin-svgr": "^5.2.0"
   },
   "exports": {
-    "./embed": "./src/embed/index.ts",
-    "./embed/styles": "./src/embed/styles/index.css"
+    "./embed": "./embed-dist/embed.js"
   }
 }

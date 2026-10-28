@@ -8,6 +8,7 @@ import { AuthEndpoints } from '@irene/api/services/auth/endpoints';
 import { isRateLimitExempt, rateLimitStore } from '@irene/api/stores/rate-limit';
 import { getApiErrorMessage } from '@irene/api/utils/errors';
 import { clearStoredSession, getAuthorizationHeader } from '@irene/api/utils/session';
+import { takeHandedOverResponse } from '@irene/api/utils/response-handoff';
 
 /**
  * ============================================================
@@ -81,6 +82,31 @@ export const client = axios.create({
   signing in and out changes it, and a client built at import time would still
   be carrying the credential from before.
 */
+/*
+  Answers from what a host application has already fetched, where one is
+  rendering these pages inside its own. Nothing is offered when this app runs
+  on its own, so this costs a map lookup and does nothing.
+*/
+client.interceptors.request.use((config) => {
+  if ((config.method ?? 'get').toLowerCase() !== 'get') {
+    return config;
+  }
+
+  const handedOver = takeHandedOverResponse(config.url ?? '');
+
+  if (handedOver !== undefined) {
+    config.adapter = async () => ({
+      data: handedOver,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config,
+    });
+  }
+
+  return config;
+});
+
 client.interceptors.request.use((config) => {
   const authorization = getAuthorizationHeader();
 
