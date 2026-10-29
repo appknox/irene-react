@@ -49,5 +49,3 @@ cypress.env.json
 /cypress/snapshots/actual
 /cypress/snapshots/diff
 
-# Staged by `npm run build:embed` from the React app's built embed bundle.
-/public/assets/embed

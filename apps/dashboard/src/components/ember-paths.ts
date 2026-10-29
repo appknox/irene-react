@@ -11,27 +11,37 @@
 
 /** The Ember path for each React path that has no screen yet, longest first. */
 const EMBER_PATHS: Record<string, string> = {
-  '/dashboard/analytics': '/analytics',
-  '/dashboard/file': '/file',
-  '/dashboard/marketplace': '/marketplace',
-  '/dashboard/notifications': '/notifications',
-  '/dashboard/organization': '/organization',
+  '/dashboard/analytics': '/dashboard/analytics',
+  '/dashboard/file': '/dashboard/file',
+  '/dashboard/marketplace': '/dashboard/marketplace',
+  '/dashboard/notifications': '/dashboard/notifications',
+  '/dashboard/organization': '/dashboard/organization',
   '/dashboard/privacy-module': '/dashboard/privacy-module',
   '/dashboard/project': '/dashboard/project',
   '/dashboard/projects': '/dashboard/projects',
-  '/dashboard/public-api': '/public-api',
+  '/dashboard/public-api': '/dashboard/public-api',
   '/dashboard/reports': '/dashboard/reports',
-  '/dashboard/sbom': '/sbom',
+  '/dashboard/sbom': '/dashboard/sbom',
   '/dashboard/storeknox': '/dashboard/storeknox',
-  '/dashboard/store-monitoring': '/store-monitoring',
-  '/dashboard/store-release-readiness': '/store-release-readiness',
-  '/dashboard/subscription': '/subscription',
+  '/dashboard/store-monitoring': '/dashboard/store-monitoring',
+  '/dashboard/store-release-readiness': '/dashboard/store-release-readiness',
+  '/dashboard/subscription': '/dashboard/subscription',
   '/partner/analytics': '/partner/analytics',
   '/partner/clients': '/partner/clients',
   '/security/download-app': '/security/downloadapp',
   '/security/projects': '/security/projects',
   '/security/purge-analysis': '/security/purgeanalysis',
 };
+
+/**
+ * The paths the Ember app still serves, longest first.
+ *
+ * The same list the dev server proxies and the handover reads, so a path
+ * cannot leave one and stay in the other.
+ */
+export const EMBER_OWNED_PATHS: string[] = [...new Set(Object.values(EMBER_PATHS))].sort(
+  (one, other) => other.length - one.length
+);
 
 /**
  * The Ember URL a React path hands over to.

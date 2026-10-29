@@ -12,6 +12,11 @@ interface PublicApiDocsApiEndpointsSignature {
 }
 
 export default class PublicApiDocsApiEndpointsComponent extends Component<PublicApiDocsApiEndpointsSignature> {
+  /*
+    Only the `apis` preset. The standalone preset is a separate entry point of
+    the package and is undefined here, and it draws a top bar for choosing a
+    spec that this page has no use for: the spec is passed in.
+  */
   @action
   initializeAPIEndpoints(element: HTMLDivElement) {
     const servers = this.args.data.servers;
@@ -19,7 +24,7 @@ export default class PublicApiDocsApiEndpointsComponent extends Component<Public
     SwaggerUI({
       spec: { ...this.args.data, info: {}, servers },
       domNode: element,
-      presets: [SwaggerUI.presets.apis, SwaggerUI.SwaggerUIStandalonePreset],
+      presets: [SwaggerUI.presets.apis],
     });
   }
 }

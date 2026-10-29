@@ -3,6 +3,30 @@
 import type OrganizationModel from 'irene/models/organization';
 import type UserModel from 'irene/models/user';
 
+/**
+ * Adds a script tag once per page.
+ *
+ * Both widgets wrap global methods when they load, so a second copy wraps the
+ * first and the two then call each other until the stack runs out.
+ *
+ * @param src - The script to load.
+ * @returns Whether it was added, false when it is already there.
+ */
+const injectScriptOnce = (src: string) => {
+  if (document.querySelector(`script[src="${src}"]`)) {
+    return false;
+  }
+
+  const s = document.createElement('script');
+
+  s.src = src;
+  s.async = 1;
+
+  document.getElementsByTagName('head')[0].appendChild(s);
+
+  return true;
+};
+
 // Inject freshdesk support script that enables widget in the application
 const injectSupportWidget = (widgetId: string) => {
   // Widget launch
@@ -19,10 +43,7 @@ const injectSupportWidget = (widgetId: string) => {
     }
   })();
 
-  const s = document.createElement('script');
-  s.src = `https://ind-widget.freshworks.com/widgets/${widgetId}.js`;
-  s.async = 1;
-  document.getElementsByTagName('head')[0].appendChild(s);
+  injectScriptOnce(`https://ind-widget.freshworks.com/widgets/${widgetId}.js`);
 };
 
 // Install freshchat
@@ -89,10 +110,7 @@ const installFreshChat = (
     restoreId,
   };
 
-  const s = document.createElement('script');
-  s.src = `${host}/js/widget.js`;
-  s.async = 1;
-  document.getElementsByTagName('head')[0].appendChild(s);
+  injectScriptOnce(`${host}/js/widget.js`);
 };
 
 export { injectSupportWidget, installFreshChat };

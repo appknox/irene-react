@@ -67,26 +67,6 @@ module.exports = function (defaults) {
     },
     autoImport: {
       webpack: {
-        /* The React components in `react-src/` are TypeScript this build compiles. */
-        module: {
-          rules: [
-            {
-              test: /\.(ts|tsx)$/,
-              include: [path.resolve(__dirname, 'react-src')],
-              use: {
-                loader: require.resolve('babel-loader'),
-                options: {
-                  babelrc: false,
-                  configFile: false,
-                  presets: [
-                    [require.resolve('@babel/preset-react'), { runtime: 'automatic' }],
-                    require.resolve('@babel/preset-typescript'),
-                  ],
-                },
-              },
-            },
-          ],
-        },
         // extra webpack configuration goes here
         node: {
           global: true,

@@ -14,7 +14,6 @@
     "build": "ember build --environment=production",
     "build:test": "ember build --environment=test",
     "build:icons": "tsx ./scripts/build-icons.mjs || node ./scripts/build-icons.mjs",
-    "build:embed": "mkdir -p public/assets/embed && cp -R node_modules/@irene/dashboard/embed-dist/. public/assets/embed/",
     "lint": "concurrently \"npm:lint:*(!fix)\" --names \"lint:\"",
     "lint:css": "stylelint \"**/*.{css,scss}\" --allow-empty-input",
     "lint:css:fix": "concurrently \"npm:lint:css -- --fix\"",
@@ -74,7 +73,6 @@
     "@iconify-json/solar": "^1.2.4",
     "@iconify-json/streamline-plump": "^1.2.0",
     "@iconify/utils": "^3.0.1",
-    "@irene/dashboard": "file:../../apps/dashboard",
     "@storybook/addon-actions": "8.4.6",
     "@storybook/addon-docs": "8.4.6",
     "@storybook/addon-essentials": "8.4.6",
@@ -198,7 +196,6 @@
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-qunit": "^8.1.1",
-    "irene-react": "file:./react-src",
     "loader.js": "^4.7.0",
     "luxon": "^3.7.2",
     "miragejs": "^0.1.48",
@@ -209,8 +206,6 @@
     "prettier": "^3.2.5",
     "qunit": "^2.22.0",
     "qunit-dom": "^3.2.1",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
     "sass": "^1.77.8",
     "semver": "^7.7.1",
     "storybook": "8.4.6",
@@ -245,9 +240,7 @@
   "overrides": {
     "@storybook/ember": {
       "ember-source": "~5.12.0"
-    },
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    }
   },
   "engines": {
     "node": ">=24.22.1",

@@ -1,8 +1,6 @@
 {
   "extends": "@tsconfig/ember/tsconfig.json",
   "compilerOptions": {
-    // The React components in `react-src/` are written in JSX.
-    "jsx": "react-jsx",
     // `paths` maps Ember's classic package layout, which is not resolvable with
     // the Node resolution algorithm, onto real directories. It is written
     // relative to this file: `baseUrl` is deprecated and removed in TS 7.

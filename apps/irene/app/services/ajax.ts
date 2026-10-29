@@ -6,7 +6,6 @@ import ENV from 'irene/config/environment';
 import type { SessionService } from 'irene/adapters/auth-base';
 import type RateLimitService from 'irene/services/rate-limit';
 import type LoggerService from 'irene/services/logger';
-import { keepSharedResponse } from 'irene/utils/react-responses';
 
 /**
  * Extended request options that include additional properties beyond the standard RequestInit
@@ -320,11 +319,6 @@ export default class IreneAjaxService extends Service {
 
     // Parse the response for normal processing
     const parsedResponse = await this.parseResponseText(response);
-
-    if (response.ok) {
-      /* Offered to the embedded React pages, which load the same endpoints. */
-      keepSharedResponse(finalUrl, parsedResponse);
-    }
 
     if (!response.ok && response.status !== 429) {
       const errorResponse = {
