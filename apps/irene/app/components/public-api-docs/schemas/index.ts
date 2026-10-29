@@ -17,7 +17,7 @@ export default class PublicApiDocsSchemasComponent extends Component<PublicApiDo
     SwaggerUI({
       spec: { ...this.args.data, info: {}, paths: {} },
       domNode: element,
-      presets: [SwaggerUI.presets.apis, SwaggerUI.SwaggerUIStandalonePreset],
+      presets: [SwaggerUI.presets.apis],
     });
   }
 }

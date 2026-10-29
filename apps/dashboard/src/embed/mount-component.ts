@@ -1,17 +1,19 @@
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
-import { AnalyticsPage } from '@/features/dashboard/pages/analytics';
-
-import { ScreenContext } from './screen-context';
 import { offerHandedOverResponses } from '@irene/api/utils/response-handoff';
 
-import { applyEmbedConfig, linkStylesheet, DEFAULT_ASSET_BASE } from './runtime';
+import { AnalyticsPage } from '@/features/dashboard/pages/analytics';
+
+import { AccountSettings } from './components/account-settings';
 import { EmbedProviders } from './providers';
+import { applyEmbedConfig, DEFAULT_ASSET_BASE, linkStylesheet } from './runtime';
+import { ScreenContext } from './screen-context';
 
 /** The components a host may render by name. */
 const COMPONENTS = {
   AnalyticsPage,
+  AccountSettings,
 } as const;
 
 export type IreneComponentName = keyof typeof COMPONENTS;

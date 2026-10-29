@@ -51,4 +51,3 @@ packages/translations/src/generated/
 # has its own repository and its own npm install, so it is not committed here.
 
 # Reference material, cloned rather than vendored.
-apps/ast-workshop
