@@ -19,7 +19,7 @@ export default class PublicApiDocsApiEndpointsComponent extends Component<Public
     SwaggerUI({
       spec: { ...this.args.data, info: {}, servers },
       domNode: element,
-      presets: [SwaggerUI.presets.apis, SwaggerUI.SwaggerUIStandalonePreset],
+      presets: [SwaggerUI.presets.apis],
     });
   }
 }

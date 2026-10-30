@@ -3,26 +3,49 @@
 import type OrganizationModel from 'irene/models/organization';
 import type UserModel from 'irene/models/user';
 
+/**
+ * Adds a script tag once per page.
+ *
+ * A second copy of a widget wraps the first's hold on the global it patched,
+ * and the two then call each other until the stack runs out. The React app
+ * installs the same chat widget, so either side may have got there first.
+ *
+ * @param src - The script to load.
+ * @returns Whether it was added, false when it is already there.
+ */
+const injectScriptOnce = (src: string) => {
+  if (document.querySelector(`script[src="${src}"]`)) {
+    return false;
+  }
+
+  const s = document.createElement('script');
+
+  s.src = src;
+  s.async = 1;
+
+  document.getElementsByTagName('head')[0].appendChild(s);
+
+  return true;
+};
+
 // Inject freshdesk support script that enables widget in the application
 const injectSupportWidget = (widgetId: string) => {
   // Widget launch
   window.fwSettings = { widget_id: widgetId };
 
-  !(function () {
-    if ('function' != typeof window.FreshworksWidget) {
-      // eslint-disable-next-line no-var
-      var n = function () {
-        // eslint-disable-next-line prefer-rest-params
-        n.q.push(arguments);
-      };
-      ((n.q = []), (window.FreshworksWidget = n));
-    }
-  })();
+  /* A stand-in that queues calls made before the widget's own script loads. */
+  if ('function' != typeof window.FreshworksWidget) {
+    // eslint-disable-next-line no-var
+    var n = function () {
+      // eslint-disable-next-line prefer-rest-params
+      n.q.push(arguments);
+    };
 
-  const s = document.createElement('script');
-  s.src = `https://ind-widget.freshworks.com/widgets/${widgetId}.js`;
-  s.async = 1;
-  document.getElementsByTagName('head')[0].appendChild(s);
+    n.q = [];
+    window.FreshworksWidget = n;
+  }
+
+  injectScriptOnce(`https://ind-widget.freshworks.com/widgets/${widgetId}.js`);
 };
 
 // Install freshchat
@@ -89,10 +112,7 @@ const installFreshChat = (
     restoreId,
   };
 
-  const s = document.createElement('script');
-  s.src = `${host}/js/widget.js`;
-  s.async = 1;
-  document.getElementsByTagName('head')[0].appendChild(s);
+  injectScriptOnce(`${host}/js/widget.js`);
 };
 
 export { injectSupportWidget, installFreshChat };

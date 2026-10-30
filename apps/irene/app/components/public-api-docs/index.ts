@@ -72,7 +72,7 @@ export default class PublicApiDocsComponent extends Component {
       SwaggerUI({
         spec: { ...this.data, paths: {}, components: {} },
         domNode: element,
-        presets: [SwaggerUI.presets.apis, SwaggerUI.SwaggerUIStandalonePreset],
+        presets: [SwaggerUI.presets.apis],
       });
     } catch (error) {
       this.notify.error(parseError(error, this.intl.t('pleaseTryAgain')));
