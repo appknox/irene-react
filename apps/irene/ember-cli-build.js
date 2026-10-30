@@ -22,12 +22,20 @@ module.exports = function (defaults) {
     },
     minifyJS: {
       options: {
-        exclude: ['runtimeconfig.js'],
+        /*
+        The React bundle is loaded by a fixed URL and already carries content
+        hashes of its own, so renaming it here only breaks that URL.
+      */
+      exclude: ['runtimeconfig.js', 'assets/embed'],
       },
     },
     fingerprint: {
       enabled: true,
-      exclude: ['runtimeconfig.js'],
+      /*
+        The React bundle is loaded by a fixed URL and already carries content
+        hashes of its own, so renaming it here only breaks that URL.
+      */
+      exclude: ['runtimeconfig.js', 'assets/embed'],
       extensions: defaultFingerprintExtensions.concat(['svg']),
     },
     sassOptions: {

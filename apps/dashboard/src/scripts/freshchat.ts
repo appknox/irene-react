@@ -45,6 +45,9 @@ export interface FreshchatIdentity {
 const FRESHCHAT_HOST = 'https://appknox-support.freshchat.com';
 const SCRIPT_ID = 'freshchat-widget';
 
+/* Matched against what is already on the page: a host may have installed it. */
+const WIDGET_SRC = `${FRESHCHAT_HOST}/js/widget.js`;
+
 /* The account's hash alone would sit unnamespaced beside every other key on the origin. */
 const restoreIdKey = (hash: string) => `irene:freshchat-restore-id:${hash}`;
 
@@ -142,7 +145,12 @@ function identify(identity: FreshchatIdentity) {
  * @param identity - The account the conversation belongs to.
  */
 export function installFreshchat(key: string, identity: FreshchatIdentity) {
-  if (!key || document.getElementById(SCRIPT_ID)) {
+  /*
+    Keyed on the script's address rather than this id alone. A second copy
+    wraps the first's hold on `history.pushState`, and the two then call each
+    other until the stack runs out, so whoever installed it first wins.
+  */
+  if (!key || document.querySelector(`script[src="${WIDGET_SRC}"]`)) {
     return;
   }
 
@@ -161,7 +169,7 @@ export function installFreshchat(key: string, identity: FreshchatIdentity) {
   const script = document.createElement('script');
 
   script.id = SCRIPT_ID;
-  script.src = `${FRESHCHAT_HOST}/js/widget.js`;
+  script.src = WIDGET_SRC;
   script.async = true;
 
   document.head.appendChild(script);

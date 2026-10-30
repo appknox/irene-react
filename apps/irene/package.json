@@ -14,6 +14,7 @@
     "build": "ember build --environment=production",
     "build:test": "ember build --environment=test",
     "build:icons": "tsx ./scripts/build-icons.mjs || node ./scripts/build-icons.mjs",
+    "build:embed": "mkdir -p public/assets/embed && cp -R node_modules/@irene/dashboard/embed-dist/. public/assets/embed/",
     "lint": "concurrently \"npm:lint:*(!fix)\" --names \"lint:\"",
     "lint:css": "stylelint \"**/*.{css,scss}\" --allow-empty-input",
     "lint:css:fix": "concurrently \"npm:lint:css -- --fix\"",
@@ -35,7 +36,8 @@
     "storybook-dev": "concurrently \"npm:start\" \"npm:storybook\" --names \"dev-server,storybook\"",
     "prebuild-storybook": "ember build",
     "build-storybook": "storybook build",
-    "netlify:deploy": "netlify deploy --dir dist"
+    "netlify:deploy": "netlify deploy --dir dist",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@appknox/ember-pace": "^1.0.1",
@@ -73,6 +75,7 @@
     "@iconify-json/solar": "^1.2.4",
     "@iconify-json/streamline-plump": "^1.2.0",
     "@iconify/utils": "^3.0.1",
+    "@irene/dashboard": "file:../../apps/dashboard",
     "@storybook/addon-actions": "8.4.6",
     "@storybook/addon-docs": "8.4.6",
     "@storybook/addon-essentials": "8.4.6",

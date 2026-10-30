@@ -1,0 +1,18 @@
+/*
+  The stylesheet a host loads to render these pages.
+
+  The design system's own entry, imported unchanged, so the components are
+  drawn with exactly what draws them in this app — Preflight included. What
+  makes it safe inside someone else's document is done after the build, by
+  `scripts/scope-embed-css.ts`: the cascade layers come off, and the base layer
+  is confined to the mounted element so it cannot restyle the host's own pages.
+*/
+
+@import '@irene/ui/styles';
+@import './portals.css';
+
+/*
+  The design system's entry scans its own package. This app's screens are
+  scanned here, so the utilities they use are generated too.
+*/
+@source '../..';

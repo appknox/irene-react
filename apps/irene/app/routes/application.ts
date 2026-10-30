@@ -8,6 +8,7 @@ import type ConfigurationService from 'irene/services/configuration';
 import type WhitelabelService from 'irene/services/whitelabel';
 import type AnalyticsService from 'irene/services/analytics';
 import type LoggerService from 'irene/services/logger';
+import { adoptReactSession } from 'irene/utils/react-session';
 
 interface HeadDataService {
   title: string;
@@ -24,6 +25,9 @@ export default class ApplicationRoute extends Route {
   @service declare logger: LoggerService;
 
   async beforeModel(): Promise<void> {
+    /* A migrated sign-in page authenticates on the React side, writing only its own entry. */
+    adoptReactSession();
+
     try {
       await this.session.setup();
     } catch (error) {
