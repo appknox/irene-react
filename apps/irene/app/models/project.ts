@@ -1,0 +1,105 @@
+/* eslint-disable ember/no-mixins */
+import type { AsyncBelongsTo, AsyncHasMany } from '@ember-data/model';
+import { attr, belongsTo, hasMany } from '@ember-data/model';
+
+import { isEmpty } from '@ember/utils';
+import ENUMS from 'irene/enums';
+import { ModelBaseMixin } from 'irene/mixins/base-model';
+
+import type FileModel from './file';
+import type UserModel from './user';
+import type OrganizationModel from './organization';
+
+export default class ProjectModel extends ModelBaseMixin {
+  @attr('string')
+  declare packageName: string;
+
+  @attr('boolean')
+  declare isManualScanAvailable: boolean;
+
+  @attr('boolean')
+  declare showUnknownAnalysis: boolean;
+
+  @attr('string')
+  declare url: string;
+
+  @attr('number')
+  declare activeProfileId: number;
+
+  @attr('number')
+  declare platform: number;
+
+  @attr('number')
+  declare fileCount: number;
+
+  @attr('date')
+  declare lastFileCreatedOn: Date;
+
+  @belongsTo('user', { inverse: 'ownedProjects', async: true })
+  declare owner: AsyncBelongsTo<UserModel>;
+
+  @belongsTo('organization', { inverse: null, async: true })
+  declare organization: AsyncBelongsTo<OrganizationModel>;
+
+  @belongsTo('file', { async: false, inverse: null })
+  declare lastFile: FileModel;
+
+  @hasMany('file', { inverse: 'project', async: true })
+  declare files: AsyncHasMany<FileModel>;
+
+  get pdfPassword() {
+    const uuid = this.uuid;
+
+    if (isEmpty(uuid)) {
+      return 'Unknown!';
+    } else {
+      return uuid.split('-')[4];
+    }
+  }
+
+  get hasFiles() {
+    return this.fileCount > 0;
+  }
+
+  get hasMultipleFiles() {
+    return this.fileCount > 1;
+  }
+
+  get platformDisplay() {
+    switch (this.platform) {
+      case ENUMS.PLATFORM.ANDROID:
+        return 'Android';
+      case ENUMS.PLATFORM.IOS:
+        return 'iOS';
+      case ENUMS.PLATFORM.WINDOWS:
+        return 'Windows';
+      default:
+        return '';
+    }
+  }
+
+  get platformIconClass() {
+    switch (this.platform) {
+      case ENUMS.PLATFORM.ANDROID:
+        return 'android';
+      case ENUMS.PLATFORM.IOS:
+        return 'apple';
+      case ENUMS.PLATFORM.WINDOWS:
+        return 'windows';
+      default:
+        return 'mobile';
+    }
+  }
+
+  get isAPIScanEnabled() {
+    const platform = this.platform;
+
+    return [ENUMS.PLATFORM.ANDROID, ENUMS.PLATFORM.IOS].includes(platform);
+  }
+}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    project: ProjectModel;
+  }
+}

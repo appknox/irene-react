@@ -1,0 +1,29 @@
+.mfa-records-container {
+  border: 1px solid var(--account-settings-security-mfa-border-color);
+
+  .mfa-enabled {
+    background-color: var(
+      --account-settings-security-mfa-alert-success-background
+    );
+  }
+
+  a {
+    color: var(--account-settings-security-mfa-primary-color);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.alert-warn {
+  border: 1px solid var(--account-settings-security-mfa-alert-warn-border-color);
+  background-color: var(--account-settings-security-mfa-alert-warn-background);
+  color: var(--account-settings-security-mfa-alert-warn-text-color);
+
+  .alert-warn-link {
+    color: var(
+      --account-settings-security-mfa-alert-warn-text-color
+    ) !important;
+  }
+}

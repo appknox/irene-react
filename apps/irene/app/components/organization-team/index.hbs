@@ -1,0 +1,85 @@
+{{! template-lint-disable no-partial }}
+<AkStack class='py-3' @alignItems='center' @justifyContent='space-between'>
+  <div local-class='search-input'>
+    <AkTextField
+      data-test-orgTeamSearch-input
+      @placeholder={{t 'searchTeam'}}
+      @value={{@queryParams.team_query}}
+      {{on 'keyup' this.handleSearchInputKeyUp}}
+    >
+      <:leftAdornment>
+        <AkIcon @iconName='search' @color='textSecondary' />
+      </:leftAdornment>
+    </AkTextField>
+  </div>
+
+  {{#if this.me.org.is_admin}}
+    <OrganizationTeam::CreateTeam
+      @organization={{this.organization.selected}}
+      @reloadTeams={{this.handleReloadTeams}}
+    />
+  {{/if}}
+</AkStack>
+
+<AkPaginationProvider
+  @results={{this.teamList}}
+  @onItemPerPageChange={{this.handleItemPerPageChange}}
+  @totalItems={{this.totalTeamCount}}
+  @nextAction={{this.handleNextPrevAction}}
+  @prevAction={{this.handleNextPrevAction}}
+  @itemPerPageOptions={{array 10 25 50}}
+  @defaultLimit={{@queryParams.team_limit}}
+  @offset={{@queryParams.team_offset}}
+  as |pgc|
+>
+  {{#if this.fetchTeams.isRunning}}
+    <div local-class='loading-container'>
+      <AkStack @alignItems='center' @spacing='2'>
+        <AkLoader @size={{16}} />
+        <AkTypography local-class='loading-text' @color='textSecondary'>
+          {{t 'loading'}}...
+        </AkTypography>
+      </AkStack>
+    </div>
+  {{else if this.hasNoTeam}}
+    <div local-class='emtpy-container'>
+      <AkSvg::TeamsEmpty local-class='empty-svg' />
+
+      <AkTypography @variant='h5'>
+        {{if this.isAdmin (t 'noTeams') (t 'noTeamsMember')}}
+      </AkTypography>
+    </div>
+  {{else}}
+    <AkStack @direction='column' @spacing='2'>
+      {{#each pgc.currentPageResults as |team|}}
+        <OrganizationTeam::Overview
+          @team={{team}}
+          @organization={{this.organization.selected}}
+          @showTeamDetails={{this.handleShowTeamDetails}}
+        />
+      {{/each}}
+    </AkStack>
+
+    <AkPagination
+      @disableNext={{pgc.disableNext}}
+      @nextAction={{pgc.nextAction}}
+      @disablePrev={{pgc.disablePrev}}
+      @prevAction={{pgc.prevAction}}
+      @endItemIdx={{pgc.endItemIdx}}
+      @startItemIdx={{pgc.startItemIdx}}
+      @itemPerPageOptions={{pgc.itemPerPageOptions}}
+      @onItemPerPageChange={{pgc.onItemPerPageChange}}
+      @selectedOption={{pgc.selectedOption}}
+      @tableItemLabel={{t 'teams'}}
+      @perPageTranslation={{t 'recordPerPage'}}
+      @totalItems={{pgc.totalItems}}
+    />
+
+    <OrganizationTeam::Details
+      @showTeamDetail={{this.showTeamDetails}}
+      @handleTeamDetailClose={{this.handleTeamDetailClose}}
+      @team={{this.selectedTeam}}
+      @organization={{this.organization.selected}}
+    />
+  {{/if}}
+</AkPaginationProvider>

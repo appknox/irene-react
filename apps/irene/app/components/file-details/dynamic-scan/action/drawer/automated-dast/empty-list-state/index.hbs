@@ -1,0 +1,34 @@
+<AkStack
+  @direction='column'
+  @width='full'
+  @justifyContent='center'
+  @alignItems='center'
+  class='pt-3 pb-4'
+  ...attributes
+>
+  <AkSvg::NoApiUrlFilter />
+
+  <AkTypography @fontWeight='bold' class='mb-1 mt-3'>
+    {{@headerText}}
+  </AkTypography>
+
+  <AkTypography>
+    {{@subText}}
+  </AkTypography>
+
+  <AkStack @spacing='1' @alignItems='flex-end'>
+    <AkLink
+      @color='primary'
+      @underline='always'
+      @route={{@link}}
+      @model={{@projectId}}
+      target='_blank'
+      rel='noopener noreferrer'
+      data-test-fileDetails-dynamicScanDrawer-settingsPageRedirectLink
+    >
+      {{@linkText}}
+    </AkLink>
+
+    <AkIcon @iconName='open-in-new' @size='small' @color='primary' />
+  </AkStack>
+</AkStack>

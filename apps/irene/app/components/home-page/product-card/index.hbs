@@ -1,0 +1,63 @@
+<AkStack
+  data-test-home-page-product-card
+  @direction='column'
+  local-class='product-card-container'
+>
+  {{#let (component @coverBackgroundImage) as |Cover|}}
+    <Cover />
+  {{/let}}
+
+  <AkStack @direction='column' @spacing='4' local-class='product-card-content'>
+    <AkStack @direction='column' @spacing='1'>
+      {{#let (component @indicatorSvg) as |SvgIcon|}}
+        <SvgIcon
+          data-test-home-page-product-card-indicator-icon
+          local-class='product-icon'
+          id={{if this.enablePendo @pendoContainerId}}
+        />
+      {{/let}}
+
+      <AkStack @alignItems='center' @spacing='1'>
+        <AkTypography
+          data-test-home-page-product-card-title
+          @variant='h6'
+          @fontWeight='bold'
+        >
+          {{@title}}
+        </AkTypography>
+
+        {{#if @isBeta}}
+          <AkChip
+            @variant='outlined'
+            @size='small'
+            @label={{t 'beta'}}
+            local-class='beta-chip'
+          />
+        {{/if}}
+      </AkStack>
+
+      <AkTypography
+        @variant='subtitle2'
+        @fontWeight='regular'
+        {{style minHeight='36px'}}
+      >
+        {{@description}}
+      </AkTypography>
+    </AkStack>
+
+    <AkStack @direction='row' @spacing='1' @alignItems='center'>
+      <AkLink
+        data-test-home-page-product-card-link
+        @route={{this.route}}
+        @underline='always'
+        @fontWeight='medium'
+        target={{if @openInNewTab '_blank'}}
+        rel={{if @openInNewTab 'noopener noreferrer'}}
+      >
+        {{@linkText}}
+      </AkLink>
+
+      <AkIcon @iconName='north-east' @size='small' @color='primary' />
+    </AkStack>
+  </AkStack>
+</AkStack>

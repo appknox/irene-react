@@ -1,0 +1,27 @@
+.novnc-rfb {
+  width: 100%;
+  height: 100%;
+
+  canvas {
+    cursor: pointer !important;
+    overflow: hidden;
+  }
+
+  &[data-contain-canvas='true'] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  &.no-interaction {
+    canvas {
+      cursor: not-allowed !important;
+    }
+  }
+}

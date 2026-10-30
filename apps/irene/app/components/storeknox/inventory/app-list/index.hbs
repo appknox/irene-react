@@ -1,0 +1,41 @@
+<AkStack
+  local-class='app-list-header'
+  @justifyContent='flex-end'
+  @alignItems='center'
+  class='p-2'
+>
+  {{!-- <div local-class='search-input-container-width'>
+    <AkTextField @placeholder={{t 'search'}} @value={{this.searchQuery}}>
+      <:rightAdornment>
+        {{#if this.searchQuery}}
+          <AkStack
+            @alignItems='center'
+            local-class='close-search-text'
+            {{on 'click' this.clearSearch}}
+          >
+            <AkIcon @iconName='close' />
+          </AkStack>
+        {{else}}
+          <AkIcon @iconName='search' @color='textSecondary' />
+        {{/if}}
+      </:rightAdornment>
+    </AkTextField>
+  </div> --}}
+
+  {{#if this.showArchivedAppsLink}}
+    <AkButton @color='neutral' @variant='outlined' class='p-0'>
+      <AkLink
+        @route='authenticated.storeknox.archived-apps'
+        @underline='none'
+        {{style padding='0.4em 0.7em !important'}}
+        data-test-storeknoxInventory-archivedApps-link
+      >
+        {{t 'storeknox.archivedApps'}}
+      </AkLink>
+    </AkButton>
+  {{/if}}
+</AkStack>
+
+<div local-class='app-list-table'>
+  <Storeknox::Inventory::AppList::Table />
+</div>

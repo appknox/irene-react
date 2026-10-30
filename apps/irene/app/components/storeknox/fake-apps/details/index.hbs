@@ -1,0 +1,59 @@
+<Storeknox::FakeApps::DetailsHeader
+  @fakeApp={{@fakeApp}}
+  @skInventoryApp={{@skInventoryApp}}
+  @isFakeAppIgnored={{this.isFakeAppIgnored}}
+/>
+
+<AkStack @width='full' @spacing='2' @alignItems='stretch'>
+  <AkStack
+    @direction='column'
+    class='{{if this.isFakeAppIgnored "is-ignored"}}'
+    {{style width='70%'}}
+    data-test-storeknoxFakeAppsDetails-findingsContainer
+  >
+    <Storeknox::FakeApps::FindingsCard
+      @isDefaultFinding={{true}}
+      @description={{this.overallFindingData.description}}
+      @score={{this.overallFindingData.score}}
+      @title={{this.overallFindingData.title}}
+      @isIgnored={{this.overallFindingData.isIgnored}}
+    />
+
+    <Storeknox::FakeApps::FindingsGroup
+      @groupData={{this.brandIdentityGroup}}
+      @isIgnored={{this.isFakeAppIgnored}}
+      @onSignalClick={{this.openDrawer}}
+      data-test-storeknoxFakeAppsDetails-brandGroup
+    />
+
+    {{#if this.binarySimilarityGroup}}
+      <Storeknox::FakeApps::FindingsGroup
+        @groupData={{this.binarySimilarityGroup}}
+        @isIgnored={{this.isFakeAppIgnored}}
+        @onSignalClick={{this.openDrawer}}
+        data-test-storeknoxFakeAppsDetails-binaryGroup
+      />
+    {{/if}}
+
+    {{#if this.securityRiskGroup}}
+      <Storeknox::FakeApps::FindingsGroup
+        @groupData={{this.securityRiskGroup}}
+        @isIgnored={{this.isFakeAppIgnored}}
+        @onSignalClick={{this.openDrawer}}
+        data-test-storeknoxFakeAppsDetails-securityGroup
+      />
+    {{/if}}
+  </AkStack>
+
+  <Storeknox::FakeApps::OriginalAppInfo
+    @isIgnored={{this.isFakeAppIgnored}}
+    @skInventoryApp={{@skInventoryApp}}
+  />
+</AkStack>
+
+<Storeknox::FakeApps::SignalDetailDrawer
+  @isOpen={{if this.selectedSignal true false}}
+  @sectionTitle={{this.drawerSectionTitle}}
+  @signal={{this.selectedSignal}}
+  @onClose={{this.closeDrawer}}
+/>

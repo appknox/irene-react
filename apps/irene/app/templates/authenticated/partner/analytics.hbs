@@ -1,0 +1,16 @@
+{{page-title 'Analytics'}}
+
+<div class='px-2 pt-3 pb-6'>
+  <div class='pb-6'>
+    <Partner::ClientUploadsStatChart
+      @title='Clients Overall'
+      @targetModel='partner/analytic'
+    />
+  </div>
+
+  <div class='pb-6'>
+    <Partner::ExportStats />
+  </div>
+
+  {{outlet}}
+</div>

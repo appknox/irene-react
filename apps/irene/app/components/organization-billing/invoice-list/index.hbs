@@ -1,0 +1,33 @@
+<div class='px-3'>
+  {{#if this.hasInvoices}}
+    <AkTypography @variant='h2'>
+      {{t 'invoices'}}
+    </AkTypography>
+
+    <AkTable
+      class='my-2'
+      @variant='full-bordered'
+      @borderColor='dark'
+      data-test-billingInvoice-list
+      as |t|
+    >
+      <t.head data-test-billingInvoice-list-thead @columns={{this.columns}} />
+
+      <t.body @rows={{this.invoiceList}} as |b|>
+        <b.row data-test-billingInvoice-list-row as |r|>
+          <r.cell data-test-billingInvoice-list-cell as |value|>
+            {{#if r.columnValue.component}}
+              {{#let (component r.columnValue.component) as |Component|}}
+                <Component @invoice={{r.rowValue}} />
+              {{/let}}
+            {{else}}
+              <AkTypography title={{value}} @noWrap={{true}}>
+                {{value}}
+              </AkTypography>
+            {{/if}}
+          </r.cell>
+        </b.row>
+      </t.body>
+    </AkTable>
+  {{/if}}
+</div>

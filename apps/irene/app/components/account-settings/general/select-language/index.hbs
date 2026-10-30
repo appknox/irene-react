@@ -1,0 +1,21 @@
+<AkStack @direction='column' @spacing='2' class='p-2'>
+  <AkTypography @variant='h5'>
+    {{t 'language'}}
+  </AkTypography>
+
+  <AkTypography @color='textSecondary'>
+    {{t 'selectLanguage'}}
+  </AkTypography>
+
+  <AkSelect
+    {{style width='250px'}}
+    id='settings-select-language'
+    @options={{this.allLocales}}
+    @selected={{this.currentLocale}}
+    @onChange={{this.handleLocaleChange}}
+    @disabled={{this.setLocale.isRunning}}
+    as |locale|
+  >
+    {{locale.localeString}}
+  </AkSelect>
+</AkStack>

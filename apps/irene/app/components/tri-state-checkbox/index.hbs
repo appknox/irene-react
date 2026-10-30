@@ -1,0 +1,42 @@
+<div local-class='container' data-test-container ...attributes>
+  {{#if @label}}
+    <AkStack
+      @alignItems='center'
+      local-class='{{if @isOverridden "overridden"}}'
+      data-test-check
+    >
+      <AkFormControlLabel @label={{@label}} title={{@title}} data-test-label>
+        <AkCheckbox
+          @checked={{@value}}
+          @onClick={{@onToggle}}
+          data-test-input
+        />
+      </AkFormControlLabel>
+
+      {{#if @isToggleRunning}}
+        <AkLoader class='ml-1' @size={{13}} data-test-progress-spinner />
+      {{/if}}
+
+      {{#if @isOverridden}}
+        <div local-class='reset-icon-btn-container'>
+          <AkTooltip
+            @placement='right'
+            @title=' {{t "resetToDefault"}}'
+            @renderInPlace={{true}}
+            @arrow={{true}}
+            data-test-reset-tooltip
+          >
+            <AkIconButton {{on 'click' @onOverrideReset}} data-test-reset>
+              <AkIcon
+                @iconName='cancel'
+                @color='textPrimary'
+                @size='small'
+                local-class='reset-icon'
+              />
+            </AkIconButton>
+          </AkTooltip>
+        </div>
+      {{/if}}
+    </AkStack>
+  {{/if}}
+</div>

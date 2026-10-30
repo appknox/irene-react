@@ -1,0 +1,128 @@
+{{#if this.isFetching}}
+  <PrivacyModule::Loader @loadingText='{{t "loading"}}...' />
+{{else}}
+  {{#if this.showEmptyContent}}
+    <AkStack
+      @direction='column'
+      @alignItems='center'
+      local-class='empty-container'
+    >
+      <AkSvg::PrivacyUpload />
+
+      <AkTypography local-class='body-text' class='mt-2'>
+        {{t 'privacyModule.serverLocationReupload'}}
+      </AkTypography>
+    </AkStack>
+  {{else}}
+    <AkStack @direction='column' local-class='map-body'>
+      <AkStack
+        @justifyContent='space-between'
+        @alignItems='center'
+        @spacing='1'
+        @width='full'
+        local-class='map-header'
+      >
+        <div>
+          <AkTypography @tag='span'>
+            {{t 'privacyModule.serverLocationDescPart1'}}
+          </AkTypography>
+
+          {{! We will be adding Drawer in later release }}
+          <AkTypography @tag='span'>
+            {{t 'privacyModule.serverLocationDescHighRisk'}}
+          </AkTypography>
+
+          <AkTypography @tag='span'>
+            {{t 'privacyModule.serverLocationDescPart2'}}
+          </AkTypography>
+        </div>
+
+        <AkStack>
+          <AkTooltip
+            @title={{t 'privacyModule.mapView'}}
+            @placement='bottom'
+            @arrow={{true}}
+          >
+            <AkIconButton
+              local-class='switch-button map {{if this.isMapView "active"}}'
+              @variant='outlined'
+              @size='medium'
+              {{on 'click' (fn this.handleViewClick true)}}
+              data-test-privacy-module-geo-map-view-button
+            >
+              <AkIcon
+                @color={{if this.isMapView 'primary'}}
+                @iconName='distance'
+              />
+            </AkIconButton>
+          </AkTooltip>
+
+          <AkTooltip
+            @title={{t 'privacyModule.tableView'}}
+            @placement='bottom'
+            @arrow={{true}}
+          >
+            <AkIconButton
+              local-class='switch-button table {{unless
+                this.isMapView
+                "active"
+              }}'
+              @variant='outlined'
+              {{on 'click' (fn this.handleViewClick false)}}
+              data-test-privacy-module-geo-table-view-button
+            >
+              <AkIcon
+                @color={{unless this.isMapView 'primary'}}
+                @iconName='format-list-bulleted'
+              />
+            </AkIconButton>
+          </AkTooltip>
+        </AkStack>
+      </AkStack>
+
+      {{#if this.isMapView}}
+        <div
+          {{did-insert this.setupChart}}
+          local-class='map-container'
+          class='w-full'
+          data-test-privacy-geo-location-map
+        >
+        </div>
+      {{else}}
+        <AkTable @dense={{true}} data-test-privacy-geo-location-table as |t|>
+          <t.head
+            @columns={{this.columns}}
+            data-test-privacy-geo-location-thead
+          />
+
+          <t.body @rows={{this.geoLocationData}} as |b|>
+            <b.row
+              @onClick={{this.handleRowClick}}
+              local-class='table-row'
+              data-test-privacy-geo-location-trow
+              as |r|
+            >
+              <r.cell as |value|>
+                {{#if r.columnValue.component}}
+                  {{#let (component r.columnValue.component) as |Component|}}
+                    <Component @geoLocation={{r.rowValue}} />
+                  {{/let}}
+                {{else}}
+                  <AkTypography title={{value}} @noWrap={{true}}>
+                    {{value}}
+                  </AkTypography>
+                {{/if}}
+              </r.cell>
+            </b.row>
+          </t.body>
+        </AkTable>
+      {{/if}}
+    </AkStack>
+  {{/if}}
+{{/if}}
+
+<PrivacyModule::AppDetails::GeoLocation::DetailsDrawer
+  @open={{this.countryIsSelected}}
+  @onClose={{this.closeCountryInfoDrawer}}
+  @selectedCountry={{this.selectedCountry}}
+/>

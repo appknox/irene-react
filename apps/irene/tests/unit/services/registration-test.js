@@ -1,0 +1,13 @@
+/* eslint-disable prettier/prettier */
+import { module, test } from 'qunit';
+import { setupTest } from 'ember-qunit';
+
+module('Unit | Service | registration', function (hooks) {
+  setupTest(hooks);
+
+  // TODO: Replace this with your real tests.
+  test('it exists', function (assert) {
+    const service = this.owner.lookup('service:registration');
+    assert.ok(service);
+  });
+});

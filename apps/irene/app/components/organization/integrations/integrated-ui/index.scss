@@ -1,0 +1,24 @@
+.bordered-box {
+  min-width: 350px;
+  border: 1px solid var(--organization-integrations-integrated-ui-border-color);
+  border-radius: var(--organization-integrations-integrated-ui-border-radius);
+  box-sizing: border-box;
+  padding: 1em;
+
+  .integration-logo-container {
+    border: 1px solid
+      var(--organization-integrations-integrated-ui-border-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+
+    img {
+      width: 40px;
+    }
+  }
+
+  .integration-account-container {
+    box-sizing: border-box;
+    width: 100%;
+  }
+}

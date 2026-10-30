@@ -1,0 +1,122 @@
+.title {
+  font-size: 14px;
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.header {
+  line-height: 3rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--neutral-grey-700);
+}
+
+.body {
+  border: 1px solid var(--border-color-1);
+  border-radius: 0.3rem;
+  padding-right: 1rem;
+  padding-top: 1rem;
+  padding-bottom: 0.5rem;
+  position: relative;
+  background: var(--background-light);
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  column-gap: 15px;
+
+  .date-range-picker {
+    .date-range {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      column-gap: 8px;
+      justify-content: left;
+      align-items: center;
+      border: 1px solid var(--border-color-1);
+      background: var(--background-main);
+      border-radius: 0.3rem;
+      padding: 0.4rem 1rem;
+
+      .date {
+        font-weight: bold;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .duration-options {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    justify-content: right;
+
+    .option {
+      border: 1px solid var(--primary-main);
+      border-radius: 12px;
+      padding: 0.5rem 1rem !important;
+      max-height: 32px;
+      background-color: transparent;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--primary-main);
+      border-radius: 0;
+
+      &:hover,
+      &:active,
+      &:focus {
+        background-color: var(--primary-light);
+      }
+      &:first-child {
+        border-top-left-radius: 0.34rem;
+        border-bottom-left-radius: 0.34rem;
+      }
+      &:last-child {
+        border-top-right-radius: 0.34rem;
+        border-bottom-right-radius: 0.34rem;
+      }
+
+      // Disable border for first two ele
+      &:nth-child(-n + 2) {
+        border-right: none;
+      }
+
+      &.active {
+        &,
+        &:hover,
+        &:active,
+        &:focus {
+          background-color: var(--primary-main);
+          color: var(--primary-contrast-text);
+        }
+      }
+    }
+  }
+}
+
+.tooltip {
+  border: 1px solid var(--border-color-1);
+  width: max-content;
+  padding: 0.5rem;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  background-color: #ffffff;
+}
+
+.tt-val-label {
+  font-weight: bold;
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+}
+
+.loading-spinner {
+  position: absolute;
+  height: 100%;
+}

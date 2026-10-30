@@ -1,0 +1,46 @@
+<AkButton
+  @variant='outlined'
+  @disabled={{@disabled}}
+  @color={{if @needsAction 'primary'}}
+  local-class='action-button-root
+  {{if this.isArchived "archived"}}
+  {{if @showDisabledState "disabled-state"}}
+  {{if @needsAction "needs-action"}}
+  {{if @featureInProgress "feature-in-progress"}}
+  {{if @statusIsInitializing "status-initializing"}}'
+  data-test-storeknoxInventoryDetails-actionBtn-root
+  ...attributes
+>
+  <:leftIcon>
+    <AkIcon
+      @iconName={{this.leftIconName}}
+      @color='inherit'
+      local-class='button-icon'
+      data-test-storeknoxInventoryDetails-actionBtn-leftIcon
+    />
+  </:leftIcon>
+
+  <:default>
+    <AkTypography @color='inherit' @fontWeight='medium'>
+      {{@label}}
+    </AkTypography>
+  </:default>
+
+  <:rightIcon>
+    {{#unless @hideRightIcon}}
+      {{#if this.showLoadingState}}
+        <AkLoader
+          @size={{16}}
+          data-test-storeknoxInventoryDetails-actionBtn-rightIconLoader
+        />
+      {{else}}
+        <AkIcon
+          @iconName='arrow-outward'
+          @color='textPrimary'
+          local-class='button-icon'
+          data-test-storeknoxInventoryDetails-actionBtn-rightIcon
+        />
+      {{/if}}
+    {{/unless}}
+  </:rightIcon>
+</AkButton>

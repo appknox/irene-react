@@ -1,0 +1,75 @@
+<div
+  local-class='appknox-wrapper-root {{if
+    this.isSidebarCollapsed
+    "collapsed"
+    "expanded"
+  }}'
+>
+  <TopNav
+    local-class='dashboard-header'
+    @title={{t 'vapt'}}
+    @user={{@user}}
+    as |topNav|
+  >
+    <AkStack local-class='top-nav-content' @justifyContent='space-between'>
+      <AkStack @alignItems='center' @spacing='1'>
+        {{! <div local-class='divider' /> }}
+
+        <AkTypography data-test-topNav-startScanLabel @color='inherit'>
+          {{t 'startNewScan'}}
+        </AkTypography>
+
+        <UploadApp />
+      </AkStack>
+
+      <AkStack @alignItems='center' @spacing='0.5'>
+        {{#unless this.orgIsAnEnterprise}}
+          <AkButton
+            class={{topNav.classes.navbarBtn}}
+            {{on 'click' this.onToggleOnboardingGuide}}
+            data-test-topNav-OnboardingGuideBtn
+          >
+            <:leftIcon>
+              <AkIcon @iconName='wb-incandescent' />
+            </:leftIcon>
+
+            <:default>
+              {{t 'onboardingGuides'}}
+            </:default>
+          </AkButton>
+        {{/unless}}
+
+        <TopNav::KnowledgeBase @triggerBtnClass={{topNav.classes.navbarBtn}} />
+      </AkStack>
+    </AkStack>
+  </TopNav>
+
+  <SideNav
+    @pendoContainerId='ak-pendo-version-container'
+    @productVersion={{this.productVersion}}
+    @isCollapsed={{this.isSidebarCollapsed}}
+    @toggleSidebar={{this.toggleSidebar}}
+    @menuItems={{this.menuItems}}
+    @productSwitcherFilterKey='appknox'
+    local-class='dashboard-sidenav'
+  />
+
+  {{! #id is required for scroll-to-top util }}
+  <main id='ak-dashboard-main-scroll-container' local-class='dashboard-main'>
+    {{yield}}
+  </main>
+
+  {{#if this.showOnboardingGuide}}
+    <TopNav::OnboardingGuide
+      @guideCategories={{this.guideCategories}}
+      @onClose={{this.onToggleOnboardingGuide}}
+    />
+  {{/if}}
+
+  {{#if this.showAddEditModal}}
+    <OrganizationNameHeader::AddEditModal
+      @organization={{this.organization.selected}}
+      @handleCancel={{this.handleAddEditOrgNameCancel}}
+    />
+  {{/if}}
+</div>

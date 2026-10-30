@@ -1,0 +1,35 @@
+{{#if (or this.chipDetails.icon this.chipDetails.loaderColor)}}
+  <AkChip
+    data-test-fileDetails-dynamicScan-statusChip
+    @variant='semi-filled'
+    @size='small'
+    @label={{this.chipDetails.label}}
+    @color={{this.chipDetails.color}}
+    {{style textTransform='uppercase'}}
+    ...attributes
+  >
+    <:icon>
+      {{#if this.chipDetails.icon}}
+        <AkIcon @iconName={{this.chipDetails.icon}} />
+      {{/if}}
+
+      {{#if this.chipDetails.loaderColor}}
+        <AkLoader
+          data-test-fileDetails-dynamicScan-statusChip-loader
+          @color={{this.chipDetails.loaderColor}}
+          @size={{13}}
+        />
+      {{/if}}
+    </:icon>
+  </AkChip>
+{{else}}
+  <AkChip
+    data-test-fileDetails-dynamicScan-statusChip
+    @label={{this.chipDetails.label}}
+    @variant='semi-filled'
+    @size='small'
+    @color={{this.chipDetails.color}}
+    {{style textTransform='uppercase'}}
+    ...attributes
+  />
+{{/if}}

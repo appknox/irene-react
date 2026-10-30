@@ -1,0 +1,21 @@
+{{#let
+  (file-queue name=this.fileQueueName onFileAdded=this.onFileAdded)
+  as |queue|
+}}
+  <AkButton data-test-uploadApp-uploadBtn @tag='label'>
+    <AkIcon @iconName='cloud-upload' />
+
+    <span class='ml-1'>
+      {{t 'uploadApp'}}
+    </span>
+
+    <input
+      data-test-uploadApp-input
+      type='file'
+      id='upload-app-input'
+      accept='.apk,.aab,.ipa'
+      {{style display='none'}}
+      {{queue.selectFile}}
+    />
+  </AkButton>
+{{/let}}
