@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - main
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  react:
+    name: React app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint JavaScript
+        run: pnpm lint:js
+
+      - name: Lint styles
+        run: pnpm lint:css
+
+      - name: Check formatting
+        run: pnpm exec prettier --check "{apps/dashboard,packages}/**/*.{ts,tsx,js,jsx,json,css,scss,md}"
+
+      # Turbo's default fan-out exhausts the runner's memory on this repo.
+      - name: Type check
+        run: pnpm exec turbo type-check --concurrency=2
+
+      - name: Test
+        run: pnpm exec turbo test --concurrency=2
+
+      - name: Build
+        run: pnpm build
+
+      - name: Check the app was emitted
+        run: test -f apps/dashboard/dist/index.html
+
+  ember:
+    name: Ember app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/irene
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: apps/irene/.nvmrc
+          cache: npm
+          cache-dependency-path: apps/irene/package-lock.json
+
+      # Its own install: this app is deliberately outside the pnpm workspace.
+      - name: Install
+        run: npm ci
+
+      # ember-cli-typescript reports type errors without failing the build.
+      - name: Type check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test:ember
+
+  bundle:
+    name: Combined bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Install React app
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Ember app
+        run: npm ci
+        working-directory: apps/irene
+
+      # Builds both and stages the embed into the Ember app before it is built.
+      - name: Build everything
+        run: pnpm build:all
+
+      - name: Check both apps were emitted
+        run: |
+          test -f apps/dashboard/dist/index.html
+          test -f apps/irene/dist/index.html
+
+      # The loader asks for this exact URL, which asset fingerprinting would rename.
+      - name: Check the embed kept its name
+        run: test -f apps/irene/dist/assets/embed/embed.js
+
+      # Layered styles lose to the Ember app's unlayered ones, so the post-build
+      # step unwraps them. If it stops running, Tailwind silently does nothing.
+      - name: Check the embed styles are unlayered
+        run: |
+          test -f apps/dashboard/embed-dist/style.css
+          ! grep -q "@layer" apps/dashboard/embed-dist/style.css
+
+      # Only document selectors are scoped; scoping element rules would strip
+      # styling from dropdowns and dialogs, which render outside the container.
+      - name: Check the embed styles are scoped to document selectors only
+        run: |
+          grep -q "data-react-root" apps/dashboard/embed-dist/style.css
+          ! grep -q ":where(\[data-react-root\]) \*" apps/dashboard/embed-dist/style.css
