@@ -1,6 +1,12 @@
 {
   "extends": ["stylelint-config-standard-scss"],
-  "ignoreFiles": ["**/node_modules/**", "**/dist/**", "**/storybook-static/**", "**/coverage/**"],
+  "ignoreFiles": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/embed-dist/**",
+    "**/storybook-static/**",
+    "**/coverage/**"
+  ],
   "rules": {
     "scss/at-rule-no-unknown": [
       true,

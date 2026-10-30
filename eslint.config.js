@@ -39,7 +39,16 @@ const MULTILINE_STATEMENTS = [
 ];
 
 export default defineConfig([
-  globalIgnores(['**/dist', '**/coverage', '**/.turbo', '**/routeTree.gen.ts']),
+  globalIgnores([
+    '**/dist',
+    '**/embed-dist',
+    '**/coverage',
+    '**/.turbo',
+    '**/routeTree.gen.ts',
+
+    /* The Ember app is vendored here and linted by its own config and plugins. */
+    'apps/irene',
+  ]),
 
   {
     files: ['**/*.{ts,tsx}'],
