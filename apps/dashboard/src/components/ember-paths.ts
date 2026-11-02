@@ -63,6 +63,40 @@ export function findEmberPath(pathname: string): string | undefined {
   return match ? `${EMBER_PATHS[match]}${pathname.slice(match.length)}` : undefined;
 }
 
+/*
+  Whether a navigation may be handed over.
+
+  Off until the browser entry point turns it on. A handover replaces the
+  document, which only means anything where there is one: under the memory
+  history the tests run on, the router would abandon the navigation and never
+  arrive anywhere.
+*/
+let handsOver = false;
+
+/** Lets navigations be handed over to the Ember app. Called once, at startup. */
+export function enableEmberHandover() {
+  handsOver = true;
+}
+
+/**
+ * The Ember app's URL for a navigation that belongs to it.
+ *
+ * Reserves the attempt as `handOverToEmber` does, so a handover that does not
+ * land is not tried again, and answers nothing until handovers are enabled.
+ *
+ * @param pathname - Where the navigation is headed.
+ * @returns The URL to load, or nothing where this app serves the path.
+ */
+export function claimEmberHandover(pathname: string): string | undefined {
+  if (!handsOver) {
+    return undefined;
+  }
+
+  const emberPath = findEmberPath(pathname);
+
+  return emberPath && claimAttempt(pathname) ? emberPath : undefined;
+}
+
 /* Remembers the handover last tried, so one that did not land is not tried again. */
 const HANDOVER_KEY = 'irene:ember-handover';
 
@@ -72,6 +106,35 @@ const HANDOVER_KEY = 'irene:ember-handover';
   answering and a second attempt would reload for ever.
 */
 const HANDOVER_TIMEOUT_MS = 5_000;
+
+/**
+ * Reserves an attempt at handing a path over.
+ *
+ * A second attempt at the same path means the first did not land — the Ember
+ * app is not answering — so the attempt is refused and this app renders what
+ * it would have rendered.
+ *
+ * @param pathname - The path being handed over.
+ * @returns Whether to go ahead.
+ */
+function claimAttempt(pathname: string): boolean {
+  try {
+    const [lastPath, lastTriedAt] = (sessionStorage.getItem(HANDOVER_KEY) ?? '').split('|');
+    const isRecent = Date.now() - Number(lastTriedAt) < HANDOVER_TIMEOUT_MS;
+
+    if (lastPath === pathname && isRecent) {
+      sessionStorage.removeItem(HANDOVER_KEY);
+
+      return false;
+    }
+
+    sessionStorage.setItem(HANDOVER_KEY, `${pathname}|${Date.now()}`);
+  } catch {
+    /* A browser refusing storage still gets one attempt, which is the common case. */
+  }
+
+  return true;
+}
 
 /**
  * Loads the Ember app's URL for a path it still serves.
@@ -87,23 +150,8 @@ const HANDOVER_TIMEOUT_MS = 5_000;
 export function handOverToEmber(pathname: string): boolean {
   const emberPath = findEmberPath(pathname);
 
-  if (!emberPath) {
+  if (!emberPath || !claimAttempt(pathname)) {
     return false;
-  }
-
-  try {
-    const [lastPath, lastTriedAt] = (sessionStorage.getItem(HANDOVER_KEY) ?? '').split('|');
-    const isRecent = Date.now() - Number(lastTriedAt) < HANDOVER_TIMEOUT_MS;
-
-    if (lastPath === pathname && isRecent) {
-      sessionStorage.removeItem(HANDOVER_KEY);
-
-      return false;
-    }
-
-    sessionStorage.setItem(HANDOVER_KEY, `${pathname}|${Date.now()}`);
-  } catch {
-    /* A browser refusing storage still gets one attempt, which is the common case. */
   }
 
   window.location.replace(emberPath);

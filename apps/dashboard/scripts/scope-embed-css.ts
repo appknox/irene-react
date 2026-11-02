@@ -27,6 +27,16 @@ import { readFileSync, writeFileSync } from 'node:fs';
 /** What the host marks the element it mounts into with. */
 const MOUNT_SCOPE = ':where([data-react-root])';
 
+/*
+  What a utility rule is confined to: what this app renders, and what it renders
+  through a portal. The host's own markup uses names of its own that these would
+  otherwise take over — `mb-2`, `flex` and `hidden` are its classes too.
+
+  `:where()` adds no specificity, so a utility still weighs what it weighs
+  against anything else inside the mount.
+*/
+const UTILITY_SCOPE = ':where([data-react-root],[data-slot])';
+
 /** Selectors meaning "the document", which become the mounted element instead. */
 const DOCUMENT_SELECTORS = new Set(['html', 'body', ':host', ':root']);
 
@@ -106,12 +116,29 @@ function scopeSelector(selector: string): string {
 }
 
 /**
+ * Confines a utility to what this app renders.
+ *
+ * Written twice: once for what the mount and the portals contain, and once for
+ * a portal's own root, which carries the class itself rather than inheriting it
+ * from an ancestor.
+ *
+ * @param selector - The selector as written.
+ * @returns The selector, confined to this app.
+ */
+function confineSelector(selector: string): string {
+  const trimmed = selector.trim();
+
+  return `${UTILITY_SCOPE} ${trimmed},[data-slot]${trimmed}`;
+}
+
+/**
  * Scopes every rule in a block, following nested at-rules into their bodies.
  *
  * @param css - The block's contents.
+ * @param rewrite - What to do with each selector.
  * @returns The contents, with every selector scoped.
  */
-function scopeRules(css: string): string {
+function scopeRules(css: string, rewrite: (selector: string) => string = scopeSelector): string {
   let result = '';
   let cursor = 0;
 
@@ -131,9 +158,9 @@ function scopeRules(css: string): string {
       /* A nested at-rule: its own body holds the rules to scope. */
       const isConditional = /^@(media|supports|container|layer)/.test(head.trim());
 
-      result += `${head}{${isConditional ? scopeRules(body) : body}}`;
+      result += `${head}{${isConditional ? scopeRules(body, rewrite) : body}}`;
     } else {
-      result += `${splitSelectors(head).map(scopeSelector).join(',')}{${body}}`;
+      result += `${splitSelectors(head).map(rewrite).join(',')}{${body}}`;
     }
 
     cursor = blockEnd;
@@ -143,12 +170,35 @@ function scopeRules(css: string): string {
 }
 
 /**
- * Unwraps every cascade layer, scoping the base layer as it goes.
+ * A layer's rules, rewritten for the host's document.
+ *
+ * @param layer - The layer's name.
+ * @param body - Its rules.
+ * @returns The rules, scoped as that layer needs.
+ */
+function unwrap(layer: string, body: string): string {
+  if (layer === 'base') {
+    return scopeRules(body);
+  }
+
+  /* Named classes, which the host has its own meanings for. */
+  if (layer === 'utilities' || layer === 'components') {
+    return scopeRules(body, confineSelector);
+  }
+
+  return body;
+}
+
+/**
+ * Rewrites the built stylesheet so a host page can load it.
+ *
+ * Unwraps every cascade layer, pointing the base layer's document rules at the
+ * mount and confining the named classes to what this app renders.
  *
  * @param css - The built stylesheet.
- * @returns The stylesheet, unlayered.
+ * @returns The stylesheet, unlayered and scoped.
  */
-function flatten(css: string): string {
+export function scopeEmbedCss(css: string): string {
   /* The layer order statement means nothing once no layers are left. */
   let result = css.replace(/@layer\s+[\w-]+(\s*,\s*[\w-]+)+\s*;/g, '');
   let opening = /@layer\s+([\w-]+)\s*\{/.exec(result);
@@ -157,10 +207,10 @@ function flatten(css: string): string {
     const brace = opening.index + opening[0].length - 1;
     const blockEnd = endOfBlock(result, brace);
     const body = result.slice(brace + 1, blockEnd - 1);
-    const isBase = opening[1] === 'base';
+    const layer = opening[1];
 
     result =
-      result.slice(0, opening.index) + (isBase ? scopeRules(body) : body) + result.slice(blockEnd);
+      result.slice(0, opening.index) + unwrap(layer, body) + result.slice(blockEnd);
 
     opening = /@layer\s+([\w-]+)\s*\{/.exec(result);
   }
@@ -168,10 +218,13 @@ function flatten(css: string): string {
   return result;
 }
 
-const [stylesheet] = process.argv.slice(2);
+/* Only when run as the build step, so the rewrite above can be tested on its own. */
+if (process.argv[1]?.endsWith('scope-embed-css.ts')) {
+  const [stylesheet] = process.argv.slice(2);
 
-if (!stylesheet) {
-  throw new Error('Usage: scope-embed-css.ts <stylesheet>');
+  if (!stylesheet) {
+    throw new Error('Usage: scope-embed-css.ts <stylesheet>');
+  }
+
+  writeFileSync(stylesheet, scopeEmbedCss(readFileSync(stylesheet, 'utf8')), 'utf8');
 }
-
-writeFileSync(stylesheet, flatten(readFileSync(stylesheet, 'utf8')), 'utf8');

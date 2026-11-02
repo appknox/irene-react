@@ -66,6 +66,7 @@ export default class ReactComponentModifier extends Modifier<ReactComponentModif
         name: named.name,
         props: named.props,
         config: this.buildConfig(),
+        version: String(ENV.version),
       });
     });
   }

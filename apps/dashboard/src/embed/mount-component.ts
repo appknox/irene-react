@@ -28,6 +28,9 @@ export interface ComponentMountOptions {
 
   /** Where the host serves this bundle's files from. */
   assetBase?: string;
+
+  /** The host's build, so a new one is not served the stylesheet of the last. */
+  version?: string;
 }
 
 export interface MountedComponent {
@@ -54,7 +57,7 @@ export function mountIreneComponent(
   options: ComponentMountOptions
 ): MountedComponent {
   applyEmbedConfig(options.config);
-  linkStylesheet(options.assetBase ?? DEFAULT_ASSET_BASE);
+  linkStylesheet(options.assetBase ?? DEFAULT_ASSET_BASE, options.version);
 
   element.dataset.reactRoot = '';
 

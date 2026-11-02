@@ -46,6 +46,8 @@ export function CalendarTooltip({ day, apps, pointer }: Readonly<CalendarTooltip
         px-3.5 py-3 font-mono text-background shadow-9
       "
       style={getTooltipStyle(pointer)}
+      /* Marks what this app renders outside its own element, which its stylesheet is confined to. */
+      data-slot="calendar-tooltip"
       data-test-calendar-tooltip
     >
       <div className="flex items-baseline justify-between gap-4">

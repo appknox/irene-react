@@ -29,8 +29,9 @@ export function applyEmbedConfig(config?: Record<string, string>) {
  *
  * @param assetBase - Where the host serves this bundle's files from.
  */
-export function linkStylesheet(assetBase: string) {
-  const href = `${assetBase}style.css`;
+export function linkStylesheet(assetBase: string, version?: string) {
+  /* The name carries no hash, so without this a browser keeps the sheet it has. */
+  const href = `${assetBase}style.css${version ? `?v=${version}` : ''}`;
 
   if (document.querySelector(`link[href="${href}"]`)) {
     return;

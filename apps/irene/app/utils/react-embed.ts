@@ -16,6 +16,7 @@ export interface EmbedComponentOptions {
   name: string;
   props?: Record<string, unknown>;
   config?: Record<string, string>;
+  version?: string;
 }
 
 export interface EmbedMountedComponent {
