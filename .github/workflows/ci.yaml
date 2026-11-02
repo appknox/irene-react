@@ -118,9 +118,15 @@ jobs:
           test -f apps/dashboard/embed-dist/style.css
           ! grep -q "@layer" apps/dashboard/embed-dist/style.css
 
-      # Only document selectors are scoped; scoping element rules would strip
-      # styling from dropdowns and dialogs, which render outside the container.
-      - name: Check the embed styles are scoped to document selectors only
+      # Element rules stay global: dropdowns and dialogs render outside the
+      # container and would otherwise lose the reset they are drawn with.
+      - name: Check the reset still reaches what renders outside the container
         run: |
           grep -q "data-react-root" apps/dashboard/embed-dist/style.css
-          ! grep -q ":where(\[data-react-root\]) \*" apps/dashboard/embed-dist/style.css
+          grep -qE "(^|\})button,input,select" apps/dashboard/embed-dist/style.css
+
+      # The host's markup uses these class names for its own styling, so a
+      # utility that is not confined restyles the host's pages.
+      - name: Check no utility applies to the whole document
+        run: |
+          ! grep -qE "(^|\})\.(mb|mt|flex|hidden|p)-?[0-9a-z]*\{" apps/dashboard/embed-dist/style.css
