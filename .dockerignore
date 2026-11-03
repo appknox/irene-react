@@ -1,0 +1,15 @@
+.git
+.github
+.turbo
+**/.turbo
+**/node_modules
+**/dist
+**/embed-dist
+**/coverage
+**/storybook-static
+**/.eslintcache
+**/tsconfig.tsbuildinfo
+staticserver/dist
+staticserver/ember-owned-paths.json
+Dockerfile
+.dockerignore

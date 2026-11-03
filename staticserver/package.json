@@ -1,0 +1,21 @@
+{
+  "name": "irene-react-server",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "author": "Appknox",
+  "description": "Appknox Dashboard wrapper server, serving both apps from one origin",
+  "main": "index.js",
+  "scripts": {
+    "serve": "node index.js"
+  },
+  "engines": {
+    "node": ">=24.22.1"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-static-gzip": "^2.2.0",
+    "morgan": "^1.10.1",
+    "serve-static": "^1.16.2"
+  }
+}
