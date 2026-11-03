@@ -1,0 +1,17 @@
+name: Setup App
+description: Installs Node and the pnpm workspace's dependencies
+
+runs:
+  using: 'composite'
+  steps:
+    # Before setup-node: the store cache it keys on does not exist until pnpm does.
+    - uses: pnpm/action-setup@v4
+
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

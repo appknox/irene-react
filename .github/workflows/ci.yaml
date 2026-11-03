@@ -15,18 +15,12 @@ concurrency:
 jobs:
   react:
     name: React app
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-
-      - uses: pnpm/action-setup@v4
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
+      - name: Setup Application
+        uses: ./.github/actions/setup-app
 
       - name: Lint JavaScript
         run: pnpm lint:js
@@ -50,53 +44,121 @@ jobs:
       - name: Check the app was emitted
         run: test -f apps/dashboard/dist/index.html
 
-  ember:
-    name: Ember app
-    runs-on: ubuntu-latest
+  ember-build:
+    name: Build Ember app
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Ember Application
+        uses: ./.github/actions/setup-ember-app
+
+      - name: Build ember app
+        working-directory: apps/irene
+        run: npm run build:test
+
+      # The test jobs run against this build rather than each making their own.
+      - name: Upload built ember app
+        uses: actions/upload-artifact@v7
+        with:
+          name: ember-dist
+          path: apps/irene/dist
+
+  ember-lint:
+    name: Lint Ember app
+    runs-on: [ubuntu-latest]
     defaults:
       run:
         working-directory: apps/irene
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: apps/irene/.nvmrc
-          cache: npm
-          cache-dependency-path: apps/irene/package-lock.json
-
-      # Its own install: this app is deliberately outside the pnpm workspace.
-      - name: Install
-        run: npm ci
+      - name: Setup Ember Application
+        uses: ./.github/actions/setup-ember-app
 
       # ember-cli-typescript reports type errors without failing the build.
       - name: Type check
         run: npm run type-check
 
-      - name: Lint
+      - name: Run Linting
         run: npm run lint
 
-      - name: Test
-        run: npm run test:ember
-
-  bundle:
-    name: Combined bundle
-    runs-on: ubuntu-latest
+  ember-test:
+    name: Ember ${{ matrix.tests.type }}
+    needs: [ember-build]
+    runs-on: [ubuntu-latest]
+    defaults:
+      run:
+        working-directory: apps/irene
+    strategy:
+      fail-fast: false
+      matrix:
+        tests:
+          - type: Unit Tests - Part 1
+            commandArgs: --file-path='/irene/tests/unit*.js' --split=4 --partition=1 --parallel=4 --load-balance
+          - type: Unit Tests - Part 2
+            commandArgs: --file-path='/irene/tests/unit*.js' --split=4 --partition=2 --parallel=4 --load-balance
+          - type: Unit Tests - Part 3
+            commandArgs: --file-path='/irene/tests/unit*.js' --split=4 --partition=3 --parallel=4 --load-balance
+          - type: Unit Tests - Part 4
+            commandArgs: --file-path='/irene/tests/unit*.js' --split=4 --partition=4 --parallel=4 --load-balance
+          - type: Acceptance Tests - Part 1
+            commandArgs: --file-path='/irene/tests/acceptance*.js' --split=4 --partition=1 --parallel=4 --load-balance
+          - type: Acceptance Tests - Part 2
+            commandArgs: --file-path='/irene/tests/acceptance*.js' --split=4 --partition=2 --parallel=4 --load-balance
+          - type: Acceptance Tests - Part 3
+            commandArgs: --file-path='/irene/tests/acceptance*.js' --split=4 --partition=3 --parallel=4 --load-balance
+          - type: Acceptance Tests - Part 4
+            commandArgs: --file-path='/irene/tests/acceptance*.js' --split=4 --partition=4 --parallel=4 --load-balance
+          - type: Integration Tests - Part 1
+            commandArgs: --file-path='/irene/tests/integration*.js' --split=8 --partition=1 --parallel=12 --load-balance
+          - type: Integration Tests - Part 2
+            commandArgs: --file-path='/irene/tests/integration*.js' --split=8 --partition=2 --parallel=12 --load-balance
+          - type: Integration Tests - Part 3
+            commandArgs: --file-path='/irene/tests/integration*.js' --split=8 --partition=3 --parallel=12 --load-balance
+          - type: Integration Tests - Part 4
+            commandArgs: --file-path='/irene/tests/integration*.js' --split=8 --partition=4 --parallel=12 --load-balance
+          - type: Integration Tests - Part 5
+            commandArgs: --file-path='/irene/tests/integration*.js' --split=8 --partition=5 --parallel=12 --load-balance
+          - type: Integration Tests - Part 6
+            commandArgs: --file-path='/irene/tests/integration*.js' --split=8 --partition=6 --parallel=12 --load-balance
+          - type: Integration Tests - Part 7
+            commandArgs: --file-path='/irene/tests/integration*.js' --split=8 --partition=7 --parallel=12 --load-balance
+          - type: Integration Tests - Part 8
+            commandArgs: --file-path='/irene/tests/integration*.js' --split=8 --partition=8 --parallel=12 --load-balance
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v7
+      - uses: actions/download-artifact@v8
         with:
-          node-version-file: .nvmrc
+          name: ember-dist
+          path: apps/irene/dist
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup Ember Application
+        uses: ./.github/actions/setup-ember-app
 
-      - name: Install React app
-        run: pnpm install --frozen-lockfile
+      - name: Run ${{ matrix.tests.type }}
+        run: npm run test:ember -- ${{ matrix.tests.commandArgs }} --path=dist --wmmf
 
-      - name: Install Ember app
-        run: npm ci
-        working-directory: apps/irene
+      - name: Job Summary
+        if: always()
+        run: |
+          echo "| Module | Total | Passed | Failed | Skipped | Duration (ms) |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- | --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+
+          cat module-metadata-*.json | jq -r '.modules[] | "\(.moduleName | gsub("\\|"; "\\\\|")) | \(.total) | \(.passed) | \(.failed) | \(.skipped) | \(.duration) "' >> $GITHUB_STEP_SUMMARY
+
+  bundle:
+    name: Combined bundle
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Application
+        uses: ./.github/actions/setup-app
+
+      - name: Setup Ember Application
+        uses: ./.github/actions/setup-ember-app
 
       # Builds both and stages the embed into the Ember app before it is built.
       - name: Build everything
