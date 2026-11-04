@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-
 import { scopeEmbedCss } from './scope-embed-css';
 
 describe('scopeEmbedCss', () => {

@@ -1,6 +1,5 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-
 import { describe, expect, it } from 'vitest';
 
 /** Every source file under a directory, following it down. */
@@ -16,7 +15,10 @@ function sourceFiles(directory: string): string[] {
   });
 }
 
-const roots = [resolve(import.meta.dirname, '../..', 'src'), resolve(import.meta.dirname, '../../../../packages/ui/src')];
+const roots = [
+  resolve(import.meta.dirname, '../..', 'src'),
+  resolve(import.meta.dirname, '../../../../packages/ui/src'),
+];
 
 /*
   The stylesheet this app is embedded with is confined to the element it mounts

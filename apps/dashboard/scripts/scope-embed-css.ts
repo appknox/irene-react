@@ -209,8 +209,7 @@ export function scopeEmbedCss(css: string): string {
     const body = result.slice(brace + 1, blockEnd - 1);
     const layer = opening[1];
 
-    result =
-      result.slice(0, opening.index) + unwrap(layer, body) + result.slice(blockEnd);
+    result = result.slice(0, opening.index) + unwrap(layer, body) + result.slice(blockEnd);
 
     opening = /@layer\s+([\w-]+)\s*\{/.exec(result);
   }
