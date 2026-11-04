@@ -7,6 +7,8 @@ on:
       - develop
       - main
       - master
+      # Temporary: remove before merging this branch.
+      - claude/k8s-deploy-base
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
