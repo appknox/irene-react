@@ -83,6 +83,11 @@ jobs:
         run: npm run type-check
 
       - name: Run Linting
+        # The Ember app lints with its own .eslintrc.js. ESLint 8 searches
+        # ancestors for a flat config and would otherwise pick up the
+        # workspace's eslint.config.js, whose deps this job does not install.
+        env:
+          ESLINT_USE_FLAT_CONFIG: 'false'
         run: npm run lint
 
   ember-test:
