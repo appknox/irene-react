@@ -38,6 +38,7 @@ const buildAiFeatures = (
   pii: false,
   knoxiq: false,
   ai_dast: false,
+  saved_reports: false,
   ...overrides,
 });
 

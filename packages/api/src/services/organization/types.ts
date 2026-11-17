@@ -28,6 +28,8 @@ export interface ApiOrganizationAiFeatures {
   pii: boolean;
   knoxiq: boolean;
   ai_dast: boolean;
+  /** Reports can be saved, refreshed and reopened; it only applies while reporting is on. */
+  saved_reports: boolean;
 }
 
 /** All of the organization's properties. */

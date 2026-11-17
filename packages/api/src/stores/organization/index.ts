@@ -103,6 +103,7 @@ const NO_AI_FEATURES: ApiOrganizationAiFeatures = {
   pii: false,
   knoxiq: false,
   ai_dast: false,
+  saved_reports: false,
 };
 
 export const organizationStore = createStore<OrganizationStore>((set, get) => ({

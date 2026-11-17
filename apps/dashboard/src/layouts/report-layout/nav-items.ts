@@ -16,7 +16,8 @@ export interface ReportNavItem extends SideNavItemDefinition {
  * The reporting navigation, which is the same for every account that reaches it.
  *
  * Reporting is sold as one thing: an account either has it or never sees this
- * navigation, so nothing here is gated.
+ * navigation, so nothing here is gated. Saved reports live in the panel beside
+ * each page rather than in the navigation, as the design has them.
  *
  * @returns One entry per page reporting offers.
  */

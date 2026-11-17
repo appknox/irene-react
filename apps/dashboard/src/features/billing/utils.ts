@@ -62,20 +62,8 @@ export function getPlanPricing(plan: ApiPlan, duration: PaymentDuration) {
 export const getCheckoutUrl = (url: string, quantity: number) =>
   [url, `subscription[plan_quantity]=${quantity}`].join('&');
 
-/**
- * Whether a link the server handed back is a web address, and so safe to send
- * the browser to. A `javascript:` or `data:` link never is.
- *
- * @param url - The link.
- * @returns Whether it is http or https.
- */
-export function isWebUrl(url: string) {
-  try {
-    return ['http:', 'https:'].includes(new URL(url).protocol);
-  } catch {
-    return false;
-  }
-}
+/* Shared with reporting's downloads, so it lives in the app's utils. */
+export { isWebUrl } from '@/utils/web-url';
 
 /**
  * The sentence before a subscription's end date: when a trial ends or turns

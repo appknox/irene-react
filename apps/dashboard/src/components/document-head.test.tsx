@@ -8,6 +8,7 @@ import { akMT } from '@irene/translations/intl';
 
 import { buildSession } from '@tests/factories';
 import { mockOrganizationFeatures, mockOrganizationMe } from '@tests/organization';
+import { mockReporting } from '@tests/reports';
 import { renderAtRoute } from '@tests/render';
 import { buildAPITestURL, server } from '@tests/server';
 
@@ -70,6 +71,7 @@ describe('DocumentHead', () => {
 
   it('reads page, then product, then the deployment name', async () => {
     signedIn();
+    mockReporting({ savedReports: false });
 
     await renderAtRoute('/dashboard/reports');
 

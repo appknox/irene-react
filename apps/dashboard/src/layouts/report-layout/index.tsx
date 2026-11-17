@@ -5,9 +5,11 @@ import { akMT } from '@irene/translations/intl';
 import { AkTypography } from '@irene/ui/ak-typography';
 
 import { PoweredByAiDrawer, type PoweredByAiSection } from '@/components/powered-by-ai';
+import { SavedReportsPanel } from '@/features/reports/components/saved-reports-panel';
 import { SideNav } from '@/components/side-nav';
 import { TopNav } from '@/components/top-nav';
 import { useSidebarState } from '@/hooks/use-sidebar-state';
+import { useOrganization } from '@/hooks/use-organization';
 import { useSignedInUser } from '@/hooks/use-signed-in-user';
 
 import { buildReportNavItems } from './nav-items';
@@ -23,6 +25,8 @@ import { buildReportNavItems } from './nav-items';
 export function ReportLayout() {
   const { isCollapsed, toggle } = useSidebarState();
   const user = useSignedInUser();
+  const aiFeatures = useOrganization().aiFeatures();
+  const hasSavedReports = aiFeatures.reporting && aiFeatures.saved_reports;
 
   /* What the drawer behind the AI chip explains about this product's AI. */
   const aiSections = useMemo<PoweredByAiSection[]>(
@@ -49,7 +53,8 @@ export function ReportLayout() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden" data-test-report-layout>
-      <SideNav items={buildReportNavItems()} isCollapsed={isCollapsed} onSidebarToggle={toggle} />
+      <SideNav
+        items={buildReportNavItems()} isCollapsed={isCollapsed} onSidebarToggle={toggle} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopNav username={user.username} email={user.email} showNotifications={false}>
@@ -60,11 +65,15 @@ export function ReportLayout() {
           <PoweredByAiDrawer sections={aiSections} />
         </TopNav>
 
-        <main className="flex-1 overflow-y-auto bg-background-subtle" data-test-report-main>
-          <div className="mx-auto w-full max-w-300">
-            <Outlet />
-          </div>
-        </main>
+        <div className="flex min-h-0 flex-1">
+          <main className="min-w-0 flex-1 overflow-y-auto bg-background-subtle" data-test-report-main>
+            <div className="mx-auto w-full max-w-300">
+              <Outlet />
+            </div>
+          </main>
+
+          {hasSavedReports && <SavedReportsPanel />}
+        </div>
       </div>
     </div>
   );

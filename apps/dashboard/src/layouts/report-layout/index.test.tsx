@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -7,6 +7,7 @@ import { akMT } from '@irene/translations/intl';
 
 import { buildSession } from '@tests/factories';
 import { mockOrganizationFeatures } from '@tests/organization';
+import { mockReporting } from '@tests/reports';
 import { renderAtRoute } from '@tests/render';
 
 const REPORTS = '/dashboard/reports';
@@ -20,11 +21,21 @@ describe('ReportLayout', () => {
   });
 
   it('opens on the page that generates a report, since reporting has no landing page', async () => {
+    mockReporting({ savedReports: false });
+
     await openReports();
 
     expect(
-      await screen.findByRole('heading', { name: akMT('reportModule.generateReport') })
+      await screen.findByRole('heading', { name: akMT('reportModule.describeTheReport') })
     ).toBeInTheDocument();
+  });
+
+  it('sends an organization without AI reporting home', async () => {
+    mockOrganizationFeatures({}, { reporting: false });
+
+    await openReports();
+
+    await waitFor(() => expect(document.querySelector('[data-test-report-layout]')).not.toBeInTheDocument());
   });
 
   it('leads to the page reporting offers', async () => {
@@ -33,6 +44,26 @@ describe('ReportLayout', () => {
     const generate = await screen.findByRole('link', { name: akMT('reportModule.generateReport') });
 
     expect(generate).toHaveAttribute('href', '/dashboard/reports/generate');
+  });
+
+  it('leaves the Saved reports panel out while the organization does not have them', async () => {
+    await openReports();
+
+    await screen.findByRole('link', { name: akMT('reportModule.generateReport') });
+
+    expect(
+      screen.queryByRole('complementary', { name: akMT('reportModule.savedReports.title') })
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the Saved reports panel beside the page where the organization has them', async () => {
+    mockOrganizationFeatures({}, { reporting: true, saved_reports: true });
+
+    await openReports();
+
+    expect(
+      await screen.findByRole('complementary', { name: akMT('reportModule.savedReports.title') })
+    ).toBeInTheDocument();
   });
 
   it('leaves the dashboard items out, since they belong to another product', async () => {

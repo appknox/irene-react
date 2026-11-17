@@ -21,7 +21,6 @@ export const EMBER_PATHS: Record<string, string> = {
   '/dashboard/project': '/dashboard/project',
   '/dashboard/projects': '/dashboard/projects',
   '/dashboard/public-api': '/dashboard/public-api',
-  '/dashboard/reports': '/dashboard/reports',
   '/dashboard/sbom': '/dashboard/sbom',
   '/dashboard/settings': '/dashboard/settings',
   '/dashboard/storeknox': '/dashboard/storeknox',

@@ -35,3 +35,5 @@ export { buildUploadedApp, buildPresignedUpload } from '@tests/factories/upload-
 export { buildUser, buildUserResponse } from '@tests/factories/user';
 
 export { buildVulnerability, buildVulnerabilityListResponse } from '@tests/factories/vulnerability';
+export * from '@tests/factories/saved-report';
+export * from '@tests/factories/report-request';
