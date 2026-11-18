@@ -23,6 +23,10 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "src/routeTree.gen.ts"]
     },
+    "build:embed": {
+      "dependsOn": ["^build"],
+      "outputs": ["embed-dist/**"]
+    },
     "dev": {
       "dependsOn": ["^build"],
       "cache": false,

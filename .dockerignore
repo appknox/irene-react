@@ -4,6 +4,7 @@
 **/.turbo
 **/node_modules
 **/dist
+**/embed-dist
 **/coverage
 **/storybook-static
 **/.eslintcache

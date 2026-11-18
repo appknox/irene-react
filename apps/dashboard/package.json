@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "test": "vitest run --coverage",
-    "type-check": "pnpm routes:generate && tsc -b --noEmit"
+    "type-check": "pnpm routes:generate && tsc -b --noEmit",
+    "build:embed": "vite build --config vite.embed.config.ts && node scripts/scope-embed-css.ts embed-dist/style.css"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

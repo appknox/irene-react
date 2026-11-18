@@ -73,6 +73,45 @@ jobs:
           ESLINT_USE_FLAT_CONFIG: 'false'
         run: npm run lint
 
+  embed:
+    name: Embed surface
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Application
+        uses: ./.github/actions/setup-app
+
+      - name: Build
+        run: pnpm --filter @irene/dashboard build:embed
+
+      # These cannot be expressed in the source, so they are asserted on the
+      # output. Each one is a way the bundle silently fails inside a host page.
+      - name: Check the bundle is safe to load in a host page
+        working-directory: apps/dashboard/embed-dist
+        run: |
+          set -eu
+
+          # Unlayered CSS beats layered CSS at any specificity, so a layer left
+          # here loses to the host's own reset and the components draw unstyled.
+          ! grep -q '@layer' style.css
+
+          # Document rules must be confined, or they restyle the host's pages.
+          grep -q '\[data-react-root\]' style.css
+
+          # The element reset must stay global: a drawer or menu portals into
+          # document.body, outside the mounted element.
+          grep -qE '(^|\})button, *input' style.css
+
+          # A host loads this with a script tag and reads what it leaves behind.
+          grep -q '__ireneEmbed' embed.js
+
+          # Configuration resolves at runtime, not frozen at build.
+          grep -q '__IRENE_EMBED_CONFIG__' embed.js
+
+          # Fonts emitted as files rather than inlined as base64.
+          ls ./*.woff2 >/dev/null
+
   ember-test:
     name: Ember ${{ matrix.tests.type }}
     needs: [ember-build]
