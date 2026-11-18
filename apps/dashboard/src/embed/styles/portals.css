@@ -15,6 +15,14 @@
   --irene-embed-layer: 10001;
 }
 
+/*
+  Declared important because the utilities these elements carry outrank this
+  rule once the bundle is scoped. `z-50` is written as `[data-slot].z-50`,
+  which is more specific than the attribute selectors below; in the app the
+  utilities sit in a cascade layer and lose to unlayered CSS, but the layers
+  come off for a host document. Without this the backdrop renders at z-index
+  50 and the host's navigation draws over it.
+*/
 [data-slot='drawer-overlay'],
 [data-slot='drawer-content'],
 [data-slot='modal-overlay'],
@@ -22,5 +30,5 @@
 [data-slot='popover-content'],
 [data-slot='menu-content'],
 [data-slot='select-content'] {
-  z-index: var(--irene-embed-layer);
+  z-index: var(--irene-embed-layer) !important;
 }

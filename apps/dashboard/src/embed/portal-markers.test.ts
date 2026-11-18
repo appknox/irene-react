@@ -44,3 +44,31 @@ describe('what this app renders outside its own element', () => {
     }
   );
 });
+
+describe('the portal stylesheet', () => {
+  const portals = readFileSync(resolve(import.meta.dirname, 'styles/portals.css'), 'utf8');
+
+  it('wins against the utilities these elements carry', () => {
+    /*
+      Scoping rewrites `z-50` as `[data-slot].z-50`, which outranks the
+      attribute selectors here. In the app the utilities sit in a cascade layer
+      and lose; the layers come off for a host document, so the win has to be
+      declared.
+    */
+    expect(portals).toMatch(/z-index:\s*var\(--irene-embed-layer\)\s*!important/);
+  });
+
+  it('lifts every slot that renders outside the mounted element', () => {
+    for (const slot of [
+      'drawer-overlay',
+      'drawer-content',
+      'modal-overlay',
+      'modal-content',
+      'popover-content',
+      'menu-content',
+      'select-content',
+    ]) {
+      expect(portals).toContain(`[data-slot='${slot}']`);
+    }
+  });
+});
