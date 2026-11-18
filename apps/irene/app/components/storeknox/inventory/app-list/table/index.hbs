@@ -1,0 +1,83 @@
+{{#if this.isFetchingTableData}}
+  <AkTable::Loading @columns={{this.columns}} />
+
+{{else if (and this.hasNoApps (not this.filterApplied))}}
+  <Storeknox::Inventory::AppList::Table::Empty
+    @subText={{t 'storeknox.noInventoryAppsFoundDescription' htmlSafe=true}}
+  />
+
+{{else}}
+  <AkPaginationProvider
+    @results={{this.tableData}}
+    @onItemPerPageChange={{this.onItemPerPageChange}}
+    @totalItems={{this.totalAppsCount}}
+    @nextAction={{this.goToPage}}
+    @prevAction={{this.goToPage}}
+    @itemPerPageOptions={{array 10 25 50}}
+    @defaultLimit={{this.skAppsService.limit}}
+    @offset={{this.skAppsService.offset}}
+    as |pgc|
+  >
+    <AkTable @hoverable={{not this.disableRowClick}} as |tb|>
+      <tb.head @columns={{this.columns}} as |h|>
+        <h.row as |r|>
+          <r.cell as |column|>
+            {{#if column.headerComponent}}
+              {{#let (component column.headerComponent) as |Component|}}
+                <Component
+                  @selectedMonitoringStatus={{this.monitoringStatusFilter}}
+                  @onStatusChange={{this.onStatusChange}}
+                />
+              {{/let}}
+            {{else}}
+              {{column.name}}
+            {{/if}}
+          </r.cell>
+        </h.row>
+      </tb.head>
+
+      <tb.body @rows={{pgc.currentPageResults}} as |b|>
+        <b.row
+          data-test-storeknoxInventory-appListTable-row
+          data-test-storeknoxInventory-appListTable-rowId='{{b.rowValue.app.id}}'
+          {{style cursor=(unless this.disableRowClick 'pointer')}}
+          {{on 'click' (fn this.handleRowClick b.rowValue)}}
+          as |r|
+        >
+          <r.cell>
+            {{#let (component r.columnValue.cellComponent) as |Component|}}
+              <Component
+                @loading={{this.isFetchingTableData}}
+                @app={{r.rowValue.app}}
+                @data={{r.rowValue}}
+              />
+            {{/let}}
+          </r.cell>
+        </b.row>
+      </tb.body>
+    </AkTable>
+
+    {{#if this.showEmptyState}}
+      <Storeknox::Inventory::AppList::Table::Empty
+        @subText={{t 'storeknox.noAppMatchesYourCurrentFilter'}}
+      />
+    {{/if}}
+
+    {{#unless this.hidePagination}}
+      <AkPagination
+        @disableNext={{pgc.disableNext}}
+        @nextAction={{pgc.nextAction}}
+        @disablePrev={{pgc.disablePrev}}
+        @prevAction={{pgc.prevAction}}
+        @endItemIdx={{pgc.endItemIdx}}
+        @startItemIdx={{pgc.startItemIdx}}
+        @itemPerPageOptions={{pgc.itemPerPageOptions}}
+        @onItemPerPageChange={{pgc.onItemPerPageChange}}
+        @selectedOption={{pgc.selectedOption}}
+        @tableItemLabel={{t 'apps'}}
+        @perPageTranslation={{t 'recordPerPage'}}
+        @totalItems={{pgc.totalItems}}
+      />
+    {{/unless}}
+  </AkPaginationProvider>
+{{/if}}

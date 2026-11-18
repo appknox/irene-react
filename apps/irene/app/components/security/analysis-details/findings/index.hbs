@@ -1,0 +1,76 @@
+<Security::AnalysisDetails::SectionCard
+  @title={{t 'securityAnalysisDetails.findings.title'}}
+  @description={{t 'securityAnalysisDetails.findings.description'}}
+  @testId='findings'
+  data-test-securityAnalysisDetails-findings-root
+>
+  <:actions>
+    {{#if this.allFindings.length}}
+      <AkButton
+        @variant='outlined'
+        {{on 'click' this.openClearAllFindingConfirmBox}}
+        data-test-securityAnalysisDetails-findings-clearAllFindingsBtn
+      >
+        <:leftIcon>
+          <AkIcon @iconName='close' />
+        </:leftIcon>
+
+        <:default>
+          {{t 'securityAnalysisDetails.findings.clearAll'}}
+        </:default>
+      </AkButton>
+    {{/if}}
+  </:actions>
+
+  <:content>
+    <AkStack @direction='column' @width='full' @spacing='2'>
+      {{#if this.allFindings.length}}
+        <Security::AnalysisDetails::Findings::Table
+          @analysis={{this.analysis}}
+          @allFindings={{this.allFindings}}
+          @openRemoveFindingConfirmBox={{this.openRemoveFindingConfirmBox}}
+          @onFindingEdited={{this.reportFindingsChanged}}
+        />
+
+      {{else}}
+        <AkStack
+          @direction='row'
+          @alignItems='center'
+          @spacing='1'
+          data-test-securityAnalysisDetails-findings-noFindingsInfoText
+        >
+          <AkIcon @iconName='info' @size='small' />
+
+          <AkTypography
+            @color='textSecondary'
+            @variant='body2'
+            @fontWeight='light'
+          >
+            {{t 'securityAnalysisDetails.findings.noFindings'}}
+          </AkTypography>
+        </AkStack>
+      {{/if}}
+
+      <AkDivider @color='dark' class='my-1' />
+
+      <Security::AnalysisDetails::Findings::AddForm
+        @analysis={{this.analysis}}
+        @addNewFinding={{this.addNewFinding}}
+      />
+    </AkStack>
+  </:content>
+</Security::AnalysisDetails::SectionCard>
+
+<ConfirmBox
+  @isActive={{this.showClearAllFindingsConfirmBox}}
+  @title='Are you sure you want to clear all findings?'
+  @confirmAction={{this.clearAllFindings}}
+  @cancelAction={{this.closeClearAllFindingConfirmBox}}
+/>
+
+<ConfirmBox
+  @isActive={{this.showRemoveFindingConfirmBox}}
+  @title='Are you sure you want to remove this finding?'
+  @confirmAction={{this.deleteFinding}}
+  @cancelAction={{this.closeRemoveFindingConfirmBox}}
+/>

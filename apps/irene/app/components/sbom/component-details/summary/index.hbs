@@ -1,0 +1,87 @@
+<div ...attributes data-test-sbomScanDetails-componentDetails-summary>
+  {{#each this.componentSummary as |cs index|}}
+    <AkStack
+      class='p-1'
+      data-test-sbomScanDetails-componentDetails-summary='{{cs.label}}'
+    >
+      <AkStack
+        {{style width='160px'}}
+        @direction='row'
+        @alignItems='center'
+        @spacing='0.5'
+      >
+        <AkTypography @color='textSecondary'>
+          {{cs.label}}
+        </AkTypography>
+
+        {{#if cs.tooltip}}
+          <AkTooltip @arrow={{true}} @placement='right' @multiline={{true}}>
+            <:default>
+              <AkIcon
+                data-test-sbomScanDetails-componentDetails-summary-tooltipIcon
+                @iconName='info'
+                @size='small'
+                @color='secondary'
+              />
+            </:default>
+
+            <:tooltipContent>
+              <AkTypography
+                @variant='body2'
+                @color='inherit'
+                {{style width='300px'}}
+              >
+                {{cs.tooltip}}
+              </AkTypography>
+            </:tooltipContent>
+          </AkTooltip>
+        {{/if}}
+      </AkStack>
+
+      {{#if cs.component}}
+        {{#let (component cs.component) as |Component|}}
+          <Component @sbomComponent={{@sbomComponent}} />
+        {{/let}}
+      {{else}}
+        {{#if cs.isLink}}
+          <a
+            href={{cs.value}}
+            target='_blank'
+            rel='noopener noreferrer'
+            data-test-sbomScanDetails-componentDetails-summary-link
+          >
+            <AkTypography @variant='h6' @underline='always'>
+              {{cs.value}}
+            </AkTypography>
+          </a>
+        {{else}}
+          <AkTypography
+            data-test-sbomScanDetails-componentDetails-summary-value
+            @variant='h6'
+          >
+            {{cs.value}}
+          </AkTypography>
+        {{/if}}
+      {{/if}}
+    </AkStack>
+
+    {{#unless (eq index this.componentSummaryLength)}}
+      <AkDivider />
+    {{/unless}}
+  {{/each}}
+
+  {{!-- {{#if @sbomComponent.remediation}}
+    <AkStack class='my-4 px-2' @direction='column' @spacing='1.5'>
+      <AkTypography
+        data-test-sbomScanDetails-componentDetails-howToFixTitle
+        @variant='h5'
+      >
+        {{t 'howToFix'}}
+      </AkTypography>
+
+      <AkTypography data-test-sbomScanDetails-componentDetails-howToFixRemedy>
+        {{@sbomComponent.remediation}}
+      </AkTypography>
+    </AkStack>
+  {{/if}} --}}
+</div>

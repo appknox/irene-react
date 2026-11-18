@@ -1,0 +1,137 @@
+{{#if this.isFetching}}
+  <PrivacyModule::Loader @loadingText='{{t "loading"}}...' />
+{{else}}
+  {{#if this.showEmptyContent}}
+    <PrivacyModule::Status
+      @heading={{t 'privacyModule.emptyPiiHeader'}}
+      @description={{t 'privacyModule.emptyPiiDesc'}}
+      @svgComponent='ak-svg/privacy-not-found'
+    />
+  {{else}}
+    <AkStack
+      @justifyContent='right'
+      @alignItems='center'
+      local-class='note-power-by-ai'
+    >
+      <PoweredByAi::Chip
+        @clickable={{true}}
+        @drawerInfo={{this.drawerInfo}}
+        data-test-organzation-aiPoweredFeatures-poweredByAiChip
+      />
+    </AkStack>
+
+    {{#if this.piiDataAvailable}}
+      <AkTable
+        data-test-privacyModule-pii-list
+        @hoverable={{true}}
+        local-class='pii-table'
+        as |tb|
+      >
+        <tb.head @columns={{this.columns}} />
+        <tb.body @rows={{this.piiDataList}} as |b|>
+          <b.row
+            @onClick={{this.openPiiDetailsDrawer}}
+            local-class='app-monitoring-table-row'
+            {{style cursor='pointer'}}
+            data-test-privacyModule-pii-table-row='{{b.rowValue.id}}'
+            as |r|
+          >
+            <r.cell>
+              {{#let (component r.columnValue.component) as |Component|}}
+                <Component @data={{r.rowValue}} @id={{r.rowValue.id}} />
+              {{/let}}
+            </r.cell>
+          </b.row>
+        </tb.body>
+      </AkTable>
+    {{else}}
+      {{#if this.piiEnabled}}
+        <AkStack
+          @direction='column'
+          @alignItems='center'
+          local-class='empty-container'
+        >
+          <AkSvg::PrivacyUpload />
+
+          <AkTypography
+            local-class='body-text'
+            class='mt-2'
+            data-test-privacyModule-pii-reupload-desc
+          >
+            {{t 'privacyModule.piiReupload'}}
+          </AkTypography>
+        </AkStack>
+      {{else}}
+        <AkStack
+          @direction='column'
+          @alignItems='center'
+          local-class='empty-container'
+        >
+          <AkSvg::TurnOnSettings />
+
+          <AkTypography
+            @variant='h5'
+            @gutterBottom={{true}}
+            local-class='header'
+            data-test-privacyModule-pii-turn-on-feature-header
+          >
+            {{t 'turnOnFeatureOrgSettings'}}
+          </AkTypography>
+
+          <AkTypography
+            local-class='body-text'
+            data-test-privacyModule-pii-turn-on-feature-desc
+          >
+            {{t 'privacyModule.turnOnSettingsDesc'}}
+          </AkTypography>
+
+          {{#if this.isOwner}}
+            <AkButton
+              @tag='a'
+              href='/dashboard/organization/settings/ai-powered-features'
+              target='_blank'
+              class='mt-2'
+              data-test-privacyModule-pii-turn-on-feature-button
+            >
+              {{t 'goToOrgSettings'}}
+            </AkButton>
+          {{/if}}
+        </AkStack>
+      {{/if}}
+    {{/if}}
+  {{/if}}
+{{/if}}
+
+<AkDrawer
+  @open={{this.piiIsSelected}}
+  @onClose={{this.closePiiDetailsDrawer}}
+  @anchor='right'
+  as |dr|
+>
+  <AkAppbar
+    @justifyContent='space-between'
+    @position='sticky'
+    class='px-3'
+    as |ab|
+  >
+    <AkTypography
+      @color='inherit'
+      @variant='h5'
+      data-test-privacyModule-pii-drawer-header
+    >
+      {{t 'privacyModule.piiDetails'}}
+    </AkTypography>
+
+    <AkIconButton
+      {{on 'click' dr.closeHandler}}
+      class={{ab.classes.defaultIconBtn}}
+      data-test-privacyModule-pii-drawer-close
+    >
+      <AkIcon @iconName='close' />
+    </AkIconButton>
+  </AkAppbar>
+
+  <PrivacyModule::AppDetails::Pii::DrawerDetails
+    @selectedPii={{this.selectedPii}}
+  />
+</AkDrawer>

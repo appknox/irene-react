@@ -1,0 +1,46 @@
+{{! @glint-nocheck: or, Modal-dialog}}
+<Modal-Dialog
+  @onClose={{if @disableClose this.noop @onClose}}
+  @onClickOverlay={{if
+    (or @disableClose @disableOverlayClick)
+    this.noop
+    @onClickOverlay
+  }}
+  @translucentOverlay={{true}}
+  @containerClass={{this.classes.modalDialogContainer}}
+  @overlayClass='
+    ak-modal-overlay
+    {{this.classes.overlay}} 
+    {{if @blurOverlay this.classes.overlayBlur}}'
+  ...attributes
+>
+  {{#if @showHeader}}
+    <AkAppbar data-test-ak-modal-header @justifyContent='space-between' as |ab|>
+      <AkTypography @variant='h5' @fontWeight='medium' @color='inherit'>
+        {{@headerTitle}}
+      </AkTypography>
+
+      <AkIconButton
+        data-test-modal-close-btn
+        class={{ab.classes.defaultIconBtn}}
+        {{on 'click' (or @onClose this.noop)}}
+        @size='small'
+        disabled={{@disableClose}}
+      >
+        <AkIcon @iconName='close' />
+      </AkIconButton>
+    </AkAppbar>
+  {{/if}}
+
+  <div
+    data-test-ak-modal-body
+    data-test-cy='ak-modal-body'
+    local-class='ak-modal-body {{unless @noGutter "ak-modal-body-gutter"}}'
+  >
+    {{yield}}
+  </div>
+
+  {{#if (has-block 'footer')}}
+    {{yield to='footer'}}
+  {{/if}}
+</Modal-Dialog>

@@ -1,0 +1,21 @@
+<span
+  ...attributes
+  local-class='
+    toggle-container
+    toggle-container-{{if @size @size "default"}}
+    {{if @disabled "disabled"}}
+  '
+>
+  <Input
+    data-test-toggle-input
+    local-class='toggle-input toggle-input-{{if @size @size "default"}}'
+    @type='checkbox'
+    disabled={{@disabled}}
+    readonly={{@readonly}}
+    @checked={{@checked}}
+    id={{this.id}}
+    {{on 'change' this.onChange}}
+    {{on 'click' this.onClick}}
+  />
+  <span local-class='track' data-test-toggle-input-slider></span>
+</span>

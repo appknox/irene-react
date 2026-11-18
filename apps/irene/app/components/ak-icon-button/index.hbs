@@ -1,0 +1,13 @@
+{{! @glint-nocheck: or}}
+<button
+  data-test-ak-icon-button
+  ...attributes
+  local-class='
+    ak-icon-button-root 
+    ak-icon-button-variant-{{this.variant}}
+    ak-icon-button-border-color-{{or @borderColor "default"}}
+    ak-icon-button-size-{{this.size}}'
+  type={{or @type 'button'}}
+>
+  {{yield}}
+</button>

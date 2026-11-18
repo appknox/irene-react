@@ -1,0 +1,52 @@
+<AkStack
+  @justifyContent='space-between'
+  @alignItems='center'
+  @width='full'
+  @spacing='3.5'
+  ...attributes
+>
+  <AkStack @width='6/12' @justifyContent='center'>
+    <Security::AnalysisDetails::ScoreChip
+      @caption={{t
+        'securityAnalysisDetails.cvssMetrics.riskScoreCaption'
+        version=@cvssVersion
+      }}
+      @score={{@cvssDetails.base}}
+      @label={{risk-text @cvssDetails.risk}}
+      @riskClass={{@cvssDetails.riskLabelClass}}
+      @isInvalid={{@cvssDetails.isInValidCvssBase}}
+      @invalidLabel={{t 'securityAnalysisDetails.cvssMetrics.invalidVector'}}
+      @testId='cvss'
+    />
+  </AkStack>
+
+  <AkStack @direction='column' @spacing='2.5' @width='6/12'>
+    {{#each @selectDataList as |metric|}}
+      <AkStack
+        @spacing='3.5'
+        @width='full'
+        @justifyContent='space-between'
+        @alignItems='center'
+      >
+        <AkTypography
+          local-class='metric-label'
+          data-test-securityAnalysisDetails-cvssMetrics-metricSelectLabel='{{metric.key}}'
+        >
+          {{metric.label}}
+        </AkTypography>
+
+        <AkSelect
+          id={{metric.key}}
+          @selected={{metric.selected}}
+          @options={{metric.options}}
+          @onChange={{metric.onSelect}}
+          {{style width='250px'}}
+          data-test-securityAnalysisDetails-cvssMetrics-metricSelect='{{metric.key}}'
+          as |key|
+        >
+          {{metric.getOptionLabel key}}
+        </AkSelect>
+      </AkStack>
+    {{/each}}
+  </AkStack>
+</AkStack>

@@ -1,0 +1,90 @@
+.analysis-details-root {
+  width: 50%;
+  border: 1px solid var(--file-compare-analysis-details-border-color);
+  border-top: none;
+  border-bottom-width: 1px;
+
+  &.marked-passed {
+    background-color: var(
+      --file-compare-analysis-details-marked-passed-bg-color
+    );
+
+    .vulnerability-finding-container {
+      background-color: var(
+        --file-compare-analysis-details-marked-passed-vuln-finding-bg-color
+      );
+      border: 1px solid var(--file-compare-analysis-details-border-color);
+    }
+  }
+
+  .analysis-static-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+
+    h1 {
+      font-size: 1.75rem;
+      margin: 0.4em 0 !important;
+    }
+
+    h3 {
+      margin: 0.4em 0 !important;
+    }
+
+    ul {
+      list-style: unset;
+    }
+
+    ul,
+    ol {
+      margin: 0.25em 1em;
+
+      li {
+        margin: 0.25em 1em;
+      }
+    }
+  }
+
+  &:first-of-type {
+    border-left-width: 1px;
+  }
+
+  &:last-of-type {
+    border-right-width: 1px;
+  }
+
+  .analysis-content-title {
+    width: 320px;
+  }
+
+  .analysis-content-value {
+    width: calc(100% - 320px);
+  }
+
+  .vulnerability-finding-container {
+    width: 100%;
+    max-width: 600px;
+    max-height: 300px;
+    overflow: auto;
+    text-overflow: clip;
+    margin: 1em 0;
+    background-color: var(
+      --file-compare-analysis-details-findings-code-background-color
+    );
+    border-radius: var(--file-compare-analysis-details-findings-border-radius);
+
+    .vulnerability-finding-description {
+      background-color: unset;
+      color: var(--file-compare-analysis-details-findings-color-primary);
+      white-space: pre-line;
+      width: max-content;
+      line-height: normal;
+      padding: 0.75em;
+    }
+  }
+}
+
+.file-compare-vulnerability-details-skeleton-container {
+  border: 1px solid var(--file-compare-vulnerability-details-border-color);
+  border-top: none;
+}

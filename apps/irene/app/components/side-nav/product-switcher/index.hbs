@@ -1,0 +1,103 @@
+<AkDivider @color='dark' class='mt-4' />
+
+<AkTooltip
+  @disabled={{this.isSidebarExpanded}}
+  @color='dark'
+  @placement='right'
+  @arrow={{true}}
+  @title={{t 'appSwitcher'}}
+  local-class='switcher-menu-tooltip'
+>
+  {{#if this.isSidebarExpanded}}
+    <AkButton
+      data-test-side-menu-switcher
+      local-class='switcher'
+      {{on 'click' this.onClickSwitcher}}
+    >
+      <AkIcon
+        data-test-side-menu-switcher-icon
+        class={{@classes.menuItemIcon}}
+        @iconName='apps'
+      />
+
+      <AkStack
+        class='ml-2'
+        @width='full'
+        @direction='row'
+        @justifyContent='space-between'
+        @alignItems='center'
+      >
+        <AkTypography
+          @noWrap={{true}}
+          class={{@classes.menuItemText}}
+          data-test-side-menu-switcher-text
+        >
+          {{t 'appSwitcher'}}
+        </AkTypography>
+
+        <AkIcon class={{@classes.menuItemIcon}} @iconName='chevron-right' />
+      </AkStack>
+    </AkButton>
+
+  {{else}}
+    <AkIconButton
+      data-test-side-menu-switcher
+      local-class='switcher collapsed'
+      {{on 'click' this.onClickSwitcher}}
+    >
+      <AkIcon
+        data-test-side-menu-switcher-icon
+        class={{@classes.menuItemIcon}}
+        @iconName='apps'
+      />
+    </AkIconButton>
+  {{/if}}
+</AkTooltip>
+
+<AkDivider @color='dark' class='mb-4' />
+
+<AkPopover
+  data-test-side-menu-switcher-modal
+  @anchorRef={{this.anchorRef}}
+  @arrow={{true}}
+  @arrowClass={{this.classes.switcherPopoverArrow}}
+  @closeHandler={{this.closeSwitcherPopover}}
+  @hasBackdrop={{true}}
+  @clickOutsideToClose={{true}}
+  @placement='right-start'
+>
+  <div local-class='switcher-menu-container'>
+    <AkTypography local-class='switcher-menu-title' @fontWeight='bold'>
+      {{t 'switchTo'}}
+    </AkTypography>
+
+    {{#each this.switcherMenuItems as |item index|}}
+      {{#if (not-eq index 0)}}
+        <AkDivider />
+      {{/if}}
+
+      <AkLink
+        data-test-switcher-popover-item-link
+        local-class='switcher-menu-item'
+        @underline='none'
+        @route={{item.route}}
+        target={{if item.openInNewTab '_blank'}}
+        rel={{if item.openInNewTab 'noopener noreferrer'}}
+        {{on 'click' this.closeSwitcherPopover}}
+      >
+        <AkStack @direction='row' @alignItems='center' @spacing='1'>
+          {{#let (component item.svg) as |SvgIcon|}}
+            <SvgIcon
+              local-class='switcher-menu-item-icon'
+              data-test-side-menu-switcher-modal='{{item.id}}'
+            />
+          {{/let}}
+
+          <AkTypography data-test-side-menu-switcher-modal-switch-to>
+            {{item.label}}
+          </AkTypography>
+        </AkStack>
+      </AkLink>
+    {{/each}}
+  </div>
+</AkPopover>

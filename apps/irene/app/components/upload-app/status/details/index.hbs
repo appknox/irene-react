@@ -1,0 +1,197 @@
+<div
+  ...attributes
+  local-class='progress-card'
+  data-test-cy='upload-app-status-details-{{@submission.id}}'
+>
+  <AkStack @width='full' @justifyContent='space-between' class='px-2 py-1'>
+    <AkStack @alignItems='center' @spacing='0.5'>
+      <AkIcon
+        data-test-uploadAppStatusDetails-uploadSourceIcon
+        @iconName={{if @submission.viaLink 'link' 'desktop-windows'}}
+        @color='primary'
+        @size={{if @submission.viaLink 'medium' 'small'}}
+      />
+
+      <AkTypography
+        data-test-uploadAppStatusDetails-uploadSourceTitle
+        @variant='subtitle2'
+      >
+        {{if @submission.viaLink (t 'viaLink') (t 'viaSystem')}}
+      </AkTypography>
+    </AkStack>
+
+    <AkStack @alignItems='center' @spacing='0.5'>
+      <AkIcon
+        data-test-uploadAppStatusDetails-statusIcon
+        @iconName={{this.submissionStatus.icon}}
+        @color={{this.submissionStatus.iconColor}}
+        @size='small'
+      />
+
+      <AkTypography
+        data-test-uploadAppStatusDetails-statusLabel
+        @variant='subtitle2'
+        @color={{this.submissionStatus.iconColor}}
+      >
+        {{this.submissionStatus.label}}
+      </AkTypography>
+    </AkStack>
+  </AkStack>
+
+  <AkDivider />
+
+  {{#if @submission.appData}}
+    <AkStack @alignItems='center' class='px-2 py-1'>
+      <div local-class='file-icon'>
+        <img
+          data-test-uploadAppStatusDetails-appIcon
+          src={{@submission.appData.icon_url}}
+          role='none'
+          alt=''
+        />
+      </div>
+
+      <AkStack @direction='column' class='pl-1'>
+        <AkTypography
+          data-test-uploadAppStatusDetails-appName
+          @variant='subtitle1'
+        >
+          {{@submission.appData.name}}
+        </AkTypography>
+
+        <AkTypography
+          data-test-uploadAppStatusDetails-appPackageName
+          title={{@submission.appData.package_name}}
+          @noWrap={{true}}
+          @variant='body1'
+          {{style maxWidth='315px'}}
+        >
+          {{@submission.appData.package_name}}
+        </AkTypography>
+      </AkStack>
+    </AkStack>
+  {{else}}
+    {{#unless this.submissionStatus.failed}}
+      <AkStack @alignItems='center' class='px-2 py-1'>
+        <AkSkeleton
+          data-test-uploadAppStatusDetails-appIconSkeleton
+          @width='40px'
+          @height='40px'
+          @variant='circular'
+        />
+
+        <AkStack @direction='column' @spacing='1' class='pl-1'>
+          <AkSkeleton
+            data-test-uploadAppStatusDetails-appNameSkeleton
+            @width='280px'
+            @height='16px'
+          />
+
+          <AkSkeleton
+            data-test-uploadAppStatusDetails-appPackageNameSkeleton
+            @width='215px'
+            @height='16px'
+          />
+        </AkStack>
+      </AkStack>
+    {{/unless}}
+  {{/if}}
+
+  {{#if this.submissionStatus.running}}
+    <AkStack @justifyContent='space-between' class='px-2'>
+      <AkTypography
+        data-test-uploadAppStatusDetails-statusHumanized
+        @variant='body1'
+      >
+        {{@submission.statusHumanized}}...
+      </AkTypography>
+
+      <AkTypography
+        data-test-uploadAppStatusDetails-progress
+        @variant='subtitle1'
+      >
+        {{or
+          (this.normalizeFileProgress @submission.file.progress)
+          @submission.progress
+          0
+        }}%
+      </AkTypography>
+    </AkStack>
+
+    <AkLoader::Linear
+      data-test-uploadAppStatusDetails-linearLoader
+      @variant='determinate'
+      @progress={{or
+        (this.normalizeFileProgress @submission.file.progress)
+        @submission.progress
+      }}
+      @color='success'
+      class='px-2 my-2'
+    />
+  {{/if}}
+
+  {{#if this.submissionStatus.failed}}
+    <AkStack
+      @justifyContent='space-between'
+      class='px-2 pt-1'
+      @direction='column'
+    >
+      <AkTypography
+        data-test-uploadAppStatusDetails-failedStatusHumanized
+        @variant='subtitle1'
+        @color='secondary'
+      >
+        {{@submission.statusHumanized}}
+      </AkTypography>
+
+      <AkTypography
+        data-test-uploadAppStatusDetails-failedReason
+        @variant='body1'
+      >
+        {{@submission.reason}}
+      </AkTypography>
+    </AkStack>
+  {{/if}}
+
+  <AkStack
+    @justifyContent='space-between'
+    @direction='row-reverse'
+    class='px-2 py-1 mt-1'
+    local-class='upload-status-footer'
+  >
+    <AkTypography data-test-uploadAppStatusDetails-createdOn @variant='body2'>
+      {{this.createdOn}}
+    </AkTypography>
+
+    {{#if (and @submission.viaLink @submission.appData)}}
+      <AkStack @alignItems='center'>
+        {{#if @submission.isIos}}
+          <AkSvg::AppstoreLogo data-test-uploadAppStatusDetails-appStoreLogo />
+        {{/if}}
+
+        {{#if @submission.isAndroid}}
+          <AkSvg::PlaystoreLogo
+            data-test-uploadAppStatusDetails-playStoreLogo
+          />
+        {{/if}}
+
+        <a
+          data-test-uploadAppStatusDetails-storeLink
+          class='ml-1'
+          href={{@submission.url}}
+          rel='noopener noreferrer'
+          target='_blank'
+        >
+          <AkTypography
+            @tag='span'
+            @underline='hover'
+            @variant='body2'
+            @color='primary'
+          >
+            {{t 'viewStoreLink'}}
+          </AkTypography>
+        </a>
+      </AkStack>
+    {{/if}}
+  </AkStack>
+</div>

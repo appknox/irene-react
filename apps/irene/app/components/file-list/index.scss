@@ -1,0 +1,56 @@
+.file-list-root {
+  min-height: calc(100vh - 70px);
+
+  .file-list-compare-header-chip {
+    height: 30px;
+
+    &.selected-file-chip {
+      border-style: dashed !important;
+      color: var(--file-list-selected-file-chip-color);
+      background-color: var(--file-list-selected-file-chip-background);
+    }
+  }
+
+  .file-list-wrapper {
+    margin-top: 1.4286em;
+    margin-bottom: 1em;
+  }
+
+  .file-list-container {
+    display: grid;
+    justify-items: stretch;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 1.4286em;
+  }
+}
+
+.clear-filter-section {
+  padding: 0.57em 1.285em;
+  border-bottom: 1px solid var(--file-list-selected-clear-filter-section-border);
+}
+
+.clear-filter-icon {
+  margin-right: 0.2em;
+  color: var(--file-list-selected-clear-filter-color) !important;
+}
+
+.clear-filter-label {
+  font-size: 0.857rem !important;
+  text-decoration: underline;
+  color: var(--file-list-selected-clear-filter-color) !important;
+}
+
+.clear-filter {
+  box-shadow: none;
+
+  &:hover {
+    .clear-filter-icon,
+    .clear-filter-label {
+      color: var(--file-list-selected-clear-filter-hover-color) !important;
+    }
+  }
+}
+
+.divider {
+  margin: 0 0.714em;
+}

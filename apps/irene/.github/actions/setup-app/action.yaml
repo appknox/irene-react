@@ -1,0 +1,23 @@
+name: Setup App
+description: Setup Application
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+
+    - name: Cache dependencies
+      id: cacheStep
+      uses: actions/cache@v6
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-
+
+    - name: Install dependencies
+      if: steps.cacheStep.outputs.cache-hit != 'true'
+      shell: bash
+      run: npm ci

@@ -1,0 +1,7 @@
+<AkStack @direction='column' @spacing='4' class='p-2'>
+  <AccountSettings::Security::PasswordChange />
+
+  <AkDivider @color='dark' />
+
+  <AccountSettings::Security::MultiFactorAuth @user={{@user}} />
+</AkStack>

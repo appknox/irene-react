@@ -1,0 +1,59 @@
+<div local-class='request' data-test-pending-request ...attributes>
+  <AkStack @direction='column' @spacing='0.5' class='pr-2'>
+    <AkTypography @noWrap={{true}} data-test-pending-request-email>
+      {{@request.email}}
+    </AkTypography>
+
+    <AkTypography
+      @color='neutral'
+      @variant='body2'
+      @noWrap={{true}}
+      data-test-pending-request-name
+    >
+      {{@request.fullName}}
+    </AkTypography>
+  </AkStack>
+
+  <AkTypography
+    @color='neutral'
+    @variant='body2'
+    @noWrap={{true}}
+    data-test-pending-request-company
+  >
+    {{@request.data.company}}
+  </AkTypography>
+
+  <AkTypography
+    @color='neutral'
+    @variant='body2'
+    title='{{day-js date=@request.createdOn format='DD MMM YYYY HH:mm A'}}'
+    data-test-pending-request-createdon
+  >
+    <em>{{dayjs-from-now @request.createdOn}}</em>
+  </AkTypography>
+
+  <AkStack @justifyContent='flex-end' @alignItems='center' @spacing='1'>
+    <AkButton
+      @variant='outlined'
+      title='Send invitation'
+      {{on 'click' (fn @onApprove @request)}}
+      local-class='invite-btn'
+      data-test-pending-request-approve-button
+    >
+      <:leftIcon><AkIcon @iconName='done' @color='success' /></:leftIcon>
+
+      <:default>Invite</:default>
+    </AkButton>
+
+    <AkButton
+      @variant='outlined'
+      title='Reject request'
+      data-test-pending-request-reject-button
+      {{on 'click' (fn @onReject @request)}}
+    >
+      <:leftIcon><AkIcon @iconName='close' /></:leftIcon>
+
+      <:default>Reject</:default>
+    </AkButton>
+  </AkStack>
+</div>

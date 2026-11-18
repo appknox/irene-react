@@ -1,0 +1,50 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--neutral-grey-100);
+  margin: -10px -10px 0 -10px;
+}
+
+.header-left {
+  padding: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.header-title {
+  color: var(--text-primary);
+  font-weight: bold;
+  font-size: 1.2rem;
+  line-height: 1.5;
+}
+
+.header-right {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding-right: 1.8rem;
+}
+
+.nav {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nav-link {
+  padding: 0.3rem 1rem;
+  border-bottom: 3px solid transparent;
+  color: inherit;
+
+  &.active {
+    border-bottom-color: var(--primary-main);
+    color: var(--text-primary);
+  }
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: var(--text-primary);
+  }
+}

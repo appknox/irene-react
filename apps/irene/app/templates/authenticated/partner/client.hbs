@@ -1,0 +1,38 @@
+{{page-title 'Client Details'}}
+
+<Partner::ClientsNav />
+
+<div class='px-2 pb-4'>
+  <div class='pt-3 pb-6'>
+    <LinkTo
+      {{style color='var(--primary-main)'}}
+      @route='authenticated.partner.clients'
+    >
+      {{t 'clients'}}
+    </LinkTo>
+    /
+    {{#if this.model.client.isEmptyTitle}}
+      <em>{{t 'noName'}}</em>
+    {{else}}
+      {{this.model.client.name}}
+    {{/if}}
+
+    <Partner::ClientDetail @client={{this.model.client}} />
+  </div>
+
+  <div class='px-2 pb-6'>
+    <Partner::ClientProjectList @clientId={{this.model.client.id}} />
+  </div>
+
+  {{#if this.model.partner.access.view_analytics}}
+    <div class='px-2 pb-6'>
+      <Partner::ClientUploadsStatChart
+        @title={{this.model.client.name}}
+        @targetModel='partner/partnerclient-analytic'
+        @id={{this.model.client.id}}
+      />
+    </div>
+  {{/if}}
+
+  {{outlet}}
+</div>

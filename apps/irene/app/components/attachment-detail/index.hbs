@@ -1,0 +1,28 @@
+<AkButton
+  data-test-attachmentDetail-btn='{{@attachment.uuid}}'
+  data-type='{{file-extension @attachment.name}}'
+  {{on 'click' (perform this.downloadAttachment)}}
+  title='{{@attachment.uuid}}_{{@attachment.name}}'
+  @tag='a'
+  @variant='outlined'
+>
+  <:default>
+    <AkTypography
+      {{style maxWidth='400px'}}
+      @noWrap={{true}}
+      @color='inherit'
+      @tag='span'
+      data-test-attachmentDetail-label
+    >
+      {{@attachment.uuid}}_{{@attachment.name}}
+    </AkTypography>
+  </:default>
+
+  <:rightIcon>
+    {{#if this.downloadAttachment.isRunning}}
+      <AkLoader @size={{16}} />
+    {{else}}
+      <AkIcon @iconName='download' data-test-attachmentDetail-downloadIcon />
+    {{/if}}
+  </:rightIcon>
+</AkButton>

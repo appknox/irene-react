@@ -1,0 +1,15 @@
+<AkStack @alignItems='center' @spacing='2'>
+  <AppPlatformIcon
+    @platform='{{this.teamProject.platformIconClass}}'
+    local-class='team-project-icon'
+  />
+
+  <AkLink
+    @route='authenticated.dashboard.project.files'
+    @model={{@project.id}}
+    @noWrap={{true}}
+    @title={{this.teamProject.packageName}}
+  >
+    {{this.teamProject.packageName}}
+  </AkLink>
+</AkStack>

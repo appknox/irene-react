@@ -1,0 +1,20 @@
+<AkButton
+  @disabled={{this.disableReportBtn}}
+  {{style paddingRight='12px'}}
+  {{on 'click' this.openReportDrawer}}
+  data-test-fileReportBtn
+>
+  <:leftIcon>
+    <AkIcon @iconName='description-outline' data-test-fileReportBtn-icon />
+  </:leftIcon>
+
+  <:default>
+    {{t 'viewReport'}}
+  </:default>
+</AkButton>
+
+<File::ReportDrawer
+  @file={{@file}}
+  @open={{this.reportDrawerOpen}}
+  @onClose={{this.closeReportDrawer}}
+/>

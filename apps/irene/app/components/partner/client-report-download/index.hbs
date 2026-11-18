@@ -1,0 +1,120 @@
+{{#if this.partner.access.view_reports}}
+  <div
+    {{did-insert (perform this.getReports)}}
+    data-test-report-download
+    ...attributes
+  >
+    {{#unless this.reportListAPIError}}
+      <div local-class='report-actions' data-test-report-actions>
+        <div data-test-action-download>
+          <AkTooltip @placement='top' @arrow={{true}}>
+            <:tooltipContent>
+              {{#if this.isGenerating}}
+                <span data-test-download-button-generating-tooltip>
+                  Progress:
+                  {{this.latestReport.progress}}%
+                </span>
+              {{else if this.latestReport.id}}
+                <span data-test-download-button-tooltip>
+                  {{t 'generatedOn'}}
+
+                  {{day-js
+                    date=this.latestReport.generatedOn
+                    format='DD MMM YYYY hh:mm a'
+                  }}
+                </span>
+              {{else}}
+                <span data-test-download-button-no-report-tooltip>
+                  {{t 'noReportsGenerated'}}
+                </span>
+              {{/if}}
+            </:tooltipContent>
+
+            <:default>
+              <AkButton
+                @variant='outlined'
+                @disabled={{this.isDownloadButtonDisabled}}
+                local-class='{{if
+                  this.isGenerating
+                  "button-progress"
+                }} download-button button-small'
+                {{on 'click' (fn this.onDownload this.latestReport.id)}}
+                data-test-download-report-button
+              >
+
+                <:leftIcon>
+                  {{#unless this.isGenerating}}
+                    <AkIcon @iconName='download' />
+                  {{/unless}}
+                </:leftIcon>
+
+                <:default>
+                  {{#if this.isGenerating}}
+                    <span
+                      local-class='progress-loader is-progress'
+                      style={{this.generationProgressStyle}}
+                      data-test-download-button-generating-progress
+                    ></span>
+
+                    <AkTypography
+                      @color='inherit'
+                      data-test-download-button-generating-label
+                    >
+                      {{t 'generating'}}
+                    </AkTypography>
+                  {{else}}
+                    <AkTypography
+                      @color='inherit'
+                      data-test-download-button-download-label
+                    >
+                      {{t 'download'}}
+                    </AkTypography>
+                  {{/if}}
+                </:default>
+              </AkButton>
+            </:default>
+          </AkTooltip>
+        </div>
+
+        <div data-test-action-generate>
+          <AkTooltip @placement='top' @arrow={{true}}>
+            <:tooltipContent>
+              {{#if this.isGenerating}}
+                <div data-test-generate-button-progress-tooltip>
+                  {{t 'reportGenerationInProgressWait'}}
+                </div>
+              {{else}}
+                <div data-test-generate-button-tooltip>
+                  {{t 'generateNewReport'}}
+                </div>
+              {{/if}}
+            </:tooltipContent>
+
+            <:default>
+              <AkIconButton
+                @variant='outlined'
+                disabled={{this.isGenerateButtonDisabled}}
+                local-class='button-small'
+                {{on 'click' this.onGenerate}}
+                data-test-generate-report-button
+              >
+                <AkIcon @iconName='refresh' />
+              </AkIconButton>
+            </:default>
+          </AkTooltip>
+        </div>
+
+        {{#if this.latestReport.id}}
+          <div data-test-action-copy-password>
+            <Partner::ClientReportDownload::ReportPassword
+              @clientId={{@clientId}}
+              @fileId={{@fileId}}
+              @reportId={{this.latestReport.id}}
+              data-test-report-password-toggle-id='{{this.latestReport.id}}'
+            />
+          </div>
+        {{/if}}
+      </div>
+    {{/unless}}
+  </div>
+{{/if}}

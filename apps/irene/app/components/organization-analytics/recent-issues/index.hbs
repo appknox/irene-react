@@ -1,0 +1,59 @@
+<div local-class='main-box-container'>
+  <AkStack @width='full' local-class='box-main-heading'>
+    <AkTypography @variant='h5' @fontWeight='medium'>Top Issues</AkTypography>
+  </AkStack>
+
+  {{#if this.recentIssues.records}}
+    <AkStack @width='full' @direction='column' local-class='box-list-container'>
+      {{#each this.recentIssues.records as |issue|}}
+        <AkStack
+          class='p-2'
+          @alignItems='center'
+          @width='full'
+          @justifyContent='space-between'
+        >
+          <AkStack @direction='column' @spacing='1'>
+            <AkTypography
+              @variant='h5'
+              @fontWeight='regular'
+              local-class='issue-name'
+            >
+              {{issue.vulnerability.name}}
+            </AkTypography>
+
+            <AkTypography @variant='body3'>
+              Found in
+              {{issue.count}}
+              file(s)
+            </AkTypography>
+          </AkStack>
+
+          <AkStack @alignItems='center'>
+            {{#each issue.vulnerability.types as |tag|}}
+              <AkChip
+                @label={{t (vulnerability-type tag)}}
+                @color='secondary'
+                @variant='filled'
+                class='m-1'
+              />
+            {{/each}}
+          </AkStack>
+        </AkStack>
+
+        <AkDivider @color='dark' />
+      {{/each}}
+    </AkStack>
+  {{else}}
+    <AkStack
+      local-class='empty-container'
+      @alignItems='center'
+      @justifyContent='center'
+    >
+      <AkStack @alignItems='center' @justifyContent='center' @spacing='1'>
+        <AkIcon @iconName='mdi:report-problem' />
+
+        <AkTypography>No issues found</AkTypography>
+      </AkStack>
+    </AkStack>
+  {{/if}}
+</div>

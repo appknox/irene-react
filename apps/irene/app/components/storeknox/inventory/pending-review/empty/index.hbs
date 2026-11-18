@@ -1,0 +1,27 @@
+<AkStack
+  @width='full'
+  @direction='column'
+  @alignItems='center'
+  local-class='empty-container'
+>
+  <AkSvg::NoPendingItems
+    data-test-storeknoxInventory-pendingReviewEmptyIllustration
+  />
+
+  <AkTypography
+    @variant='h5'
+    @gutterBottom={{true}}
+    local-class='header'
+    data-test-storeknoxInventory-pendingReviewEmptyHeaderText
+  >
+    {{t 'storeknox.noPendingItems'}}
+  </AkTypography>
+
+  <AkTypography
+    @align='center'
+    {{style maxWidth='25em'}}
+    data-test-storeknoxInventory-pendingReviewEmptyDescriptionText
+  >
+    {{t 'storeknox.noPendingItemsDescription'}}
+  </AkTypography>
+</AkStack>

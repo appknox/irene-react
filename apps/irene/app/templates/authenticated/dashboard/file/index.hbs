@@ -1,0 +1,12 @@
+<FileDetails::AnalysesProvider @file={{@model.file}} as |apctx|>
+  {{#if (and (not apctx.allAnalysesCVSSAreLatest) this.showLegacyMessage)}}
+    <AkNotificationBanner
+      @messages={{this.someAnalysesAreLegacyMessage}}
+      @onClose={{this.closeLegacyMessage}}
+    />
+  {{/if}}
+
+  <PageWrapper>
+    <FileDetails @file={{@model.file}} @fileAnalysesListContext={{apctx}} />
+  </PageWrapper>
+</FileDetails::AnalysesProvider>

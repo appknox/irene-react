@@ -1,0 +1,12 @@
+.empty-loading-container {
+  width: 100%;
+  background-color: var(--sbom-empty-loading-view-background-color);
+  border: 1px solid var(--sbom-empty-loading-view-border-color);
+  border-radius: var(--sbom-empty-loading-view-border-radius);
+
+  .empty-loading-content-bordered {
+    padding: 2em;
+    border: 1px solid var(--sbom-empty-loading-view-border-color);
+    border-radius: var(--sbom-empty-loading-view-border-radius);
+  }
+}

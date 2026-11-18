@@ -1,0 +1,263 @@
+<div class='py-1' data-test-sbomScanDetails-container>
+  <Sbom::SummaryHeader>
+    <:summary>
+      <AkStack @alignItems='center' @spacing='1.5'>
+        <Sbom::AppLogo @sbomProject={{@sbomProject}} />
+
+        <AkTypography data-test-sbomAppSummary-appPackageName @variant='h6'>
+          {{this.packageName}}
+        </AkTypography>
+
+        {{#if @sbomFile.isStale}}
+          <AkTooltip
+            @title={{t 'sbomModule.staleFileTooltip'}}
+            @arrow={{true}}
+            @placement='bottom'
+          >
+            <AkIcon
+              data-test-sbomScanDetails-staleIcon
+              @iconName='mdi:clock-alert-outline'
+              @size='small'
+              @color='warn'
+            />
+          </AkTooltip>
+        {{/if}}
+
+        <Sbom::AppPlatform @sbomProject={{@sbomProject}} />
+      </AkStack>
+    </:summary>
+
+    <:actionBtn>
+      <AkStack @alignItems='stretch' @spacing='1'>
+        <AkLink
+          @class={{this.classes.akLinkBtn}}
+          @route='authenticated.dashboard.sbom.app-scans'
+          @model={{@sbomProject.id}}
+          @underline='none'
+          data-test-sbomScanDetails-pastSbomAnalyses-link
+        >
+          {{t 'sbomModule.pastSbomAnalyses'}}
+        </AkLink>
+
+        {{#if this.scanStatusCompleted}}
+          <AkButton
+            {{on 'click' this.handleViewReportDrawerOpen}}
+            data-test-sbomScanDetails-viewReport-btn
+          >
+            {{t 'sbomModule.viewReport'}}
+          </AkButton>
+        {{/if}}
+      </AkStack>
+    </:actionBtn>
+
+    <:collapsibleContent>
+      <Sbom::ScanDetails::FileScanSummary
+        @sbomFile={{@sbomFile}}
+        @sbomScanSummary={{@sbomScanSummary}}
+      />
+    </:collapsibleContent>
+  </Sbom::SummaryHeader>
+
+  {{#if this.scanStatusCompleted}}
+    {{#if this.isNotOutdated}}
+      <AkTabs class='mt-2' local-class='tabs-bar' as |Akt|>
+        <Akt.tabItem
+          @id='sbom'
+          @isActive={{eq this.activeTab 'sbom'}}
+          @buttonVariant={{true}}
+          @onTabClick={{fn this.selectTab 'sbom'}}
+          data-test-sbomScanDetails-sbomTab
+        >
+          {{t 'sbomModule.sbomComponents'}}
+        </Akt.tabItem>
+
+        <Akt.tabItem
+          @id='aibom'
+          @isActive={{eq this.activeTab 'aibom'}}
+          @buttonVariant={{true}}
+          @onTabClick={{fn this.selectTab 'aibom'}}
+          data-test-sbomScanDetails-aibomTab
+        >
+          {{t 'sbomModule.aiBomComponents'}}
+        </Akt.tabItem>
+      </AkTabs>
+    {{/if}}
+
+    {{#if (eq this.activeTab 'sbom')}}
+      {{#if @sbomFile.isOutdated}}
+        <AkTypography
+          data-test-sbomScanDetails-overview-title
+          class='mt-3 mb-1'
+          @variant='h5'
+        >
+          {{t 'overview'}}
+        </AkTypography>
+      {{/if}}
+
+      <Sbom::ScanDetails::Overview
+        @sbomScanSummary={{@sbomScanSummary}}
+        class='my-2'
+      />
+
+      {{#if (and this.isTreeView this.isNotOutdated)}}
+        <AkStack
+          data-test-sbomScanDetails-switch-header
+          local-class='switch-view-header'
+          @alignItems='center'
+          @justifyContent='flex-end'
+        >
+          <AkStack @alignItems='center'>
+            <AkButton
+              data-test-sbomScanDetails-collapseAllButton
+              {{on 'click' this.collapseAll}}
+              @variant='outlined'
+              @color='neutral'
+              @disabled={{not this.isTreeExpanded}}
+              local-class='toggle-button'
+              class='mr-2'
+            >
+              <:leftIcon>
+                <AkIcon @iconName='unfold-less' />
+              </:leftIcon>
+
+              <:default>
+                {{t 'collapseAll'}}
+              </:default>
+            </AkButton>
+
+            <AkIconButton
+              local-class='switch-button tree active'
+              @variant='outlined'
+              @size='medium'
+              {{on 'click' this.handleTreeViewClick}}
+              data-test-sbomScanDetails-switch-treeViewButton
+            >
+              <AkIcon @color='primary' @iconName='account-tree' />
+            </AkIconButton>
+
+            <AkIconButton
+              local-class='switch-button list'
+              @variant='outlined'
+              {{on 'click' this.handleListViewClick}}
+              data-test-sbomScanDetails-switch-listViewButton
+            >
+              <AkIcon @iconName='format-list-bulleted' />
+            </AkIconButton>
+          </AkStack>
+        </AkStack>
+      {{/if}}
+    {{/if}}
+
+    {{#if (eq this.activeTab 'sbom')}}
+      {{#if (and this.isTreeView this.isNotOutdated)}}
+        <Sbom::ScanDetails::ComponentTree
+          @sbomProject={{@sbomProject}}
+          @sbomFile={{@sbomFile}}
+          @packageName={{this.packageName}}
+          @updateExpandedNodes={{this.updateExpandedNodes}}
+          @expandedNodes={{this.expandedNodes}}
+          @treeNodes={{this.treeNodes}}
+          @updateTreeNodes={{this.updateTreeNodes}}
+        />
+      {{else}}
+        {{#if this.isNotOutdated}}
+          <AkStack
+            data-test-sbomScanDetails-switch-header
+            local-class='switch-view-header'
+            @alignItems='center'
+            @justifyContent='space-between'
+          >
+            <div {{style width='250px'}}>
+              <AkTextField
+                data-test-sbomScanDetails-componentSearchInput
+                @placeholder={{t 'search'}}
+                @value={{this.sbomScanDetailsService.searchQuery}}
+                {{on 'input' this.handleSearchInput}}
+              >
+                <:leftAdornment>
+                  <AkIcon @iconName='search' @color='textSecondary' />
+                </:leftAdornment>
+              </AkTextField>
+            </div>
+
+            <AkStack @alignItems='center'>
+              <AkIconButton
+                local-class='switch-button tree'
+                @variant='outlined'
+                @size='medium'
+                {{on 'click' this.handleTreeViewClick}}
+                data-test-sbomScanDetails-switch-treeViewButton
+              >
+                <AkIcon @iconName='account-tree' />
+              </AkIconButton>
+
+              <AkIconButton
+                local-class='switch-button list active'
+                @variant='outlined'
+                {{on 'click' this.handleListViewClick}}
+                data-test-sbomScanDetails-switch-listViewButton
+              >
+                <AkIcon @color='primary' @iconName='format-list-bulleted' />
+              </AkIconButton>
+            </AkStack>
+          </AkStack>
+        {{/if}}
+
+        <Sbom::ScanDetails::ComponentList
+          @sbomProject={{@sbomProject}}
+          @sbomFile={{@sbomFile}}
+          @sbomScanSummary={{@sbomScanSummary}}
+          local-class='listing-content'
+          data-test-sbomScanDetails-componentList-container
+        />
+      {{/if}}
+    {{else if (eq this.activeTab 'aibom')}}
+      <Sbom::ScanDetails::AiBomComponentList
+        @sbomProject={{@sbomProject}}
+        @sbomFile={{@sbomFile}}
+        @sbomScanSummary={{@sbomScanSummary}}
+        data-test-sbomScanDetails-aiBomComponentList-container
+      />
+    {{/if}}
+  {{else}}
+    <AkStack
+      @direction='column'
+      @justifyContent='center'
+      @alignItems='center'
+      class='mt-2'
+      local-class='scan-status-container'
+    >
+      {{#if this.scanStatusFailed}}
+        <AkSvg::NoResult data-test-sbomScanDetails-scanStatusFailedSvg />
+      {{else}}
+        <AkSvg::InProgress data-test-sbomScanDetails-scanStatusInProgressSvg />
+      {{/if}}
+
+      <AkStack
+        class='mt-5'
+        @direction='column'
+        @alignItems='center'
+        @spacing='1'
+      >
+        <AkTypography data-test-sbomScanDetails-scanStatusTitle @variant='h5'>
+          {{this.scanStatusText.title}}
+        </AkTypography>
+
+        <AkTypography
+          data-test-sbomScanDetails-scanStatusDescription
+          {{style width='600px'}}
+          @color='textSecondary'
+          @align='center'
+        >
+          {{this.scanStatusText.description}}
+        </AkTypography>
+      </AkStack>
+    </AkStack>
+  {{/if}}
+</div>
+
+<Sbom::ScanReportDrawer
+  @sbomFile={{@sbomFile}}
+  @open={{this.openViewReportDrawer}}
+  @onClose={{this.handleViewReportDrawerClose}}
+/>

@@ -1,0 +1,51 @@
+<AkStack
+  ...attributes
+  @direction='column'
+  local-class='file-overview'
+  data-test-fileOverview-root
+>
+  <FileOverview::Header
+    @file={{@file}}
+    @disableSelection={{@disableSelection}}
+    @hideCTAs={{@hideCTAs}}
+    @hideOpenInNewTabIcon={{@hideOpenInNewTabIcon}}
+    @isSelectedFile={{@isSelectedFile}}
+    @onFileSelect={{@onFileSelect}}
+    @showMenuButton={{@showMenuButton}}
+  />
+
+  <FileOverview::FileDetails @file={{@file}} />
+
+  <AkDivider @color='dark' />
+
+  <FileOverview::ScanStatuses @file={{@file}} />
+
+  <AkDivider @color='dark' />
+
+  <AkStack
+    @width='full'
+    @alignItems='center'
+    @justifyContent='center'
+    @spacing='6'
+    class='p-3'
+    local-class='file-overview-chart'
+    data-test-fileOverview-severityCountChartAndValues
+  >
+    {{#if @file}}
+      <FileChart
+        {{style maxWidth='145px' maxHeight='145px'}}
+        @file={{@file}}
+        @legendMaxWidth={{200}}
+        data-test-fileOverview-chart
+      />
+    {{else}}
+      <AkSkeleton @width='100%' @height='200px' @variant='rectangular' />
+    {{/if}}
+  </AkStack>
+
+  <AkDivider @color='dark' />
+
+  <FileOverview::Tags @file={{@file}} />
+
+  {{yield}}
+</AkStack>

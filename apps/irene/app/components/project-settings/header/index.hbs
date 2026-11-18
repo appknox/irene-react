@@ -1,0 +1,85 @@
+<div local-class='project-settings-header-root'>
+  <AkBreadcrumbs::AutoTrail
+    class={{if @isDASTScenarioPage 'py-2' 'pt-2'}}
+    data-test-projectSettingsHeader-breadcrumbsContainer
+  />
+
+  {{#unless @isDASTScenarioPage}}
+    <div class='my-2' data-test-projectSettingsHeader-descText>
+      <AkTypography @variant='h5' @gutterBottom={{true}}>
+        {{t 'settings'}}
+      </AkTypography>
+
+      <AkTypography @variant='body2' local-class='settings-header-info-text'>
+        {{t 'projectSettings.headerText'}}
+      </AkTypography>
+    </div>
+
+    <AkStack
+      @alignItems='center'
+      class='p-2'
+      local-class='project-details-card'
+      data-test-projectSettingsHeader-projectDetails
+    >
+      <AkStack
+        @alignItems='center'
+        @justifyContent='space-between'
+        @width='full'
+        @spacing='3'
+      >
+        <div local-class='file-icon'>
+          <img
+            src='{{@project.lastFile.iconUrl}}'
+            alt=''
+            role='none'
+            data-test-projectSettingsHeader-projectDetails-lastFileIconUrl
+          />
+        </div>
+
+        <AkStack
+          @direction='column'
+          @justifyContent='space-between'
+          @width='full'
+        >
+          <AkTypography
+            @variant='body1'
+            @color='textSecondary'
+            data-test-projectSettingsHeader-projectDetails-packageName
+          >
+            {{this.project.packageName}}
+          </AkTypography>
+
+          <AkTypography
+            @variant='h6'
+            @color='textPrimary'
+            data-test-projectSettingsHeader-projectDetails-projectID
+          >
+            {{t 'projectID'}}
+            -
+            {{this.project.id}}
+          </AkTypography>
+        </AkStack>
+      </AkStack>
+
+      <AppPlatformIcon
+        @platform={{this.project.platformIconClass}}
+        data-test-projectSettingsHeader-platformIcon
+      />
+
+    </AkStack>
+
+    <AkTabs local-class='settings-header-tabs' as |Akt|>
+      {{#each this.tabItems as |item|}}
+        <Akt.tabItem
+          @id={{item.id}}
+          @route={{item.route}}
+          data-test-projectSettingsHeader-tab='{{item.label}}'
+        >
+          <:default>
+            {{item.label}}
+          </:default>
+        </Akt.tabItem>
+      {{/each}}
+    </AkTabs>
+  {{/unless}}
+</div>

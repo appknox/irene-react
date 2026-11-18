@@ -1,0 +1,498 @@
+import { render, click } from '@ember/test-helpers';
+import Service from '@ember/service';
+import dayjs from 'dayjs';
+import { hbs } from 'ember-cli-htmlbars';
+import { setupMirage } from 'ember-cli-mirage/test-support';
+import { setupIntl, t } from 'ember-intl/test-support';
+import { setupRenderingTest } from 'ember-qunit';
+import { module, test } from 'qunit';
+
+import { SbomScanStatus } from 'irene/models/sbom-file';
+
+class RouterStub extends Service {
+  currentRouteName = 'authenticated.dashboard.sbom.scan-details';
+
+  transitionTo(routeNameOrQueryParams) {
+    this.currentRouteName = routeNameOrQueryParams;
+  }
+}
+
+module('Integration | Component | sbom/scan-details', function (hooks) {
+  setupRenderingTest(hooks);
+  setupMirage(hooks);
+  setupIntl(hooks, 'en');
+
+  hooks.beforeEach(async function () {
+    this.owner.unregister('service:router');
+    this.owner.register('service:router', RouterStub);
+
+    const store = this.owner.lookup('service:store');
+
+    const file = this.server.create('file', 1);
+    const project = this.server.create('project', 1, { last_file: file });
+    const sbomScanSummary = this.server.create('sbom-scan-summary', 1);
+
+    this.server.createList('sbom-component', 10);
+
+    const sbomProject = this.server.create('sbom-project', 1, {
+      project: project.id,
+    });
+
+    const sbomFile = this.server.create('sbom-file', 1, {
+      file: file.id,
+      sb_project: sbomProject.id,
+    });
+
+    sbomProject.latest_sb_file = sbomFile.id;
+
+    const sbomProjectNormalized = store.normalize(
+      'sbom-project',
+      sbomProject.toJSON()
+    );
+    const sbomFileNormalized = store.normalize('sbom-file', sbomFile.toJSON());
+
+    const sbomScanSummaryNormalized = store.normalize(
+      'sbom-scan-summary',
+      sbomScanSummary.toJSON()
+    );
+
+    this.setProperties({
+      sbomProject: store.push(sbomProjectNormalized),
+      sbomFile: store.push(sbomFileNormalized),
+      sbomScanSummary: store.push(sbomScanSummaryNormalized),
+      queryParams: {
+        component_limit: 10,
+        component_offset: 0,
+        component_query: '',
+        view_type: 'tree',
+        component_type: -1,
+        is_dependency: null,
+      },
+    });
+
+    // Server mock
+    this.server.get('/v3/projects/:id', (schema, req) => {
+      return schema.projects.find(`${req.params.id}`)?.toJSON();
+    });
+
+    this.server.get('/v3/files/:id', (schema, req) => {
+      return schema.files.find(`${req.params.id}`)?.toJSON();
+    });
+  });
+
+  test.each(
+    'it renders sbom scan details',
+    [
+      SbomScanStatus.PENDING,
+      SbomScanStatus.IN_PROGRESS,
+      SbomScanStatus.COMPLETED,
+      SbomScanStatus.FAILED,
+    ],
+    async function (assert, status) {
+      this.sbomFile.status = status;
+
+      this.server.get('/v2/sb_files/:id/sb_file_components', (schema) => {
+        const results = schema.sbomComponents.all().models;
+
+        return {
+          count: results.length,
+          next: null,
+          previous: null,
+          results: results,
+        };
+      });
+
+      await render(hbs`
+        <Sbom::ScanDetails
+          @sbomProject={{this.sbomProject}}
+          @sbomFile={{this.sbomFile}}
+          @sbomScanSummary={{this.sbomScanSummary}}
+          @queryParams={{this.queryParams}}
+        />
+      `);
+
+      // assert.dom('[data-test-sbomScanDetails-componentSearchInput]').hasNoValue();
+
+      assert.dom('[data-test-sbomScanDetails-container]').exists();
+
+      assert
+        .dom('[data-test-sbomScanDetails-pastSbomAnalyses-link]')
+        .exists()
+        .hasText(t('sbomModule.pastSbomAnalyses'));
+
+      if (status === SbomScanStatus.COMPLETED) {
+        assert
+          .dom('[data-test-sbomScanDetails-viewReport-btn]')
+          .exists()
+          .containsText(t('sbomModule.viewReport'));
+      } else {
+        assert.dom('[data-test-sbomScanDetails-viewReport-btn]').doesNotExist();
+      }
+
+      // By default the content is collapsed"
+      assert
+        .dom('[data-test-sbomSummaryHeader-collapsibleToggleBtn]')
+        .isNotDisabled();
+
+      assert
+        .dom('[data-test-sbomSummaryHeader-collapsibleContent]')
+        .doesNotExist();
+
+      assert.dom('[data-test-fileScanSummary-container]').doesNotExist();
+
+      if (status === SbomScanStatus.COMPLETED) {
+        assert.dom('[data-test-component-tree]').exists();
+
+        // a current file has a tab bar naming the section, so no heading
+        assert.dom('[data-test-sbomScanDetails-sbomTab]').exists();
+        assert.dom('[data-test-sbomScanDetails-overview-title]').doesNotExist();
+      } else {
+        if (status === SbomScanStatus.FAILED) {
+          assert
+            .dom('[data-test-sbomScanDetails-scanStatusFailedSvg]')
+            .exists();
+
+          assert
+            .dom('[data-test-sbomScanDetails-scanStatusTitle]')
+            .hasText(t('sbomModule.sbomScanStatusError.title'));
+
+          assert
+            .dom('[data-test-sbomScanDetails-scanStatusDescription]')
+            .hasText(t('sbomModule.sbomScanStatusError.description'));
+        }
+
+        if (
+          status === SbomScanStatus.PENDING ||
+          status === SbomScanStatus.IN_PROGRESS
+        ) {
+          assert
+            .dom('[data-test-sbomScanDetails-scanStatusInProgressSvg]')
+            .exists();
+
+          assert
+            .dom('[data-test-sbomScanDetails-scanStatusTitle]')
+            .hasText(t('sbomModule.sbomScanStatusProgress.title'));
+
+          assert
+            .dom('[data-test-sbomScanDetails-scanStatusDescription]')
+            .hasText(t('sbomModule.sbomScanStatusProgress.description'));
+        }
+      }
+
+      assert.dom('[data-test-sbomReportDrawer-drawer]').doesNotExist();
+    }
+  );
+
+  test('it toggles file and scan summary on header toggle collapse button click', async function (assert) {
+    this.server.get('/v2/sb_files/:id/sb_file_components', (schema) => {
+      const results = schema.sbomComponents.all().models;
+
+      return {
+        count: results.length,
+        next: null,
+        previous: null,
+        results: results,
+      };
+    });
+
+    this.sbomFile.status = SbomScanStatus.COMPLETED;
+
+    await render(hbs`
+    <Sbom::ScanDetails
+      @sbomProject={{this.sbomProject}}
+      @sbomFile={{this.sbomFile}}
+      @sbomScanSummary={{this.sbomScanSummary}}
+      @queryParams={{this.queryParams}}
+    />
+  `);
+
+    assert.dom('[data-test-fileScanSummary-container]').doesNotExist();
+
+    assert
+      .dom('[data-test-sbomSummaryHeader-collapsibleToggleBtn]')
+      .isNotDisabled();
+
+    assert
+      .dom('[data-test-sbomSummaryHeader-collapsibleContent]')
+      .doesNotExist();
+
+    // Show file and scan summary
+    await click('[data-test-sbomSummaryHeader-collapsibleToggleBtn]');
+
+    assert.dom('[data-test-sbomSummaryHeader-collapsibleContent]').exists();
+
+    assert.dom('[data-test-fileScanSummary-container]').exists();
+
+    // File summary tests
+    const fileSummaryDetailsList = [
+      {
+        label: t('status'),
+        isComponent: true,
+        assertValue: () =>
+          assert.dom('[data-test-sbom-scanStatus]').hasAnyText(),
+      },
+      {
+        label: t('sbomModule.generatedDate'),
+        value: dayjs(this.sbomFile.completedAt).format('MMM DD, YYYY'),
+      },
+      {
+        label: t('version'),
+        value: this.sbomFile.get('file').get('version'),
+      },
+      {
+        label: t('sbomModule.versionCode'),
+        value: this.sbomFile.get('file').get('versionCode'),
+      },
+      {
+        label: t('file'),
+        value: this.sbomFile.get('file').get('id'),
+        link: true,
+      },
+    ];
+
+    for (const fileSummary of fileSummaryDetailsList) {
+      assert
+        .dom(
+          `[data-test-sbomScanDetails-fileSummaryGroup="${fileSummary.label}"]`
+        )
+        .exists();
+
+      assert
+        .dom(
+          `[data-test-sbomScanDetails-fileSummaryGroup="${fileSummary.label}"] [data-test-sbomScanDetails-fileSummaryGroup-label]`
+        )
+        .exists()
+        .hasText(fileSummary.label);
+
+      if (fileSummary.isComponent && fileSummary.assertValue) {
+        fileSummary.assertValue();
+      } else if (fileSummary.link) {
+        assert
+          .dom(
+            `[data-test-sbomScanDetails-fileSummaryGroup="${fileSummary.label}"] [data-test-sbomScanDetails-fileSummaryGroup-link]`
+          )
+          .exists()
+          .hasText(fileSummary.value);
+      } else {
+        assert
+          .dom(
+            `[data-test-sbomScanDetails-fileSummaryGroup="${fileSummary.label}"] [data-test-sbomScanDetails-fileSummaryGroup-value]`
+          )
+          .exists()
+          .hasText(fileSummary.value);
+      }
+    }
+
+    // Collapse file and scan summary
+    await click('[data-test-sbomSummaryHeader-collapsibleToggleBtn]');
+
+    assert.dom('[data-test-fileScanSummary-container]').doesNotExist();
+  });
+
+  test('it launches download report drawer on download report button click', async function (assert) {
+    this.sbomFile.status = SbomScanStatus.COMPLETED;
+
+    this.server.get('/v2/sb_files/:id/sb_file_components', (schema) => {
+      const results = schema.sbomComponents.all().models;
+
+      return {
+        count: results.length,
+        next: null,
+        previous: null,
+        results: results,
+      };
+    });
+
+    await render(hbs`
+      <Sbom::ScanDetails
+        @sbomProject={{this.sbomProject}}
+        @sbomFile={{this.sbomFile}}
+        @sbomScanSummary={{this.sbomScanSummary}}
+        @queryParams={{this.queryParams}}
+      />
+    `);
+
+    assert.dom('[data-test-sbomReportDrawer-drawer]').doesNotExist();
+
+    await click('[data-test-sbomScanDetails-viewReport-btn]');
+
+    assert.dom('[data-test-sbomReportDrawer-drawer]').exists();
+  });
+
+  test('it fetches an outdated file in list mode, not tree mode', async function (assert) {
+    this.sbomFile.status = SbomScanStatus.COMPLETED;
+    this.sbomFile.isOutdated = true;
+
+    let componentsQuery = null;
+
+    this.server.get(
+      '/v2/sb_files/:id/sb_file_components',
+      (schema, request) => {
+        componentsQuery = request.queryParams;
+
+        const results = schema.sbomComponents.all().models;
+
+        return { count: results.length, next: null, previous: null, results };
+      }
+    );
+
+    // queryParams still carries the controller's view_type: 'tree' default
+    await render(hbs`
+      <Sbom::ScanDetails
+        @sbomProject={{this.sbomProject}}
+        @sbomFile={{this.sbomFile}}
+        @sbomScanSummary={{this.sbomScanSummary}}
+        @queryParams={{this.queryParams}}
+      />
+    `);
+
+    // the tree is gated on isNotOutdated, so an outdated file always renders
+    // the flat list...
+    assert.dom('[data-test-sbomScanDetails-componentList-container]').exists();
+    assert.dom('[data-test-component-tree]').doesNotExist();
+
+    // ...so the fetch has to match it. type=1 is the tree-mode marker, and
+    // tree mode drops every list filter server-side.
+    assert.notOk(componentsQuery.type, 'no tree-mode marker in the request');
+  });
+
+  test('it pins an outdated file to the SBOM tab when the url asks for AI BoM', async function (assert) {
+    this.sbomFile.status = SbomScanStatus.COMPLETED;
+    this.sbomFile.isOutdated = true;
+
+    this.server.get('/v2/sb_files/:id/sb_file_components', (schema) => {
+      const results = schema.sbomComponents.all().models;
+
+      return { count: results.length, next: null, previous: null, results };
+    });
+
+    this.server.get('/v2/sb_files/:id/sb_file_components/ai_summary', () => ({
+      total: 0,
+      by_type: {},
+      aibom_supported: true,
+    }));
+
+    // a bookmarked/shared link straight to the AI BoM tab
+    this.set('queryParams', { ...this.queryParams, is_ai_component: 'true' });
+
+    await render(hbs`
+      <Sbom::ScanDetails
+        @sbomProject={{this.sbomProject}}
+        @sbomFile={{this.sbomFile}}
+        @sbomScanSummary={{this.sbomScanSummary}}
+        @queryParams={{this.queryParams}}
+      />
+    `);
+
+    // an outdated scan renders no tab bar at all...
+    assert.dom('[data-test-sbomScanDetails-sbomTab]').doesNotExist();
+    assert.dom('[data-test-sbomScanDetails-aibomTab]').doesNotExist();
+
+    // ...so the AI BoM list must not render either -- there would be no way
+    // back to the SBOM tab without hand-editing the URL.
+    assert.dom('[data-test-sbomScanDetails-aiBomComponentList]').doesNotExist();
+
+    // the SBOM tab's own content is unaffected by the pin -- an outdated
+    // scan still shows its overview and component list, only the view-switch
+    // header is withheld.
+    assert.dom('[data-test-sbomScanDetails-overview-container]').exists();
+    assert.dom('[data-test-sbomScanDetails-componentList-container]').exists();
+
+    // with no tab bar to label the section, the overview gets a heading
+    assert
+      .dom('[data-test-sbomScanDetails-overview-title]')
+      .exists()
+      .hasText(t('overview'));
+    assert.dom('[data-test-sbomScanDetails-switch-header]').doesNotExist();
+  });
+
+  test('it still opens the AI BoM tab from the url for a current file', async function (assert) {
+    this.sbomFile.status = SbomScanStatus.COMPLETED;
+    this.sbomFile.isOutdated = false;
+
+    this.server.get('/v2/sb_files/:id/sb_file_components', (schema) => {
+      const results = schema.sbomComponents.all().models;
+
+      return { count: results.length, next: null, previous: null, results };
+    });
+
+    this.server.get('/v2/sb_files/:id/sb_file_components/ai_summary', () => ({
+      total: 0,
+      by_type: {},
+      aibom_supported: true,
+    }));
+
+    this.set('queryParams', { ...this.queryParams, is_ai_component: 'true' });
+
+    await render(hbs`
+      <Sbom::ScanDetails
+        @sbomProject={{this.sbomProject}}
+        @sbomFile={{this.sbomFile}}
+        @sbomScanSummary={{this.sbomScanSummary}}
+        @queryParams={{this.queryParams}}
+      />
+    `);
+
+    assert.dom('[data-test-sbomScanDetails-aibomTab]').exists();
+
+    assert.dom('[data-test-sbomScanDetails-aiBomComponentList]').exists();
+  });
+
+  test('it resets AI BoM-only and SBOM-only filters when switching tabs', async function (assert) {
+    this.sbomFile.status = SbomScanStatus.COMPLETED;
+
+    this.server.get('/v2/sb_files/:id/sb_file_components', (schema) => {
+      const results = schema.sbomComponents.all().models;
+
+      return {
+        count: results.length,
+        next: null,
+        previous: null,
+        results: results,
+      };
+    });
+
+    this.server.get('/v2/sb_files/:id/sb_file_components/ai_summary', () => ({
+      total: 0,
+      by_type: {},
+      aibom_supported: true,
+    }));
+
+    await render(hbs`
+      <Sbom::ScanDetails
+        @sbomProject={{this.sbomProject}}
+        @sbomFile={{this.sbomFile}}
+        @sbomScanSummary={{this.sbomScanSummary}}
+        @queryParams={{this.queryParams}}
+      />
+    `);
+
+    const sbomService = this.owner.lookup('service:sbom-scan-details');
+
+    // Simulates a filter having been applied on the AI BoM tab -- these
+    // properties only ever mean anything for AI components, and must not
+    // leak into the SBOM tab's request (plain SBOM components don't have
+    // an ai_artifact_class/ai_confidence, so any non-null value here would
+    // silently zero out every SBOM tab result).
+    await click('[data-test-sbomScanDetails-aibomTab] button');
+    sbomService.setQueryData({
+      ai_artifact_class: 'model',
+      ai_confidence: 'high',
+    });
+
+    await click('[data-test-sbomScanDetails-sbomTab] button');
+
+    assert.strictEqual(sbomService.selectedAiArtifactClass, null);
+    assert.strictEqual(sbomService.selectedAiConfidence, null);
+
+    // Simulates a filter having been applied on the SBOM tab -- these only
+    // ever mean anything for plain SBOM components, and must not leak into
+    // the AI BoM tab's request the same way.
+    sbomService.setQueryData({ component_type: 1, dependency_type: 'true' });
+
+    await click('[data-test-sbomScanDetails-aibomTab] button');
+
+    assert.strictEqual(sbomService.selectedComponentType, -1);
+    assert.strictEqual(sbomService.selectedDependencyType, null);
+  });
+});

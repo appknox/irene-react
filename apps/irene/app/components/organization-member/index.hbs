@@ -1,0 +1,19 @@
+{{#if this.me.org.is_admin}}
+  <OrganizationMember::List
+    @queryParams={{@queryParams}}
+    @organization={{this.organization.selected}}
+  />
+
+  <div class='mt-7'>
+    <OrganizationInvitationList
+      @queryParams={{@queryParams}}
+      @organization={{this.organization.selected}}
+    >
+      <:headerContent>
+        <AkTypography data-test-invitation-list-title @variant='h5'>
+          {{t 'pendingInvitations'}}
+        </AkTypography>
+      </:headerContent>
+    </OrganizationInvitationList>
+  </div>
+{{/if}}

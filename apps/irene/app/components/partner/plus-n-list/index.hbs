@@ -1,0 +1,41 @@
+<div local-class='initial-container' data-test-initial-container ...attributes>
+  <AkTypography local-class='first-item' data-test-default-items>
+    {{this.defaultItems}}
+  </AkTypography>
+
+  {{#if (gt this.remainingCount 0)}}
+    <button
+      type='button'
+      class='ml-2'
+      local-class='show-more-count-badge'
+      title='View {{this.remainingCount}} more'
+      {{on 'click' this.toggleShowMoreModal}}
+      data-test-more-btn
+    >
+      +
+      {{this.remainingCount}}
+      {{#if @suffix}}
+        {{@suffix}}
+      {{/if}}
+    </button>
+  {{/if}}
+</div>
+
+{{#if this.showMoreModal}}
+  <AkModal
+    @onClose={{this.toggleShowMoreModal}}
+    @showHeader={{true}}
+    @headerTitle={{@modalTitle}}
+  >
+    <div local-class='list' data-test-list-modal>
+      {{#each this.list as |item seq|}}
+        <div local-class='list-item' data-test-list-item='{{seq}}'>
+          {{#if @isShowSeq}}
+            {{add seq 1}}.
+          {{/if}}
+          {{item}}
+        </div>
+      {{/each}}
+    </div>
+  </AkModal>
+{{/if}}

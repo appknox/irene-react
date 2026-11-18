@@ -1,0 +1,62 @@
+{{#if @loading}}
+  <AkStack @justifyContent='center'>
+    <AkSkeleton @width='30px' @height='30px' />
+  </AkStack>
+{{else if @data.docUlid}}
+  <div {{did-insert this.handleCheckStatus}}>
+    {{#if this.checkStatus.isRunning}}
+      <AkStack @justifyContent='center'>
+        <AkSkeleton @width='30px' @height='30px' />
+      </AkStack>
+    {{else}}
+      {{#if this.requested}}
+        <AkTooltip
+          @enterDelay={{if this.firstTimeApproveOrRequest 3000}}
+          @placement='bottom'
+          @arrow={{true}}
+          @color='light'
+          @onClose={{this.handleCloseReqOrApproveTooltip}}
+          data-test-storeknoxDiscover-resultsTable-addedOrRequestedTooltip
+        >
+          <:tooltipContent>
+            <div local-class='tooltip-content'>
+              <AkTypography @color='inherit'>
+                {{this.iconValue.tooltipText}}
+              </AkTypography>
+            </div>
+          </:tooltipContent>
+
+          <:default>
+            <AkIcon
+              @iconName={{this.iconValue.iconName}}
+              @size='small'
+              local-class='{{this.iconValue.className}}'
+              data-test-storeknoxDiscover-resultsTable-addedOrRequestedIcon
+            />
+          </:default>
+        </AkTooltip>
+      {{else}}
+        {{#if this.buttonLoading}}
+          <AkLoader @size={{16}} />
+        {{else}}
+          <AkIconButton
+            {{on 'click' this.handleAddToInventory}}
+            data-test-storeknoxDiscover-resultsTable-addOrSendAddAppReqButton
+          >
+            {{#if this.isOwner}}
+              <AkIcon
+                @iconName='add-box'
+                data-test-storeknoxDiscover-resultsTable-addIcon
+              />
+            {{else}}
+              <AkIcon
+                @iconName='send'
+                data-test-storeknoxDiscover-resultsTable-SendAddAppReqIcon
+              />
+            {{/if}}
+          </AkIconButton>
+        {{/if}}
+      {{/if}}
+    {{/if}}
+  </div>
+{{/if}}

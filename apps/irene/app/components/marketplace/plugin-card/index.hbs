@@ -1,0 +1,54 @@
+{{#let
+  (component
+    'marketplace/card-content'
+    title=@data.title
+    logo=@data.logo
+    text=@data.description
+  )
+  as |Component|
+}}
+  {{#if @data.published}}
+    <a
+      local-class='marketplace-card'
+      href={{@data.link}}
+      target='_blank'
+      rel='noopener noreferrer'
+    >
+      <Component />
+    </a>
+  {{else}}
+    <a
+      local-class='marketplace-card'
+      href='#'
+      {{on 'click' this.openInstructionsModal}}
+    >
+      <Component />
+    </a>
+  {{/if}}
+{{/let}}
+
+{{#if this.showInstructionsModal}}
+  <AkModal
+    @showHeader={{true}}
+    @headerTitle={{this.modalHeading}}
+    @onClose={{this.closeInstructionsModal}}
+  >
+    <div local-class='marketplace-modal-content-container'>
+      <div local-class='marketplace-modal-logo'>
+        <img src={{@data.logo}} alt='ci-logo' />
+      </div>
+
+      <AkTypography
+        @align='center'
+        @fontWeight='bold'
+        local-class='marketplace-modal-title'
+      >
+        {{@data.title}}
+      </AkTypography>
+
+      <div>
+        {{@data.instructions}}
+      </div>
+    </div>
+  </AkModal>
+{{/if}}

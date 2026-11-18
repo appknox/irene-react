@@ -1,0 +1,19 @@
+.swagger-ui-wrapper {
+  position: relative;
+  padding-top: 0.714em;
+
+  .service-account-link {
+    position: absolute;
+    top: 24px;
+    right: 0em;
+  }
+
+  .tabs-container {
+    width: 100%;
+    padding-top: 1em;
+    position: sticky;
+    top: -7px;
+    z-index: 10;
+    background: var(--public-api-docs-tabs-background-color);
+  }
+}

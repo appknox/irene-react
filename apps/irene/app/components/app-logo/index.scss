@@ -1,0 +1,60 @@
+.app-logo-image {
+  object-fit: contain;
+  background-image: none;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.app-logo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: var(--app-logo-fallback-bg);
+  color: var(--app-logo-fallback-color);
+  font-weight: bold;
+  border-radius: 4px;
+  line-height: 1;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.app-logo-container-border {
+  border-radius: var(--app-logo-border-radius);
+  border: 1px solid var(--app-logo-border-color);
+  box-sizing: border-box;
+}
+
+.app-logo-container-padding {
+  padding: 0.5em;
+}
+
+.app-logo-image-rounded {
+  border-radius: 4px;
+}
+
+.app-logo-container-size-small {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 1.1rem;
+}
+
+.app-logo-container-size-medium {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.25rem;
+}
+
+.app-logo-container-size-large {
+  width: 53px;
+  height: 53px;
+  min-width: 53px;
+  min-height: 53px;
+  font-size: 1.5rem;
+}

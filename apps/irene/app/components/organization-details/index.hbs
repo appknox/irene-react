@@ -1,0 +1,43 @@
+<div local-class='header-container'>
+  <OrganizationNameHeader @organization={{this.organization.selected}}>
+    <:actionBtn>
+      {{#if this.me.org.is_admin}}
+        <AkButton
+          @variant='outlined'
+          data-test-org-name-action-btn
+          {{on 'click' this.routeToOrgSettings}}
+        >
+          <:leftIcon>
+            <AkIcon @iconName='settings' />
+          </:leftIcon>
+
+          <:default>
+            {{t 'organizationSettings'}}
+          </:default>
+        </AkButton>
+      {{/if}}
+    </:actionBtn>
+  </OrganizationNameHeader>
+</div>
+
+<AkTabs local-class='tabs-container' as |Akt|>
+  {{#each this.tabItems as |item|}}
+    {{#unless item.hidden}}
+      <Akt.tabItem
+        @id={{item.id}}
+        @hasBadge={{item.hasBadge}}
+        @badgeCount={{item.badgeCount}}
+        @route={{item.route}}
+        data-test-organization-details='{{item.id}}-tab'
+      >
+        <:tabIcon>
+          <AkIcon @iconName={{item.iconName}} />
+        </:tabIcon>
+
+        <:default>
+          {{item.label}}
+        </:default>
+      </Akt.tabItem>
+    {{/unless}}
+  {{/each}}
+</AkTabs>

@@ -1,0 +1,77 @@
+{{#if this.fetchOrganizationPreference.isRunning}}
+  <AkSkeleton @width='175px' @height='20px' class='mb-2' />
+
+  <AkStack @direction='column' @spacing='1'>
+    <AkSkeleton @width='300px' @height='14px' />
+
+    <AkSkeleton @width='400px' @height='12px' />
+  </AkStack>
+
+  <div class='mt-5'>
+    {{#each (array 0 1 2 3 4)}}
+      <AkStack @direction='row' @alignItems='center'>
+        <AkSkeleton @width='18px' @height='18px' class='m-1' />
+
+        <AkSkeleton @width='75px' @height='14px' />
+      </AkStack>
+    {{/each}}
+  </div>
+{{else if this.orgPreference.reportPreference}}
+  <div local-class='preferences-container' data-test-preferences>
+    <AkTypography
+      @gutterBottom={{true}}
+      @variant='h5'
+      data-test-preferences-title
+    >
+      {{t 'regulatoryPreferences'}}
+    </AkTypography>
+
+    <AkStack @direction='column' @spacing='0.5'>
+      <AkTypography @variant='h6' data-test-preferences-subtitle>
+        {{t 'regulatoryPreferencesChooseForAll'}}
+      </AkTypography>
+
+      <AkTypography
+        @variant='body2'
+        @color='textSecondary'
+        data-test-preferences-desc
+      >
+        {{t 'regulatoryPreferencesWarning'}}
+      </AkTypography>
+    </AkStack>
+
+    <div class='mt-2'>
+      {{#each this.regulatoryPreferences as |pref|}}
+        <AkStack
+          @alignItems='center'
+          @spacing='1'
+          data-test-preference='{{pref.label}}'
+        >
+          <AkTooltip
+            @disabled={{pref.task.isRunning}}
+            @title={{pref.title}}
+            @arrow={{true}}
+            @placement='right'
+          >
+            <AkFormControlLabel
+              @disabled={{pref.task.isRunning}}
+              @label={{pref.label}}
+              as |fcl|
+            >
+              <AkCheckbox
+                data-test-preference-checkbox
+                @disabled={{fcl.disabled}}
+                @checked={{pref.checked}}
+                @onChange={{perform pref.task}}
+              />
+            </AkFormControlLabel>
+          </AkTooltip>
+
+          {{#if pref.task.isRunning}}
+            <AkLoader @size={{14}} data-test-progress-spinner />
+          {{/if}}
+        </AkStack>
+      {{/each}}
+    </div>
+  </div>
+{{/if}}

@@ -1,0 +1,58 @@
+<div local-class='findings-card' data-test-offensiveSecurity-findingsList>
+  <div local-class='findings-header'>
+    <AkTypography @variant='body1' @fontWeight='bold' local-class='findings-title'>
+      {{t 'offensiveSecurity.findings'}}
+    </AkTypography>
+
+    <AkTypography @variant='body2' @color='textSecondary' local-class='findings-subtitle'>
+      {{t 'offensiveSecurity.findingsSubtitle'}}
+    </AkTypography>
+  </div>
+
+  {{#if this.hasFindings}}
+    <AkStack @direction='column' @spacing='2' local-class='groups-list'>
+      {{#each this.groupedFindings as |group|}}
+        {{! template-lint-disable require-presentational-children }}
+        <AkStack
+          @alignItems='center'
+          @justifyContent='space-between'
+          @width='full'
+          local-class='group-card group-header'
+          role='button'
+          tabindex='0'
+          {{on 'click' (fn this.handleCategoryClick group)}}
+          {{on 'keydown' (fn this.handleCategoryKeydown group)}}
+          data-test-offensiveSecurity-findingsList-group={{group.key}}
+          data-test-offensiveSecurity-findingsList-groupHeader={{group.key}}
+        >
+          <AkStack @alignItems='center' @spacing='0.5'>
+            <AkTypography
+              @variant='subtitle2'
+              @fontWeight='bold'
+              local-class='group-title'
+              data-test-offensiveSecurity-findingsList-groupTitle
+            >
+              {{group.title}}
+            </AkTypography>
+            <span local-class='group-count'>({{group.findings.length}})</span>
+          </AkStack>
+
+          <AkIcon
+            @iconName='chevron-right'
+            @color='textSecondary'
+            local-class='group-nav-icon'
+            data-test-offensiveSecurity-findingsList-expandIcon
+          />
+        </AkStack>
+      {{/each}}
+    </AkStack>
+  {{else}}
+  <AkTypography @variant='body2' @color='textSecondary' data-test-offensiveSecurity-findingsList-empty>
+    {{if
+    @scan.isInProgress
+    (t 'offensiveSecurity.findingsRecording')
+    (t 'offensiveSecurity.noFindings')
+    }}
+  </AkTypography>
+  {{/if}}
+</div>

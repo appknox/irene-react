@@ -1,0 +1,48 @@
+<AkStack
+  @width='full'
+  @alignItems='center'
+  @direction='column'
+  data-test-purge-api-analysis-container
+>
+  <AkStack @direction='column' local-class='root-container'>
+    <AkTypography
+      @variant='h4'
+      @fontWeight='bold'
+      local-class='title'
+      data-test-purge-api-analysis-title
+    >
+      Purge API Analyses
+    </AkTypography>
+
+    <AkTypography data-test-purge-api-analysis-summary>
+      Please enter the id of the file you want to purge off API Analyses
+    </AkTypography>
+
+    <AkStack
+      @width='full'
+      @direction='column'
+      @alignItems='stretch'
+      @spacing='3'
+      class='pt-3'
+    >
+      <AkTextField
+        @label='File ID'
+        @placeholder='Enter the File ID'
+        @labelTypographyColor='secondary'
+        @labelTypographyVariant='subtitle2'
+        @value={{this.fileNumber}}
+        @autofocus={{true}}
+        data-test-purge-api-analysis-input
+      />
+
+      <AkButton
+        @loading={{this.isPurgingAPIAnalyses}}
+        @disabled={{if this.fileNumber false true}}
+        {{on 'click' (perform this.purgeAPIAnalyses)}}
+        data-test-purge-api-analysis-submit-button
+      >
+        Submit
+      </AkButton>
+    </AkStack>
+  </AkStack>
+</AkStack>

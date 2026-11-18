@@ -1,0 +1,71 @@
+<AkStack @direction='column' @width='full' local-class='analysis-details-root'>
+  <AkBreadcrumbs::AutoTrail />
+
+  <Security::AnalysisDetails::Header
+    @analysis={{this.analysisDetails}}
+    @isKnoxIqEnabled={{this.isKnoxIqAnalysis}}
+    @onMarkedAsPassed={{this.refreshAfterMarkAsPassed}}
+    @currentCVSSMetrics={{this.currentCVSSDetails.metrics}}
+    @updateAnalysis={{this.triggerUpdateAnalysis}}
+    @updateCVSSDetails={{this.triggerUpdateCurrentCVSSDetails}}
+    @updateLegacyCVSSDetails={{this.triggerUpdateLegacyCVSSDetails}}
+  />
+
+  {{#if this.isKnoxIqAnalysis}}
+    <AkStack @direction='column' @width='full' class='my-2'>
+      <Security::AnalysisDetails::Aeis @analysis={{this.analysisDetails}} />
+    </AkStack>
+  {{/if}}
+
+  <AkStack @direction='column' @width='full' class='my-2'>
+    <Security::AnalysisDetails::CvssMetrics
+      @analysis={{this.analysisDetails}}
+      @currentCVSSDetails={{this.currentCVSSDetails}}
+      @legacyCVSSDetails={{this.legacyCVSSDetails}}
+      @updateCurrentCVSSDetails={{this.triggerUpdateCurrentCVSSDetails}}
+      @updateLegacyCVSSDetails={{this.triggerUpdateLegacyCVSSDetails}}
+    />
+  </AkStack>
+
+  <AkStack @direction='column' @width='full' class='my-2'>
+    {{#if this.isKnoxIqAnalysis}}
+      {{#each this.findingSections key='id' as |section|}}
+        <AkStack @direction='column' @width='full' class='my-2'>
+          <Security::AnalysisDetails::ValidatedFindings
+            @analysis={{this.analysisDetails}}
+            @showsFalsePositives={{section.showsFalsePositives}}
+            @readOnly={{not this.canEditKnoxIqData}}
+            @onRegisterReload={{fn this.registerReloadFindings section.id}}
+          />
+        </AkStack>
+      {{/each}}
+    {{else}}
+      <Security::AnalysisDetails::Findings
+        @analysis={{this.analysisDetails}}
+        @onAnalysisPropsChange={{this.markFindingsChanged}}
+      />
+    {{/if}}
+  </AkStack>
+
+  <AkStack @direction='column' @width='full' class='my-2'>
+    <Security::AnalysisDetails::RegulatoryCategories
+      @analysis={{this.analysisDetails}}
+      @onAnalysisPropsChange={{this.markRegulatoryChanged}}
+    />
+  </AkStack>
+
+  <AkStack @direction='column' @width='full' class='my-2'>
+    <Security::AnalysisDetails::Attachments
+      @analysis={{this.analysisDetails}}
+      @updateAnalysis={{this.triggerUpdateAnalysis}}
+    />
+  </AkStack>
+
+  <Security::AnalysisDetails::Footer
+    @analysis={{this.analysisDetails}}
+    @saveAnalysis={{this.triggerSaveAnalysis}}
+    @isSavingAnalysis={{this.saveAnalysis.isRunning}}
+    @isSaveActionOnly={{this.isSaveActionOnly}}
+    @hasUnsavedChanges={{this.analysisHasUnsavedChanges}}
+  />
+</AkStack>

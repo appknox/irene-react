@@ -1,0 +1,97 @@
+<AkDrawer
+  @anchor='right'
+  @open={{true}}
+  @disableBackdropClick={{true}}
+  data-test-cy='dynamicScanDrawer'
+  @onClose={{@onClose}}
+  as |dr|
+>
+  <AkStack
+    @direction='column'
+    @width='full'
+    local-class='dynamic-scan-drawer'
+    data-test-fileDetails-dynamicScanDrawer-drawerContainer
+  >
+    <AkAppbar
+      @position='sticky'
+      @justifyContent='space-between'
+      class='px-3'
+      as |ab|
+    >
+      <AkTypography
+        @color='inherit'
+        @variant='h5'
+        @fontWeight='medium'
+        data-test-fileDetails-dynamicScanDrawer-drawerContainer-title
+      >
+        {{t
+          (if @isAutomatedScan 'dastTabs.automatedDAST' 'dastTabs.manualDAST')
+        }}
+      </AkTypography>
+
+      <AkIconButton
+        disabled={{this.disableCloseDastModal}}
+        {{on 'click' dr.closeHandler}}
+        class={{ab.classes.defaultIconBtn}}
+        data-test-fileDetails-dynamicScanDrawer-drawerContainer-closeBtn
+      >
+        <AkIcon @iconName='close' />
+      </AkIconButton>
+    </AkAppbar>
+
+    <AkStack
+      @direction='column'
+      @width='full'
+      local-class='dynamic-scan-drawer-body'
+      class='p-3'
+    >
+      {{#if @isAutomatedScan}}
+        <FileDetails::DynamicScan::Action::Drawer::AutomatedDast
+          @dpContext={{@dpContext}}
+          @file={{@file}}
+        />
+      {{else}}
+        <FileDetails::DynamicScan::Action::Drawer::ManualDast
+          @dpContext={{@dpContext}}
+          @file={{@file}}
+          @isApiCaptureEnabled={{this.isApiCaptureEnabled}}
+          @onApiCaptureChange={{this.handleApiCaptureChange}}
+          @onSelectedManualDeviceAvailable={{this.handleSelectedManualDeviceAvailable}}
+        />
+      {{/if}}
+    </AkStack>
+
+    <AkStack
+      @width='full'
+      @justifyContent='space-between'
+      @spacing='1.5'
+      class='px-3 py-2'
+      local-class='dynamic-scan-drawer-cta'
+    >
+      <AkButton
+        {{on 'click' this.runDynamicScan}}
+        @loading={{this.startDynamicScan.isRunning}}
+        @disabled={{not this.enableStartDynamicScanBtn}}
+        data-test-fileDetails-dynamicScanDrawer-startBtn
+      >
+        <:leftIcon>
+          <AkIcon @iconName={{if @isAutomatedScan 'schedule' 'play-arrow'}} />
+        </:leftIcon>
+
+        <:default>
+          {{t (if @isAutomatedScan 'scheduleAutomation' 'start')}}
+        </:default>
+      </AkButton>
+
+      <AkButton
+        @variant='outlined'
+        @color='neutral'
+        {{on 'click' @onClose}}
+        @disabled={{this.startDynamicScan.isRunning}}
+        data-test-fileDetails-dynamicScanDrawer-cancelBtn
+      >
+        {{t 'cancel'}}
+      </AkButton>
+    </AkStack>
+  </AkStack>
+</AkDrawer>

@@ -1,0 +1,58 @@
+<div>
+  <div local-class='header' data-test-header>
+    {{t 'downloadClientsStatData'}}
+  </div>
+
+  <div local-class='body'>
+    <div local-class='date-range-picker' data-test-date-range-picker-container>
+      <AkDatePicker
+        @range={{true}}
+        @selected={{this.selectedDateRange}}
+        @maxDate={{this.maxDate}}
+        @onSelect={{this.updateDateRange}}
+        @quickSelectOptions={{this.datepickerOptions}}
+        data-test-date-range-picker
+      >
+        <div local-class='date-range' data-test-date-range>
+          <AkIcon
+            data-test-date-range-icon
+            @iconName='calendar-month'
+            @size='small'
+            title='Select date range'
+          />
+          <span data-test-date-range-selected>
+            <span local-class='date' data-test-from-date>
+              {{#if this.selectedDateRange.start}}
+                {{day-js date=this.selectedDateRange.start format='DD/MM/YYYY'}}
+              {{else}}
+                {{t 'fromDate'}}
+              {{/if}}
+            </span>
+
+            <span>
+              -
+            </span>
+
+            <span local-class='date' data-test-to-date>
+              {{#if this.selectedDateRange.end}}
+                {{day-js date=this.selectedDateRange.end format='DD/MM/YYYY'}}
+              {{else}}
+                {{t 'toDate'}}
+              {{/if}}
+            </span>
+          </span>
+        </div>
+      </AkDatePicker>
+    </div>
+
+    <AkButton
+      class='ml-2'
+      {{on 'click' this.downloadCSV}}
+      @loading={{this.fetchDownloadUrl.isRunning}}
+      @disabled={{this.fetchDownloadUrl.isRunning}}
+      data-test-export-btn
+    >
+      {{t 'exportCSV'}}
+    </AkButton>
+  </div>
+</div>

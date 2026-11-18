@@ -1,0 +1,28 @@
+<div class='py-1' data-test-sbomComponentDetails-container>
+  <AkStack
+    data-test-sbomComponentDetails-sbomHeader
+    local-class='sbom-component-details-root'
+    class='p-2'
+  >
+    <AkTypography
+      data-test-sbomComponentDetails-headerTitleValue
+      @variant='h5'
+      local-class='sbom-component-details-value'
+    >
+      {{this.componentName}}
+    </AkTypography>
+  </AkStack>
+
+  <AkTabs class='mt-3' as |Akt|>
+    {{#each this.tabs as |item|}}
+      <Akt.tabItem
+        @id={{item.id}}
+        @route={{item.route}}
+        @currentWhen={{item.activeRoutes}}
+        data-test-sbomComponentDetails-tab='{{item.id}}'
+      >
+        {{item.label}}
+      </Akt.tabItem>
+    {{/each}}
+  </AkTabs>
+</div>

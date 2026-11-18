@@ -1,0 +1,76 @@
+<AkStack
+  @direction='column'
+  @width='full'
+  @justifyContent='space-between'
+  {{style flex='1'}}
+>
+  {{#if @isKnoxiqEnabled}}
+    <div local-class='dynamic-scan-accent {{this.dynamicScanAccentClass}}'>
+    </div>
+  {{/if}}
+
+  <AkStack
+    @width='full'
+    @justifyContent='space-between'
+    @alignItems='center'
+    @flexWrap='wrap'
+    class='p-2'
+  >
+    <AkTypography
+      @variant='h5'
+      data-test-fileDetailScanActions-dynamicScanTitle
+    >
+      {{t 'dynamicScan'}}
+    </AkTypography>
+
+    {{#if this.isDynamicScanLoading}}
+      <AkSkeleton @width='80px' />
+    {{else if @file.isDynamicDone}}
+      {{#if this.showKnoxiqStatusChip}}
+        <KnoxIq::StatusChip @state={{this.knoxiqStatusChipState}} />
+      {{else}}
+        <FileDetails::DynamicScan::StatusChip
+          @status={{this.status}}
+          @statusText={{this.statusLabel}}
+          @runningAsWarn={{true}}
+          data-test-fileDetailScanActions-dynamicScanStatus
+        />
+      {{/if}}
+    {{else}}
+      <FileDetails::DynamicScan::StatusChip
+        @status={{this.status}}
+        @statusText={{this.statusLabel}}
+        @runningAsWarn={{true}}
+        data-test-fileDetailScanActions-dynamicScanStatus
+      />
+    {{/if}}
+  </AkStack>
+
+  <FileDetails::ScanActions::ScanOverview
+    @file={{@file}}
+    @isDynamicScanAction={{true}}
+    @vulnerabilityCount={{if @file.isDynamicDone @vulnerabilityCount null}}
+    data-test-fileDetails-scanActions-scanOverview-dynamicScanRoot
+  />
+</AkStack>
+
+<AkDivider @color='dark' />
+
+<AkLink
+  @color='primary'
+  @underline='always'
+  @fontWeight='bold'
+  @route='authenticated.dashboard.file.dynamic-scan.manual'
+  @model={{@file.id}}
+  class='px-2 py-1'
+  local-class='view-details-icon'
+  data-test-fileDetailScanActions-dynamicScanViewDetails
+>
+  <:default>
+    {{t 'viewDetails'}}
+  </:default>
+
+  <:rightIcon>
+    <AkIcon @iconName='arrow-right' />
+  </:rightIcon>
+</AkLink>

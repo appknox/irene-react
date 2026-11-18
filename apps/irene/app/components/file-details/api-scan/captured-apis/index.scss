@@ -1,0 +1,14 @@
+.captured-api-list-container,
+.captured-api-header-container {
+  background-color: var(
+    --file-details-api-scan-captured-apis-container-background
+  );
+}
+
+.captured-api-status-card {
+  width: 360px;
+  background-color: var(--file-details-api-scan-captured-apis-card-background);
+  box-shadow: var(--file-details-api-scan-captured-apis-card-box-shadow);
+  border-radius: var(--file-details-api-scan-captured-apis-border-radius);
+  box-sizing: border-box;
+}

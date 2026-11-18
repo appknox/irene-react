@@ -1,0 +1,29 @@
+<AkStack
+  @alignItems='flex-start'
+  @direction='column'
+  @width='full'
+  {{style alignSelf='flex-start'}}
+  data-test-component-tree-skeleton-loader
+>
+  <AkStack
+    @width='full'
+    @alignItems='center'
+    @spacing='1'
+    local-class='tree-package-name-container'
+  >
+    <AkSkeleton @width='500px' @height='16px' class='my-1' />
+  </AkStack>
+
+  <AkTree
+    @treeData={{this.skeletonTreeData}}
+    @expanded={{this.expanded}}
+    @onExpand={{this.noop}}
+    @checked={{this.expanded}}
+    @onCheck={{this.noop}}
+  >
+    <AkStack local-class='node-container'>
+      <div local-class='tree-connectors' />
+      <AkSkeleton @width='500px' @height='22px' class='my-1' />
+    </AkStack>
+  </AkTree>
+</AkStack>

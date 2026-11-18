@@ -1,0 +1,55 @@
+<div local-class='analytics-root'>
+  <AkStack @width='full' class='p-2'>
+    <AkStack @width='6/12'>
+      <OrganizationAnalytics::ScanCountChart @scanCount={{this.scanCount}} />
+    </AkStack>
+
+    <AkStack @width='6/12'>
+      <OrganizationAnalytics::AppScanChart />
+    </AkStack>
+  </AkStack>
+
+  <AkDivider @color='dark' />
+
+  <AkStack @spacing='5' @width='full' class='mt-3'>
+    <AkStack @direction='column' @width='6/12'>
+      <AkStack
+        @width='full'
+        @direction='column'
+        local-class='main-box-container'
+      >
+        <AkStack @width='full' local-class='box-main-heading'>
+          <AkTypography @variant='h5' @fontWeight='medium'>Overall Scan Count</AkTypography>
+        </AkStack>
+
+        <AkStack @width='full' @direction='column' class='py-1'>
+          {{#each this.scanTypes as |scanType|}}
+            <AkStack @width='full' class='p-2'>
+              <AkStack @justifyContent='center' @width='9/12'>
+                <AkTypography @variant='h5' @fontWeight='regular'>
+                  Total
+                  {{scanType.name}}
+                  Scans
+                </AkTypography>
+              </AkStack>
+
+              <AkStack @width='3/12'>
+                <AkTypography @variant='h5' @fontWeight='regular'>
+                  {{scanType.count}}
+                </AkTypography>
+              </AkStack>
+            </AkStack>
+
+            {{#unless scanType.last}}
+              <AkDivider @color='dark' />
+            {{/unless}}
+          {{/each}}
+        </AkStack>
+      </AkStack>
+    </AkStack>
+
+    <AkStack @width='6/12'>
+      <OrganizationAnalytics::RecentIssues />
+    </AkStack>
+  </AkStack>
+</div>

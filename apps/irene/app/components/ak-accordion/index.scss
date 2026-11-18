@@ -1,0 +1,52 @@
+.ak-accordion-root {
+  &,
+  .details,
+  .summary {
+    width: 100%;
+  }
+
+  .details {
+    height: auto;
+    overflow: hidden;
+
+    &.collapsed {
+      max-height: 0px !important;
+    }
+  }
+
+  .summary {
+    cursor: pointer;
+    border: 1px solid;
+    padding: 0.7857em 1.4285em;
+
+    &.primary {
+      background-color: var(--ak-accordion-summary-primary-background);
+      border-color: var(--ak-accordion-summary-primary-border-color);
+    }
+
+    &.secondary,
+    &.disabled {
+      background-color: var(--ak-accordion-summary-secondary-background);
+      border-color: var(--ak-accordion-summary-secondary-border-color);
+    }
+
+    &.light {
+      border: none;
+      background-color: var(--ak-accordion-summary-light-background);
+      box-shadow: var(--ak-accordion-summary-light-box-shadow);
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+    }
+
+    .summary-expand-icon {
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: rotate(0deg);
+
+      &.expanded {
+        transform: rotate(-180deg);
+      }
+    }
+  }
+}

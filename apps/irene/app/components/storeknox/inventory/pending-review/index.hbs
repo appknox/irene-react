@@ -1,0 +1,65 @@
+{{!-- <AkStack
+  @justifyContent='space-between'
+  @alignItems='center'
+  local-class='review-header'
+>
+  <div local-class='search-input-container-width'>
+    <AkTextField @placeholder={{t 'search'}}>
+      <:rightAdornment>
+        <AkIcon @iconName='search' @color='textSecondary' />
+      </:rightAdornment>
+    </AkTextField>
+  </div>
+
+  <AkStack @spacing='1' @alignItems='center'>
+    {{#if this.showButtons}}
+      <AkButton
+        local-class='approve-button'
+      >
+        <:leftIcon>
+          <AkIcon @iconName='check' />
+        </:leftIcon>
+
+        <:default>
+          {{t 'approve'}}
+        </:default>
+      </AkButton>
+
+      <AkButton
+        local-class='reject-button'
+      >
+        <:leftIcon>
+          <AkIcon @iconName='close' />
+        </:leftIcon>
+
+        <:default>
+          {{t 'reject'}}
+        </:default>
+      </AkButton>
+
+      <AkDivider @direction='vertical' @height='40px' @color='dark' local-class='divider' />
+    {{/if}}
+
+    <AkLink @route='authenticated.storeknox.review-logs'>
+      <AkButton @color='neutral' @variant='outlined'>
+        {{t 'storeknox.logs'}}
+      </AkButton>
+    </AkLink>
+  </AkStack>
+</AkStack> --}}
+
+<AkStack @width='full' class='mt-3'>
+  {{#if this.showTable}}
+    <Storeknox::Inventory::PendingReview::Table
+      @skAppList={{this.reviewAppsData}}
+      @limit={{this.skPendingReview.limit}}
+      @offset={{this.skPendingReview.offset}}
+      @loadingData={{this.isFetchingData}}
+      @totalCount={{this.totalCount}}
+      @goToPage={{this.goToPage}}
+      @onItemPerPageChange={{this.changePerPageItem}}
+    />
+  {{else}}
+    <Storeknox::Inventory::PendingReview::Empty />
+  {{/if}}
+</AkStack>

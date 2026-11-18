@@ -1,0 +1,49 @@
+<AkStack @direction='column' @spacing='2' {{style width='350px'}}>
+  <AkTypography @variant='h5'>
+    {{t 'changePassword'}}
+  </AkTypography>
+
+  <AkTextField
+    id='security-pc-old-password'
+    @label={{t 'currentPassword'}}
+    @labelTypographyColor='secondary'
+    @labelTypographyVariant='subtitle2'
+    @type='password'
+    @value={{this.changeset.old_password}}
+    @error={{if this.changeset.error.old_password true false}}
+    @helperText={{this.changeset.error.old_password.validation}}
+    autocomplete='password'
+  />
+
+  <AkTextField
+    id='security-pc-new-password'
+    @label={{t 'newPassword'}}
+    @labelTypographyColor='secondary'
+    @labelTypographyVariant='subtitle2'
+    @type='password'
+    @value={{this.changeset.password}}
+    @error={{if this.changeset.error.password true false}}
+    @helperText={{this.changeset.error.password.validation}}
+    autocomplete='new-password'
+  />
+
+  <AkTextField
+    id='security-pc-confirm-password'
+    @label={{t 'confirmPassword'}}
+    @labelTypographyColor='secondary'
+    @labelTypographyVariant='subtitle2'
+    @type='password'
+    @value={{this.changeset.confirm_password}}
+    @error={{if this.changeset.error.confirm_password true false}}
+    @helperText={{this.changeset.error.confirm_password.validation}}
+    autocomplete='new-password'
+  />
+
+  <AkButton @variant='outlined' {{on 'click' (perform this.changePassword)}}>
+    {{#if this.changePassword.isRunning}}
+      <AkLoader @size={{14}} class='mr-1' />
+    {{/if}}
+
+    {{t 'changePassword'}}
+  </AkButton>
+</AkStack>

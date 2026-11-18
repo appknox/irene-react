@@ -1,0 +1,78 @@
+<AkStack
+  @direction='row'
+  @alignItems='center'
+  @justifyContent='space-between'
+  local-class='header-storeknox-inventory-page'
+>
+  <AkStack @direction='column' @spacing='0.5'>
+    <AkTypography
+      @variant='subtitle1'
+      data-test-storeknoxInventory-inventoryHeaderText
+    >
+      {{t 'storeknox.inventoryHeader'}}
+    </AkTypography>
+
+    <AkTypography
+      @variant='body2'
+      @color='neutral'
+      data-test-storeknoxInventory-inventoryDescriptionText
+    >
+      {{t 'storeknox.inventoryDescription'}}
+    </AkTypography>
+  </AkStack>
+
+  <AkStack @alignItems='center' @justifyContent='center' @spacing='1.5'>
+    <AkButton>
+      <AkLink
+        @underline='none'
+        @color='inherit'
+        @route='authenticated.storeknox.discover.result'
+        data-test-storeknoxInventory-discoveryPageLink
+      >
+        {{t 'storeknox.discoverHeader'}}
+      </AkLink>
+    </AkButton>
+
+    {{#if this.isOwner}}
+      <AkDivider
+        @direction='vertical'
+        @color='dark'
+        @height='32px'
+        @width='1px'
+      />
+
+      <AkIconButton
+        @size='medium'
+        @variant='outlined'
+        {{on 'click' this.openSettingsDrawer}}
+        data-test-storeknoxInventory-settingsDrawerTrigger
+      >
+        <AkIcon @iconName='settings' />
+      </AkIconButton>
+    {{/if}}
+  </AkStack>
+</AkStack>
+
+<AkTabs as |Akt|>
+  {{#each this.tabItems as |item|}}
+    <Akt.tabItem
+      @id={{item.id}}
+      @badgeBackground={{true}}
+      @route={{item.route}}
+      @hasBadge={{item.hasBadge}}
+      @badgeCount={{item.badgeCount}}
+      data-test-storeknoxInventory-tabs='{{item.id}}-tab'
+    >
+      {{item.label}}
+    </Akt.tabItem>
+  {{/each}}
+</AkTabs>
+
+{{! Sk Org Settings Drawer }}
+<Storeknox::Inventory::SettingsDrawer
+  @skOrg={{this.skOrg}}
+  @shouldShowSettingsDrawer={{this.shouldShowSettingsDrawer}}
+  @closeSettingsDrawer={{this.closeSettingsDrawer}}
+  @onToggleAddToInventoryByDefault={{this.onToggleAddToInventoryByDefault}}
+  @onToggleAutoDiscoveryEnabled={{this.onToggleAutoDiscoveryEnabled}}
+/>

@@ -1,0 +1,85 @@
+{{#if this.partner.access.view_plans}}
+  <div
+    local-class='partner-plan'
+    data-test-partner-plan
+    {{did-insert this.initialize}}
+  >
+    {{#if this.fetchPartnerPlan.isRunning}}
+      <AkLoader @size={{13}} />
+    {{else if this.partnerPlan}}
+      {{#if this.partner.access.transfer_credits}}
+        {{#if
+          (and this.partnerPlan.limitedScans (eq this.partnerPlan.scansLeft 0))
+        }}
+          {{! NOTE 0 credits left warning }}
+          <div data-test-warning-zero-scan-credits>
+            <AkTooltip
+              @placement='top'
+              @arrow={{true}}
+              @title='No credits left to transfer to the clients. Please upgrade your plan'
+            >
+              <div class='mr-2'><AkIcon @iconName='error' /></div>
+            </AkTooltip>
+          </div>
+        {{else if (not this.partnerPlan.limitedScans)}}
+          {{! NOTE credit transfer unavailable warning }}
+          <div data-test-warning-credit-transfer-unavailable>
+            <div class='mr-2'>
+              <AkTooltip @placement='left' @arrow={{true}}>
+                <:tooltipContent>
+                  <AkStack
+                    @tag='span'
+                    {{style width='320px' whiteSpace='normal'}}
+                  >
+                    Credit transfer option is unavailable in your plan. Please
+                    contact support for transferring credits to clients
+                  </AkStack>
+                </:tooltipContent>
+
+                <:default>
+                  <AkIcon @iconName='error' />
+                </:default>
+              </AkTooltip>
+            </div>
+          </div>
+        {{/if}}
+      {{/if}}
+
+      <div local-class='plan'>
+        <div local-class='plan-key'>
+          <div local-class='plan-label' data-test-plan-label>
+            {{t 'yourPlan'}}
+          </div>
+
+          <div
+            local-class='plan-type {{if
+              this.partnerPlan.limitedScans
+              "per-scan"
+              "per-app"
+            }}'
+            data-test-plan-type
+          >
+            {{t (if this.partnerPlan.limitedScans 'perScan' 'perApp')}}
+          </div>
+        </div>
+        <div local-class='plan-value'>
+          <span local-class='credits-left' data-test-credits-left>
+            {{#if this.partnerPlan.limitedScans}}
+              {{this.partnerPlan.scansLeft}}
+            {{else}}
+              {{this.partnerPlan.projectsLimit}}
+            {{/if}}
+          </span>
+
+          <span local-class='credits-type' data-test-credits-type>
+            {{#if this.partnerPlan.limitedScans}}
+              {{t 'pluralScans' itemCount=this.partnerPlan.scansLeft}}
+            {{else}}
+              {{t 'pluralApps' itemCount=this.partnerPlan.projectsLimit}}
+            {{/if}}
+          </span>
+        </div>
+      </div>
+    {{/if}}
+  </div>
+{{/if}}

@@ -1,0 +1,54 @@
+<AkStack @direction='column' @spacing='1'>
+  <div>
+    <AkTypography data-test-nf-str-url-upldfailnprjdeny2-primary-message>
+      {{t
+        'notificationModule.messages.nf-str-url-upldfailnprjdeny2.primary'
+        htmlSafe=true
+        platform_display=@context.platform_display
+        package_name=@context.package_name
+        requester_username=@context.requester_username
+        requester_role=@context.requester_role
+      }}
+    </AkTypography>
+
+    <AkTypography
+      @color='textSecondary'
+      data-test-nf-str-url-upldfailnprjdeny2-secodary-message
+    >
+      <em>
+        ({{t
+          'notificationModule.messages.nf-str-url-upldfailnprjdeny2.secondary'
+        }})
+      </em>
+    </AkTypography>
+  </div>
+
+  <AkStack @spacing='1.5'>
+    <AkLink
+      data-test-nf-str-url-upldfailnprjdeny2-projectSettingslink
+      @color='primary'
+      @route='authenticated.dashboard.project.settings'
+      @model={{@context.project_id}}
+      @underline='always'
+      @title='{{t "notificationModule.viewProjectSettings"}}'
+    >
+      {{t 'notificationModule.projectSettings'}}
+    </AkLink>
+
+    {{#if @context.store_url}}
+      <span local-class='pipe'>|</span>
+
+      <AkButton
+        data-test-nf-str-url-upldfailnprjdeny2-viewAppOnStorelink
+        @tag='a'
+        @variant='text'
+        @underline='always'
+        target='_blank'
+        href={{@context.store_url}}
+        rel='noopener noreferrer'
+      >
+        {{t 'notificationModule.viewAppOnStore'}}
+      </AkButton>
+    {{/if}}
+  </AkStack>
+</AkStack>

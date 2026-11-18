@@ -1,0 +1,31 @@
+<AkTypography @fontWeight='bold' local-class='marketplace-header'>
+  {{t 'marketplace'}}
+</AkTypography>
+
+<AkStack @direction='column' class='pt-4 pl-2 pb-1'>
+  <AkTypography @fontWeight='bold' local-class='sub-header'>
+    {{t 'plugins'}}
+  </AkTypography>
+
+  <AkTypography local-class='sub-header-description'>
+    {{t 'marketplacePluginDesc'}}
+  </AkTypography>
+</AkStack>
+
+<AkStack class='pb-4'>
+  <Marketplace::PluginList />
+</AkStack>
+
+<AkStack @direction='column' class='pl-2 pb-1'>
+  <AkTypography @fontWeight='bold' local-class='sub-header'>
+    {{t 'integration'}}
+  </AkTypography>
+
+  <AkTypography local-class='sub-header-description'>
+    {{t 'marketplaceIntegrationDesc'}}
+  </AkTypography>
+</AkStack>
+
+<AkStack class='pb-4'>
+  <Marketplace::IntegrationList />
+</AkStack>

@@ -1,0 +1,19 @@
+<AkSkeleton @width='250px' @height='14px' class='mt-2 mb-4' />
+
+<div local-class='summary-header-root' class='mb-3'>
+  <AkStack
+    @alignItems='center'
+    @justifyContent='space-between'
+    @spacing='1.5'
+    local-class='summary-header-container'
+  >
+    <AkSkeleton @width='150px' @height='18px' />
+  </AkStack>
+</div>
+
+<Sbom::EmptyLoadingView
+  @empty={{false}}
+  @loading={{true}}
+  @loadingSvgHeight='200px'
+  @height='500px'
+/>

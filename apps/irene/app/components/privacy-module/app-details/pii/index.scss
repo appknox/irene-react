@@ -1,0 +1,24 @@
+.note-power-by-ai {
+  background-color: var(--privacy-module-pii-bg-color);
+  padding: 10px 14px;
+}
+
+.empty-container {
+  padding-top: 4em;
+  padding-bottom: 4em;
+  background-color: var(--privacy-module-pii-bg-color);
+  border-top: 1px solid var(--privacy-module-pii-border-color);
+
+  .header {
+    margin-top: 1.25em;
+  }
+
+  .body-text {
+    text-align: center;
+    max-width: 500px;
+  }
+}
+
+.pii-table {
+  background-color: var(--privacy-module-pii-bg-color);
+}

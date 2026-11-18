@@ -1,0 +1,35 @@
+<span
+  data-test-ak-checkbox-root
+  local-class='
+      ak-checkbox-root ak-checkbox-color-{{this.color}}
+      {{unless @disabled "ak-checkbox-hover-focus"}}
+    '
+>
+  <Input
+    data-test-checkbox
+    ...attributes
+    data-indeterminate='{{@indeterminate}}'
+    local-class='ak-checkbox'
+    @checked={{@checked}}
+    disabled={{@disabled}}
+    readonly={{@readonly}}
+    @type='checkbox'
+    id={{this.id}}
+    {{on 'change' this.onChange}}
+    {{on 'click' this.onClick}}
+  />
+
+  {{#if @indeterminate}}
+    <AkIcon local-class='ak-svg-checkbox-icon' @iconName='mdi:minus-box' />
+  {{else}}
+    <AkIcon
+      data-test-checkbox-icon
+      local-class='ak-svg-checkbox-icon'
+      @iconName={{if
+        @checked
+        'mdi:checkbox-marked'
+        'mdi:checkbox-blank-outline'
+      }}
+    />
+  {{/if}}
+</span>

@@ -1,0 +1,83 @@
+{{! @glint-nocheck: or}}
+<div ...attributes local-class='ak-select-root'>
+  <div local-class='ak-form-control'>
+    {{#if @label}}
+      <AkTypography
+        @variant={{@labelTypographyVariant}}
+        @color={{or @labelTypographyColor 'textSecondary'}}
+        @tag='label'
+        data-test-form-label
+        local-class='ak-form-label'
+        for={{this.labelId}}
+      >
+        {{@label}}
+        {{if @required ' *'}}
+      </AkTypography>
+    {{/if}}
+
+    <div
+      local-class='ak-select-trigger-root
+      {{if @label "ak-form-label-spacing"}}
+      {{if @multiple "ak-select-trigger-root-multiple"}}'
+    >
+      {{#let
+        (component (if @multiple 'power-select-multiple' 'power-select'))
+        as |SelectComponent|
+      }}
+        <SelectComponent
+          @triggerId={{this.labelId}}
+          @dropdownClass='{{@dropdownClass}} {{this.classes.dropdown}}'
+          @triggerClass='
+          {{@triggerClass}}
+          {{this.classes.trigger}}
+          {{if @error this.classes.triggerError}}'
+          @options={{@options}}
+          @onChange={{@onChange}}
+          @selected={{@selected}}
+          @placeholder={{@placeholder}}
+          @disabled={{@disabled}}
+          @renderInPlace={{@renderInPlace}}
+          @ariaInvalid='{{if @error true false}}'
+          @onOpen={{this.onOpen}}
+          @onClose={{@onClose}}
+          @loadingMessage={{@loadingMessage}}
+          @selectedItemComponent={{@selectedItemComponent}}
+          @verticalPosition={{or @verticalPosition 'below'}}
+          @horizontalPosition={{or @horizontalPosition 'left'}}
+          @searchEnabled={{@searchEnabled}}
+          @searchFieldPosition={{@searchFieldPosition}}
+          @searchPlaceholder={{@searchPlaceholder}}
+          @extra={{this.extra}}
+          @search={{@search}}
+          @noMatchesMessage={{@noMatchesMessage}}
+          @beforeOptionsComponent={{or
+            @beforeOptionsComponent
+            (component 'ak-select/before-option')
+          }}
+          @groupComponent={{@groupComponent}}
+          @closeOnSelect={{@closeOnSelect}}
+          @afterOptionsComponent={{@afterOptionsComponent}}
+          @allowClear={{@allowClear}}
+          @registerAPI={{@registerAPI}}
+          @triggerComponent={{@triggerComponent}}
+          data-test-power-select
+          as |option|
+        >
+          {{yield option}}
+        </SelectComponent>
+      {{/let}}
+    </div>
+
+    {{#if @helperText}}
+      <p
+        data-test-helper-text
+        local-class='ak-form-helper-text {{if
+          @error
+          "ak-error-form-helper-text"
+        }}'
+      >
+        {{@helperText}}
+      </p>
+    {{/if}}
+  </div>
+</div>

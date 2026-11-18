@@ -1,0 +1,90 @@
+$defaultTrackHeight: 1.6875em;
+
+@mixin toggleContainerSize($scale: 1) {
+  height: $defaultTrackHeight * $scale;
+  margin: 0.4em;
+}
+
+// static base css
+.toggle-container {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+  appearance: none;
+  text-decoration: none;
+  aspect-ratio: 2/1;
+}
+
+.toggle-input {
+  cursor: inherit;
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  margin: 0px;
+  padding: 0px;
+  z-index: 1;
+
+  &:checked + .track::before {
+    flex: auto;
+  }
+
+  &:checked + .track {
+    background-color: var(--ak-toggle-checked-background-color);
+  }
+
+  &:disabled + .track {
+    opacity: 0.5;
+  }
+}
+
+.track {
+  cursor: pointer;
+  display: flex;
+  background-color: var(--ak-toggle-unchecked-background-color);
+  border-radius: 999px;
+  height: 100%;
+  width: 100%;
+  padding: 5%;
+
+  &::before, &::after {
+    display: block;
+    content: '';
+    flex: 0;
+    height: 100%;
+  }
+
+  &::before {
+    transition: flex 0.4s;
+  }
+
+  &::after {
+    flex: 0;
+    aspect-ratio: 1/1;
+    max-width: fit-content;
+    border-radius: 999px;
+    background-color: var(--ak-toggle-slider-background-color);
+  }
+}
+
+
+// small switch
+.toggle-container-small {
+  @include toggleContainerSize(0.7);
+}
+
+// default switch
+.toggle-container-default {
+  @include toggleContainerSize;
+}
+
+// large switch
+.toggle-container-large {
+  @include toggleContainerSize(1.3);
+}
+
+

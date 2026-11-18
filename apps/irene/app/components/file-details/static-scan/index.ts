@@ -1,0 +1,163 @@
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
+import { service } from '@ember/service';
+import { action } from '@ember/object';
+import { task } from 'ember-concurrency';
+import { waitForPromise } from '@ember/test-waiters';
+import type Store from 'ember-data/store';
+import type IntlService from 'ember-intl/services/intl';
+import type { EmberTableSort } from 'ember-table';
+
+import ENUMS from 'irene/enums';
+import ENV from 'irene/config/environment';
+import type FileModel from 'irene/models/file';
+import type IreneAjaxService from 'irene/services/ajax';
+import type { AjaxError } from 'irene/services/ajax';
+import type FileRiskModel from 'irene/models/file-risk';
+import type KnoxiqScanModel from 'irene/models/knoxiq-scan';
+
+export interface FileDetailsStaticScanSignature {
+  Args: {
+    file: FileModel;
+  };
+}
+
+export default class FileDetailsStaticScan extends Component<FileDetailsStaticScanSignature> {
+  @service declare intl: IntlService;
+  @service declare store: Store;
+  @service declare ajax: IreneAjaxService;
+  @service('notifications') declare notify: NotificationService;
+
+  @tracked fileRisk: FileRiskModel | null = null;
+  @tracked knoxiqScan: KnoxiqScanModel | null = null;
+  @tracked showRescanModal = false;
+
+  @tracked sorts: EmberTableSort[] = [
+    { isAscending: false, valuePath: 'computedRisk' },
+  ];
+
+  constructor(owner: unknown, args: FileDetailsStaticScanSignature['Args']) {
+    super(owner, args);
+
+    this.fetchFileRisk.perform();
+    this.fetchKnoxiqScan.perform();
+  }
+
+  get tRescanInitiated() {
+    return this.intl.t('rescanInitiated');
+  }
+
+  get filterBy() {
+    return ENUMS.VULNERABILITY_TYPE.STATIC;
+  }
+
+  get columns() {
+    return [
+      {
+        name: this.intl.t('impact'),
+        valuePath: 'computedRisk',
+        component: 'file-details/vulnerability-analysis/impact',
+        width: 50,
+        textAlign: 'center',
+      },
+      {
+        name: this.intl.t('title'),
+        width: 250,
+        valuePath: 'vulnerability.name',
+        isSortable: false,
+      },
+    ];
+  }
+
+  get file() {
+    return this.args.file;
+  }
+
+  get tabItems() {
+    return [
+      {
+        id: 'vulnerability-details',
+        label: this.intl.t('vulnerabilityDetails'),
+        route: 'authenticated.dashboard.file.static-scan',
+        currentWhen: 'authenticated.dashboard.file.static-scan',
+      },
+    ];
+  }
+
+  get isRescanDisabled() {
+    return !this.file.isStaticCompleted || !this.file.isActive;
+  }
+
+  get useKnoxiqVulnerabilityTable() {
+    return this.knoxiqScan?.sastStatus === ENUMS.KNOXIQ_SCAN_STATUS.COMPLETED;
+  }
+
+  @action
+  handleRescanModalOpen() {
+    this.showRescanModal = true;
+  }
+
+  @action
+  closeRescanModal() {
+    this.showRescanModal = false;
+  }
+
+  @action
+  updateSorts(sorts: EmberTableSort[]) {
+    this.sorts = sorts;
+  }
+
+  handleRescanApp = task(async () => {
+    try {
+      const data = {
+        file_id: this.args.file.id,
+      };
+
+      const url = [
+        ENV.endpoints['files'],
+        this.args.file.id,
+        ENV.endpoints['rescan'],
+      ].join('/');
+
+      await this.ajax.post(url, {
+        namespace: ENV.namespace_v2,
+        data,
+      });
+
+      this.notify.info(this.tRescanInitiated);
+
+      if (!this.isDestroyed) {
+        this.showRescanModal = false;
+      }
+    } catch (error) {
+      this.notify.error((error as AjaxError).payload.detail);
+    }
+  });
+
+  get staticVulnerabilityCount() {
+    return this.fileRisk?.get('riskCountByScanType')?.static;
+  }
+
+  fetchFileRisk = task(async () => {
+    this.fileRisk = await this.args.file.fetchFileRisk();
+  });
+
+  fetchKnoxiqScan = task(async () => {
+    try {
+      this.knoxiqScan = await waitForPromise(
+        this.store.queryRecord('knoxiq-scan', {
+          id: this.args.file.id,
+          fileId: this.args.file.id,
+        })
+      );
+    } catch {
+      this.knoxiqScan = null;
+    }
+  });
+}
+
+declare module '@glint/environment-ember-loose/registry' {
+  export default interface Registry {
+    'FileDetails::StaticScan': typeof FileDetailsStaticScan;
+  }
+}

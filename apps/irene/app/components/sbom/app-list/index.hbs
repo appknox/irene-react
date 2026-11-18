@@ -1,0 +1,113 @@
+<div local-class='sbom-app-list-container'>
+
+  <Sbom::AppList::Header
+    @packageNameSearchQuery={{@queryParams.app_query}}
+    @onQueryChange={{this.searchSbomProjectForQuery}}
+    @handleClear={{this.handleClear}}
+    @filterPlatform={{this.filterPlatform}}
+    @selectedPlatformValue={{@queryParams.app_platform}}
+  />
+
+  <div class='my-3'>
+    <AkPaginationProvider
+      @results={{this.sbomProjectList}}
+      @onItemPerPageChange={{this.handleItemPerPageChange}}
+      @totalItems={{this.totalSbomProjectCount}}
+      @nextAction={{this.handlePrevNextAction}}
+      @prevAction={{this.handlePrevNextAction}}
+      @itemPerPageOptions={{array 10 25 50}}
+      @defaultLimit={{this.limit}}
+      @offset={{this.offset}}
+      as |pgc|
+    >
+      <Sbom::EmptyLoadingView
+        @empty={{this.hasNoSbomProject}}
+        @loading={{this.fetchSbomProjects.isRunning}}
+      >
+        <:emptySvg>
+          <AkSvg::OrgNamespaceEmpty data-test-sbomApp-emptySvg />
+        </:emptySvg>
+
+        <:emptyText>
+          <AkStack
+            class='mt-2'
+            @direction='column'
+            @alignItems='center'
+            @spacing='1'
+          >
+            <AkTypography data-test-sbomApp-emptyTextTitle @variant='h5'>
+              {{t 'sbomModule.sbomAppEmptyText.title'}}
+            </AkTypography>
+
+            <AkTypography
+              data-test-sbomApp-emptyTextDescription
+              {{style width='600px'}}
+              @color='textSecondary'
+              @align='center'
+            >
+              {{t 'sbomModule.sbomAppEmptyText.description'}}
+            </AkTypography>
+          </AkStack>
+        </:emptyText>
+
+        <:default>
+          <AkTable
+            local-class='sbom-app-table'
+            @hoverable={{true}}
+            data-test-sbomApp-table
+            as |t|
+          >
+            <t.head data-test-sbomApp-thead @columns={{this.columns}} />
+            <t.body @rows={{pgc.currentPageResults}} as |b|>
+              <b.row
+                {{style cursor='pointer'}}
+                @onClick={{this.handleSbomProjectRowClick}}
+                data-test-cy='sbomApp-row-{{b.rowValue.id}}'
+                data-test-sbomApp-row
+                as |r|
+              >
+                <r.cell data-test-sbomApp-cell>
+                  {{#let (component r.columnValue.component) as |Component|}}
+                    <Component
+                      @sbomProject={{r.rowValue}}
+                      @sbomFile={{r.rowValue.latestSbFile}}
+                      @onViewReportClick={{this.handleViewReportOpen}}
+                    />
+                  {{/let}}
+                </r.cell>
+              </b.row>
+            </t.body>
+          </AkTable>
+
+          <AkPagination
+            @disableNext={{pgc.disableNext}}
+            @nextAction={{pgc.nextAction}}
+            @disablePrev={{pgc.disablePrev}}
+            @prevAction={{pgc.prevAction}}
+            @endItemIdx={{pgc.endItemIdx}}
+            @startItemIdx={{pgc.startItemIdx}}
+            @itemPerPageOptions={{pgc.itemPerPageOptions}}
+            @onItemPerPageChange={{pgc.onItemPerPageChange}}
+            @selectedOption={{pgc.selectedOption}}
+            @tableItemLabel={{t 'apps'}}
+            @perPageTranslation={{t 'recordPerPage'}}
+            @totalItems={{pgc.totalItems}}
+          />
+
+          <Sbom::ScanReportDrawer
+            @open={{this.openViewReportDrawer}}
+            @onClose={{this.handleViewReportClose}}
+            @sbomFile={{this.selectedSbomFile}}
+            @showAppDetails={{true}}
+          />
+
+          {{#if this.showNoScanAlert}}
+            <Sbom::AppList::NoScanAlert
+              @onClose={{this.handleNoScanAlertClose}}
+            />
+          {{/if}}
+        </:default>
+      </Sbom::EmptyLoadingView>
+    </AkPaginationProvider>
+  </div>
+</div>

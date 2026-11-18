@@ -1,0 +1,9 @@
+{
+  "ignore_dirs": [
+    "tmp",
+    "dist",
+    "node_modules",
+    "staticserver/node_modules",
+    ".git"
+  ]
+}

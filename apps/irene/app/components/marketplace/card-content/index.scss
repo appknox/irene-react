@@ -1,0 +1,22 @@
+.marketplace-card-logo {
+  height: 50%;
+  width: 50%;
+  margin: auto;
+  padding: 1rem 0;
+
+  img {
+    height: 6rem;
+    width: 6rem;
+  }
+}
+
+.marketplace-card-desc {
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.marketplace-card-title {
+  font-size: 1.2rem;
+}

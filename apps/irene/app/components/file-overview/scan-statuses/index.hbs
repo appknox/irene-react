@@ -1,0 +1,70 @@
+<AkStack
+  @width='full'
+  @justifyContent='space-between'
+  local-class='file-overview-status'
+  data-test-fileOverview-scanStatuses
+>
+  <AkStack @spacing='1'>
+    {{#each this.scanStatuses as |status|}}
+      <AkStack
+        @alignItems='center'
+        @spacing='0.5'
+        data-test-fileOverview-scanStatuses='{{status.name}}'
+      >
+        <AkIcon
+          @iconName={{if status.isDone 'check-circle' 'circle-outline'}}
+          @color='success'
+          local-class='file-overview-status-icon'
+          data-test-fileOverview-scanStatus-icon
+        />
+
+        <AkTypography @variant='body2' data-test-fileOverview-scanStatus-name>
+          {{status.name}}
+        </AkTypography>
+      </AkStack>
+    {{/each}}
+
+    {{#unless this.isManualScanDisabled}}
+      <AkStack
+        @alignItems='center'
+        @spacing='0.5'
+        data-test-fileOverview-manualScanStatus
+      >
+        {{#if @file.isManualDone}}
+          <AkIcon
+            @iconName='check-circle'
+            @color='success'
+            local-class='file-overview-status-icon'
+            data-test-fileOverview-manualScanStatus-doneIcon
+          />
+        {{else}}
+          <AkIcon
+            @iconName={{if
+              @file.isManualRequested
+              'timer-outline'
+              'circle-outline'
+            }}
+            @color='success'
+            local-class='file-overview-status-icon'
+            data-test-fileOverview-manualScanStatus-requestedPendingIcon
+          />
+        {{/if}}
+
+        <AkTypography
+          @variant='body2'
+          data-test-fileOverview-manualScanStatus-name
+        >
+          {{t 'manual'}}
+        </AkTypography>
+      </AkStack>
+    {{/unless}}
+  </AkStack>
+
+  <AkTooltip
+    @placement='bottom'
+    @arrow={{true}}
+    @title='{{this.file.createdOnDateTime}}'
+  >
+    <AkIcon @iconName='event' @color='textPrimary' />
+  </AkTooltip>
+</AkStack>

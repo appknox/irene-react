@@ -1,0 +1,61 @@
+{{#if @loading}}
+  <AkSkeleton @height='32px' @width='170px' />
+
+{{else if this.isPending}}
+  <AkChip
+    @label={{t 'storeknox.waitingForApproval'}}
+    @variant='semi-filled'
+    @color='warn'
+    data-test-storeknoxDiscover-requestedAppsTable-row-waitingForApprovalChip
+  >
+    <:icon>
+      <AkIcon
+        @iconName='schedule-send'
+        data-test-storeknoxDiscover-requestedAppsTable-row-waitingForApprovalChipIcon
+      />
+    </:icon>
+  </AkChip>
+
+{{else}}
+  <AkStack
+    @justifyContent='center'
+    @direction='column'
+    data-test-storeknoxDiscover-requestedAppsTable-row-approvalOrRejectedInfoContainer
+  >
+    <AkTypography @color={{this.statusDetails.color}}>
+      {{this.statusDetails.text}}
+    </AkTypography>
+
+    <AkStack @alignItems='center' @spacing='0.5'>
+      <AkTypography
+        data-test-storeknoxDiscover-requestedAppsTable-row-approvalOrRejectedUserInfo
+      >
+        {{t 'by'}}
+        {{this.statusDetails.by}}
+      </AkTypography>
+
+      <AkTooltip @placement='bottom' @arrow={{true}} @color='light'>
+        <:tooltipContent>
+          <AkStack @spacing='0.5' @alignItems='center'>
+            <AkIcon @iconName='check-circle' @size='small' />
+
+            <AkTypography
+              @color='inherit'
+              data-test-storeknoxDiscover-requestedAppsTable-row-approvalOrRejectedDate
+            >
+              {{this.statusDetails.date}}
+            </AkTypography>
+          </AkStack>
+        </:tooltipContent>
+
+        <:default>
+          <AkIcon
+            @iconName='info'
+            local-class='info-icon'
+            data-test-storeknoxDiscover-requestedAppsTable-row-approvalOrRejectedDateTooltipIcon
+          />
+        </:default>
+      </AkTooltip>
+    </AkStack>
+  </AkStack>
+{{/if}}

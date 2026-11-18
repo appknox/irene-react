@@ -1,0 +1,42 @@
+{{! @glint-nocheck : did-insert, did-update, will-destroy, or}}
+{{#if this.mountContent}}
+  <EmberWormhole @to='ak-component-wormhole' @renderInPlace={{@renderInPlace}}>
+    <div
+      role='presentation'
+      ...attributes
+      data-test-ak-popover-root
+      local-class='ak-popover-root {{unless @anchorRef "hide"}}'
+    >
+      {{#if @hasBackdrop}}
+        <div
+          data-test-ak-popover-backdrop
+          role='button'
+          aria-hidden='true'
+          local-class='backdrop-root'
+          {{on 'click' this.handleBackdropClick}}
+        />
+      {{/if}}
+
+      <div
+        data-test-ak-popover-container
+        class='ak-popover {{@containerClass}}'
+        local-class='ak-popover-container'
+        {{did-insert this.elementInserted}}
+        {{did-update this.handleAnchorRefUpdate @anchorRef}}
+        {{will-destroy this.handleWillDestroyCleanup}}
+      >
+        {{yield}}
+
+        {{#if @arrow}}
+          <span
+            data-popper-arrow
+            class='{{@arrowClass}}'
+            local-class='
+              ak-popover-arrow 
+              ak-popover-arrow-color-{{or @arrowColor "light"}}'
+          ></span>
+        {{/if}}
+      </div>
+    </div>
+  </EmberWormhole>
+{{/if}}

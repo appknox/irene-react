@@ -1,0 +1,76 @@
+{{#if this.score}}
+  <AkStack
+    @width='full'
+    @direction='column'
+    @spacing='1.5'
+    local-class='
+      findings-card-root
+      {{if @isDefaultFinding "is-default"}}
+      {{if @isIgnored "is-ignored"}}
+    '
+    class='p-3'
+    data-test-storeknoxFakeAppsFindingsCard-root
+    data-test-storeknoxFakeAppsFindingsCard-title={{@title}}
+  >
+    {{#if @isDefaultFinding}}
+      <PoweredByAi::Chip
+        @clickable={{false}}
+        @chipText='Findings'
+        class='m-0'
+        data-test-storeknoxFakeAppsFindingsCard-poweredByAiChip
+      />
+    {{/if}}
+
+    <AkStack
+      @width='full'
+      @direction='row'
+      @justifyContent='space-between'
+      @spacing='1'
+    >
+      <AkStack
+        @width='full'
+        @direction='column'
+        @alignItems='flex-start'
+        {{style maxWidth='620px'}}
+      >
+        <AkStack @alignItems='center' {{style marginBottom='0.5em'}}>
+          <AkTypography
+            @fontWeight='bold'
+            data-test-storeknoxFakeAppsFindingsCard-title
+          >
+            {{@title}}
+          </AkTypography>
+        </AkStack>
+
+        <AkTypography data-test-storeknoxFakeAppsFindingsCard-description>
+          {{@description}}
+        </AkTypography>
+      </AkStack>
+
+      <AkStack
+        @direction='column'
+        @alignItems='flex-end'
+        @spacing='1'
+        {{style minWidth='80px'}}
+      >
+        <AkTypography
+          @variant='h4'
+          @fontWeight={{if @isDefaultFinding 'bold' 'regular'}}
+          local-class='score
+          {{if @isDefaultFinding "is-default"}}'
+          data-test-storeknoxFakeAppsFindingsCard-score
+        >
+          {{this.score}}
+        </AkTypography>
+
+        <AkTypography
+          @variant='body2'
+          @color='textSecondary'
+          data-test-storeknoxFakeAppsFindingsCard-scoreDescription
+        >
+          {{t 'storeknox.fakeApps.confidence'}}
+        </AkTypography>
+      </AkStack>
+    </AkStack>
+  </AkStack>
+{{/if}}

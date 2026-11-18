@@ -1,0 +1,115 @@
+<Organization::Integrations::Card
+  @data={{this.data}}
+  @onIntegrateClick={{if
+    this.data.isIntegrated
+    this.openSNRiskEditModal
+    this.navigateToOrgSettings
+  }}
+  @loading={{this.isFetchingSNConfig}}
+/>
+
+<ProjectSettings::Integrations::ConfigDrawer
+  @drawerTitle={{t 'serviceNowIntegration'}}
+  @openDrawer={{this.showEditSNRiskModal}}
+  @loadingDrawerSaveAction={{this.selectRiskThreshold.isRunning}}
+  @closeDrawerHandler={{this.closeSNRiskEditModal}}
+  @drawerSaveAction={{if
+    this.showSelectUI
+    this.saveSelectedRiskThreshold
+    this.openDeleteSNConfigConfirmBox
+  }}
+  @showDeleteButton={{if this.showSelectUI false true}}
+  @noFooter={{this.showDeleteSNConfigConfirmBox}}
+>
+  <:drawerContent>
+    {{#if this.showSelectUI}}
+      <AkTypography
+        @variant='h6'
+        @fontWeight='regular'
+        @color='textSecondary'
+        data-test-prjSettings-integrations-serviceNow-configDrawer-note
+      >
+        {{t 'otherTemplates.selectServiceNowRisk'}}
+      </AkTypography>
+
+      <AkStack @direction='column' @spacing='1'>
+        <AkTypography
+          @variant='h6'
+          data-test-prjSettings-integrations-serviceNow-configDrawer-thresholdTitle
+        >
+          {{t 'threshold'}}
+        </AkTypography>
+
+        <AkSelect
+          @selected={{this.selectedThreshold}}
+          @options={{this.thresholds}}
+          @onChange={{this.selectThreshold}}
+          @placeholder='{{t "selectThreshold"}}'
+          @triggerClass='select-threshold-class'
+          {{style width='300px'}}
+          data-test-prjSettings-integrations-serviceNow-configDrawer-thresholdList
+          as |threshold|
+        >
+          {{threshold-status threshold}}
+        </AkSelect>
+      </AkStack>
+    {{else if this.showDeleteSNConfigConfirmBox}}
+      <AkStack @direction='column' @spacing='1'>
+        <AkTypography
+          data-test-prjSettings-integrations-snProject-confirmDelete
+          @variant='body1'
+        >
+          {{t 'confirmBox.removeServiceNow'}}
+        </AkTypography>
+
+        <AkStack @spacing='1.5' class='pt-4'>
+          <AkButton
+            data-test-prjSettings-integrations-snProject-confirmDeleteBtn
+            {{on 'click' (perform this.deleteServiceNowConfig)}}
+          >
+            {{t 'yesDelete'}}
+          </AkButton>
+
+          <AkButton
+            @variant='outlined'
+            {{on 'click' this.closeDeleteSNConfigConfirmBox}}
+          >
+            {{t 'cancel'}}
+          </AkButton>
+        </AkStack>
+      </AkStack>
+
+    {{else if this.serviceNowConfig}}
+      <AkStack @justifyContent='space-between' @spacing='3' @width='full'>
+        <AkStack @direction='column' @spacing='1'>
+          <AkTypography @color='textSecondary' @variant='body2'>
+            {{t 'riskThresholdIntegrationDescription'}}
+          </AkTypography>
+
+          <AkTypography
+            @variant='body2'
+            @fontWeight='bold'
+            data-test-prjSettings-integrations-serviceNow-riskHeaderText
+          >
+            {{t 'threshold'}}
+          </AkTypography>
+
+          <ProjectSettings::Integrations::RiskThreshold
+            @computedRisk={{this.serviceNowConfig.riskThreshold}}
+            data-test-prjSettings-integrations-serviceNow-risk
+          />
+        </AkStack>
+
+        {{#unless this.isEditing}}
+          <AkIconButton
+            data-test-prjSettings-integrations-serviceNow-editBtn
+            @variant='outlined'
+            {{on 'click' this.onEditClick}}
+          >
+            <AkIcon @iconName='edit' />
+          </AkIconButton>
+        {{/unless}}
+      </AkStack>
+    {{/if}}
+  </:drawerContent>
+</ProjectSettings::Integrations::ConfigDrawer>

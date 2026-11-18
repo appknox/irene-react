@@ -1,0 +1,10 @@
+<AkTable data-test-component-list-skeleton-loader as |t|>
+  <t.head @columns={{@columns}} />
+  <t.body @rows={{this.loadingMockData}} as |b|>
+    <b.row as |r|>
+      <r.cell>
+        <AkSkeleton @width='100px' @height='20px' />
+      </r.cell>
+    </b.row>
+  </t.body>
+</AkTable>

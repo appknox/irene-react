@@ -1,0 +1,9 @@
+{{page-title 'SCA'}}
+
+<PageWrapper>
+  {{#if @model.isSbomEnabled}}
+    {{outlet}}
+  {{else}}
+    <Sbom::Upselling />
+  {{/if}}
+</PageWrapper>

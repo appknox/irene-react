@@ -1,0 +1,98 @@
+<div data-test-credit-transfer-confirm>
+  <div local-class='partner-credits' data-test-partner-credits>
+    <div local-class='row' data-test-row>
+      <div local-class='key' data-test-partner-current-credits-key>
+        {{t 'currentCredits'}}:
+      </div>
+
+      <strong local-class='value' data-test-partner-current-credits-value>
+        {{@partnerPlan.scansLeft}}
+        {{t 'pluralScans' itemCount=@partnerPlan.scansLeft}}
+      </strong>
+    </div>
+
+    <div local-class='row' data-test-row>
+      <div local-class='key' data-test-partner-remaining-credits-key>
+        {{t 'remainingCredits'}}:
+      </div>
+
+      <strong local-class='value' data-test-partner-remaining-credits-value>
+        {{@remainingCredits}}
+        {{t 'pluralScans' itemCount=@remainingCredits}}
+      </strong>
+    </div>
+  </div>
+
+  <AkDivider class='my-2' @color='dark' />
+
+  <div local-class='client-crdits' data-test-client-credits>
+    <div local-class='row' data-test-row>
+      <div local-class='key' data-test-client-key>
+        {{t 'client'}}:
+      </div>
+
+      <strong
+        local-class='value {{unless @clientName "empty-title"}}'
+        data-test-client-value
+      >
+        {{#if @clientName}}
+          {{@clientName}}
+        {{else}}
+          {{t 'noName'}}
+        {{/if}}
+      </strong>
+    </div>
+
+    <div local-class='row' data-test-row>
+      <div local-class='key' data-test-client-current-credits-key>
+        {{t 'currentCredits'}}:
+      </div>
+
+      <strong local-class='value' data-test-client-current-credits-value>
+        {{@clientPlan.scansLeft}}
+        {{t 'pluralScans' itemCount=@clientPlan.scansLeft}}
+      </strong>
+    </div>
+
+    <div local-class='row' data-test-row>
+      <div local-class='key' data-test-new-credits-key>
+        {{t 'newCredits'}}:
+      </div>
+
+      <strong local-class='value' data-test-new-credits-value>
+        {{@transferCount}}
+        {{t 'pluralScans' itemCount=@transferCount}}
+      </strong>
+    </div>
+  </div>
+
+  <AkStack
+    @justifyContent='center'
+    @alignItems='center'
+    @spacing='2'
+    @width='full'
+    class='mt-2'
+    data-test-action-btns
+  >
+    {{#if @transferCredits}}
+      <AkButton
+        @variant='outlined'
+        data-test-confirm-btn
+        {{on 'click' @transferCredits}}
+      >
+        {{t 'confirmTransfer'}}
+      </AkButton>
+    {{/if}}
+
+    {{#if @toggleMode}}
+      <AkButton
+        @variant='outlined'
+        @color='neutral'
+        data-test-back-btn
+        {{on 'click' @toggleMode}}
+      >
+        {{t 'back'}}
+      </AkButton>
+    {{/if}}
+  </AkStack>
+</div>

@@ -1,0 +1,19 @@
+.organization-settings-root {
+  background-color: var(--organization-settings-wrapper-background-color);
+  min-height: calc(100vh - 56px);
+
+  .organization-settings-breadcrumbs-container,
+  .organization-settings-tabs-container {
+    position: sticky;
+    z-index: 100;
+    background-color: var(--organization-settings-wrapper-background-color);
+  }
+
+  .organization-settings-breadcrumbs-container {
+    top: -0.5em;
+  }
+
+  .organization-settings-tabs-container {
+    top: 3em;
+  }
+}

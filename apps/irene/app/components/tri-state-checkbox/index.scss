@@ -1,0 +1,25 @@
+.container {
+  width: 10rem;
+  position: relative;
+
+  .overridden {
+    position: relative;
+    border: 1px solid var(--tri-state-checkbox-border-color);
+    margin-top: 0.3rem;
+    margin-bottom: 0.35rem;
+    border-radius: 0.35rem;
+    background: var(--tri-state-checkbox-overridden-bg);
+  }
+
+  .reset-icon-btn-container {
+    position: absolute;
+    right: 0;
+    top: 0px;
+    transform: translateY(-47%) translateX(50%);
+  }
+
+  .reset-icon {
+    background-color: var(--tri-state-reset-icon-bg);
+    border-radius: 100%;
+  }
+}

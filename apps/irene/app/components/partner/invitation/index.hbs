@@ -1,0 +1,68 @@
+<div
+  local-class='invitation {{if @request.hasExpired "invitation-expired"}}'
+  ...attributes
+>
+  <AkStack @direction='column' @spacing='0.5' class='pr-2' local-class='user'>
+    <AkTypography @noWrap={{true}}>{{@request.email}}</AkTypography>
+
+    <AkTypography @color='neutral' @variant='body2' @noWrap={{true}}>
+      {{@request.fullName}}
+    </AkTypography>
+  </AkStack>
+
+  <AkTypography @color='neutral' @variant='body2' @noWrap={{true}}>
+    {{@request.data.company}}
+  </AkTypography>
+
+  <AkTypography
+    title='{{day-js date=@request.updatedOn format='DD MMM YYYY HH:mm A'}}'
+    @variant='body2'
+  >
+    <em>{{dayjs-from-now @request.updatedOn}}</em>
+  </AkTypography>
+
+  <div>
+    {{#if @request.hasExpired}}
+      <AkTypography
+        @color='primary'
+        @variant='body2'
+        title='{{day-js date=@request.validUntil format='DD MMM YYYY'}}'
+      >
+        {{t 'expired'}}
+      </AkTypography>
+    {{else}}
+      <AkTypography
+        title='{{day-js date=@request.validUntil format='DD MMM YYYY HH:mm A'}}'
+        @variant='body2'
+      >
+        <em>{{day-js date=@request.validUntil format='DD MMM YYYY'}}</em>
+      </AkTypography>
+    {{/if}}
+  </div>
+
+  <div>
+    <div local-class='source source-{{@request.source}}'>
+      {{@request.source}}
+    </div>
+  </div>
+
+  <AkStack @justifyContent='flex-end' @alignItems='center' @spacing='1'>
+    <AkTooltip @placement='top' @arrow={{true}} @title={{t 'resend'}}>
+      <AkIconButton
+        title='Resend invite mail'
+        {{on 'click' (fn @onResend @request)}}
+      >
+        <AkIcon @iconName='refresh' />
+      </AkIconButton>
+    </AkTooltip>
+
+    <AkTooltip @placement='top' @arrow={{true}} @title={{t 'delete'}}>
+      <AkIconButton
+        title='Delete invitation'
+        {{on 'click' (fn @onDelete @request)}}
+      >
+        <AkIcon @iconName='delete' @color='primary' />
+      </AkIconButton>
+    </AkTooltip>
+  </AkStack>
+</div>

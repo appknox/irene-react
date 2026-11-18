@@ -1,0 +1,18 @@
+.findings-card-root {
+  align-self: flex-end;
+  border: 1px solid var(--storeknox-fake-apps-findings-card-border);
+
+  &.is-default {
+    background-color: var(--storeknox-fake-apps-findings-card-background);
+  }
+
+  &.is-ignored {
+    background-color: var(
+      --storeknox-fake-apps-findings-card-ignored-background
+    );
+  }
+
+  .score.is-default {
+    color: var(--storeknox-fake-apps-findings-card-overall-score-color);
+  }
+}

@@ -1,0 +1,23 @@
+<AkStack @width='full' @alignItems='center' class='mb-3'>
+  <AkBreadcrumbs::AutoTrail />
+</AkStack>
+
+<AkStack
+  @width='full'
+  local-class='header-security-file-search-page-title'
+  @alignItems='center'
+  class='mb-4'
+>
+  <AkStack @direction='column' @spacing='0.5'>
+    <AkTypography @variant='h5' data-test-security-file-search-list-heading>
+      List of Files
+    </AkTypography>
+
+    <AkTypography
+      @variant='body2'
+      data-test-security-file-search-list-description
+    >
+      Here you can view all the files of a selected project.
+    </AkTypography>
+  </AkStack>
+</AkStack>

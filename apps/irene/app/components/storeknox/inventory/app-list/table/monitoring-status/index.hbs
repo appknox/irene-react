@@ -1,0 +1,48 @@
+<AkTooltip
+  @placement='bottom'
+  @disabled={{this.disableTooltip}}
+  @arrow={{true}}
+  @color='light'
+>
+  <:tooltipContent>
+    <div local-class='tooltip-content'>
+      <AkTypography
+        @color='textSecondary'
+        {{style textTransform='uppercase'}}
+        data-test-storeknoxInventory-appListTable-monitoringStatusTooltipHeaderText
+      >
+        {{t 'reason'}}
+      </AkTypography>
+
+      <AkTypography
+        class='mt-1'
+        data-test-storeknoxInventory-appListTable-monitoringStatusTooltipText
+      >
+        {{this.tooltipMessage}}
+        {{this.tooltipSuffix}}
+      </AkTypography>
+    </div>
+  </:tooltipContent>
+
+  <:default>
+    <AkStack @alignItems='center' @spacing='0.5'>
+      {{#if @loading}}
+        <AkSkeleton @variant='circular' @height='16px' @width='16px' />
+
+        <AkSkeleton @variant='rounded' @height='19px' @width='100px' />
+      {{else}}
+        {{#let (component this.iconDetails.icon) as |Icon|}}
+          <Icon
+            data-test-storeknoxInventory-appListTable-monitoringStatusIcon='{{this.iconDetails.key}}'
+          />
+        {{/let}}
+
+        <AkTypography
+          data-test-storeknoxInventory-appListTable-monitoringStatusText
+        >
+          {{this.statusText}}
+        </AkTypography>
+      {{/if}}
+    </AkStack>
+  </:default>
+</AkTooltip>

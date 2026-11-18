@@ -1,0 +1,13 @@
+<LinkTo
+  @route='authenticated.dashboard.file'
+  @model={{this.project.lastFile.id}}
+  ...attributes
+  data-test-project-overview-container
+  data-test-project-overview-card='{{this.project.lastFile.id}}'
+>
+  <AppFileCard
+    @file={{this.project.lastFile}}
+    @showMenuButton={{true}}
+    @hideCTAs={{true}}
+  />
+</LinkTo>

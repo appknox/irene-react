@@ -1,0 +1,67 @@
+<AkStack @direction='column' @width='full'>
+  <Storeknox::InventoryDetails::SectionHeader
+    @color='white'
+    {{style height='50px'}}
+  >
+    <:icon>
+      <AkIcon
+        @iconName='auto-graph'
+        @color='textPrimary'
+        data-test-storeknoxInventoryDetails-actionListHeaderIcon
+      />
+    </:icon>
+
+    <:default>
+      <AkStack
+        @width='full'
+        @justifyContent='space-between'
+        @alignItems='center'
+      >
+        <AkTypography
+          @fontWeight='medium'
+          data-test-storeknoxInventoryDetails-actionListHeaderText
+        >
+          {{t 'storeknox.actionNeeded'}}
+          {{#if this.showActionableItemsCount}}
+            ({{this.actionableItemsCount}})
+          {{/if}}
+        </AkTypography>
+      </AkStack>
+    </:default>
+  </Storeknox::InventoryDetails::SectionHeader>
+
+  <Storeknox::InventoryDetails::SectionInfo
+    @width='full'
+    @spacing='1'
+    @alignItems='center'
+  >
+    {{#each this.actionsList as |action|}}
+      {{#unless action.hideAction}}
+        <AkTooltip
+          @disabled={{not action.shouldShowDisabledTooltip}}
+          @title={{action.disabledTooltipMessage}}
+          @arrow={{true}}
+          @placement='top'
+          data-test-storeknoxInventoryDetails-actionBtnTooltip='{{action.id}}'
+        >
+          <AkLink
+            @disabled={{action.disableActionButton}}
+            @route={{action.route}}
+            @model={{this.skInventoryApp.id}}
+          >
+            <Storeknox::InventoryDetails::AppDetails::ActionsList::Button
+              @needsAction={{action.needsAction}}
+              @featureInProgress={{action.featureInProgress}}
+              @label={{action.label}}
+              @skInventoryApp={{this.skInventoryApp}}
+              @statusIsInitializing={{action.statusIsInitializing}}
+              @disabled={{action.disableActionButton}}
+              @showDisabledState={{action.showDisabledState}}
+              data-test-storeknoxInventoryDetails-actionBtn='{{action.id}}'
+            />
+          </AkLink>
+        </AkTooltip>
+      {{/unless}}
+    {{/each}}
+  </Storeknox::InventoryDetails::SectionInfo>
+</AkStack>
