@@ -12,7 +12,9 @@
     "lint": "eslint .",
     "test": "vitest run --coverage",
     "type-check": "pnpm routes:generate && tsc -b --noEmit",
-    "build:embed": "vite build --config vite.embed.config.ts && node scripts/scope-embed-css.ts embed-dist/style.css"
+    "build:embed": "vite build --config vite.embed.config.ts && node scripts/scope-embed-css.ts embed-dist/style.css",
+    "test:shard": "vitest run --coverage --reporter=blob",
+    "test:merge": "vitest --merge-reports .vitest/blob --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

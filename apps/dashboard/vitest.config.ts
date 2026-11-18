@@ -29,11 +29,16 @@ export default defineConfig({
     environment: 'jsdom',
 
     /*
-      One jsdom per worker rather than one per file, which the files were
-      spending most of the run creating. The setup file clears the module
-      state that then outlives a file: storage, the stores and the handlers.
+      A jsdom and a module registry per file.
+
+      Sharing them across a worker is faster, and was how this ran, but it
+      makes a file's result depend on which files ran before it in the same
+      worker: a `vi.mock` only applies if no earlier file imported the real
+      module, and the locale a file reads at import time is whatever the last
+      one left. Both failed in CI, where the files group differently than they
+      do here, and neither is something a test can defend against.
     */
-    isolate: false,
+    isolate: true,
     globals: true,
     setupFiles: ['./tests/setup.ts'],
     coverage: coverageConfig,

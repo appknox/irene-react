@@ -65,23 +65,23 @@ describe('getProductFeatureIdForPath', () => {
 
 describe('getProductFeatureName', () => {
   it.each([
-    ['appknox', akMT('vapt')],
-    ['storeknox', akMT('appMonitoring')],
-    ['offensive-security', akMT('offensiveSecurity.title')],
-    ['reporting', akMT('reportModule.title')],
-    ['security', akMT('securityDashboard')],
-  ] as const)('calls %s "%s" on a whitelabel install', (id, expected) => {
-    expect(getProductFeatureName(id, false)).toBe(expected);
+    ['appknox', 'vapt'],
+    ['storeknox', 'appMonitoring'],
+    ['offensive-security', 'offensiveSecurity.title'],
+    ['reporting', 'reportModule.title'],
+    ['security', 'securityDashboard'],
+  ] as const)('names %s after %s on a whitelabel install', (id, messageId) => {
+    expect(getProductFeatureName(id, false)).toBe(akMT(messageId));
   });
 
   it.each([
-    ['appknox', akMT('appknox')],
-    ['storeknox', akMT('storeknox.title')],
-    ['offensive-security', akMT('offensiveSecurity.title')],
-    ['reporting', akMT('reportModule.title')],
-    ['security', akMT('securityDashboard')],
-  ] as const)('calls %s "%s" on an Appknox host', (id, expected) => {
-    expect(getProductFeatureName(id, true)).toBe(expected);
+    ['appknox', 'appknox'],
+    ['storeknox', 'storeknox.title'],
+    ['offensive-security', 'offensiveSecurity.title'],
+    ['reporting', 'reportModule.title'],
+    ['security', 'securityDashboard'],
+  ] as const)('names %s after %s on an Appknox host', (id, messageId) => {
+    expect(getProductFeatureName(id, true)).toBe(akMT(messageId));
   });
 });
 

@@ -27,8 +27,59 @@ jobs:
       - name: Type check
         run: pnpm lint:types
 
+      # The dashboard's own suite is sharded below; this covers the packages.
       - name: Test
-        run: pnpm test:unit
+        run: pnpm test:unit --filter=!@irene/dashboard
+
+  react-test:
+    name: React tests ${{ matrix.shard }}/4
+    runs-on: [ubuntu-latest]
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Application
+        uses: ./.github/actions/setup-app
+
+      # The suite imports from the workspace packages, which turbo builds for
+      # the test task. Running vitest directly means building them here.
+      - name: Build packages
+        run: pnpm build
+
+      # Each shard measures its own files; the blobs are merged afterwards, so
+      # coverage is judged on the whole suite rather than a quarter of it.
+      - name: Test
+        working-directory: apps/dashboard
+        run: pnpm test:shard --shard=${{ matrix.shard }}/4
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: vitest-blob-${{ matrix.shard }}
+          path: apps/dashboard/.vitest/blob/*
+          retention-days: 1
+
+  react-coverage:
+    name: React coverage
+    needs: [react-test]
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Application
+        uses: ./.github/actions/setup-app
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: vitest-blob-*
+          merge-multiple: true
+          path: apps/dashboard/.vitest/blob
+
+      - name: Merge reports and check coverage
+        working-directory: apps/dashboard
+        run: pnpm test:merge
 
   ember-build:
     name: Build Ember app
@@ -164,6 +215,16 @@ jobs:
           name: ember-dist
           path: apps/irene/dist
 
+      # --wmmf writes the per-module metadata the summary below reads.
       - name: Test
         working-directory: apps/irene
-        run: npm run test:ember -- ${{ matrix.tests.commandArgs }} --path=dist
+        run: npm run test:ember -- ${{ matrix.tests.commandArgs }} --path=dist --wmmf
+
+      - name: Job Summary
+        if: always()
+        working-directory: apps/irene
+        run: |
+          echo "| Module | Total | Passed | Failed | Skipped | Duration (ms) |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- | --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+
+          cat module-metadata-*.json | jq -r '.modules[] | "\(.moduleName | gsub("\\|"; "\\\\|")) | \(.total) | \(.passed) | \(.failed) | \(.skipped) | \(.duration) "' >> $GITHUB_STEP_SUMMARY
