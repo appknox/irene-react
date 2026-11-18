@@ -39,7 +39,11 @@ const MULTILINE_STATEMENTS = [
 ];
 
 export default defineConfig([
-  globalIgnores(['**/dist', '**/coverage', '**/.turbo', '**/routeTree.gen.ts']),
+  /*
+    apps/irene is the vendored Ember app. It carries its own eslintrc and its
+    own rules, and is linted by its own tasks, not these.
+  */
+  globalIgnores(['**/dist', '**/coverage', '**/.turbo', '**/routeTree.gen.ts', 'apps/irene/**']),
 
   {
     files: ['**/*.{ts,tsx}'],

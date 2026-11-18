@@ -5,7 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "types": ["vite/client", "vite-plugin-svgr/client"],
+    "types": ["node", "vite/client", "vite-plugin-svgr/client"],
 
     "strict": true,
     "noUnusedLocals": true,
@@ -25,5 +25,16 @@
       "@tests/*": ["./tests/*"]
     }
   },
-  "include": ["src", "tests", "vite.config.ts", "vitest.config.ts", "../../types"]
+  "include": [
+    "src",
+    "tests",
+    "scripts",
+    "vite",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "../../types",
+
+    // Assembles the deployed bundle from this app's dist and the Ember app's.
+    "../../scripts"
+  ]
 }

@@ -4,33 +4,40 @@
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "engines": {
-    "node": ">=24",
+    "node": ">=24.22.1",
+    "npm": ">=11",
     "pnpm": ">=10"
   },
   "scripts": {
     "prepare": "husky",
     "build": "turbo build",
     "build:test": "turbo build:test",
+    "build:ember": "npm --prefix apps/irene run build",
+    "build:all": "pnpm build && pnpm build:ember",
     "build:icons": "pnpm --filter @irene/ui build-icons",
     "dev": "cross-env IRENE_API_HOST=http://localhost:8000 turbo dev",
-    "start": "pnpm dev",
-    "startstaging": "cross-env IRENE_API_HOST=https://api.appknox.io turbo dev",
-    "startprod": "cross-env IRENE_API_HOST=https://api.appknox.com turbo dev",
+    "start": "cross-env IRENE_API_HOST=http://localhost:8000 pnpm start-both",
+    "startstaging": "cross-env IRENE_API_HOST=https://api.appknox.io pnpm start-both",
+    "startprod": "cross-env IRENE_API_HOST=https://api.appknox.com pnpm start-both",
+    "start-both": "concurrently \"turbo dev\" \"npm:start-ember\" --names react,ember --prefix-colors cyan,magenta",
+    "start-ember": "cd apps/irene && npx ember server --port 4210",
     "storybook": "pnpm --filter @irene/ui storybook",
     "build-storybook": "pnpm --filter @irene/ui build-storybook",
     "lint": "concurrently \"npm:lint:*(!fix)\" --names \"lint:\"",
     "lint:fix": "concurrently \"npm:lint:*:fix\" --names \"fix:\"",
     "lint:js": "eslint . --cache",
     "lint:js:fix": "eslint . --fix",
-    "lint:css": "stylelint \"**/*.{css,scss}\"",
-    "lint:css:fix": "stylelint \"**/*.{css,scss}\" --fix",
+    "lint:css": "stylelint \"{apps/dashboard,packages}/**/*.{css,scss}\"",
+    "lint:css:fix": "stylelint \"{apps/dashboard,packages}/**/*.{css,scss}\" --fix",
     "lint:types": "turbo type-check",
     "test": "concurrently \"npm:lint\" \"npm:test:*\" --names \"lint,test:\"",
     "test:unit": "turbo test",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run --browser chrome",
     "netlify:deploy": "netlify deploy --dir apps/dashboard/dist",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
+    "build:bundle": "node scripts/build-bundle.ts",
+    "serve:bundle": "node bundle/index.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -60,20 +67,5 @@
     "typescript-eslint": "^8.70.0",
     "vite": "catalog:",
     "vitest": "^5.0.0"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
-      "prettier --write",
-      "eslint --max-warnings=0"
-    ],
-    "*.{css,scss}": [
-      "stylelint --fix",
-      "prettier --write",
-      "stylelint --max-warnings=0"
-    ],
-    "*.{json,md,html}": [
-      "prettier --write"
-    ]
   }
 }

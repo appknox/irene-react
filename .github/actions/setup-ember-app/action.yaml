@@ -1,0 +1,16 @@
+name: Setup Ember App
+description: Installs Node and the vendored Ember app's dependencies
+runs:
+  using: 'composite'
+  steps:
+    # The Ember app is outside the pnpm workspace and installs with npm.
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: 'apps/irene/.nvmrc'
+        cache: 'npm'
+        cache-dependency-path: 'apps/irene/package-lock.json'
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: apps/irene
+      run: npm ci

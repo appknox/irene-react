@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   buildBasicCredential,
@@ -148,5 +148,60 @@ describe('buildBasicCredential', () => {
     ['an accent', 3, 'café', 'MzpjYWbDqQ=='],
   ])('encodes %s, which btoa rejects on its own', (_label, userId, token, expected) => {
     expect(buildBasicCredential(userId, token)).toBe(expected);
+  });
+});
+
+describe('the session the Ember app reads', () => {
+  const EMBER_KEY = 'ember_simple_auth-session';
+
+  const session = {
+    token: 'tok-1',
+    userId: 42,
+    b64token: buildBasicCredential(42, 'tok-1'),
+  };
+
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("is written alongside this app's own, in the shape Ember persists", () => {
+    storeSession(session);
+
+    expect(JSON.parse(window.localStorage.getItem(EMBER_KEY) ?? '{}')).toStrictEqual({
+      authenticated: {
+        authenticator: 'authenticator:login',
+        token: 'tok-1',
+        user_id: 42,
+        b64token: session.b64token,
+      },
+    });
+  });
+
+  it('carries the same credential, so neither app asks for a sign-in the other has done', () => {
+    storeSession(session);
+
+    const mirrored = JSON.parse(window.localStorage.getItem(EMBER_KEY) ?? '{}');
+
+    expect(mirrored.authenticated.b64token).toBe(getStoredSession()?.b64token);
+  });
+
+  it('is forgotten on sign-out, so the Ember app does not stay signed in', () => {
+    storeSession(session);
+    clearStoredSession();
+
+    expect(window.localStorage.getItem(EMBER_KEY)).toBeNull();
+  });
+
+  it('is skipped where storage is blocked, without failing the sign-in', () => {
+    const setItem = vi
+      .spyOn(Storage.prototype, 'setItem')
+      .mockImplementationOnce(() => undefined)
+      .mockImplementationOnce(() => {
+        throw new Error('storage is blocked');
+      });
+
+    expect(() => storeSession(session)).not.toThrow();
+
+    setItem.mockRestore();
   });
 });

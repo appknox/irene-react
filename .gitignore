@@ -46,3 +46,10 @@ routeTree.gen.ts
 
 # Generated from translations/ by packages/translations/scripts/generate.ts
 packages/translations/src/generated/
+
+# Assembled by `pnpm build:bundle` from both apps' dists.
+bundle/
+
+# Build output of the embed surface.
+embed-dist/
+apps/irene/public/assets/embed/

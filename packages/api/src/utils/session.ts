@@ -9,6 +9,46 @@ export interface IreneAuthSession {
 
 export const IRENE_AUTH_SESSION_KEY = 'irene:auth-session';
 
+/*
+  Where the Ember app keeps its session: Ember Simple Auth's default local
+  storage store, under the shape its authenticator persists. Both apps are
+  served from one origin, so a session written here is the same session the
+  Ember app restores, and crossing between them does not ask anyone to sign in
+  again.
+
+  `authenticator` names the one that rebuilt sessions are restored through. It
+  re-checks the credential against the API on boot, so a mirrored entry whose
+  token has since been revoked signs the user out rather than being trusted.
+*/
+const EMBER_SESSION_KEY = 'ember_simple_auth-session';
+const EMBER_AUTHENTICATOR = 'authenticator:login';
+
+/**
+ * Writes the session where the Ember app looks for it.
+ *
+ * Its field names differ from this app's, so the values are re-keyed rather
+ * than the object being reused.
+ *
+ * @param session - The session to mirror.
+ */
+function _mirrorToEmber(session: IreneAuthSession) {
+  try {
+    window.localStorage.setItem(
+      EMBER_SESSION_KEY,
+      JSON.stringify({
+        authenticated: {
+          authenticator: EMBER_AUTHENTICATOR,
+          token: session.token,
+          user_id: session.userId,
+          b64token: session.b64token,
+        },
+      })
+    );
+  } catch {
+    // Storage is blocked. This app still works; the Ember pages will ask for a sign-in.
+  }
+}
+
 /**
  * Checks that a parsed value has the shape of a stored session.
  *
@@ -103,12 +143,16 @@ export function getStoredSession() {
  */
 export function storeSession(session: IreneAuthSession) {
   window.localStorage.setItem(IRENE_AUTH_SESSION_KEY, JSON.stringify(session));
+  _mirrorToEmber(session);
 }
 
 /** Forgets the stored session. Safe to call when nothing is stored. */
 export function clearStoredSession() {
   try {
     window.localStorage.removeItem(IRENE_AUTH_SESSION_KEY);
+
+    // Left behind, the Ember app would still consider the user signed in.
+    window.localStorage.removeItem(EMBER_SESSION_KEY);
   } catch {
     // Nothing stored means nothing to clear.
   }

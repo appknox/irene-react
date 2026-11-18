@@ -8,6 +8,8 @@ import { buildConfigDefine } from '@irene/config';
 import { translationsPlugin } from '@irene/translations/vite';
 import { svgrPlugin } from '@irene/ui/vite';
 
+import { emberProxy } from './vite/ember-proxy.ts';
+
 // Resolve paths to files in the src directory.
 const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -31,5 +33,11 @@ export default defineConfig({
     svgrPlugin(),
   ],
   resolve: { alias: { '@': resolvePath('./src') } },
-  server: { port: 4200, strictPort: true },
+
+  /*
+    One origin for both apps, so the session is shared and crossing between
+    them is a navigation rather than a change of origin. The Ember app serves
+    the forwarded paths from its own dev server on 4210.
+  */
+  server: { port: 4200, strictPort: true, proxy: emberProxy() },
 });
