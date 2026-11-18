@@ -64,7 +64,11 @@ module.exports = function (defaults) {
       enabled: true,
       // public-api-docs.css is loaded at runtime via a hardcoded path
       // (see irene/utils/load-public-api-docs-styles), so it can't be fingerprinted.
-      exclude: ['runtimeconfig.js', 'public-api-docs.css'],
+      //
+      // assets/embed is the React app's own build, loaded by URL at runtime
+      // (see irene/utils/react-embed). It hashes its own chunks; its entry and
+      // stylesheet have to keep the names that module asks for.
+      exclude: ['runtimeconfig.js', 'public-api-docs.css', 'assets/embed'],
       extensions: defaultFingerprintExtensions.concat(['svg']),
     },
     sassOptions: {
