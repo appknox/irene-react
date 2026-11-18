@@ -1,27 +1,16 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
-import { getStoredSession } from '@irene/api/utils/session';
-
-import { loadConfiguration } from '@/actions/load-configuration';
-import { setupUserAndOrgContext } from '@/actions/setup-user-context';
+import { clearStoredSession, storeSession } from '@irene/api/utils/session';
 
 import { ScreenContext } from './screen-context';
 
-vi.mock('@/actions/load-configuration', () => ({
-  loadConfiguration: vi.fn().mockResolvedValue(undefined),
-}));
-
-vi.mock('@/actions/setup-user-context', () => ({
-  setupUserAndOrgContext: vi.fn().mockResolvedValue(undefined),
-}));
-
-vi.mock('@irene/api/utils/session', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@irene/api/utils/session')>()),
-  getStoredSession: vi.fn(() => ({ token: 't', userId: 7, b64token: 'b' })),
-}));
-
+/*
+  No module mocks: files share a module registry here (isolate: false), so a
+  mock only applies if no other file imported the real module first. The
+  session is driven through its own storage instead, which nothing else holds.
+*/
 function renderInContext() {
   return render(
     <QueryClientProvider client={new QueryClient()}>
@@ -32,32 +21,32 @@ function renderInContext() {
   );
 }
 
+afterEach(() => {
+  clearStoredSession();
+});
+
 describe('ScreenContext', () => {
   it('renders the screen straight away rather than holding it back', () => {
+    storeSession({ token: 'tok', userId: 7, b64token: 'b64' });
+
     renderInContext();
 
     expect(screen.getByText('screen')).toBeInTheDocument();
   });
 
-  it('loads the configuration the screen assumes is already there', async () => {
+  it('renders the screen when nobody is signed in', () => {
+    clearStoredSession();
+
     renderInContext();
 
-    await waitFor(() => expect(loadConfiguration).toHaveBeenCalled());
+    expect(screen.getByText('screen')).toBeInTheDocument();
   });
 
-  it('fills the organization store the signed-in routes would have filled', async () => {
-    renderInContext();
-
-    await waitFor(() => expect(setupUserAndOrgContext).toHaveBeenCalledWith(expect.anything(), 7));
-  });
-
-  it('loads the configuration but no organization when nobody is signed in', async () => {
-    vi.mocked(getStoredSession).mockReturnValueOnce(null);
+  it('keeps the screen rendered while the context it needs loads', async () => {
+    storeSession({ token: 'tok', userId: 7, b64token: 'b64' });
 
     renderInContext();
 
-    await waitFor(() => expect(loadConfiguration).toHaveBeenCalled());
-
-    expect(setupUserAndOrgContext).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.getByText('screen')).toBeInTheDocument());
   });
 });

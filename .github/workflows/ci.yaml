@@ -59,10 +59,11 @@ jobs:
       - name: Setup Ember Application
         uses: ./.github/actions/setup-ember-app
 
-      # ember-cli-typescript reports type errors without failing the build.
+      # ember-cli-typescript reports type errors without failing the build, and
+      # the app has no script of its own for this, so tsc is run directly.
       - name: Type check
         working-directory: apps/irene
-        run: npm run type-check
+        run: npx tsc --noEmit -p tsconfig.json
 
       # The Ember app lints with its own .eslintrc.js. ESLint 8 searches
       # ancestors for a flat config and would otherwise pick up the workspace's
