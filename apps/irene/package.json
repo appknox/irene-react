@@ -13,6 +13,7 @@
   "scripts": {
     "build": "ember build --environment=production",
     "build:test": "ember build --environment=test",
+    "build:embed": "mkdir -p public/assets/embed && cp -R ../dashboard/embed-dist/. public/assets/embed/",
     "build:icons": "tsx ./scripts/build-icons.mjs || node ./scripts/build-icons.mjs",
     "lint": "concurrently \"npm:lint:*(!fix)\" --names \"lint:\"",
     "lint:css": "stylelint \"**/*.{css,scss}\" --allow-empty-input",

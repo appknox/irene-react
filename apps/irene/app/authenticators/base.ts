@@ -8,6 +8,7 @@ import ENV from 'irene/config/environment';
 import type OidcService from 'irene/services/oidc';
 import type FreshdeskService from 'irene/services/freshdesk';
 import { getB64Token } from 'irene/utils/b64-encode-unicode';
+import { syncReactSession } from 'irene/utils/react-session';
 import type IreneAjaxService from 'irene/services/ajax';
 import type { SessionService } from 'irene/adapters/auth-base';
 
@@ -24,6 +25,8 @@ export interface IreneLastTransitionInfoProps {
 
 export const processData = (data: LoginSuccessDataProps) => {
   data.b64token = getB64Token(data.user_id, data.token);
+
+  syncReactSession(data);
 
   return data;
 };
@@ -71,6 +74,10 @@ export default class BaseAuthenticator extends Base {
       },
     });
 
+    // A session restored from storage fires no authentication event, and the
+    // React app's entry may be missing or stale from before this ran.
+    syncReactSession(data);
+
     return data;
   }
 
@@ -78,6 +85,8 @@ export default class BaseAuthenticator extends Base {
     const url = ENV['ember-simple-auth']['logoutEndPoint'];
 
     await this.ajax.post(url);
+
+    syncReactSession(null);
 
     this.freshdesk.destroyFreshchatWidget();
 
