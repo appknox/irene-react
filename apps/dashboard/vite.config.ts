@@ -5,10 +5,9 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 import { buildConfigDefine } from '@irene/config';
+import { emberProxy } from '@irene/ember-bridge/proxy';
 import { translationsPlugin } from '@irene/translations/vite';
 import { svgrPlugin } from '@irene/ui/vite';
-
-import { emberProxy } from './vite/ember-proxy.ts';
 
 // Resolve paths to files in the src directory.
 const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.url));

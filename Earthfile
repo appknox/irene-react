@@ -6,7 +6,7 @@ ARG TAG="$EARTHLY_GIT_BRANCH"_"$EARTHLY_GIT_SHORT_HASH"
 ARG CONTAINER="ghcr.io/appknox/irene-react"
 
 docker:
-    FROM DOCKERFILE .
+    FROM DOCKERFILE -f deploy/Dockerfile .
     SAVE IMAGE irene-react:"$TAG"
 
 publish:

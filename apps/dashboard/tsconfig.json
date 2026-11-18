@@ -32,9 +32,6 @@
     "vite",
     "vite.config.ts",
     "vitest.config.ts",
-    "../../types",
-
-    // Assembles the deployed bundle from this app's dist and the Ember app's.
-    "../../scripts"
+    "../../types"
   ]
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EMBER_OWNED_PATHS, EMBER_PATHS, findEmberPath } from './ember-paths';
+import { EMBER_OWNED_PATHS, EMBER_PATHS, findEmberPath } from './paths.ts';
 
 describe('findEmberPath', () => {
   it('maps a path the Ember app still owns', () => {

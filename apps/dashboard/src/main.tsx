@@ -1,8 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { enableEmberHandover } from '@irene/ember-bridge/handover';
 import { App } from '@/App';
-import { enableEmberHandover } from '@/components/ember-handover';
 
 import '@/index.css';
 

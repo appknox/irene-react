@@ -1,4 +1,4 @@
-import { findEmberPath } from './ember-paths';
+import { findEmberPath } from './paths.ts';
 
 /*
   Handing over replaces the document, so it only means anything where there is
@@ -25,7 +25,7 @@ const HANDOVER_KEY = 'irene:ember-handover';
 const HANDOVER_TIMEOUT_MS = 5_000;
 
 /**
- * Reserves an attempt at handing a path over.
+ * Records an attempt at handing a path over, and says whether to go ahead.
  *
  * Storage is unavailable in a private window and throws rather than returning
  * nothing, in which case the handover goes ahead unguarded: a page that loads
@@ -34,7 +34,7 @@ const HANDOVER_TIMEOUT_MS = 5_000;
  * @param pathname - The path being handed over.
  * @returns Whether to go ahead.
  */
-function claimAttempt(pathname: string): boolean {
+function recordAttempt(pathname: string): boolean {
   try {
     const previous = sessionStorage.getItem(HANDOVER_KEY);
 
@@ -57,17 +57,19 @@ function claimAttempt(pathname: string): boolean {
 }
 
 /**
- * The Ember app's URL for a navigation that belongs to it.
+ * Begins handing a navigation over to the Ember app.
+ *
+ * Records the attempt as it goes, so one that does not land is not retried.
  *
  * @param pathname - Where the navigation is headed.
  * @returns The URL to load, or nothing where this app serves the path.
  */
-export function claimEmberHandover(pathname: string): string | undefined {
+export function startEmberHandover(pathname: string): string | undefined {
   if (!handsOver) {
     return undefined;
   }
 
   const emberPath = findEmberPath(pathname);
 
-  return emberPath && claimAttempt(pathname) ? emberPath : undefined;
+  return emberPath && recordAttempt(pathname) ? emberPath : undefined;
 }

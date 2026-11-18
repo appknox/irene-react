@@ -1,0 +1,19 @@
+{
+  "name": "@irene/ember-bridge",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./paths": "./src/paths.ts",
+    "./handover": "./src/handover.ts",
+    "./proxy": "./src/proxy.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "vitest run --coverage",
+    "type-check": "tsc -b --noEmit"
+  },
+  "devDependencies": {
+    "vite": "catalog:"
+  }
+}

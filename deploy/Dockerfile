@@ -16,7 +16,7 @@ RUN pnpm build:all
 
 # Merges both dists, bakes the ledger and adds the server. The same script backs
 # `pnpm build:bundle`, so what runs here is what runs locally.
-RUN node scripts/build-bundle.ts /code/bundle
+RUN node deploy/build-bundle.ts /code/bundle
 
 
 FROM node:24.22.1-alpine

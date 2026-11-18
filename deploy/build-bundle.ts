@@ -1,14 +1,15 @@
-import { cpSync, existsSync, renameSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { writeEmberPaths } from '../apps/dashboard/scripts/write-ember-paths.ts';
+import { EMBER_OWNED_PATHS } from '@irene/ember-bridge/paths';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const deployDir = dirname(fileURLToPath(import.meta.url));
 
 const EMBER_DIST = join(repoRoot, 'apps/irene/dist');
 const REACT_DIST = join(repoRoot, 'apps/dashboard/dist');
-const SERVER = join(repoRoot, 'staticserver');
+const SERVER = join(deployDir, 'server');
 
 /*
   Files the Ember build emits that the deployed bundle has no use for. Its
@@ -47,7 +48,13 @@ export function buildBundle(outputDir: string): void {
     rmSync(join(dist, name), { recursive: true, force: true });
   }
 
-  writeEmberPaths(join(outputDir, 'ember-owned-paths.json'));
+  /* The server cannot import from the app's source, so the ledger is written
+     beside the bundles it answers for, by the build that produced them. */
+  writeFileSync(
+    join(outputDir, 'ember-owned-paths.json'),
+    `${JSON.stringify(EMBER_OWNED_PATHS, null, 2)}\n`
+  );
+
   cpSync(SERVER, outputDir, { recursive: true });
 
   process.stdout.write(`bundle assembled at ${outputDir}\n`);

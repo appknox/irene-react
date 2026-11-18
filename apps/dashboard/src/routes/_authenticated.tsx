@@ -1,7 +1,8 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
+import { startEmberHandover } from '@irene/ember-bridge/handover';
+
 import { setupUserAndOrgContext } from '@/actions/setup-user-context';
-import { claimEmberHandover } from '@/components/ember-handover';
 import { RouteError } from '@/components/route-error';
 import { RoutePending } from '@/components/route-pending';
 import { sessionCheckOptions } from '@/features/auth/queries/session';
@@ -27,7 +28,7 @@ export const Route = createFileRoute('/_authenticated')({
       reloadDocument is required: without it a root-relative href is treated as
       an internal navigation and resolves to the not-found route.
     */
-    const emberHref = claimEmberHandover(location.pathname);
+    const emberHref = startEmberHandover(location.pathname);
 
     if (emberHref) {
       throw redirect({ href: emberHref, reloadDocument: true, replace: true });

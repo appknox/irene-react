@@ -1,9 +1,5 @@
 import type { ProxyOptions } from 'vite';
-/*
-  Relative, with its extension: the config is loaded by Node, which reads
-  neither Vite's aliases nor an import that leaves its extension off.
-*/
-import { EMBER_OWNED_PATHS } from '../src/components/ember-paths.ts';
+import { EMBER_OWNED_PATHS } from './paths.ts';
 
 /** Where the Ember app's own dev server listens. */
 const EMBER_ORIGIN = 'http://localhost:4210';

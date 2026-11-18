@@ -24,7 +24,8 @@ const UNMEASURED = [
   /* A development-only shim that renders nothing in production. */
   '**/query-devtools.tsx',
 
-  /* Build tooling, which runs on import. Root-scoped, so `src/scripts` counts. */
+  /* Build tooling, which runs on import. */
+  'deploy/**',
   'scripts/**',
 ];
 

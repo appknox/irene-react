@@ -37,12 +37,13 @@
     "cypress:run": "cypress run --browser chrome",
     "netlify:deploy": "netlify deploy --dir apps/dashboard/dist",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
-    "build:bundle": "node scripts/build-bundle.ts",
+    "build:bundle": "node deploy/build-bundle.ts",
     "serve:bundle": "node bundle/index.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@irene/ember-bridge": "workspace:*",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
