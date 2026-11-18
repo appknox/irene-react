@@ -33,6 +33,6 @@ describe('emberProxy', () => {
   });
 
   it('claims nothing this app serves', () => {
-    expect(Object.keys(emberProxy())).not.toContain('/dashboard/home');
+    expect(Object.keys(emberProxy())).not.toContain('/dashboard/storeknox');
   });
 });

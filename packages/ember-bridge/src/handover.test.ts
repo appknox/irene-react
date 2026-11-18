@@ -36,7 +36,7 @@ describe('startEmberHandover', () => {
 
     enableEmberHandover();
 
-    expect(startEmberHandover('/dashboard/home')).toBeUndefined();
+    expect(startEmberHandover('/dashboard/storeknox')).toBeUndefined();
   });
 
   it('refuses a second attempt at a path the first did not land on', async () => {

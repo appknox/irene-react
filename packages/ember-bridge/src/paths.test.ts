@@ -7,7 +7,7 @@ describe('findEmberPath', () => {
   });
 
   it('returns nothing for a path this app serves', () => {
-    expect(findEmberPath('/dashboard/home')).toBeUndefined();
+    expect(findEmberPath('/dashboard/storeknox')).toBeUndefined();
   });
 
   it('carries the rest of the path across, so ids reach the Ember app', () => {

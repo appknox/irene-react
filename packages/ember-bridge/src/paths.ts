@@ -19,6 +19,7 @@ export const EMBER_PATHS = {
   '/dashboard/analytics': '/dashboard/analytics',
   '/dashboard/billing': '/dashboard/billing',
   '/dashboard/file': '/dashboard/file',
+  '/dashboard/home': '/dashboard/home',
   '/dashboard/marketplace': '/dashboard/marketplace',
   '/dashboard/notifications': '/dashboard/notifications',
   '/dashboard/offensive-security': '/dashboard/offensive-security',
