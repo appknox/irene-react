@@ -2,68 +2,49 @@ import { coverageConfigDefaults, type ViteUserConfig } from 'vitest/config';
 
 type CoverageOptions = NonNullable<NonNullable<ViteUserConfig['test']>['coverage']>;
 
-/**
- * Files that carry no behaviour of their own, so measuring them reports a
- * number that no test can move: the generated route tree, the harness the tests
- * are written with, and Storybook stories.
- */
+/** Files with no behaviour of their own, so no test can move their number. */
 const UNMEASURED = [
   ...coverageConfigDefaults.exclude,
   '**/routeTree.gen.ts',
   '**/tests/**',
 
-  /* The harness a package ships for other packages' tests, same as `tests/`. */
+  /* A harness a package ships for other packages' tests, same as `tests/`. */
   '**/src/testing/**',
   '**/*.stories.tsx',
   '**/vite/**',
 
-  /*
-    Route definitions. The router plugin rewrites every one of these files, and
-    what it adds is counted against the file: a five-line route with no
-    conditional and no function of its own still reports seven branches and two
-    functions, most of them unreachable. The guards and loaders they declare are
-    covered through the pages that render them.
-  */
+  /* The router plugin rewrites these, and counts its own unreachable branches
+     against them. Guards and loaders are covered through the pages. */
   '**/src/routes/**',
 
-  /*
-    The entry point and the provider tree it renders. Both are composition: a
-    test of either asserts that the file lists what it lists, and the pieces are
-    covered where they do their work.
-  */
+  /* Composition: a test would assert only that the file lists what it lists. */
   '**/src/main.tsx',
   '**/src/App.tsx',
 
-  /* A development-only shim: its whole job is to render nothing in production. */
+  /* A development-only shim that renders nothing in production. */
   '**/query-devtools.tsx',
 
-  /*
-    Build tooling at a package's root: these run on import — they write
-    generated files and rewrite sources — so a test of one is a run of one.
-    Scoped to the root so `src/scripts`, which is app code, still counts.
-  */
+  /* Build tooling, which runs on import. Root-scoped, so `src/scripts` counts. */
   'scripts/**',
 ];
+
+/* A shard measures part of the suite. Thresholds apply to the merged report. */
+const MEASURES_ONE_SHARD = process.argv.some((arg) => arg.startsWith('--shard'));
 
 /**
  * The coverage settings every workspace shares.
  *
- * The thresholds fail the run rather than print a number nobody reads: a change
- * that leaves a branch untested is a failing test, not a report to skim. Each
- * one sits just under what the least-covered package reaches today — statements
- * and lines at `@irene/config`, branches at `@irene/dashboard`, functions at
- * `@irene/api` — so a package that drops fails rather than coasting on the rest.
+ * Thresholds fail the run rather than print a number nobody reads, and each
+ * sits just under what the least-covered package reaches today.
  */
 export const coverageConfig: CoverageOptions = {
   provider: 'v8',
   reporter: ['text', 'html'],
 
-  /*
-    Named rather than left to default. Vitest reports only the files a test
-    imported, so a module nobody tests is absent from the table instead of
-    sitting at zero, and the total reads higher the less of the app is covered.
-  */
+  /* Named, so a module nobody tests reads as uncovered rather than being absent. */
   include: ['src/**/*.{ts,tsx}', 'scripts/**/*.{ts,tsx}'],
   exclude: UNMEASURED,
-  thresholds: { statements: 93, branches: 95, functions: 94, lines: 91 },
+  thresholds: MEASURES_ONE_SHARD
+    ? undefined
+    : { statements: 93, branches: 95, functions: 94, lines: 91 },
 };

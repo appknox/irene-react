@@ -53,3 +53,6 @@ bundle/
 # Build output of the embed surface.
 embed-dist/
 apps/irene/public/assets/embed/
+
+# Shard coverage blobs, merged by the coverage job.
+.vitest/
