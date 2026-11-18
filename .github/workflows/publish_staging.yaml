@@ -1,0 +1,74 @@
+name: Publish staging image
+
+# The image the staging cluster runs. staging-fluxcd pins it by tag in
+# irene-react/values.yaml, so every build publishes an immutable
+# <branch>_<sha> tag and prints the line to paste there.
+on: workflow_dispatch
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GHCR_CONTAINER: ghcr.io/${{ github.repository }}
+
+jobs:
+  publish:
+    name: Build and push to ghcr
+    runs-on: [ubuntu-latest]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Get docker tag
+        id: docker_tag
+        run: echo "docker_tag=${GITHUB_REF##*/}_${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Docker Login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download earthly
+        run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.8.15/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
+
+      - name: Earthly version
+        run: earthly --version
+
+      - name: Build and publish
+        run: earthly --ci --push +publish --TAG=${{ steps.docker_tag.outputs.docker_tag }} --CONTAINER=${{ env.GHCR_CONTAINER }}
+
+      # The chart pins an immutable tag, so a deploy means editing that line.
+      - name: Say what to deploy
+        run: |
+          {
+            echo "### Staging image published"
+            echo
+            echo 'Set this in `staging-fluxcd` at `irene-react/values.yaml`:'
+            echo
+            echo '```yaml'
+            echo 'image:'
+            echo '  tag: ${{ steps.docker_tag.outputs.docker_tag }}'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Slack notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: repo,workflow
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: `Staging image ${{ job.status }}: ${{ env.GHCR_CONTAINER }}:${{ steps.docker_tag.outputs.docker_tag }}`,
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
