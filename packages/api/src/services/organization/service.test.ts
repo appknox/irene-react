@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 
 import {
+  buildCyodRegisteredDevice,
   buildOrganization,
   buildOrganizationMe,
   buildOrganizationMembership,
@@ -154,5 +155,38 @@ describe('the timeout on the organization setup', () => {
     // intercepted request never honours.
     expect(recorder.latest()?.signal).toBeInstanceOf(AbortSignal);
     expect(recorder.latest()?.signal?.aborted).toBe(false);
+  });
+});
+
+describe('OrganizationService.getRegisteredDevices', () => {
+  it('returns the devices out of their results', async () => {
+    const devices = [
+      buildCyodRegisteredDevice(),
+      buildCyodRegisteredDevice({ is_connected: false }),
+    ];
+
+    server.use(
+      http.get(buildAPITestURL(OrganizationEndpoints.registeredDevices(ORGANIZATION_ID)), () =>
+        HttpResponse.json({ results: devices })
+      )
+    );
+
+    await expect(OrganizationService.getRegisteredDevices(ORGANIZATION_ID)).resolves.toEqual(
+      devices
+    );
+  });
+
+  it('rejects with a 403 where the organization has no device farm of its own', async () => {
+    server.use(
+      http.get(buildAPITestURL(OrganizationEndpoints.registeredDevices(ORGANIZATION_ID)), () =>
+        HttpResponse.json({ detail: 'not configured' }, { status: HTTP_STATUS_CODES.FORBIDDEN })
+      )
+    );
+
+    const error = await OrganizationService.getRegisteredDevices(ORGANIZATION_ID).catch(
+      (reason: unknown) => reason
+    );
+
+    expect(getApiErrorStatus(error)).toBe(HTTP_STATUS_CODES.FORBIDDEN);
   });
 });

@@ -28,6 +28,36 @@ describe('AkSpinner', () => {
     expect(spinner).not.toHaveClass('size-4');
   });
 
+  it('spins in the brand colour unless another is asked for', () => {
+    render(<AkSpinner />);
+
+    expect(screen.getByRole('status')).toHaveClass('text-primary');
+  });
+
+  it('spins in the colour it is given', () => {
+    render(<AkSpinner color="success" />);
+
+    const spinner = screen.getByRole('status');
+
+    expect(spinner).toHaveClass('text-success');
+    expect(spinner).not.toHaveClass('text-primary');
+  });
+
+  it('takes the surrounding text colour when asked to inherit', () => {
+    render(<AkSpinner color="inherit" />);
+
+    expect(screen.getByRole('status')).toHaveClass('text-inherit');
+  });
+
+  it('lets a className override the colour, for a one-off', () => {
+    render(<AkSpinner className="text-danger" />);
+
+    const spinner = screen.getByRole('status');
+
+    expect(spinner).toHaveClass('text-danger');
+    expect(spinner).not.toHaveClass('text-primary');
+  });
+
   it('passes through svg props', () => {
     render(<AkSpinner data-testid="spinner" aria-label="Signing in" />);
 

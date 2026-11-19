@@ -119,3 +119,17 @@ export interface ApiOrganizationNamespace {
   approved_by: number | null;
   requested_by: number | null;
 }
+
+/**
+ * A device registered to the organization through Mercer for CYOD scans, as
+ * the device farm describes it. Which fields it fills varies by device, so a
+ * name is read from the first of `name`, `model` and `serial_number` it has.
+ */
+export interface ApiCyodRegisteredDevice {
+  name: string | null;
+  serial_number: string;
+  model: string;
+  platform: number;
+  is_connected: boolean;
+  created_on: string | null;
+}
