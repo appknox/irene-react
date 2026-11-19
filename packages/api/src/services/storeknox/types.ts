@@ -221,3 +221,43 @@ export interface ApiSkOrganizationUser {
   email: string;
   is_active: boolean;
 }
+
+/** A store search the server ran, kept under its id. */
+export interface ApiSkDiscoverySearch {
+  id: number;
+  query_str: string;
+  query: { q: string };
+}
+
+/** One store listing a search found, not yet tied to the inventory. */
+export interface ApiSkDiscoveryResult {
+  doc_ulid: string;
+  doc_hash: string;
+  app_id: string;
+  package_name: string;
+  title: string;
+  platform: ApiSkPlatform;
+  region: string;
+  app_url: string;
+  dev_name: string;
+  dev_email: string;
+  icon_url: string;
+}
+
+/** What the discovery results endpoint accepts. */
+export interface ApiSkDiscoveryResultsRequest {
+  limit: number;
+  offset: number;
+}
+
+/** What adding a store listing to the inventory sends: the listing and the search it came from. */
+export interface ApiSkAddToInventoryRequest {
+  doc_ulid: string;
+  app_discovery_query: number | string;
+}
+
+/** An app a member asked to add; the requests list names who decided, where the inventory carries ids. */
+export interface ApiSkRequestedApp extends Omit<ApiSkApp, 'approved_by' | 'rejected_by'> {
+  approved_by: string | null;
+  rejected_by: string | null;
+}

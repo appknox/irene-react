@@ -5,9 +5,12 @@ import { ENUMS } from '@irene/enums';
 
 import {
   buildArchivedSkApp,
+  buildPendingSkRequestedApp,
   buildSkApp,
   buildSkAppVersion,
   buildSkCoreFile,
+  buildSkDiscoveryResult,
+  buildSkDiscoverySearch,
   buildSkFileRisk,
   buildSkInventoryApp,
   buildSkOrganizationUser,
@@ -249,5 +252,67 @@ describe('StoreknoxService files', () => {
     });
 
     expect(FileEndpoints.detail(file.id)).toBe(`api/v3/files/${file.id}`);
+  });
+});
+
+describe('StoreknoxService discovery', () => {
+  it('starts a search with the query and returns it under its id', async () => {
+    const search = buildSkDiscoverySearch();
+    const seen = capture('post', StoreknoxEndpoints.discovery(), search);
+
+    await expect(StoreknoxService.createDiscoverySearch(search.query_str)).resolves.toEqual(search);
+
+    expect(seen.body).toEqual({ query_str: search.query_str });
+  });
+
+  it('reads a page of a search’s results by its id', async () => {
+    const search = buildSkDiscoverySearch();
+    const results = [buildSkDiscoveryResult(), buildSkDiscoveryResult()];
+
+    const seen = capture(
+      'get',
+      StoreknoxEndpoints.discoveryResults(search.id),
+      buildDrfPage(results, { count: 14 })
+    );
+
+    const page = await StoreknoxService.getDiscoveryResults(search.id, { limit: 10, offset: 10 });
+
+    expect(page).toMatchObject({ items: results, count: 14 });
+    expect(seen.params.get('offset')).toBe('10');
+  });
+
+  it('asks after a listing by its ulid', async () => {
+    const result = buildSkDiscoveryResult();
+
+    const reply = {
+      id: 1,
+      approval_status: ENUMS.SK_APPROVAL_STATUS.APPROVED,
+      approval_status_display: 'Approved',
+    };
+
+    const seen = capture('get', StoreknoxEndpoints.approvalStatusCheck(), reply);
+
+    await expect(StoreknoxService.checkApprovalStatus(result.doc_ulid)).resolves.toEqual(reply);
+    expect(seen.params.get('doc_ulid')).toBe(result.doc_ulid);
+  });
+
+  it('adds a listing with the search it was found by', async () => {
+    const result = buildSkDiscoveryResult();
+    const app = buildSkApp();
+    const seen = capture('post', StoreknoxEndpoints.apps(), app);
+
+    await StoreknoxService.addAppToInventory({ doc_ulid: result.doc_ulid, app_discovery_query: 4 });
+
+    expect(seen.body).toEqual({ doc_ulid: result.doc_ulid, app_discovery_query: 4 });
+  });
+
+  it('reads a page of the member’s requests', async () => {
+    const requests = [buildPendingSkRequestedApp()];
+    const seen = capture('get', StoreknoxEndpoints.requestedApps(), buildDrfPage(requests));
+
+    const page = await StoreknoxService.getRequestedApps({ limit: 25, offset: 0 });
+
+    expect(page.items).toEqual(requests);
+    expect(seen.params.get('limit')).toBe('25');
   });
 });

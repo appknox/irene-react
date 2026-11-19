@@ -15,6 +15,7 @@ import type { ApiPageEnvelope } from '@irene/api/utils/pagination';
 import { StoreknoxEndpoints } from './endpoints';
 
 import type {
+  ApiSkAddToInventoryRequest,
   ApiSkApp,
   ApiSkAppListRequest,
   ApiSkApprovalStatus,
@@ -22,12 +23,16 @@ import type {
   ApiSkAppVersion,
   ApiSkAppVersionListRequest,
   ApiSkCoreFile,
+  ApiSkDiscoveryResult,
+  ApiSkDiscoveryResultsRequest,
+  ApiSkDiscoverySearch,
   ApiSkFileRisk,
   ApiSkInitiateUploadResponse,
   ApiSkInventoryApp,
   ApiSkMonitoringStatusResponse,
   ApiSkOrganizationSettingsRequest,
   ApiSkOrganizationUser,
+  ApiSkRequestedApp,
   ApiSkSubscription,
 } from './types';
 
@@ -141,4 +146,44 @@ export default class StoreknoxService {
     organizationId: number | string,
     userId: number | string
   ) => apiRequest.get<ApiSkOrganizationUser>(OrganizationEndpoints.user(organizationId, userId));
+
+  /** Starts a store search; its results are then read by the id the server returns. */
+  public static readonly createDiscoverySearch = (query: string) =>
+    apiRequest.post<ApiSkDiscoverySearch>(StoreknoxEndpoints.discovery(), { query_str: query });
+
+  /** Fetches a page of what one store search found. */
+  public static readonly getDiscoveryResults = async (
+    searchId: number | string,
+    params: ApiSkDiscoveryResultsRequest
+  ) => {
+    const page = await apiRequest.get<ApiPageEnvelope<ApiSkDiscoveryResult>>(
+      StoreknoxEndpoints.discoveryResults(searchId),
+      { params }
+    );
+
+    return transformPaginatedResponse(page);
+  };
+
+  /**
+   * Asks whether a store listing is in the inventory or awaiting approval; the
+   * server answers 404 for a listing that is neither.
+   */
+  public static readonly checkApprovalStatus = (docUlid: string) =>
+    apiRequest.get<ApiSkApprovalStatusResponse>(StoreknoxEndpoints.approvalStatusCheck(), {
+      params: { doc_ulid: docUlid },
+    });
+
+  /** Adds a store listing to the inventory; an owner's addition is approved at once, anyone else's waits for an owner. */
+  public static readonly addAppToInventory = (request: ApiSkAddToInventoryRequest) =>
+    apiRequest.post<ApiSkApp>(StoreknoxEndpoints.apps(), request);
+
+  /** Fetches a page of the apps the signed-in member has asked to add. */
+  public static readonly getRequestedApps = async (params: ApiSkDiscoveryResultsRequest) => {
+    const page = await apiRequest.get<ApiPageEnvelope<ApiSkRequestedApp>>(
+      StoreknoxEndpoints.requestedApps(),
+      { params }
+    );
+
+    return transformPaginatedResponse(page);
+  };
 }

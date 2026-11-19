@@ -44,6 +44,7 @@ export function buildStoreknoxNavItems(access: StoreknoxNavAccess): StoreknoxNav
       label: akMT('discovery'),
       icon: 'material-symbols:search',
       to: '/dashboard/storeknox/discover/result',
+      activeWhen: ['/dashboard/storeknox/discover'],
     },
 
     access.detectsFakeApps && {
