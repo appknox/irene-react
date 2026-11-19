@@ -51,26 +51,31 @@ export function AccountSettingsLayout() {
   const activeTab = tabs.find((tab) => matchRoute({ to: tab.to }))?.to ?? pathname;
 
   return (
-    <div className="mx-auto w-full max-w-300 px-6 pt-4 pb-6" data-test-account-settings>
-      <AkTypography tag="h1" variant="h4" className="mt-1.75 mb-5.25 text-xl">
-        {akMT('accountSettings')}
-      </AkTypography>
+    <div className="w-full px-5.25 pt-3.5 pb-5.25" data-test-account-settings>
+      <div className="mx-auto w-full max-w-300">
+        <AkTypography tag="h1" variant="body1" fontWeight="medium" className="mt-1.75 mb-5.25">
+          {akMT('accountSettings')}
+        </AkTypography>
 
-      <AkTabs value={activeTab} activationMode="manual" className="gap-0">
-        <div className="border border-b-0 border-border bg-background">
-          <AkTabsList>
-            {tabs.map((tab) => (
-              <AkTabsTrigger key={tab.to} value={tab.to} asChild>
-                <Link to={tab.to}>{tab.label}</Link>
-              </AkTabsTrigger>
-            ))}
-          </AkTabsList>
-        </div>
+        <AkTabs value={activeTab} activationMode="manual" className="gap-0">
+          <div className="border border-b-0 border-border bg-background">
+            <AkTabsList>
+              {tabs.map((tab) => (
+                <AkTabsTrigger key={tab.to} value={tab.to} asChild>
+                  <Link to={tab.to}>{tab.label}</Link>
+                </AkTabsTrigger>
+              ))}
+            </AkTabsList>
+          </div>
 
-        <AkTabsContent value={activeTab} className="border border-t-0 border-border bg-background">
-          <Outlet />
-        </AkTabsContent>
-      </AkTabs>
+          <AkTabsContent
+            value={activeTab}
+            className="border border-t-0 border-border bg-background"
+          >
+            <Outlet />
+          </AkTabsContent>
+        </AkTabs>
+      </div>
     </div>
   );
 }
