@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
 
 import {
   AkModal,
   AkModalBody,
+  AkModalClose,
   AkModalContent,
   AkModalFooter,
   AkModalHeader,
@@ -33,15 +33,12 @@ import { personalTokenKeys } from '@/features/account-settings/queries/personal-
  */
 export function RevokeToken({ token }: Readonly<{ token: ApiPersonalToken }>) {
   const queryClient = useQueryClient();
-  const [isOpen, setIsOpen] = useState(false);
 
   const revoke = useMutation({
     mutationFn: () => PersonalTokenService.revokePersonalToken(token.id),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: personalTokenKeys.list() });
-      setIsOpen(false);
-
       akNotify.success(akMT('personalTokenRevoked'));
     },
 
@@ -51,7 +48,7 @@ export function RevokeToken({ token }: Readonly<{ token: ApiPersonalToken }>) {
   });
 
   return (
-    <AkModal open={isOpen} onOpenChange={(open) => !revoke.isPending && setIsOpen(open)}>
+    <AkModal>
       <AkModalTrigger asChild>
         <AkIconButton
           size="small"
@@ -75,15 +72,11 @@ export function RevokeToken({ token }: Readonly<{ token: ApiPersonalToken }>) {
             {akMT('delete')}
           </AkButton>
 
-          <AkButton
-            type="button"
-            variant="outlined"
-            color="neutral"
-            disabled={revoke.isPending}
-            onClick={() => setIsOpen(false)}
-          >
-            {akMT('cancel')}
-          </AkButton>
+          <AkModalClose asChild>
+            <AkButton type="button" variant="outlined" color="neutral" disabled={revoke.isPending}>
+              {akMT('cancel')}
+            </AkButton>
+          </AkModalClose>
         </AkModalFooter>
       </AkModalContent>
     </AkModal>

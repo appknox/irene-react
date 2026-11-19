@@ -10,7 +10,7 @@ import { PersonalTokenList } from './components/personal-token-list';
  */
 export function DeveloperSettingsPage() {
   return (
-    <section className="flex flex-col gap-5.25 p-5.25" data-test-developer-settings>
+    <section className="m-3.5 flex flex-col gap-5.25" data-test-developer-settings>
       <div className="flex flex-col gap-1.75">
         <AkTypography variant="h5">{akMT('personalAccessTokens')}</AkTypography>
 

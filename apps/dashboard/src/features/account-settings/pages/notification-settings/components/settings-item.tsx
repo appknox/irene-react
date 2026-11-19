@@ -41,16 +41,16 @@ export function SettingsItem({
 
   return (
     <div className="flex w-full items-center gap-3.5" data-test-notification-setting>
-      <div className="flex w-full flex-col gap-0.5">
+      <div className="flex w-full flex-col gap-1">
         <AkTypography fontWeight="medium">{title}</AkTypography>
 
-        <AkTypography variant="body2" color="textSecondary" id={descriptionId}>
+        <AkTypography color="textSecondary" id={descriptionId}>
           {description}
         </AkTypography>
       </div>
 
       <div className="flex shrink-0 items-center gap-1.75">
-        {isLoading && <AkSpinner className="size-4 text-foreground-muted" />}
+        {isLoading && <AkSpinner color="primary" />}
 
         <AkTooltip
           disabled={!isLocked}

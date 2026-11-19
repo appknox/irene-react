@@ -44,6 +44,7 @@ export function SelectLanguage() {
     mutationKey: userKeys.language(),
     mutationFn: UserService.setLanguage,
     onSuccess: () => window.location.reload(),
+
     onError: unlessRateLimited((error) => {
       akNotify.error(getApiErrorMessage(error) ?? akMT('somethingWentWrong'));
     }),
@@ -61,12 +62,10 @@ export function SelectLanguage() {
   };
 
   return (
-    <div className="flex flex-col gap-3.5" data-test-select-language>
-      <div className="flex flex-col gap-1.75">
-        <AkTypography variant="h5">{akMT('language')}</AkTypography>
+    <div className="flex flex-col gap-3.5 p-3.5" data-test-select-language>
+      <AkTypography variant="h5">{akMT('language')}</AkTypography>
 
-        <AkTypography color="textSecondary">{akMT('selectLanguage')}</AkTypography>
-      </div>
+      <AkTypography color="textSecondary">{akMT('selectLanguage')}</AkTypography>
 
       <AkSelect value={getLocale()} onValueChange={chooseLanguage} disabled={isSaving}>
         <AkSelectTrigger aria-label={akMT('language')} className="w-62.5">

@@ -76,7 +76,7 @@ export function MultiFactorAuth() {
   };
 
   return (
-    <section className="flex w-8/12 flex-col gap-5.25" data-test-multi-factor-auth>
+    <section className="flex w-8/12 flex-col gap-3.5" data-test-multi-factor-auth>
       <div className="flex flex-col gap-1.75">
         <AkTypography variant="h5" data-test-mfa-title>
           {akMT('multiFactorAuth')}
@@ -85,27 +85,7 @@ export function MultiFactorAuth() {
         <AkTypography color="textSecondary">{akMT('mfaDescription')}</AkTypography>
       </div>
 
-      {!canDisableMfa && (
-        <AkAlert variant="warning" data-test-mfa-cannot-disable>
-          <AkIcon name="material-symbols:security" />
-
-          <AkAlertDescription className="flex flex-wrap items-center gap-x-1">
-            {akMT('disableMFADenied')}
-
-            {me?.is_owner && (
-              <>
-                <span>{akMT('disableThisIn')}</span>
-
-                <AkLink asChild color="inherit" className="font-semibold">
-                  <Link to="/dashboard/organization/settings">{akMT('organizationSettings')}</Link>
-                </AkLink>
-              </>
-            )}
-          </AkAlertDescription>
-        </AkAlert>
-      )}
-
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-3.5">
         <AkTypography color="textSecondary">{akMT('mfaSelect')}</AkTypography>
 
         {methods.length > 0 && (
@@ -128,6 +108,26 @@ export function MultiFactorAuth() {
           </div>
         )}
       </div>
+
+      {!canDisableMfa && (
+        <AkAlert variant="warning" className="mt-3.5 mb-7" data-test-mfa-cannot-disable>
+          <AkIcon name="material-symbols:security" />
+
+          <AkAlertDescription className="flex flex-wrap items-center gap-x-1">
+            {akMT('disableMFADenied')}
+
+            {me?.is_owner && (
+              <Fragment>
+                <span>{akMT('disableThisIn')}</span>
+
+                <AkLink asChild color="inherit" className="font-semibold">
+                  <Link to="/dashboard/organization/settings">{akMT('organizationSettings')}</Link>
+                </AkLink>
+              </Fragment>
+            )}
+          </AkAlertDescription>
+        </AkAlert>
+      )}
 
       {openModal === 'disable' && (
         <MfaDisable
@@ -172,9 +172,9 @@ function MfaMethodRow({ mfa, canDisableMfa, onEnable, onDisable }: Readonly<MfaM
   const name = isApp ? akMT('mfaMethodApp') : akMT('email');
 
   return (
-    <div className="flex w-full items-center gap-4.5 p-4.25" data-test-mfa-method={mfa.method}>
+    <div className="flex w-full items-center gap-4.5 p-3.5" data-test-mfa-method={mfa.method}>
       <div className="flex w-full flex-col">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.75">
           <AkTypography fontWeight="medium" data-test-mfa-method-name>
             {name}
           </AkTypography>
@@ -191,12 +191,12 @@ function MfaMethodRow({ mfa, canDisableMfa, onEnable, onDisable }: Readonly<MfaM
           )}
         </div>
 
-        <AkTypography variant="body2" color="textSecondary" className="mt-1">
+        <AkTypography variant="body2" color="textSecondary" className="mt-1.75">
           {isApp ? akMT('mfaAppDesc') : akMT('mfaEmailDesc')}
         </AkTypography>
 
         {isApp && (
-          <div className="mt-2.5 flex flex-col gap-0.5">
+          <div className="mt-3.5 flex flex-col">
             {AUTHENTICATOR_APPS.map(({ platforms, app, infoUrl }) => (
               <div key={app} className="flex items-center gap-1">
                 <AkTypography variant="body2" color="textSecondary" className="text-sm">

@@ -8,7 +8,7 @@ import { PasswordChange } from './components/password-change';
  */
 export function SecuritySettingsPage() {
   return (
-    <div className="flex flex-col gap-7 p-5.25" data-test-security-settings>
+    <div className="flex flex-col gap-7 p-3.5" data-test-security-settings>
       <PasswordChange />
 
       <AkDivider color="dark" />

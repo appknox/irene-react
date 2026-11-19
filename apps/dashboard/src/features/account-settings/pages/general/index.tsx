@@ -6,7 +6,7 @@ import { SelectLanguage } from './components/select-language';
  */
 export function GeneralSettingsPage() {
   return (
-    <div className="flex flex-col p-5.25" data-test-general-settings>
+    <div className="flex flex-col pb-7" data-test-general-settings>
       <SelectLanguage />
     </div>
   );

@@ -78,7 +78,7 @@ export function PasswordChange() {
         <ChangePasswordFormField
           name="old_password"
           label={akMT('currentPassword')}
-          labelProps={{ className: 'text-md font-semibold text-foreground-muted' }}
+          labelProps={{ className: 'text-md font-semibold text-secondary' }}
         >
           <AkInput type="password" autoComplete="current-password" />
         </ChangePasswordFormField>
@@ -86,7 +86,7 @@ export function PasswordChange() {
         <ChangePasswordFormField
           name="password"
           label={akMT('newPassword')}
-          labelProps={{ className: 'text-md font-semibold text-foreground-muted' }}
+          labelProps={{ className: 'text-md font-semibold text-secondary' }}
         >
           <AkInput type="password" autoComplete="new-password" />
         </ChangePasswordFormField>
@@ -94,12 +94,12 @@ export function PasswordChange() {
         <ChangePasswordFormField
           name="confirm_password"
           label={akMT('confirmPassword')}
-          labelProps={{ className: 'text-md font-semibold text-foreground-muted' }}
+          labelProps={{ className: 'text-md font-semibold text-secondary' }}
         >
           <AkInput type="password" autoComplete="new-password" />
         </ChangePasswordFormField>
 
-        <AkButton type="submit" className="mt-1.75 self-start" loading={changePassword.isPending}>
+        <AkButton type="submit" className="self-start" loading={changePassword.isPending}>
           {akMT('changePassword')}
         </AkButton>
       </form>

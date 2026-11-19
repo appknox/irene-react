@@ -129,13 +129,13 @@ export function NotificationSettingsPage() {
   const pendingKey = updatePreference.isPending ? updatePreference.variables.key : null;
 
   return (
-    <section className="flex w-full flex-col gap-5.25 p-5.25" data-test-notification-settings>
+    <section className="flex w-full flex-col gap-5.25 p-5.25 pb-7" data-test-notification-settings>
       <AkTypography variant="h5">{akMT('accountNotifSettings.emailSummaryTitle')}</AkTypography>
 
       {GROUPS.map((group) => (
         <div
           key={group.id}
-          className="flex flex-col gap-2.5"
+          className="flex flex-col gap-3.5"
           data-test-notification-group={group.id}
         >
           <div className="flex items-center gap-1">
@@ -176,7 +176,7 @@ export function NotificationSettingsPage() {
         </div>
       ))}
 
-      <AkTypography color="textSecondary" className="max-w-175" data-test-notification-note>
+      <AkTypography className="max-w-175" data-test-notification-note>
         {akMT('accountNotifSettings.notificationNote')}
       </AkTypography>
     </section>
