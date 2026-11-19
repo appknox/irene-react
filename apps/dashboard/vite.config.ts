@@ -31,7 +31,12 @@ export default defineConfig({
     // Turns `@irene/ui/svgs/*.svg?react` imports into components.
     svgrPlugin(),
   ],
-  resolve: { alias: { '@': resolvePath('./src') } },
+  resolve: {
+    alias: { '@': resolvePath('./src') },
+
+    // Two copies of React answer hooks from two dispatchers, which fails as an invalid hook call.
+    dedupe: ['react', 'react-dom'],
+  },
 
   /*
     One origin for both apps, so the session is shared and crossing between

@@ -28,9 +28,9 @@
   "include": [
     "src",
     "tests",
-    "scripts",
     "vite",
     "vite.config.ts",
+    "vite.embed.config.ts",
     "vitest.config.ts",
     "../../types"
   ]

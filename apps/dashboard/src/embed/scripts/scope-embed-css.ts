@@ -22,7 +22,6 @@
      ships an equivalent reset, so applying this one document-wide changes
      little, where confining it visibly breaks everything that portals.
 */
-import { readFileSync, writeFileSync } from 'node:fs';
 
 /** What the host marks the element it mounts into with. */
 const MOUNT_SCOPE = ':where([data-react-root])';
@@ -219,15 +218,4 @@ export function scopeEmbedCss(css: string): string {
   }
 
   return result;
-}
-
-/* Only when run as the build step, so the rewrite above can be tested on its own. */
-if (process.argv[1]?.endsWith('scope-embed-css.ts')) {
-  const [stylesheet] = process.argv.slice(2);
-
-  if (!stylesheet) {
-    throw new Error('Usage: scope-embed-css.ts <stylesheet>');
-  }
-
-  writeFileSync(stylesheet, scopeEmbedCss(readFileSync(stylesheet, 'utf8')), 'utf8');
 }

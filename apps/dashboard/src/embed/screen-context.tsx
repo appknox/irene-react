@@ -5,7 +5,7 @@ import { queryClient } from '@irene/api';
 import { getStoredSession } from '@irene/api/utils/session';
 
 import { loadConfiguration } from '@/actions/load-configuration';
-import { setupUserAndOrgContext } from '@/actions/setup-user-context';
+import { loadUserAndOrgContext } from '@/actions/setup-user-context';
 
 /**
  * Loads what every screen of this app assumes is already there.
@@ -13,6 +13,9 @@ import { setupUserAndOrgContext } from '@/actions/setup-user-context';
  * A screen reads the organization and the deployment's configuration from
  * stores the signed-in routes fill. Rendered outside those routes, nothing
  * fills them, so this does.
+ *
+ * The data alone: the support widget and the guides belong to the host page,
+ * which installs its own.
  *
  * The screen renders straight away rather than being held back. Every query
  * that needs the organization is disabled until there is one, so a screen with
@@ -31,10 +34,11 @@ export function ScreenContext({ children }: Readonly<{ children: ReactNode }>) {
 
     queryFn: async () => {
       const session = getStoredSession();
+
       await loadConfiguration(queryClient);
 
       if (session) {
-        await setupUserAndOrgContext(queryClient, session.userId);
+        await loadUserAndOrgContext(queryClient, session.userId);
       }
 
       return true;

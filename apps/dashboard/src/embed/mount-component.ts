@@ -1,15 +1,17 @@
 import { createElement, Suspense } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
-import { RoutePending } from '@/components/route-pending';
+import { akNotify } from '@irene/ui/notify';
 
 import {
   EMBEDDABLE_PAGES,
   findEmbeddablePage,
+  findPageSkeleton,
   type EmbeddablePage,
   type EmbeddablePageName,
 } from './pages';
 
+import { PageSkeleton } from './page-skeleton';
 import { EmbedProviders } from './providers';
 import { applyEmbedConfig, linkStylesheet } from './runtime';
 import { ScreenContext } from './screen-context';
@@ -80,6 +82,7 @@ export function mountIreneComponent(
   options: ComponentMountOptions
 ): MountedComponent {
   const Page = resolvePage(options.name);
+  const Skeleton = findPageSkeleton(options.name) ?? PageSkeleton;
 
   applyEmbedConfig(options.config);
   linkStylesheet(options.version);
@@ -93,8 +96,9 @@ export function mountIreneComponent(
     the organization from a store the signed-in routes fill, and no route runs
     here.
 
-    Suspense sits inside both, so the waiting state renders with the app's own
-    styles and the context keeps loading while the screen's code arrives.
+    Suspense holds a skeleton while the screen's code arrives, sized to the
+    panel the host gave this app rather than to a page: everything around it is
+    already drawn, so a full-page loader here would read as a fault.
   */
   const draw = (props?: Record<string, unknown>) =>
     root.render(
@@ -104,11 +108,7 @@ export function mountIreneComponent(
         createElement(
           ScreenContext,
           null,
-          createElement(
-            Suspense,
-            { fallback: createElement(RoutePending) },
-            createElement(Page, props)
-          )
+          createElement(Suspense, { fallback: createElement(Skeleton) }, createElement(Page, props))
         )
       )
     );
@@ -118,8 +118,15 @@ export function mountIreneComponent(
   return {
     update: draw,
 
-    /* Unmounting inside the host's own teardown warns, so it waits a tick. */
     destroy() {
+      /*
+        Toasts outlive the root that raised them: they are held in a module the
+        host keeps loaded, and are replayed to the next toaster that subscribes.
+        Dismissing them here retires them with the screen that raised them.
+      */
+      akNotify.dismiss();
+
+      /* Unmounting inside the host's own teardown warns, so it waits a tick. */
       setTimeout(() => root.unmount(), 0);
     },
   };

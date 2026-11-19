@@ -23,6 +23,27 @@ export const EMBEDDABLE_PAGES = {
 export type EmbeddablePageName = keyof typeof EMBEDDABLE_PAGES;
 
 /*
+  What stands in for a page while its chunk is fetched.
+
+  A page that draws its own frame registers a placeholder shaped like that
+  frame, so the chrome is not withheld until the chunk lands. Anything left out
+  here falls back to the generic panel placeholder.
+*/
+const PAGE_SKELETONS: Partial<Record<EmbeddablePageName, ComponentType>> = {};
+
+/**
+ * Finds the placeholder registered for a page.
+ *
+ * @param name - The name the host asked for.
+ * @returns The page's own placeholder, or nothing where it has none.
+ */
+export function findPageSkeleton(name: string): ComponentType | undefined {
+  return Object.hasOwn(PAGE_SKELETONS, name)
+    ? PAGE_SKELETONS[name as EmbeddablePageName]
+    : undefined;
+}
+
+/*
   Looked up through a Map rather than by indexing the registry: a host names
   the page at runtime and may name one that does not exist, which indexing an
   object of known keys would not admit.

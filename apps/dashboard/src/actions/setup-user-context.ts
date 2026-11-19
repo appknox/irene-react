@@ -128,18 +128,22 @@ function _installChatSupport(user: ApiUser) {
 }
 
 /**
- * Loads what every signed-in page can then rely on.
+ * Loads what every signed-in page reads, and nothing a page owns.
  *
  * The organizations, the hosts the product links to, and the vulnerability
  * catalogue are asked for together, since none describes the other. StoreKnox
  * follows and may fail. The account comes last, and its language is applied
  * once known.
  *
+ * Separate from `setupUserAndOrgContext` for a screen rendered inside another
+ * application: the page there belongs to the host, which installs the support
+ * widget and the guides itself. A second copy of either fights the first.
+ *
  * @param queryClient - The cache to load through.
  * @param userId - The user id the session carries.
  * @returns The signed-in account.
  */
-export async function setupUserAndOrgContext(queryClient: QueryClient, userId: number) {
+export async function loadUserAndOrgContext(queryClient: QueryClient, userId: number) {
   const [organizations, dashboardConfiguration, vulnerabilities] = await Promise.all([
     queryClient.query(organizationsOptions()),
     queryClient.query(dashboardConfigurationOptions()),
@@ -155,11 +159,24 @@ export async function setupUserAndOrgContext(queryClient: QueryClient, userId: n
   const user = await queryClient.query(userOptions(userId));
   await _applyUserLocale(user);
 
+  return user;
+}
+
+/**
+ * Loads that context and installs what this application's own pages carry.
+ *
+ * @param queryClient - The cache to load through.
+ * @param userId - The user id the session carries.
+ * @returns The signed-in account.
+ */
+export async function setupUserAndOrgContext(queryClient: QueryClient, userId: number) {
+  const user = await loadUserAndOrgContext(queryClient, userId);
+
   _installChatSupport(user);
   _installProductGuides(user);
 
   /* The knowledge base is opened from the top bar, so the widget loads with the page. */
-  installFreshdesk(configurationStore.getState().supportWidgetId());
+  void installFreshdesk(configurationStore.getState().supportWidgetId());
 
   return user;
 }
