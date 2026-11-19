@@ -30,5 +30,5 @@
 [data-slot='popover-content'],
 [data-slot='menu-content'],
 [data-slot='select-content'] {
-  z-index: var(--irene-embed-layer) !important;
+  z-index: var(--irene-embed-layer) !important; /* NOSONAR */
 }

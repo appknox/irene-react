@@ -6,8 +6,16 @@
 /* Imported for the build: this is what puts the stylesheet in the output. */
 import './styles/index.css';
 
-/** Matches the base the bundle was built with, which its font URLs resolve against. */
-export const DEFAULT_ASSET_BASE = '/assets/embed/';
+declare global {
+  var __IRENE_EMBED_CONFIG__: Record<string, string> | undefined;
+}
+
+/*
+  Where the host serves this bundle's files from. Not a setting: the build
+  bakes the same path into every chunk and font URL it emits, so moving the
+  stylesheet alone would only half-work.
+*/
+const ASSET_BASE = '/assets/embed/';
 
 /**
  * Records the configuration the host resolved, which this bundle reads in
@@ -17,7 +25,7 @@ export const DEFAULT_ASSET_BASE = '/assets/embed/';
  */
 export function applyEmbedConfig(config?: Record<string, string>) {
   if (config) {
-    (globalThis as Record<string, unknown>)['__IRENE_EMBED_CONFIG__'] = config;
+    globalThis.__IRENE_EMBED_CONFIG__ = config;
   }
 }
 
@@ -27,12 +35,11 @@ export function applyEmbedConfig(config?: Record<string, string>) {
  * Loaded as a file rather than bundled into this module, so the browser caches
  * it and the font URLs inside it resolve against the same directory.
  *
- * @param assetBase - Where the host serves this bundle's files from.
  * @param version - The host's build, so a new one is not served the last one's sheet.
  */
-export function linkStylesheet(assetBase: string, version?: string) {
-  /* The name carries no hash, so without this a browser keeps the sheet it has. */
-  const href = `${assetBase}style.css${version ? `?v=${version}` : ''}`;
+export function linkStylesheet(version?: string) {
+  const query = version ? `?v=${version}` : '';
+  const href = `${ASSET_BASE}style.css${query}`;
 
   if (document.querySelector(`link[href="${href}"]`)) {
     return;

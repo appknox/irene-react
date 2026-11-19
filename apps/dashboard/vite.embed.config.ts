@@ -59,17 +59,20 @@ export default defineConfig({
     rolldownOptions: {
       input: resolvePath('./src/embed/index.ts'),
 
-      /*
-        Without this the entry is treated as an application's, and its exports
-        are dropped as unused — the bundle then runs on load and exports
-        nothing for a host to call.
-      */
-      preserveEntrySignatures: 'strict',
       output: {
         format: 'es',
         entryFileNames: 'embed.js',
         chunkFileNames: 'chunks/[name]-[hash].js',
         assetFileNames: '[name][extname]',
+
+        /*
+          Dependencies in a chunk of their own. They change far less often than
+          the screens do, so a host that has loaded one build keeps them when
+          the next ships.
+        */
+        advancedChunks: {
+          groups: [{ name: 'vendor', test: /node_modules/ }],
+        },
       },
     },
   },

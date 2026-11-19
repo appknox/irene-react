@@ -1,3 +1,4 @@
+import { waitFor } from '@testing-library/react';
 import { act } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -13,7 +14,7 @@ describe('mountIreneComponent', () => {
     const element = document.createElement('div');
 
     expect(() => mountIreneComponent(element, { name: 'NoSuchComponent' })).toThrowError(
-      /No embeddable component named "NoSuchComponent"/
+      /No embeddable page named "NoSuchComponent"/
     );
   });
 
@@ -21,7 +22,7 @@ describe('mountIreneComponent', () => {
     const element = document.createElement('div');
 
     expect(() => mountIreneComponent(element, { name: 'Nope' })).toThrowError(
-      /None are registered yet|Known components:/
+      /None are registered yet|Known pages:/
     );
   });
 
@@ -35,43 +36,48 @@ describe('mountIreneComponent', () => {
 });
 
 describe('a mounted component', () => {
-  function mount(props?: Record<string, unknown>) {
+  /* The page is loaded on demand, so it suspends before it draws. */
+  async function mount(props?: Record<string, unknown>) {
     const element = document.createElement('div');
 
     document.body.append(element);
 
-    const mounted = act(() => mountIreneComponent(element, { name: 'HomePage', props }));
+    const mounted = await act(async () =>
+      mountIreneComponent(element, { name: 'HomePage', props })
+    );
+
+    await waitFor(() => expect(element.textContent).toContain('home:'));
 
     return { element, mounted };
   }
 
-  it('renders the registered screen into the element it is given', () => {
-    const { element } = mount();
+  it('renders the registered screen into the element it is given', async () => {
+    const { element } = await mount();
 
     expect(element.textContent).toContain('home:');
   });
 
-  it('marks the element, so a host can see the app owns its contents', () => {
-    const { element } = mount();
+  it('marks the element, so a host can see the app owns its contents', async () => {
+    const { element } = await mount();
 
     expect(element.dataset.reactRoot).toBe('');
   });
 
   it('renders again with new props, keeping the tree', async () => {
-    const { element, mounted } = mount({ label: 'first' });
+    const { element, mounted } = await mount({ label: 'first' });
 
     expect(element.textContent).toContain('home:first');
 
-    await act(async () => (await mounted).update({ label: 'second' }));
+    await act(async () => mounted.update({ label: 'second' }));
 
-    expect(element.textContent).toContain('home:second');
+    await waitFor(() => expect(element.textContent).toContain('home:second'));
   });
 
   it('takes the component down, leaving the element empty', async () => {
-    const { element, mounted } = mount();
+    const { element, mounted } = await mount();
 
     await act(async () => {
-      (await mounted).destroy();
+      mounted.destroy();
 
       /* Unmounting waits a tick, so the host's own teardown does not warn. */
       await new Promise((resolve) => setTimeout(resolve, 0));

@@ -31,7 +31,6 @@ export function ScreenContext({ children }: Readonly<{ children: ReactNode }>) {
 
     queryFn: async () => {
       const session = getStoredSession();
-
       await loadConfiguration(queryClient);
 
       if (session) {
