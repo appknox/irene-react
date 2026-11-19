@@ -14,6 +14,33 @@ component, `Readonly<Props>`, and a JSDoc saying what it's for.
   lines goes in a `use…` hook; pure helpers go in `utils.ts` with a test.
 - Loading: an `AkSkeleton` shaped like the content, or `loading` on the
   button. Failures: `AkAlert` or `akNotify`.
+- **Skeletons match the real element's heights** (16px heading, 14px body,
+  `h-9` button…) so nothing shifts when the content replaces it. Mark the
+  wrapper `aria-busy`, add `<span className="sr-only">{akMT('loading')}</span>`
+  and a `data-test-*-skeleton` hook.
+- **`AkSpinner` colour comes from its `color` prop** (`primary` default,
+  `neutral`, `textSecondary`, `success`, `error`, `inherit`…), not a `text-*`
+  class. `className` is for size only (`className="size-6"`). Inside a
+  coloured control (a button) use `color="inherit"`.
+- **Copying to the clipboard → `useCopyToClipboard()`** from
+  `@/hooks/use-copy-to-clipboard`. Never call `navigator.clipboard` directly:
+  the hook notifies on success (`successMessage` overrides, `null` drops it)
+  and on failure (insecure origin, denied permission), and exposes `isCopied`
+  for two seconds. `const { copy } = useCopyToClipboard(); onClick={() => copy(text)}`.
+- **Modals**: let `AkModal` own its open state when it has a trigger
+  (`<AkModal><AkModalTrigger asChild>…`), and wrap Cancel in
+  `<AkModalClose asChild>` rather than mirroring `open` in `useState`. A modal
+  the caller mounts to open (so each opening starts fresh, like the MFA steps)
+  still closes through `open={false}` and unmounts only once the panel has left
+  the DOM, so the closing animation plays: see `useMfaModal` + `MfaModal` in
+  `features/account-settings/pages/security/components/`.
+- A cell renderer or other piece used once stays inline; don't split out a
+  one-use wrapper component (`DeviceStatus` was folded back into its column).
+- **Name components and files for what they are, not generically**:
+  `cyod-setup-step.tsx` / `CYODSetupStep`, not `step.tsx` / `Step`.
+  A feature's layout component lives in `features/<f>/layout/<name>.tsx`.
+- `AkAlertDescription` takes the alert's variant colour; `color` on the
+  typography inside does nothing, so change it with `className`.
 - A feature rendered from outside exports its entry in `features/<f>/index.ts`.
 
 ## Design-system components (`packages/ui/src/components/ak-<name>/`)
@@ -182,15 +209,21 @@ always come from `z.infer`.
 
 ### Dates, times and numbers
 
-- Use the named `FORMATS` (`packages/translations/src/formats.ts`: `hhmmss`
-  for date/time, `USD`/`EUR` for numbers). In a message:
-  `"Last scanned at {at, time, hhmmss}"` with `values={{ at: new Date(…) }}`.
-  Standalone: `useIntl().formatTime(v, { format: 'hhmmss' })` (or `getIntl()`
-  outside React).
-- Need another format? Add it to `FORMATS`. Never use `toLocaleString`, inline
-  `Intl` options or pattern strings.
-- Relative time: `formatRelativeTime` from `@/utils/relative-time`. dayjs is
-  for parsing and arithmetic. If it must format, use
-  `.locale(getLocale())` per call, never the global `dayjs.locale()`. (The
-  fixed patterns in `notifications/utils.ts` are legacy and English-only.)
-- Unreadable dates render as `''`, never "Invalid Date".
+- **A standalone date or time → `formatDateTime(value, format)`** from
+  `@irene/translations/date-time`. `format` is a named style (`'date'`,
+  `'mediumDate'`, `'longDate'`, `'time'`, `'dateTime'`, `'longDateTime'`) or a
+  `DateTimeFormat` token (`DateTimeFormat.ll`, `.LLL`…). Tokens, not patterns,
+  so order, separators and the clock follow the locale. It takes whatever the
+  API sends (string, number, `Date`, `null`) and returns `''` for anything
+  unreadable, so a table cell is `{formatDateTime(getValue(), 'longDate') || '-'}`.
+  Don't write a per-file `_formatX` helper around `new Date()` + `getIntl()`.
+- **Relative time → `formatRelativeTime(value, now?)`**, same module.
+- **Grouping by day → `getUTCDateString(value)`** (`YYYY-MM-DD` in UTC, not
+  localized), since the API truncates to UTC midnight.
+- **Inside a message**, use the named `FORMATS` (`formats.ts`: `hhmmss`,
+  `mediumDate`, `longDate`, `USD`/`EUR`): `"Last scanned at {at, time, hhmmss}"`
+  with `values={{ at: new Date(…) }}`. Numbers go through `FORMATS` too.
+- Never use `toLocaleString`, inline `Intl` options, pattern strings or the
+  global `dayjs.locale()` (the module sets `.locale(getLocale())` per call).
+  dayjs elsewhere is for parsing and arithmetic.
+- Unreadable dates render as `''` (or a `-` the caller adds), never "Invalid Date".

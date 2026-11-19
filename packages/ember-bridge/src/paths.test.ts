@@ -31,6 +31,15 @@ describe('findEmberPath', () => {
     expect(findEmberPath('/reset/a-token')).toBe('/reset/a-token');
   });
 
+  it('hands over the StoreKnox pages still on Ember and keeps the inventory', () => {
+    expect(findEmberPath('/dashboard/storeknox/fake-apps/42')).toBe(
+      '/dashboard/storeknox/fake-apps/42'
+    );
+
+    expect(findEmberPath('/dashboard/storeknox/inventory/app-list')).toBeUndefined();
+    expect(findEmberPath('/dashboard/storeknox/inventory-details/42')).toBeUndefined();
+  });
+
   it('prefers the longest owner, so a deeper path is not read as a shallower one', () => {
     expect(findEmberPath('/security/download-app')).toBe('/security/downloadapp');
     expect(findEmberPath('/security/projects')).toBe('/security/projects');

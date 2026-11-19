@@ -21,3 +21,17 @@ export { buildUploadedApp, buildPresignedUpload } from '@tests/factories/upload-
 export { buildUser, buildUserResponse } from '@tests/factories/user';
 
 export { buildVulnerability, buildVulnerabilityListResponse } from '@tests/factories/vulnerability';
+
+export {
+  buildArchivedSkApp,
+  buildPendingSkApp,
+  buildSkApp,
+  buildSkAppMetadata,
+  buildSkAppVersion,
+  buildSkCoreFile,
+  buildSkFileRisk,
+  buildSkInventoryApp,
+  buildSkOrganizationUser,
+  buildSkStoreInstance,
+  buildSkSubscription,
+} from '@tests/factories/storeknox';

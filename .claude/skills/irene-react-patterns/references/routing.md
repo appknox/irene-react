@@ -42,6 +42,12 @@ export const Route = createFileRoute('/_unauthenticated/login')({
 - **`loader`** + `pendingComponent: RoutePending` + `errorComponent: RouteError`:
   for data needed before render. The component then reads the same query with
   `useQuery`.
+- **A page with no loader still gets a `pendingComponent`** when its code is
+  a lazy chunk, or the click leaves the previous page on screen while the
+  chunk downloads. Use a page-shaped skeleton from the page's `components/`
+  (only the route `component` is split, so the skeleton ships in the parent
+  bundle), with `pendingMs: 150` and `pendingMinMs: 300` so a fast load shows
+  nothing and a slow one doesn't flash (`settings/cyod-settings.tsx`).
 - A guard needing data a parent _loader_ fills must await that setup itself.
   Loaders run after all guards; cached queries make the second call free
   (`dashboard/home.tsx`).
