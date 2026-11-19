@@ -7,10 +7,13 @@ import type {
   ApiSkAppMetadata,
   ApiSkAppVersion,
   ApiSkCoreFile,
+  ApiSkDiscoveryResult,
+  ApiSkDiscoverySearch,
   ApiSkFileRisk,
   ApiSkInventoryApp,
   ApiSkOrganizationUser,
   ApiSkPlatform,
+  ApiSkRequestedApp,
   ApiSkStoreInstance,
   ApiSkSubscription,
 } from '@irene/api/services/storeknox';
@@ -198,5 +201,67 @@ export const buildSkOrganizationUser = (
   username: faker.internet.username(),
   email: faker.internet.email(),
   is_active: true,
+  ...overrides,
+});
+
+/** A store search the server has started, under its id. */
+export const buildSkDiscoverySearch = (
+  overrides: Partial<ApiSkDiscoverySearch> = {}
+): ApiSkDiscoverySearch => {
+  const query = overrides.query_str ?? faker.commerce.productName();
+
+  return { id: _id(), query_str: query, query: { q: query }, ...overrides };
+};
+
+/** A store listing a search found, not yet tied to the inventory. */
+export const buildSkDiscoveryResult = (
+  overrides: Partial<ApiSkDiscoveryResult> = {}
+): ApiSkDiscoveryResult => ({
+  doc_ulid: faker.string.ulid(),
+  doc_hash: faker.string.hexadecimal({ length: 32 }),
+  app_id: faker.internet.domainName(),
+  package_name: `com.${faker.word.noun()}.${faker.word.noun()}`,
+  title: faker.commerce.productName(),
+  platform: faker.helpers.arrayElement([ENUMS.PLATFORM.ANDROID, ENUMS.PLATFORM.IOS]),
+  region: faker.location.countryCode(),
+  app_url: faker.internet.url(),
+  dev_name: faker.company.name(),
+  dev_email: faker.internet.email(),
+  icon_url: faker.image.url(),
+  ...overrides,
+});
+
+/** A member's request to add an app, still waiting for an owner. */
+export const buildPendingSkRequestedApp = (
+  overrides: Partial<ApiSkRequestedApp> = {}
+): ApiSkRequestedApp => ({
+  ...buildPendingSkApp(),
+  approved_by: null,
+  rejected_by: null,
+  ...overrides,
+});
+
+/** A member's request an owner approved, naming who and when. */
+export const buildApprovedSkRequestedApp = (
+  overrides: Partial<ApiSkRequestedApp> = {}
+): ApiSkRequestedApp => ({
+  ...buildSkApp(),
+  approved_by: faker.person.fullName(),
+  rejected_by: null,
+  ...overrides,
+});
+
+/** A member's request an owner rejected, naming who and when. */
+export const buildRejectedSkRequestedApp = (
+  overrides: Partial<ApiSkRequestedApp> = {}
+): ApiSkRequestedApp => ({
+  ...buildSkApp({
+    approval_status: ENUMS.SK_APPROVAL_STATUS.REJECTED,
+    approval_status_display: 'Rejected',
+    approved_on: null,
+    rejected_on: faker.date.past().toISOString(),
+  }),
+  approved_by: null,
+  rejected_by: faker.person.fullName(),
   ...overrides,
 });

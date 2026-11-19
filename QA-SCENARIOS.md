@@ -325,6 +325,30 @@ controls, so run the role-specific rows in each role.
 | Version upload details                | A version whose upload failed, press Check Details                      | A modal with the reason, the last attempt date, and Retry Upload                                      |
 | Unscanned versions while initializing | `…/unscanned-version` for an app still initializing                     | Redirected to the app's details                                                                       |
 
+## StoreKnox discovery
+
+Sign in to an organization with StoreKnox. The owner and a member see different
+controls, so run the role-specific rows in each role.
+
+| Scenario                   | How to get there                                                     | Expected                                                                                                                                  |
+| -------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Discovery                  | Press Discover on the inventory, or Discovery in the side navigation | The heading, an App Inventory button, the search, the disclaimer, and an invitation to search; Discovery is marked in the side navigation |
+| Tabs by role               | Open discovery as the owner, then as a member                        | The owner sees Discovery Results alone; a member also sees Requested Apps                                                                 |
+| Search                     | Type two or more characters, press Discover                          | "Showing results for" the query, then a row per listing; the URL carries `app_query` and `app_search_id`                                  |
+| Too short                  | Type one character, press Discover                                   | "Minimum 2 characters required"; nothing is searched                                                                                      |
+| Clear the field            | Type, then press the cross in the field                              | The field empties and the search mark returns                                                                                             |
+| No results                 | Search for something no store lists                                  | "No result found" with its description                                                                                                    |
+| Disclaimer                 | Press View More beside the disclaimer                                | A modal with the disclaimer's heading and full text                                                                                       |
+| Owner adds an app          | As the owner, press the add icon on a result                         | "added to inventory" toast; the row shows the inventory mark, whose tooltip says it is already there                                      |
+| Member asks for an app     | As a member, press the send icon on a result                         | "requested" toast; the row shows the requested mark                                                                                       |
+| Already there or asked for | Search for an app already in the inventory, or already requested     | The row shows its mark instead of a button                                                                                                |
+| Addition fails             | Add when the server refuses, for example with no licences            | The server's reason in a toast; the button stays                                                                                          |
+| Action help                | Hover the info icon in the Action heading                            | The owner's or the member's explanation                                                                                                   |
+| Pages                      | A search with more than ten results, press Next                      | The next page; the page shown stays, dimmed, until it arrives                                                                             |
+| Requested apps             | As a member, open Requested Apps                                     | Each request waiting for approval, or approved or rejected with who decided; hover the info icon for when                                 |
+| No requests                | As a member with no requests                                         | "No requested apps found" with where to raise one                                                                                         |
+| Owner and requests         | As the owner, open `/dashboard/storeknox/discover/requested`         | Redirected to the results                                                                                                                 |
+
 ## Dashboard navigation
 
 The side navigation every signed-in page sits beside: the logo, the product

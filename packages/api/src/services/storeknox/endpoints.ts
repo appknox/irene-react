@@ -49,4 +49,17 @@ export const StoreknoxEndpoints = {
 
   /** Tells support the organization wants more monitoring licences. */
   creditRequest: () => `${API_NAMESPACES.v2}/feature_request/sk_credit` as const,
+
+  /** Starts a store search, which the server runs and keeps under an id. */
+  discovery: () => `${API_NAMESPACES.v2}/sk_discovery` as const,
+
+  /** The apps one store search found. */
+  discoveryResults: (searchId: number | string) =>
+    `${API_NAMESPACES.v2}/sk_discovery/${_segment(searchId)}/search_results` as const,
+
+  /** Whether a store listing is already in the inventory, or asked for; a 404 when it is neither. */
+  approvalStatusCheck: () => `${API_NAMESPACES.v2}/sk_app/check_approval_status` as const,
+
+  /** The apps a member has asked to add, with each one's decision. */
+  requestedApps: () => `${API_NAMESPACES.v2}/sk_requested_apps` as const,
 };

@@ -8,15 +8,25 @@ import {
 import {
   StoreknoxEndpoints,
   type ApiSkApp,
+  type ApiSkApprovalStatus,
   type ApiSkAppVersion,
+  type ApiSkDiscoveryResult,
   type ApiSkInventoryApp,
+  type ApiSkRequestedApp,
   type ApiSkSubscription,
 } from '@irene/api/services/storeknox';
 
 import { storeSession } from '@irene/api/utils/session';
+import { HTTP_STATUS_CODES } from '@irene/constants';
 import { ENUMS } from '@irene/enums';
 
-import { buildSession, buildSkSubscription, buildStoreknoxOrganization } from '@tests/factories';
+import {
+  buildSession,
+  buildSkDiscoverySearch,
+  buildSkSubscription,
+  buildStoreknoxOrganization,
+} from '@tests/factories';
+
 import { mockOrganizationFeatures, mockOrganizationMe } from '@tests/organization';
 import { buildAPITestURL, server } from '@tests/server';
 
@@ -120,5 +130,58 @@ export function mockSkAppVersions(
         page(rows, isLatest ? rows.length : (versions.historyCount ?? rows.length))
       );
     })
+  );
+}
+
+/**
+ * Answers the store search and its results; a listing not in `statuses` (keyed by ulid) answers 404, neither in the inventory nor requested.
+ *
+ * @returns The search served, and the query and result params it was sent.
+ */
+export function mockSkDiscovery(
+  results: ApiSkDiscoveryResult[] = [],
+  statuses: Record<string, ApiSkApprovalStatus> = {}
+) {
+  const search = buildSkDiscoverySearch();
+  const sent: { query?: string; resultParams: URLSearchParams[] } = { resultParams: [] };
+
+  server.use(
+    http.post(buildAPITestURL(StoreknoxEndpoints.discovery()), async ({ request }) => {
+      const body = (await request.json()) as { query_str: string };
+
+      sent.query = body.query_str;
+
+      return HttpResponse.json({ ...search, query_str: body.query_str });
+    }),
+
+    http.get(buildAPITestURL(StoreknoxEndpoints.discoveryResults(search.id)), ({ request }) => {
+      sent.resultParams.push(new URL(request.url).searchParams);
+
+      return HttpResponse.json(page(results));
+    }),
+
+    http.get(buildAPITestURL(StoreknoxEndpoints.approvalStatusCheck()), ({ request }) => {
+      const docUlid = new URL(request.url).searchParams.get('doc_ulid') ?? '';
+      const status = statuses[docUlid];
+
+      if (status === undefined) {
+        return HttpResponse.json(
+          { detail: 'App not found in organization inventory.' },
+          { status: HTTP_STATUS_CODES.NOT_FOUND }
+        );
+      }
+
+      return HttpResponse.json({ id: 1, approval_status: status, approval_status_display: '' });
+    })
+  );
+
+  return { search, sent };
+}
+
+export function mockSkRequestedApps(requests: ApiSkRequestedApp[] = []) {
+  server.use(
+    http.get(buildAPITestURL(StoreknoxEndpoints.requestedApps()), () =>
+      HttpResponse.json(page(requests))
+    )
   );
 }

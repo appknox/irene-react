@@ -10,7 +10,7 @@ import type { ApiSkAppMetadata } from '@irene/api/services/storeknox';
 
 import { isAndroid, isIos } from '@/features/storeknox/utils/sk-app';
 
-/** The store listing the shared cells read, as an inventory app carries it under `app_metadata`. */
+/** The store listing the shared cells read; a search result is mapped into it by `discoveryResultAsCellApp`. */
 export interface SkCellApp {
   app_metadata: Pick<
     ApiSkAppMetadata,

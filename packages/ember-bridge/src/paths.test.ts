@@ -31,7 +31,9 @@ describe('findEmberPath', () => {
     expect(findEmberPath('/reset/a-token')).toBe('/reset/a-token');
   });
 
-  it('hands over the StoreKnox pages still on Ember and keeps the inventory', () => {
+  it('hands over the StoreKnox pages still on Ember and keeps the inventory and discovery', () => {
+    expect(findEmberPath('/dashboard/storeknox/discover/result')).toBeUndefined();
+
     expect(findEmberPath('/dashboard/storeknox/fake-apps/42')).toBe(
       '/dashboard/storeknox/fake-apps/42'
     );
