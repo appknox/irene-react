@@ -2157,6 +2157,8 @@
   "risk": "The risk of",
   "riskAndCommentRequired": "Risk and comment are required fields",
   "riskOf": "Risk Of",
+  "riskScore": "Risk Score",
+  "riskStatus": "Risk Status",
   "riskThresholdIntegrationDescription": "Configure your risk threshold settings based on security risk levels.",
   "riskType": "Risk Type",
   "role": "Role",

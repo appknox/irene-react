@@ -2157,6 +2157,8 @@
   "risk": "リスク",
   "riskAndCommentRequired": "Risk and comment are required fields",
   "riskOf": "リスク",
+  "riskScore": "Risk Score",
+  "riskStatus": "Risk Status",
   "riskThresholdIntegrationDescription": "Configure your risk threshold settings based on security risk levels.",
   "riskType": "リスクタイプ",
   "role": "役割",
