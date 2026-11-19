@@ -81,4 +81,10 @@ export const StoreknoxEndpoints = {
   /** Dismisses one copy and adds its store listing to the inventory. */
   addFakeAppToInventory: (skAppId: number | string, id: number | string) =>
     `${API_NAMESPACES.v2}/sk_app/${_segment(skAppId)}/sk_fake_app/${_segment(id)}/add_to_inventory` as const,
+
+  /** The regions each store is scanned in for third-party apps. */
+  thirdPartyConfig: () => `${API_NAMESPACES.v2}/sk_third_party_config` as const,
+
+  /** The third-party apps list; with `q` it answers one app instead of a page. */
+  thirdPartyApps: () => `${API_NAMESPACES.v2}/sk_third_party_apps` as const,
 };

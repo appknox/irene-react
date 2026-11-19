@@ -11,13 +11,13 @@ import { AkTypography } from '@irene/ui/ak-typography';
 import { PageWrapper } from '@/components/page-wrapper';
 import { PoweredByAiDrawer, type PoweredByAiSection } from '@/components/powered-by-ai';
 import { SkListEmpty } from '@/features/storeknox/components/list-empty';
+import { ListingSearch } from '@/features/storeknox/components/listing-search';
 import { useErrorToast } from '@/features/storeknox/hooks/use-error-toast';
 import { skFakeAppInventoryOptions } from '@/features/storeknox/queries/fake-apps';
 import { readFakeAppInventoryParams } from '@/features/storeknox/utils/list-params';
 
 import { FakeAppInventoryCard } from './components/fake-app-inventory-card';
 import { FakeAppInventoryCardSkeleton } from './components/fake-app-inventory-card-skeleton';
-import { ListingSearch } from './components/listing-search';
 
 const routeApi = getRouteApi('/_authenticated/dashboard_/storeknox/fake-apps/');
 

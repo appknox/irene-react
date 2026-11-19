@@ -16,6 +16,8 @@ import {
   type ApiSkInventoryApp,
   type ApiSkRequestedApp,
   type ApiSkSubscription,
+  type ApiSkThirdPartyApp,
+  type ApiSkThirdPartyConfig,
 } from '@irene/api/services/storeknox';
 
 import { storeSession } from '@irene/api/utils/session';
@@ -29,6 +31,7 @@ import {
   buildStoreknoxOrganization,
 } from '@tests/factories';
 
+import { riskStatusLabel } from '@/features/storeknox/utils/third-party';
 import { mockOrganizationFeatures, mockOrganizationMe } from '@tests/organization';
 import { buildAPITestURL, server } from '@tests/server';
 
@@ -299,4 +302,86 @@ export function mockSkFakeAppReview(
   );
 
   return bodies;
+}
+
+/** Answers the third-party scan config with one config. */
+export function mockSkThirdPartyConfig(config: ApiSkThirdPartyConfig) {
+  server.use(
+    http.get(buildAPITestURL(StoreknoxEndpoints.thirdPartyConfig()), () =>
+      HttpResponse.json(config)
+    )
+  );
+}
+
+/**
+ * Answers the third-party apps list, keeping the apps whose package name contains `filter`
+ * (case-insensitive) and whose risk status is the `risk_status` word, then paginating by `limit`
+ * and `offset`. A request with `q` is a single app's, left to `mockSkThirdPartyApp`.
+ *
+ * @returns The query strings received, newest last.
+ */
+export function mockSkThirdPartyApps(apps: ApiSkThirdPartyApp[] = []) {
+  const received: URLSearchParams[] = [];
+
+  server.use(
+    http.get(buildAPITestURL(StoreknoxEndpoints.thirdPartyApps()), ({ request }) => {
+      const params = new URL(request.url).searchParams;
+
+      if (params.has('q')) {
+        return undefined;
+      }
+
+      const filter = (params.get('filter') ?? '').toLowerCase();
+      const risk = params.get('risk_status');
+
+      const matching = apps.filter(
+        (app) =>
+          app.package_name.toLowerCase().includes(filter) &&
+          (risk === null || riskStatusLabel(app.risk_status) === risk)
+      );
+
+      const limit = Number(params.get('limit') ?? matching.length);
+      const offset = Number(params.get('offset') ?? 0);
+
+      received.push(params);
+
+      return HttpResponse.json(page(matching.slice(offset, offset + limit), matching.length));
+    })
+  );
+
+  return received;
+}
+
+/**
+ * Answers one third-party app: the app whose package name is `q` and whose store, region and
+ * version match the request (a request without `version` gets the app's own). Anything else is a 404.
+ *
+ * @returns The query strings received, newest last.
+ */
+export function mockSkThirdPartyApp(app: ApiSkThirdPartyApp) {
+  const received: URLSearchParams[] = [];
+
+  server.use(
+    http.get(buildAPITestURL(StoreknoxEndpoints.thirdPartyApps()), ({ request }) => {
+      const params = new URL(request.url).searchParams;
+
+      if (!params.has('q')) {
+        return undefined;
+      }
+
+      received.push(params);
+
+      const matches =
+        params.get('q') === app.package_name &&
+        params.get('store') === app.store &&
+        params.get('region') === app.region &&
+        (params.get('version') ?? app.version) === app.version;
+
+      return matches
+        ? HttpResponse.json(app)
+        : HttpResponse.json({ detail: 'Not found.' }, { status: HTTP_STATUS_CODES.NOT_FOUND });
+    })
+  );
+
+  return received;
 }

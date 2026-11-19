@@ -44,4 +44,8 @@ export {
   buildSkOrganizationUser,
   buildSkStoreInstance,
   buildSkSubscription,
+  buildSkThirdPartyApp,
+  buildSkThirdPartyConfig,
+  buildSkThirdPartyFinding,
+  buildUnscoredSkThirdPartyApp,
 } from '@tests/factories/storeknox';

@@ -20,6 +20,8 @@ import {
   buildSkInventoryApp,
   buildSkOrganizationUser,
   buildSkSubscription,
+  buildSkThirdPartyApp,
+  buildSkThirdPartyConfig,
   buildStoreknoxOrganization,
   buildSubmission,
 } from '@tests/factories';
@@ -416,5 +418,83 @@ describe('StoreknoxService fake apps', () => {
     ).resolves.toEqual(fakeApp);
 
     expect(seen.body).toEqual({ ignore_reason: reason });
+  });
+});
+
+describe('StoreknoxService third-party scans', () => {
+  it('getThirdPartyApps sends store, region and page, and leaves out an empty filter and risk status', async () => {
+    const apps = [buildSkThirdPartyApp(), buildSkThirdPartyApp()];
+    const store = faker.helpers.arrayElement(['appstore', 'playstore'] as const);
+    const region = faker.location.countryCode().toLowerCase();
+    const limit = faker.number.int({ min: 5, max: 50 });
+    const offset = faker.number.int({ min: 0, max: 100 });
+
+    const seen = capture(
+      'get',
+      StoreknoxEndpoints.thirdPartyApps(),
+      buildDrfPage(apps, { count: 12 })
+    );
+
+    const page = await StoreknoxService.getThirdPartyApps({ store, region, limit, offset });
+
+    expect(page.items).toEqual(apps);
+    expect(page.count).toBe(12);
+
+    expect(Object.fromEntries(seen.params)).toEqual({
+      store,
+      region,
+      limit: String(limit),
+      offset: String(offset),
+    });
+  });
+
+  it('getThirdPartyApps sends the risk status as its label', async () => {
+    const filter = faker.lorem.word();
+
+    const seen = capture(
+      'get',
+      StoreknoxEndpoints.thirdPartyApps(),
+      buildDrfPage([buildSkThirdPartyApp()])
+    );
+
+    await StoreknoxService.getThirdPartyApps({
+      store: 'playstore',
+      region: 'us',
+      limit: 10,
+      offset: 0,
+      filter,
+      risk_status: 'high',
+    });
+
+    expect(seen.params.get('risk_status')).toBe('high');
+    expect(seen.params.get('filter')).toBe(filter);
+  });
+
+  it('getThirdPartyApp asks for one app by package name, store, region and version', async () => {
+    const app = buildSkThirdPartyApp();
+    const seen = capture('get', StoreknoxEndpoints.thirdPartyApps(), app);
+
+    await expect(
+      StoreknoxService.getThirdPartyApp({
+        q: app.package_name,
+        store: app.store,
+        region: app.region,
+        version: app.version,
+      })
+    ).resolves.toEqual(app);
+
+    expect(Object.fromEntries(seen.params)).toEqual({
+      q: app.package_name,
+      store: app.store,
+      region: app.region,
+      version: app.version,
+    });
+  });
+
+  it('getThirdPartyConfig reads the opted regions', async () => {
+    const config = buildSkThirdPartyConfig();
+    capture('get', StoreknoxEndpoints.thirdPartyConfig(), config);
+
+    await expect(StoreknoxService.getThirdPartyConfig()).resolves.toEqual(config);
   });
 });

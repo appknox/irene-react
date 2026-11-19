@@ -332,3 +332,76 @@ export type ApiSkFakeAppReviewResponse = Pick<
   'id' | 'status' | 'status_display' | 'reviewed_by' | 'reviewed_on'
 > &
   Partial<Pick<ApiSkFakeApp, 'ignore_reason' | 'added_to_inventory_app'>>;
+
+/** The store a third-party scan reads an app from. */
+export type ApiSkThirdPartyStore = 'appstore' | 'playstore';
+
+/** How risky a third-party scan found an app, as the server codes it. */
+export type ApiSkThirdPartyRiskStatus =
+  (typeof ENUMS.SK_THIRD_PARTY_APP_RISK_STATUS)[keyof typeof ENUMS.SK_THIRD_PARTY_APP_RISK_STATUS];
+
+/** The risk status as the apps list filter names it; the list takes a word where the app carries a code. */
+export type ApiSkThirdPartyRiskLabel = 'minimal' | 'medium' | 'high';
+
+/** Which regions each store is scanned in, how often, and how many top apps it covers. */
+export interface ApiSkThirdPartyConfig {
+  frequency: number;
+  playstore_regions_opted: string[];
+  appstore_regions_opted: string[];
+  top_apps_count: number;
+}
+
+/** One rule the third-party scan ran against an app. */
+export interface ApiSkThirdPartyFinding {
+  rule_id: string;
+  name: string;
+  description: string;
+  severity: string;
+  status: string;
+  details: string[];
+  skip_reason: string | null;
+  /* The server may send no category; the details page files such a finding under Others. */
+  category: string | null;
+  contributes_to_score: boolean;
+  checks: string;
+  business_impact: string;
+  is_potential_risk: boolean;
+}
+
+/** One store app the third-party scan covers; `score` is null until a scan has finished. */
+export interface ApiSkThirdPartyApp {
+  package_name: string;
+  region: string;
+  version: string;
+  store: ApiSkThirdPartyStore;
+  score: number | null;
+  /* A plain number: the server may send a code the enum does not know, which the pages show as unknown. */
+  risk_status: number;
+  scan_date: string;
+  title: string;
+  icon_url: string;
+  dev_name: string;
+  app_url: string;
+  platform: ApiSkPlatform;
+  presigned_url: string;
+  versions: string[];
+  findings: ApiSkThirdPartyFinding[];
+}
+
+/** What the third-party apps list accepts; `filter` and `risk_status` are left out when not narrowing. */
+export interface ApiSkThirdPartyAppsRequest {
+  store: ApiSkThirdPartyStore;
+  region: string;
+  limit: number;
+  offset: number;
+  filter?: string;
+  risk_status?: ApiSkThirdPartyRiskLabel;
+}
+
+/** What asking for one third-party app sends: its package name as `q`, and `version` for an older scan. */
+export interface ApiSkThirdPartyAppRequest {
+  q: string;
+  store: ApiSkThirdPartyStore;
+  region: string;
+  version?: string;
+}

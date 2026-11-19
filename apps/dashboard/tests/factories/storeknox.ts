@@ -19,6 +19,10 @@ import type {
   ApiSkRequestedApp,
   ApiSkStoreInstance,
   ApiSkSubscription,
+  ApiSkThirdPartyApp,
+  ApiSkThirdPartyConfig,
+  ApiSkThirdPartyFinding,
+  ApiSkThirdPartyStore,
 } from '@irene/api/services/storeknox';
 
 const _id = () => faker.number.int({ min: 1, max: 99999 });
@@ -393,3 +397,82 @@ export const buildSkFakeAppInventoryApp = (overrides: Partial<ApiSkApp> = {}): A
     last_fake_detection_on: faker.date.recent().toISOString(),
     ...overrides,
   });
+
+/* Real region codes are uppercase; US, SG and SA have a `storeknox.regionNames` entry, the rest do not. */
+const _REGIONS = ['US', 'SG', 'SA', 'IN', 'GB', 'DE'];
+
+/** Which regions each store is scanned in, with at least one opted for each. */
+export const buildSkThirdPartyConfig = (
+  overrides: Partial<ApiSkThirdPartyConfig> = {}
+): ApiSkThirdPartyConfig => ({
+  frequency: faker.number.int({ min: 1, max: 30 }),
+  playstore_regions_opted: faker.helpers.arrayElements(_REGIONS, {
+    min: 1,
+    max: 3,
+  }),
+  appstore_regions_opted: faker.helpers.arrayElements(_REGIONS, {
+    min: 1,
+    max: 3,
+  }),
+  top_apps_count: faker.number.int({ min: 10, max: 500 }),
+  ...overrides,
+});
+
+/** One rule the third-party scan ran against an app. */
+export const buildSkThirdPartyFinding = (
+  overrides: Partial<ApiSkThirdPartyFinding> = {}
+): ApiSkThirdPartyFinding => ({
+  rule_id: faker.string.uuid(),
+  name: faker.lorem.words(3),
+  description: faker.lorem.sentence(),
+  severity: faker.helpers.arrayElement(['critical', 'high', 'medium', 'low', 'info']),
+  status: faker.helpers.arrayElement(['triggered', 'clean', 'error', 'skipped']),
+  details: [faker.lorem.sentence()],
+  skip_reason: null,
+  category: faker.lorem.word(),
+  contributes_to_score: faker.datatype.boolean(),
+  checks: faker.lorem.sentence(),
+  business_impact: faker.lorem.sentence(),
+  is_potential_risk: faker.datatype.boolean(),
+  ...overrides,
+});
+
+/**
+ * A scanned third-party app; its platform follows its store and its versions include the scanned one.
+ * Its risk status is drawn from the enum; a test for an unrecognised code overrides `risk_status` with a number outside it.
+ */
+export const buildSkThirdPartyApp = (
+  overrides: Partial<ApiSkThirdPartyApp> = {}
+): ApiSkThirdPartyApp => {
+  const store: ApiSkThirdPartyStore =
+    overrides.store ?? faker.helpers.arrayElement(['appstore', 'playstore']);
+
+  const version = overrides.version ?? faker.system.semver();
+
+  return {
+    package_name: faker.internet.domainName(),
+    region: faker.helpers.arrayElement(_REGIONS),
+    version,
+    store,
+    score: faker.number.int({ min: 0, max: 100 }),
+    risk_status: faker.helpers.arrayElement([
+      ENUMS.SK_THIRD_PARTY_APP_RISK_STATUS.MINIMAL,
+      ENUMS.SK_THIRD_PARTY_APP_RISK_STATUS.MEDIUM,
+      ENUMS.SK_THIRD_PARTY_APP_RISK_STATUS.HIGH,
+    ]),
+    scan_date: faker.date.recent().toISOString(),
+    title: faker.company.name(),
+    icon_url: faker.image.url(),
+    dev_name: faker.person.fullName(),
+    app_url: faker.internet.url(),
+    platform: store === 'appstore' ? ENUMS.PLATFORM.IOS : ENUMS.PLATFORM.ANDROID,
+    presigned_url: faker.internet.url(),
+    versions: [version, faker.system.semver()],
+    findings: [buildSkThirdPartyFinding()],
+    ...overrides,
+  };
+};
+
+/** A third-party app no scan has finished for, so it has no score. */
+export const buildUnscoredSkThirdPartyApp = (overrides: Partial<ApiSkThirdPartyApp> = {}) =>
+  buildSkThirdPartyApp({ score: null, ...overrides });

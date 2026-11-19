@@ -14,10 +14,12 @@ interface ListingSearchProps {
 }
 
 /**
- * The package-name search above the fake-app listing.
+ * The search box above a StoreKnox listing: the fake-app cards and the third-party scans.
  *
  * It keeps what is typed itself and reports it once typing has paused, so a search is not sent
- * per keystroke; clearing reports at once. A search the URL already carries fills the field.
+ * per keystroke; clearing reports at once. A search the URL already carries fills the field. Text
+ * is compared and reported trimmed, as the URL holds it, so surrounding spaces never search twice.
+ * Clearing a field the URL has no search for only empties the text, leaving the page where it is.
  *
  * @param props.query - The search the page is showing, from the URL.
  * @param props.onSearch - Called with the typed text a pause after the last keystroke, or with an empty string on clear.
@@ -49,18 +51,23 @@ export function ListingSearch({ query, onSearch }: Readonly<ListingSearchProps>)
   );
 
   useEffect(() => {
-    if (text === query) {
+    const trimmed = text.trim();
+
+    if (trimmed === query) {
       return undefined;
     }
 
-    const timer = setTimeout(() => report(text), SEARCH_DEBOUNCE_MS);
+    const timer = setTimeout(() => report(trimmed), SEARCH_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
   }, [text, query, report]);
 
   const clear = () => {
     setText('');
-    report('');
+
+    if (query) {
+      report('');
+    }
   };
 
   return (
@@ -71,7 +78,7 @@ export function ListingSearch({ query, onSearch }: Readonly<ListingSearchProps>)
         placeholder={akMT('searchQuery')}
         aria-label={akMT('searchQuery')}
         className="h-8 pr-9 text-sm placeholder:text-sm"
-        data-test-sk-fake-apps-search-input
+        data-test-sk-listing-search-input
       />
 
       <span className="absolute inset-y-0 right-1 flex items-center">

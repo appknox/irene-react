@@ -38,6 +38,10 @@ import type {
   ApiSkOrganizationUser,
   ApiSkRequestedApp,
   ApiSkSubscription,
+  ApiSkThirdPartyApp,
+  ApiSkThirdPartyAppRequest,
+  ApiSkThirdPartyAppsRequest,
+  ApiSkThirdPartyConfig,
 } from './types';
 
 /** Talks to the StoreKnox inventory endpoints. */
@@ -238,4 +242,22 @@ export default class StoreknoxService {
       StoreknoxEndpoints.addFakeAppToInventory(skAppId, id),
       { ignore_reason: reason }
     );
+
+  /** Fetches which regions each store is scanned in for third-party apps. */
+  public static readonly getThirdPartyConfig = () =>
+    apiRequest.get<ApiSkThirdPartyConfig>(StoreknoxEndpoints.thirdPartyConfig());
+
+  /** Fetches a page of third-party apps for one store and region. */
+  public static readonly getThirdPartyApps = async (params: ApiSkThirdPartyAppsRequest) => {
+    const page = await apiRequest.get<ApiPageEnvelope<ApiSkThirdPartyApp>>(
+      StoreknoxEndpoints.thirdPartyApps(),
+      { params }
+    );
+
+    return transformPaginatedResponse(page);
+  };
+
+  /** Fetches one third-party app by package name; the same path as the list, answered with a single object. */
+  public static readonly getThirdPartyApp = (params: ApiSkThirdPartyAppRequest) =>
+    apiRequest.get<ApiSkThirdPartyApp>(StoreknoxEndpoints.thirdPartyApps(), { params });
 }

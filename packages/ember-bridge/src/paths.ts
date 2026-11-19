@@ -33,7 +33,6 @@ export const EMBER_PATHS = {
   '/dashboard/settings': '/dashboard/settings',
   '/dashboard/store-monitoring': '/dashboard/store-monitoring',
   '/dashboard/store-release-readiness': '/dashboard/store-release-readiness',
-  '/dashboard/storeknox/third-party-scans': '/dashboard/storeknox/third-party-scans',
   '/dashboard/subscription': '/dashboard/subscription',
   '/partner/analytics': '/partner/analytics',
   '/partner/clients': '/partner/clients',
