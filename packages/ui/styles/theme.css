@@ -114,6 +114,10 @@ Two layers, deliberately separate:
   --color-disabled-field: var(--color-neutral-100);
   --color-disabled-button: var(--color-neutral-400);
 
+  /* What each platform is marked with, wherever an app's platform is shown. */
+  --color-android: #33a852;
+  --color-ios: #8d9096;
+
   /* What the AI features are marked with, wherever one is offered. */
   --color-ai: var(--color-teal-400);
   --color-ai-hover: var(--color-teal-500);
@@ -132,6 +136,7 @@ Two layers, deliberately separate:
   /* ---------------------------------------------------------------------
      Radius — six sizes plus a capsule.
      --------------------------------------------------------------------- */
+  --radius-none: 0;
   --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 6px;

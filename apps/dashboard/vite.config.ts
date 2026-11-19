@@ -33,6 +33,21 @@ export default defineConfig({
   ],
   resolve: { alias: { '@': resolvePath('./src') } },
 
+  optimizeDeps: {
+    /*
+      Vite pre-bundles what the app's own source imports, so a dependency only a
+      workspace package reaches is named here. Discovering one mid-session
+      reloads the dependency graph under the running page.
+    */
+    include: [
+      'dayjs',
+      'dayjs/locale/ja',
+      'dayjs/plugin/localizedFormat',
+      'dayjs/plugin/relativeTime',
+      'dayjs/plugin/utc',
+    ],
+  },
+
   /*
     One origin for both apps, so the session is shared and crossing between
     them is a navigation rather than a change of origin. The Ember app serves
