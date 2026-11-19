@@ -117,7 +117,7 @@ function useAppActions(app: ApiSkInventoryApp): AppAction[] {
   ];
 }
 
-/** The link a check opens; the fake-apps check opens the stand-in fake-apps page until irene's list is built. */
+/** The link a check opens; the fake-apps check opens the app's own fake-app list. */
 function _ActionLink({
   action,
   appId,
@@ -138,7 +138,11 @@ function _ActionLink({
   }
 
   if (action.id === 'brand-abuse' && !action.featureInProgress) {
-    return <Link to="/dashboard/storeknox/fake-apps">{children}</Link>;
+    return (
+      <Link to="/dashboard/storeknox/fake-apps/$skApp" params={{ skApp: String(appId) }}>
+        {children}
+      </Link>
+    );
   }
 
   return (

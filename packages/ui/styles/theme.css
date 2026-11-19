@@ -142,6 +142,16 @@ Two layers, deliberately separate:
   --color-beta: var(--color-blue-800);
   --color-beta-surface: var(--color-blue-100);
 
+  /* What StoreKnox marks a suspected copy with: brand abuse in blue, a fake app in crimson. */
+  --color-brand-abuse: #114db5;
+  --color-brand-abuse-surface: #e1ecff;
+  --color-fake-app: #b11146;
+  --color-fake-app-surface: #ffe8ef;
+
+  /* A copy's overall AI finding: a pale blue card with its confidence in rose. */
+  --color-fake-app-finding: #e6f9ff;
+  --color-fake-app-confidence: #f43f5e;
+
   /* ---------------------------------------------------------------------
      Severity — how a finding is ranked. A scan reports counts at each.
      --------------------------------------------------------------------- */

@@ -12,6 +12,7 @@ import PlaystoreLogo from '@irene/ui/svgs/playstore-logo.svg?react';
 import type { ApiSkInventoryApp } from '@irene/api/services/storeknox';
 
 import { DetailsSectionHeader } from '@/features/storeknox/components/details-section';
+import { SkRoundAppIcon } from '@/features/storeknox/components/sk-round-app-icon';
 import { useActiveDetailsSection } from '@/features/storeknox/hooks/use-active-details-section';
 import { useMonitoringToggle } from '@/features/storeknox/hooks/use-monitoring-toggle';
 import { hasLicense, isAndroid, isDecommissioned } from '@/features/storeknox/utils/sk-app';
@@ -20,33 +21,6 @@ import { ArchiveDrawer } from './archive-drawer';
 import { DetailsBreadcrumbs } from './details-breadcrumbs';
 import { HeaderActions } from './header-actions';
 import { ToggleMonitoringDrawer } from './toggle-monitoring-drawer';
-
-/** The app's icon, or a placeholder when it has none or it fails to load. */
-function HeaderAppIcon({ app }: Readonly<{ app: ApiSkInventoryApp }>) {
-  const [failed, setFailed] = useState(false);
-  const { icon_url: iconUrl, title } = app.app_metadata;
-
-  if (!iconUrl || failed) {
-    return (
-      <span
-        className="
-          flex size-12.5 shrink-0 items-center justify-center rounded-full bg-background-subtle
-        "
-      >
-        <AkIcon name="hugeicons:image-03" className="text-foreground-muted" />
-      </span>
-    );
-  }
-
-  return (
-    <img
-      src={iconUrl}
-      alt={title}
-      className="size-12.5 shrink-0 rounded-full object-contain"
-      onError={() => setFailed(true)}
-    />
-  );
-}
 
 /** The header of an app's details, with its breadcrumbs, identity, licence mark, controls and store. */
 export function DetailsHeader({ app }: Readonly<{ app: ApiSkInventoryApp }>) {
@@ -75,7 +49,7 @@ export function DetailsHeader({ app }: Readonly<{ app: ApiSkInventoryApp }>) {
 
       <div className="flex w-full justify-between gap-2 border border-border bg-background p-6">
         <div className="flex min-w-0 items-center gap-4">
-          <HeaderAppIcon app={app} />
+          <SkRoundAppIcon src={metadata.icon_url} alt={metadata.title} className="size-12.5" />
 
           <div className="flex min-w-0 flex-col items-start gap-1.5">
             <a

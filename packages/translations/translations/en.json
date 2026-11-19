@@ -3013,6 +3013,7 @@
       "suspectedFakeApps": "Suspected Fake Apps",
       "suspectedBrandAbuse": "Suspected Brand Abuse",
       "noSuspectedApps": "No Suspected Brand Abuse/Fake Apps Found",
+      "noSuspectedAppsDecommissionedDescription": "No suspected brand abuse/fake apps were found before this app was removed from the store. Fake app detection has stopped, so no new results will appear here.",
       "noBrandAbuseFound": "No Suspected Brand Abuse Found",
       "noFakeAppsFound": "No Suspected Fake App Found",
       "noIgnoredApps": "No Apps have been Ignored",

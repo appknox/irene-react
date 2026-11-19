@@ -1,16 +1,21 @@
+import { faker } from '@faker-js/faker';
 import { http, HttpResponse, type JsonBodyType } from 'msw';
 import { describe, expect, it } from 'vitest';
 
 import { ENUMS } from '@irene/enums';
 
 import {
+  buildAddedToInventorySkFakeApp,
   buildArchivedSkApp,
+  buildBrandAbuseSkFakeApp,
+  buildIgnoredSkFakeApp,
   buildPendingSkRequestedApp,
   buildSkApp,
   buildSkAppVersion,
   buildSkCoreFile,
   buildSkDiscoveryResult,
   buildSkDiscoverySearch,
+  buildSkFakeApp,
   buildSkFileRisk,
   buildSkInventoryApp,
   buildSkOrganizationUser,
@@ -314,5 +319,102 @@ describe('StoreknoxService discovery', () => {
 
     expect(page.items).toEqual(requests);
     expect(seen.params.get('limit')).toBe('25');
+  });
+});
+
+describe('StoreknoxService fake apps', () => {
+  it('getFakeAppInventory sends the page and the search, and no monitoring filter', async () => {
+    const apps = [buildSkApp(), buildSkApp()];
+    const q = faker.word.noun();
+
+    const seen = capture(
+      'get',
+      StoreknoxEndpoints.fakeAppInventory(),
+      buildDrfPage(apps, { count: 30 })
+    );
+
+    const page = await StoreknoxService.getFakeAppInventory({ limit: 12, offset: 24, q });
+
+    expect(page).toMatchObject({ items: apps, count: 30 });
+    expect(seen.params.get('limit')).toBe('12');
+    expect(seen.params.get('offset')).toBe('24');
+    expect(seen.params.get('q')).toBe(q);
+    expect(seen.params.has('monitoring_status')).toBe(false);
+  });
+
+  it('getFakeApps leaves classification out for the ignored list', async () => {
+    const skAppId = faker.number.int({ min: 1, max: 999 });
+    const fakeApps = [buildIgnoredSkFakeApp()];
+    const seen = capture('get', StoreknoxEndpoints.fakeApps(skAppId), buildDrfPage(fakeApps));
+
+    const page = await StoreknoxService.getFakeApps(skAppId, {
+      limit: 10,
+      offset: 0,
+      status: 'ignored',
+    });
+
+    expect(page.items).toEqual(fakeApps);
+    expect(seen.params.get('status')).toBe('ignored');
+    expect(seen.params.has('classification')).toBe(false);
+  });
+
+  it('getFakeApps sends the status and the classification of a pending list', async () => {
+    const skAppId = faker.number.int({ min: 1, max: 999 });
+
+    const seen = capture(
+      'get',
+      StoreknoxEndpoints.fakeApps(skAppId),
+      buildDrfPage([buildBrandAbuseSkFakeApp()])
+    );
+
+    await StoreknoxService.getFakeApps(skAppId, {
+      limit: 10,
+      offset: 20,
+      status: 'pending',
+      classification: 'brand_abuse',
+    });
+
+    expect(seen.params.get('status')).toBe('pending');
+    expect(seen.params.get('classification')).toBe('brand_abuse');
+    expect(seen.params.get('offset')).toBe('20');
+  });
+
+  it('getFakeApp fetches one fake app beneath its inventory app', async () => {
+    const skAppId = faker.number.int({ min: 1, max: 999 });
+    const fakeApp = buildSkFakeApp();
+    capture('get', StoreknoxEndpoints.fakeApp(skAppId, fakeApp.id), fakeApp);
+
+    await expect(StoreknoxService.getFakeApp(skAppId, fakeApp.id)).resolves.toEqual(fakeApp);
+  });
+
+  it('ignoreFakeApp posts the reason to the fake app’s ignore path', async () => {
+    const skAppId = faker.number.int({ min: 1, max: 999 });
+    const fakeApp = buildIgnoredSkFakeApp();
+    const reason = faker.lorem.sentence();
+    const seen = capture('post', StoreknoxEndpoints.ignoreFakeApp(skAppId, fakeApp.id), fakeApp);
+
+    await expect(StoreknoxService.ignoreFakeApp(skAppId, fakeApp.id, reason)).resolves.toEqual(
+      fakeApp
+    );
+
+    expect(seen.body).toEqual({ ignore_reason: reason });
+  });
+
+  it('addFakeAppToInventory posts the reason to the fake app’s add path', async () => {
+    const skAppId = faker.number.int({ min: 1, max: 999 });
+    const fakeApp = buildAddedToInventorySkFakeApp();
+    const reason = faker.lorem.sentence();
+
+    const seen = capture(
+      'post',
+      StoreknoxEndpoints.addFakeAppToInventory(skAppId, fakeApp.id),
+      fakeApp
+    );
+
+    await expect(
+      StoreknoxService.addFakeAppToInventory(skAppId, fakeApp.id, reason)
+    ).resolves.toEqual(fakeApp);
+
+    expect(seen.body).toEqual({ ignore_reason: reason });
   });
 });

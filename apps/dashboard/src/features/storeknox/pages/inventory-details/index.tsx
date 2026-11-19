@@ -7,8 +7,8 @@ import {
 } from '@/features/storeknox/hooks/use-inventory-app';
 
 import { PageWrapper } from '@/components/page-wrapper';
+import { DetailsBanner } from '@/features/storeknox/components/details-banner';
 
-import { DetailsBanner } from './components/details-banner';
 import { DetailsHeader } from './components/details-header';
 
 /** The layout around every page about one app: the warning banner, the header and the page beneath. */

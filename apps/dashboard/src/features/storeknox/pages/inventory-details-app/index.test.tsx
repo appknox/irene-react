@@ -318,7 +318,7 @@ describe('an app’s checks in other states', () => {
     },
   };
 
-  it('opens the fake apps for an organization that detects them', async () => {
+  it("opens the app's own fake-app list from the brand abuse check", async () => {
     mockStoreknoxOrganization(fakeAppDetection);
 
     const app = buildSkInventoryApp({
@@ -335,7 +335,7 @@ describe('an app’s checks in other states', () => {
 
     expect(within(fakeApps).getByRole('link')).toHaveAttribute(
       'href',
-      '/dashboard/storeknox/fake-apps'
+      `/dashboard/storeknox/fake-apps/${app.id}`
     );
   });
 

@@ -2,7 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import { ENUMS } from '@irene/enums';
 
-import { readInventoryListParams, readListPage, skInventoryListSearchSchema } from './list-params';
+import {
+  readFakeAppInventoryParams,
+  readFakeAppTabPage,
+  readInventoryListParams,
+  readListPage,
+  skFakeAppInventorySearchSchema,
+  skFakeAppTabSearchSchema,
+  skInventoryListSearchSchema,
+} from './list-params';
 
 describe('list params', () => {
   it('starts a list at irene’s ten rows from the first', () => {
@@ -30,5 +38,36 @@ describe('list params', () => {
     });
 
     expect(readInventoryListParams(search)).toEqual({ limit: 10, offset: 0, monitoringStatus: -1 });
+  });
+
+  it('defaults the fake-app listing to twelve apps from the first', () => {
+    expect(readFakeAppInventoryParams({})).toEqual({ limit: 12, offset: 0 });
+
+    const search = skFakeAppInventorySearchSchema.parse({
+      app_limit: '24',
+      app_offset: '12',
+      q: '  bank  ',
+    });
+
+    expect(readFakeAppInventoryParams(search)).toEqual({ limit: 24, offset: 12, q: 'bank' });
+  });
+
+  it('drops a blank search', () => {
+    const search = skFakeAppInventorySearchSchema.parse({ q: '   ' });
+
+    expect(readFakeAppInventoryParams(search)).toEqual({ limit: 12, offset: 0 });
+  });
+
+  it('defaults a fake-app tab to ten rows', () => {
+    expect(readFakeAppTabPage({})).toEqual({ limit: 10, offset: 0 });
+
+    const search = skFakeAppTabSearchSchema.parse({ limit: '25', offset: '50' });
+
+    expect(readFakeAppTabPage(search)).toEqual({ limit: 25, offset: 50 });
+
+    expect(readFakeAppTabPage(skFakeAppTabSearchSchema.parse({ limit: 'many' }))).toEqual({
+      limit: 10,
+      offset: 0,
+    });
   });
 });
