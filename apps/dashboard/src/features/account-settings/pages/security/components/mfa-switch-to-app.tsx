@@ -21,6 +21,7 @@ import { mfaKeys } from '@/features/account-settings/queries/mfa';
 import { MfaAppVerify } from './mfa-app-verify';
 import { MfaEmailCode } from './mfa-email-code';
 import { MfaModal, MfaModalFooter } from './mfa-modal';
+import { useMfaModal } from './use-mfa-modal';
 
 type SwitchToAppStep = 'confirm' | 'email';
 
@@ -43,6 +44,8 @@ interface MfaSwitchToAppProps {
  * @param props.onClose - Called when the modal closes, whether or not the switch completed.
  */
 export function MfaSwitchToApp({ email, onClose }: Readonly<MfaSwitchToAppProps>) {
+  const { closeModal, modalProps } = useMfaModal(onClose);
+
   const queryClient = useQueryClient();
   const [step, setStep] = useState<SwitchToAppStep>('confirm');
   const [emailOtp, setEmailOtp] = useState('');
@@ -76,14 +79,14 @@ export function MfaSwitchToApp({ email, onClose }: Readonly<MfaSwitchToAppProps>
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: mfaKeys.methods() });
-      onClose();
+      closeModal();
     },
 
     onError: notifyOtpStepFailed,
   });
 
   return (
-    <MfaModal title={akMT('mfaSwitchToAppTitle')} onClose={onClose}>
+    <MfaModal title={akMT('mfaSwitchToAppTitle')} {...modalProps}>
       {!appSetup && step === 'confirm' && (
         <>
           <AkModalBody>
@@ -101,7 +104,7 @@ export function MfaSwitchToApp({ email, onClose }: Readonly<MfaSwitchToAppProps>
               {akMT('continue')}
             </AkButton>
 
-            <AkButton type="button" variant="outlined" color="neutral" onClick={onClose}>
+            <AkButton type="button" variant="outlined" color="neutral" onClick={closeModal}>
               {akMT('cancel')}
             </AkButton>
           </MfaModalFooter>
@@ -136,7 +139,7 @@ export function MfaSwitchToApp({ email, onClose }: Readonly<MfaSwitchToAppProps>
             otp={appOtp}
             onOtpChange={setAppOtp}
             onContinue={() => sendOtpIfTyped(appOtp, () => verifyAppCode.mutate(appSetup.token))}
-            onCancel={onClose}
+            onCancel={closeModal}
             isVerifying={verifyAppCode.isPending}
           />
         </AkModalBody>
