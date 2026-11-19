@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { akMT } from '@irene/translations/intl';
-import SecurityCover from '@irene/ui/svgs/security-bg-img.svg?react';
+import SecurityCover from '@irene/ui/svgs/security-bg-img.svg?url';
 import SecurityIndicator from '@irene/ui/svgs/security-indicator.svg?react';
 
 import { renderWithProviders } from '@tests/render';

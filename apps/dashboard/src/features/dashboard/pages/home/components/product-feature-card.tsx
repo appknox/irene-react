@@ -14,7 +14,7 @@ interface ProductFeatureCardProps {
   title: string;
   description: string;
   destination: ProductFeatureDestination;
-  cover: ProductCardArtwork;
+  cover: string;
   indicator: ProductCardArtwork;
   opensInNewTab?: boolean;
 }
@@ -25,7 +25,7 @@ interface ProductFeatureCardProps {
  * @param props.title - The product, as this deployment names it.
  * @param props.description - What it is for, in a line.
  * @param props.destination - A route in this app, or another app served alongside it.
- * @param props.cover - The banner behind the card's head.
+ * @param props.cover - The banner behind the card's head, as a URL.
  * @param props.indicator - The product's own mark.
  * @param props.opensInNewTab - Whether the link leaves this tab, for a product served separately.
  */
@@ -33,7 +33,7 @@ export function ProductFeatureCard({
   title,
   description,
   destination,
-  cover: ProductFeatureCover,
+  cover,
   indicator: ProductFeatureIndicator,
   opensInNewTab,
 }: Readonly<ProductFeatureCardProps>) {
@@ -42,7 +42,7 @@ export function ProductFeatureCard({
       className="flex max-w-78.5 flex-col overflow-hidden rounded-xs border border-border"
       data-test-product-feature-card
     >
-      <ProductFeatureCover role="presentation" />
+      <img src={cover} alt="" role="presentation" />
 
       <div className="flex max-h-50 flex-1 flex-col gap-7 bg-background p-5.25">
         <div className="flex flex-col gap-1.75">

@@ -1,15 +1,15 @@
 import { type ComponentType, type SVGProps } from 'react';
 
 import { akMT } from '@irene/translations/intl';
-import AppknoxCover from '@irene/ui/svgs/appknox-bg-img.svg?react';
-import OffensiveSecurityCover from '@irene/ui/svgs/offensive-security-bg-img.svg?react';
+import AppknoxCover from '@irene/ui/svgs/appknox-bg-img.svg?url';
+import OffensiveSecurityCover from '@irene/ui/svgs/offensive-security-bg-img.svg?url';
 import OffensiveSecurityIndicator from '@irene/ui/svgs/offensive-security-indicator.svg?react';
-import ReportCover from '@irene/ui/svgs/report-bg-img.svg?react';
+import ReportCover from '@irene/ui/svgs/report-bg-img.svg?url';
 import ReportIndicator from '@irene/ui/svgs/report-indicator.svg?react';
-import SecurityCover from '@irene/ui/svgs/security-bg-img.svg?react';
+import SecurityCover from '@irene/ui/svgs/security-bg-img.svg?url';
 import SecurityIndicator from '@irene/ui/svgs/security-indicator.svg?react';
 import StoreknoxIndicator from '@irene/ui/svgs/sm-indicator.svg?react';
-import StoreknoxCover from '@irene/ui/svgs/storeknox-bg-img.svg?react';
+import StoreknoxCover from '@irene/ui/svgs/storeknox-bg-img.svg?url';
 import VaptIndicator from '@irene/ui/svgs/vapt-indicator.svg?react';
 
 // All product feature entry routes
@@ -39,7 +39,8 @@ export interface ProductFeature {
   title: string;
   description: string;
   destination: ProductFeatureDestination;
-  cover: ComponentType<SVGProps<SVGSVGElement>>;
+  /** The banner behind the card's head, as a URL: it carries a raster and is decorative. */
+  cover: string;
   indicator: ComponentType<SVGProps<SVGSVGElement>>;
   opensInNewTab?: boolean;
 }
