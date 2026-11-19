@@ -261,3 +261,74 @@ export interface ApiSkRequestedApp extends Omit<ApiSkApp, 'approved_by' | 'rejec
   approved_by: string | null;
   rejected_by: string | null;
 }
+
+/** Whether a copy fake-app detection found is waiting for review, ignored, or added to the inventory. */
+export type ApiSkFakeAppStatus =
+  (typeof ENUMS.SK_FAKE_APP_STATUS)[keyof typeof ENUMS.SK_FAKE_APP_STATUS];
+
+/** What the AI took a copy for: an impersonating app or a misuse of the brand. */
+export type ApiSkFakeAppClassification = 'fake_app' | 'brand_abuse';
+
+/** The store a copy was found on. */
+export type ApiSkFakeAppStoreIdentifier = 'playstore' | 'appstore' | 'apkmody' | 'aptoide';
+
+/** How strongly one AI rule fired. */
+export type ApiSkAiScoreLevel = 'LOW' | 'MEDIUM' | 'HIGH';
+
+/** The store a copy was found on. */
+export interface ApiSkFakeAppStore {
+  id: number;
+  name: string;
+  identifier: ApiSkFakeAppStoreIdentifier;
+  icon: string;
+  platform: ApiSkPlatform;
+  platform_display: string;
+}
+
+/** One copy of an inventory app that fake-app detection found, with the AI's findings. */
+export interface ApiSkFakeApp {
+  id: number;
+  status: ApiSkFakeAppStatus;
+  status_display: string;
+  title: string;
+  package_name: string;
+  app_url: string;
+  dev_name: string;
+  fake_app_icon_url: string;
+  store: ApiSkFakeAppStore;
+  /* `final` and each rule's score are numbers; each `<rule>_justification` is a string. */
+  ai_scores: Record<string, number | string>;
+  ai_score_levels: Record<string, ApiSkAiScoreLevel>;
+  semantic_analysis_score: number;
+  binary_similarity_score: number;
+  binary_risk_score: number;
+  ai_classification_label: ApiSkFakeAppClassification;
+  ai_classification_justification: string;
+  reviewed_by: string | null;
+  reviewed_on: string | null;
+  ignore_reason: string | null;
+  added_to_inventory_app: number | null;
+  created_on: string;
+}
+
+/** What the fake-app inventory endpoint accepts. */
+export interface ApiSkFakeAppInventoryRequest {
+  limit: number;
+  offset: number;
+  q?: string;
+}
+
+/** What the fake-app list endpoint accepts; the ignored list is not split by classification. */
+export interface ApiSkFakeAppsRequest {
+  limit: number;
+  offset: number;
+  status: 'pending' | 'ignored';
+  classification?: ApiSkFakeAppClassification;
+}
+
+/** The server's answer to ignoring a copy or adding it to the inventory. */
+export type ApiSkFakeAppReviewResponse = Pick<
+  ApiSkFakeApp,
+  'id' | 'status' | 'status_display' | 'reviewed_by' | 'reviewed_on'
+> &
+  Partial<Pick<ApiSkFakeApp, 'ignore_reason' | 'added_to_inventory_app'>>;

@@ -3,12 +3,15 @@ import { faker } from '@faker-js/faker';
 import { ENUMS } from '@irene/enums';
 
 import type {
+  ApiSkAiScoreLevel,
   ApiSkApp,
   ApiSkAppMetadata,
   ApiSkAppVersion,
   ApiSkCoreFile,
   ApiSkDiscoveryResult,
   ApiSkDiscoverySearch,
+  ApiSkFakeApp,
+  ApiSkFakeAppStore,
   ApiSkFileRisk,
   ApiSkInventoryApp,
   ApiSkOrganizationUser,
@@ -265,3 +268,113 @@ export const buildRejectedSkRequestedApp = (
   rejected_by: faker.person.fullName(),
   ...overrides,
 });
+
+/* The rule keys the AI reports on; each present rule carries a score, a `_justification` and a level. */
+const _AI_RULES = [
+  'NativeLibsRule',
+  'ObfuscationRule',
+  'SigningCertRule',
+  'EmbeddedFilesRule',
+  'ManifestFlagsRule',
+  'CertAttributesRule',
+  'DynamicLoadingRule',
+  'ImplicitIntentsRule',
+  'PackerDetectionRule',
+  'PermissionDeltaRule',
+  'PhishingDomainsRule',
+  'TitleBrandAbuseRule',
+  'NetworkEndpointsRule',
+  'PackageSimilarityRule',
+  'SemanticSimilarityRule',
+  'SpecialPermissionsRule',
+  'SuspiciousApiChainsRule',
+  'DeveloperConsistencyRule',
+  'LogoSimilarityRule',
+  'AppFunctionalitySimilarityRule',
+];
+
+const _AI_SCORE_LEVELS: ApiSkAiScoreLevel[] = ['LOW', 'MEDIUM', 'HIGH'];
+
+/** A faker-chosen subset of the rules, each with a score, a justification and a level. */
+const _buildAiFindings = () => {
+  const ai_scores: ApiSkFakeApp['ai_scores'] = {
+    final: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+  };
+
+  const ai_score_levels: ApiSkFakeApp['ai_score_levels'] = {};
+
+  for (const rule of faker.helpers.arrayElements(_AI_RULES, { min: 3, max: 10 })) {
+    ai_scores[rule] = faker.number.int({ min: 0, max: 100 });
+    ai_scores[`${rule}_justification`] = faker.lorem.sentence();
+    ai_score_levels[rule] = faker.helpers.arrayElement(_AI_SCORE_LEVELS);
+  }
+
+  return { ai_scores, ai_score_levels };
+};
+
+/** The store a copy was found on; a test that cares which pins `identifier`. */
+export const buildSkFakeAppStore = (
+  overrides: Partial<ApiSkFakeAppStore> = {}
+): ApiSkFakeAppStore => {
+  const platform =
+    overrides.platform ?? faker.helpers.arrayElement([ENUMS.PLATFORM.ANDROID, ENUMS.PLATFORM.IOS]);
+
+  return {
+    id: _id(),
+    name: platform === ENUMS.PLATFORM.IOS ? 'App Store' : 'Google Play Store',
+    identifier: platform === ENUMS.PLATFORM.IOS ? 'appstore' : 'playstore',
+    icon: faker.image.url(),
+    platform,
+    platform_display: _PLATFORM_DISPLAY[platform] ?? String(platform),
+    ...overrides,
+  };
+};
+
+/** A copy waiting for review that the AI took for a fake app. */
+export const buildSkFakeApp = (overrides: Partial<ApiSkFakeApp> = {}): ApiSkFakeApp => ({
+  id: _id(),
+  status: ENUMS.SK_FAKE_APP_STATUS.PENDING,
+  status_display: 'Pending',
+  title: faker.commerce.productName(),
+  package_name: `com.${faker.word.noun()}.${faker.word.noun()}`,
+  app_url: faker.internet.url(),
+  dev_name: faker.company.name(),
+  fake_app_icon_url: faker.image.url(),
+  store: buildSkFakeAppStore(),
+  ..._buildAiFindings(),
+  semantic_analysis_score: faker.number.int({ min: 0, max: 100 }),
+  binary_similarity_score: faker.number.int({ min: 0, max: 100 }),
+  binary_risk_score: faker.number.int({ min: 0, max: 100 }),
+  ai_classification_label: 'fake_app',
+  ai_classification_justification: faker.lorem.sentence(),
+  reviewed_by: null,
+  reviewed_on: null,
+  ignore_reason: null,
+  added_to_inventory_app: null,
+  created_on: faker.date.past().toISOString(),
+  ...overrides,
+});
+
+/** A copy waiting for review that the AI took for a misuse of the brand. */
+export const buildBrandAbuseSkFakeApp = (overrides: Partial<ApiSkFakeApp> = {}) =>
+  buildSkFakeApp({ ai_classification_label: 'brand_abuse', ...overrides });
+
+/** A copy a reviewer dismissed, naming who, when and why. */
+export const buildIgnoredSkFakeApp = (overrides: Partial<ApiSkFakeApp> = {}) =>
+  buildSkFakeApp({
+    status: ENUMS.SK_FAKE_APP_STATUS.IGNORED,
+    status_display: 'Ignored',
+    reviewed_by: faker.person.fullName(),
+    reviewed_on: faker.date.recent().toISOString(),
+    ignore_reason: faker.lorem.sentence(),
+    ...overrides,
+  });
+
+/** A copy a reviewer dismissed and added to the inventory as the app it points to. */
+export const buildAddedToInventorySkFakeApp = (overrides: Partial<ApiSkFakeApp> = {}) =>
+  buildIgnoredSkFakeApp({
+    status: ENUMS.SK_FAKE_APP_STATUS.ADDED_TO_INVENTORY,
+    status_display: 'Added to inventory',
+    added_to_inventory_app: _id(),
+    ...overrides,
+  });

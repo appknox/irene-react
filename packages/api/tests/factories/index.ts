@@ -23,8 +23,11 @@ export { buildUser, buildUserResponse } from '@tests/factories/user';
 export { buildVulnerability, buildVulnerabilityListResponse } from '@tests/factories/vulnerability';
 
 export {
+  buildAddedToInventorySkFakeApp,
   buildApprovedSkRequestedApp,
   buildArchivedSkApp,
+  buildBrandAbuseSkFakeApp,
+  buildIgnoredSkFakeApp,
   buildPendingSkApp,
   buildPendingSkRequestedApp,
   buildRejectedSkRequestedApp,
@@ -34,6 +37,8 @@ export {
   buildSkCoreFile,
   buildSkDiscoveryResult,
   buildSkDiscoverySearch,
+  buildSkFakeApp,
+  buildSkFakeAppStore,
   buildSkFileRisk,
   buildSkInventoryApp,
   buildSkOrganizationUser,

@@ -26,6 +26,10 @@ import type {
   ApiSkDiscoveryResult,
   ApiSkDiscoveryResultsRequest,
   ApiSkDiscoverySearch,
+  ApiSkFakeApp,
+  ApiSkFakeAppInventoryRequest,
+  ApiSkFakeAppReviewResponse,
+  ApiSkFakeAppsRequest,
   ApiSkFileRisk,
   ApiSkInitiateUploadResponse,
   ApiSkInventoryApp,
@@ -186,4 +190,52 @@ export default class StoreknoxService {
 
     return transformPaginatedResponse(page);
   };
+
+  /** Fetches a page of the inventory apps fake-app detection can list copies for, searched by `q`. */
+  public static readonly getFakeAppInventory = async (params: ApiSkFakeAppInventoryRequest) => {
+    const page = await apiRequest.get<ApiPageEnvelope<ApiSkApp>>(
+      StoreknoxEndpoints.fakeAppInventory(),
+      { params }
+    );
+
+    return transformPaginatedResponse(page);
+  };
+
+  /** Fetches a page of the copies found of one inventory app; `classification` is left out for the ignored list. */
+  public static readonly getFakeApps = async (
+    skAppId: number | string,
+    params: ApiSkFakeAppsRequest
+  ) => {
+    const page = await apiRequest.get<ApiPageEnvelope<ApiSkFakeApp>>(
+      StoreknoxEndpoints.fakeApps(skAppId),
+      { params }
+    );
+
+    return transformPaginatedResponse(page);
+  };
+
+  /** Fetches one copy beneath its inventory app, which the path needs. */
+  public static readonly getFakeApp = (skAppId: number | string, id: number | string) =>
+    apiRequest.get<ApiSkFakeApp>(StoreknoxEndpoints.fakeApp(skAppId, id));
+
+  /** Dismisses a copy as not a threat, with the reviewer's reason. */
+  public static readonly ignoreFakeApp = (
+    skAppId: number | string,
+    id: number | string,
+    reason: string
+  ) =>
+    apiRequest.post<ApiSkFakeAppReviewResponse>(StoreknoxEndpoints.ignoreFakeApp(skAppId, id), {
+      ignore_reason: reason,
+    });
+
+  /** Dismisses a copy and adds its store listing to the inventory, with the reviewer's reason. */
+  public static readonly addFakeAppToInventory = (
+    skAppId: number | string,
+    id: number | string,
+    reason: string
+  ) =>
+    apiRequest.post<ApiSkFakeAppReviewResponse>(
+      StoreknoxEndpoints.addFakeAppToInventory(skAppId, id),
+      { ignore_reason: reason }
+    );
 }

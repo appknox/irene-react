@@ -3013,6 +3013,7 @@
       "suspectedFakeApps": "Suspected Fake Apps",
       "suspectedBrandAbuse": "Suspected Brand Abuse",
       "noSuspectedApps": "No Suspected Brand Abuse/Fake Apps Found",
+      "noSuspectedAppsDecommissionedDescription": "このアプリがストアから削除される前に、ブランド悪用/偽アプリの疑いは検出されませんでした。偽アプリ検出は停止したため、新しい結果は表示されません。",
       "noBrandAbuseFound": "No Suspected Brand Abuse Found",
       "noFakeAppsFound": "No Suspected Fake App Found",
       "noIgnoredApps": "No Apps have been Ignored",

@@ -6,6 +6,8 @@ import { cn } from '@irene/ui/cn';
 interface PoweredByAiChipProps {
   variant?: 'filled' | 'outlined';
   clickable?: boolean;
+  /** Replaces the default "Powered by AI" text. */
+  label?: string;
   className?: string;
 }
 
@@ -19,11 +21,13 @@ interface PoweredByAiChipProps {
  *
  * @param props.variant - Filled on a plain surface, outlined on a tinted one.
  * @param props.clickable - Whether it sits inside a control, which it then reacts with.
+ * @param props.label - Text in place of "Powered by AI", for a mark that names what the AI produced.
  * @param props.className - Laid out by whatever holds it.
  */
 export function PoweredByAiChip({
   variant = 'filled',
   clickable = false,
+  label,
   className,
 }: Readonly<PoweredByAiChipProps>) {
   return (
@@ -41,7 +45,7 @@ export function PoweredByAiChip({
       <AkIcon name="material-symbols:network-intel-node" className="size-4" />
 
       <AkTypography tag="span" variant="body2" color="inherit">
-        <AkMessageTranslate id="poweredByAi" />
+        {label ?? <AkMessageTranslate id="poweredByAi" />}
       </AkTypography>
     </span>
   );

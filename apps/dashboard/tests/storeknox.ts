@@ -11,6 +11,8 @@ import {
   type ApiSkApprovalStatus,
   type ApiSkAppVersion,
   type ApiSkDiscoveryResult,
+  type ApiSkFakeApp,
+  type ApiSkFakeAppReviewResponse,
   type ApiSkInventoryApp,
   type ApiSkRequestedApp,
   type ApiSkSubscription,
@@ -45,8 +47,18 @@ export function signInToStoreknox(role: { is_owner?: boolean; is_admin?: boolean
 }
 
 /** Answers the StoreKnox organization endpoint with one organization, and returns it. */
-export function mockStoreknoxOrganization(overrides: Partial<ApiStoreknoxOrganization> = {}) {
-  const organization = buildStoreknoxOrganization(overrides);
+export function mockStoreknoxOrganization(
+  overrides: Partial<Omit<ApiStoreknoxOrganization, 'sk_features'>> & {
+    sk_features?: Partial<ApiStoreknoxOrganization['sk_features']>;
+  } = {}
+) {
+  const base = buildStoreknoxOrganization();
+
+  const organization = {
+    ...base,
+    ...overrides,
+    sk_features: { ...base.sk_features, ...overrides.sk_features },
+  };
 
   server.use(
     http.get(buildAPITestURL(OrganizationEndpoints.storeknoxOrganization()), () =>
@@ -184,4 +196,107 @@ export function mockSkRequestedApps(requests: ApiSkRequestedApp[] = []) {
       HttpResponse.json(page(requests))
     )
   );
+}
+
+/**
+ * Answers the fake-app inventory with these apps, keeping the apps whose package name contains `q`
+ * (case-insensitive), then paginating by `limit` and `offset`.
+ */
+export function mockSkFakeAppInventory(apps: ApiSkApp[] = []) {
+  const received: URLSearchParams[] = [];
+
+  server.use(
+    http.get(buildAPITestURL(StoreknoxEndpoints.fakeAppInventory()), ({ request }) => {
+      const params = new URL(request.url).searchParams;
+      const q = (params.get('q') ?? '').toLowerCase();
+
+      const matching = apps.filter((app) =>
+        app.app_metadata.package_name.toLowerCase().includes(q)
+      );
+
+      const limit = Number(params.get('limit') ?? matching.length);
+      const offset = Number(params.get('offset') ?? 0);
+
+      received.push(params);
+
+      return HttpResponse.json(page(matching.slice(offset, offset + limit), matching.length));
+    })
+  );
+
+  return received;
+}
+
+interface SkFakeAppLists {
+  brandAbuse?: ApiSkFakeApp[];
+  fakeApp?: ApiSkFakeApp[];
+  ignored?: ApiSkFakeApp[];
+}
+
+/**
+ * Answers an app's fake-app list, telling the tabs apart by the request's `status` and
+ * `classification`, and paginating by `limit` and `offset`.
+ *
+ * @returns The query strings received, newest last.
+ */
+export function mockSkFakeApps(skAppId: number, lists: SkFakeAppLists = {}) {
+  const received: URLSearchParams[] = [];
+
+  server.use(
+    http.get(buildAPITestURL(StoreknoxEndpoints.fakeApps(skAppId)), ({ request }) => {
+      const params = new URL(request.url).searchParams;
+      const classification = params.get('classification');
+      let rows = lists.ignored ?? [];
+
+      if (params.get('status') !== 'ignored') {
+        rows = (classification === 'brand_abuse' ? lists.brandAbuse : lists.fakeApp) ?? [];
+      }
+
+      const limit = Number(params.get('limit') ?? rows.length);
+      const offset = Number(params.get('offset') ?? 0);
+
+      received.push(params);
+
+      return HttpResponse.json(page(rows.slice(offset, offset + limit), rows.length));
+    })
+  );
+
+  return received;
+}
+
+/** Answers one suspected copy's detail. */
+export function mockSkFakeApp(skAppId: number, app: ApiSkFakeApp) {
+  server.use(
+    http.get(buildAPITestURL(StoreknoxEndpoints.fakeApp(skAppId, app.id)), () =>
+      HttpResponse.json(app)
+    )
+  );
+}
+
+/**
+ * Answers ignoring a copy or adding it to the inventory with `response`.
+ *
+ * @returns The request bodies received, newest last.
+ */
+export function mockSkFakeAppReview(
+  skAppId: number,
+  id: number,
+  kind: 'ignore' | 'add-to-inventory',
+  response: ApiSkFakeAppReviewResponse
+) {
+  const bodies: unknown[] = [];
+
+  const url =
+    kind === 'ignore'
+      ? StoreknoxEndpoints.ignoreFakeApp(skAppId, id)
+      : StoreknoxEndpoints.addFakeAppToInventory(skAppId, id);
+
+  server.use(
+    http.post(buildAPITestURL(url), async ({ request }) => {
+      bodies.push(await request.json());
+
+      return HttpResponse.json(response);
+    })
+  );
+
+  return bodies;
 }

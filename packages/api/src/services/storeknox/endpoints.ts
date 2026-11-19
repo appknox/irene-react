@@ -62,4 +62,23 @@ export const StoreknoxEndpoints = {
 
   /** The apps a member has asked to add, with each one's decision. */
   requestedApps: () => `${API_NAMESPACES.v2}/sk_requested_apps` as const,
+
+  /** The inventory apps fake-app detection can list copies for, searched by title or package. */
+  fakeAppInventory: () => `${API_NAMESPACES.v2}/sk_fake_app_inventory` as const,
+
+  /** The copies fake-app detection found of one inventory app. */
+  fakeApps: (skAppId: number | string) =>
+    `${API_NAMESPACES.v2}/sk_app/${_segment(skAppId)}/sk_fake_app` as const,
+
+  /** One copy of an inventory app, with its AI findings. */
+  fakeApp: (skAppId: number | string, id: number | string) =>
+    `${API_NAMESPACES.v2}/sk_app/${_segment(skAppId)}/sk_fake_app/${_segment(id)}` as const,
+
+  /** Dismisses one copy as not a threat. */
+  ignoreFakeApp: (skAppId: number | string, id: number | string) =>
+    `${API_NAMESPACES.v2}/sk_app/${_segment(skAppId)}/sk_fake_app/${_segment(id)}/ignore` as const,
+
+  /** Dismisses one copy and adds its store listing to the inventory. */
+  addFakeAppToInventory: (skAppId: number | string, id: number | string) =>
+    `${API_NAMESPACES.v2}/sk_app/${_segment(skAppId)}/sk_fake_app/${_segment(id)}/add_to_inventory` as const,
 };

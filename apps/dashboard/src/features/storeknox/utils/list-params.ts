@@ -1,8 +1,12 @@
 import { z } from 'zod';
 
 import { ENUMS } from '@irene/enums';
-import type { ApiSkMonitoringStatusFilter } from '@irene/api/services/storeknox';
 import type { SkAppListPage, SkInventoryListParams } from '@/features/storeknox/queries/inventory';
+
+import type {
+  ApiSkFakeAppInventoryRequest,
+  ApiSkMonitoringStatusFilter,
+} from '@irene/api/services/storeknox';
 
 /* The filters a monitoring-status value may be; `-1` is irene's "every state". */
 const MONITORING_FILTERS: ReadonlyArray<ApiSkMonitoringStatusFilter | -1> = [
@@ -46,4 +50,37 @@ export function readInventoryListParams(search: Partial<SkAppListSearch>): SkInv
     ...readListPage(search),
     monitoringStatus: status !== undefined && _isMonitoringFilter(status) ? status : -1,
   };
+}
+
+/** The fake-app listing's search params: the inventory page plus a store-name search. */
+export const skFakeAppInventorySearchSchema = skAppListSearchSchema.extend({
+  q: z.string().trim().min(1).optional().catch(undefined),
+});
+
+/** The search params the fake-app listing may carry, before defaults. */
+export type SkFakeAppInventorySearch = z.infer<typeof skFakeAppInventorySearchSchema>;
+
+/** The fake-app listing's page and search; irene shows twelve apps a page, and a blank search is left out. */
+export function readFakeAppInventoryParams(
+  search: Partial<SkFakeAppInventorySearch>
+): ApiSkFakeAppInventoryRequest {
+  return {
+    limit: search.app_limit ?? 12,
+    offset: search.app_offset ?? 0,
+    ...(search.q && { q: search.q }),
+  };
+}
+
+/** A fake-app tab's page params, coerced as `app_limit` and `app_offset` are. */
+export const skFakeAppTabSearchSchema = z.object({
+  limit: z.coerce.number().int().positive().optional().catch(undefined),
+  offset: z.coerce.number().int().nonnegative().optional().catch(undefined),
+});
+
+/** The search params a fake-app tab may carry, before defaults. */
+export type SkFakeAppTabSearch = z.infer<typeof skFakeAppTabSearchSchema>;
+
+/** The page a fake-app tab asks for, defaulting to ten rows from the first. */
+export function readFakeAppTabPage(search: Partial<SkFakeAppTabSearch>): SkAppListPage {
+  return { limit: search.limit ?? 10, offset: search.offset ?? 0 };
 }

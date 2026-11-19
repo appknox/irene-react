@@ -31,11 +31,21 @@ describe('findEmberPath', () => {
     expect(findEmberPath('/reset/a-token')).toBe('/reset/a-token');
   });
 
-  it('hands over the StoreKnox pages still on Ember and keeps the inventory and discovery', () => {
-    expect(findEmberPath('/dashboard/storeknox/discover/result')).toBeUndefined();
+  it('leaves a migrated page alone while owning the pages under it', () => {
+    expect(findEmberPath('/dashboard/storeknox')).toBeUndefined();
 
-    expect(findEmberPath('/dashboard/storeknox/fake-apps/42')).toBe(
-      '/dashboard/storeknox/fake-apps/42'
+    expect(findEmberPath('/dashboard/storeknox/third-party-scans')).toBe(
+      '/dashboard/storeknox/third-party-scans'
+    );
+  });
+
+  it('hands over the StoreKnox pages still on Ember and keeps the inventory, discovery and fake apps', () => {
+    expect(findEmberPath('/dashboard/storeknox/discover/result')).toBeUndefined();
+    expect(findEmberPath('/dashboard/storeknox/fake-apps')).toBeUndefined();
+    expect(findEmberPath('/dashboard/storeknox/fake-apps/42')).toBeUndefined();
+
+    expect(findEmberPath('/dashboard/storeknox/third-party-scans/com.example.app')).toBe(
+      '/dashboard/storeknox/third-party-scans/com.example.app'
     );
 
     expect(findEmberPath('/dashboard/storeknox/inventory/app-list')).toBeUndefined();
