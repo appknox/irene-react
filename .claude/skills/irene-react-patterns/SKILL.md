@@ -17,6 +17,7 @@ apps/dashboard/src/
   routes/            thin TanStack file routes: guards, search params, loader, title, component
   features/<name>/   real code for one domain
     pages/<page>/    index.tsx + components/ hooks/ used only by that page
+    layout/          the feature's layout component(s)
     components/ hooks/ queries/ schemas/ actions/ utils/ store.ts
     index.ts         public entry, only if something outside renders the feature
   components/ layouts/ hooks/ queries/ actions/ utils/   app-wide equivalents
@@ -58,8 +59,10 @@ Narrowest level that uses it; move up when a second user appears.
 4. Live updates if the data changes server-side. Usually tagging the record is
    enough. See [websocket.md](references/websocket.md).
 5. Copy in **both** `en.json` and `ja.json`. Use `<AkMessageTranslate id>` in
-   JSX, and `akMT()` in props, schemas, toasts and titles. Format dates and
-   numbers through the named `FORMATS`.
+   JSX, and `akMT()` in props, schemas, toasts and titles. Format standalone
+   dates with `formatDateTime` / `formatRelativeTime` from
+   `@irene/translations/date-time`, and dates or numbers inside a message
+   through the named `FORMATS`.
 6. Tests next to the code (MSW + factories, ≥90% coverage). See
    [testing.md](references/testing.md).
 7. Porting from irene: carry every condition across. Record deliberate
@@ -75,6 +78,12 @@ Narrowest level that uses it; move up when a second user appears.
 - Server data lives in TanStack Query. Stores hold client state only.
 - Records that are pushed or shared across queries are tagged in the service
   (`tagRecordForCaching`).
+- Reuse the shared hooks before writing your own: `useCopyToClipboard`,
+  `useOrganization`, `useSignedInUser` (`apps/dashboard/src/hooks/`).
+- A dependency added to a `packages/*` workspace that the app's own source
+  never imports (dayjs plugins and locales, say) goes in
+  `optimizeDeps.include` in `apps/dashboard/vite.config.ts`, or Vite discovers
+  it mid-session and reloads the page.
 - Component files stay under 350 lines of code (lint). Private helpers are
   `_prefixed` and not exported. Use `data-test-*` hooks for tests.
 

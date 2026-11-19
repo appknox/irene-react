@@ -8,3 +8,4 @@ export * from '@tests/factories/submission';
 export * from '@tests/factories/upload-app';
 export * from '@tests/factories/user';
 export * from '@tests/factories/vulnerability';
+export * from '@tests/factories/storeknox';

@@ -36,6 +36,7 @@ export function buildStoreknoxNavItems(access: StoreknoxNavAccess): StoreknoxNav
       label: akMT('inventory'),
       icon: 'material-symbols:inventory-2',
       to: '/dashboard/storeknox/inventory/app-list',
+      activeWhen: ['/dashboard/storeknox/inventory', '/dashboard/storeknox/inventory-details/$id'],
     },
 
     {
