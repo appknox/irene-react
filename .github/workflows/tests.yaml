@@ -1,4 +1,4 @@
-name: CI
+name: Tests
 
 on:
   pull_request:
@@ -13,106 +13,114 @@ concurrency:
 
 jobs:
   react:
-    name: React app
+    name: Lint and type-check the React workspace
     runs-on: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
 
-      - name: Setup Application
+      - name: Install dependencies
         uses: ./.github/actions/setup-app
 
       - name: Lint
         run: pnpm lint
 
-      - name: Type check
+      - name: Type-check
         run: pnpm lint:types
 
       # The dashboard's own suite is sharded below; this covers the packages.
-      - name: Test
+      - name: Test the workspace packages
         run: pnpm test:unit --filter=!@irene/dashboard
 
   react-test:
-    name: React tests ${{ matrix.shard }}/4
+    name: React tests (shard ${{ matrix.shard }} of 4)
     runs-on: [ubuntu-latest]
     strategy:
       fail-fast: false
       matrix:
         shard: [1, 2, 3, 4]
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
 
-      - name: Setup Application
+      - name: Install dependencies
         uses: ./.github/actions/setup-app
 
       # The suite imports from the workspace packages, which turbo builds for
       # the test task. Running vitest directly means building them here.
-      - name: Build packages
+      - name: Build the workspace packages
         run: pnpm build
 
       # Each shard measures its own files; the blobs are merged afterwards, so
       # coverage is judged on the whole suite rather than a quarter of it.
-      - name: Test
+      - name: Run shard ${{ matrix.shard }} of 4
         working-directory: apps/dashboard
         run: pnpm test:shard --shard=${{ matrix.shard }}/4
 
-      - uses: actions/upload-artifact@v7
+      - name: Upload this shard's coverage
+        uses: actions/upload-artifact@v7
         with:
           name: vitest-blob-${{ matrix.shard }}
           path: apps/dashboard/.vitest/blob/*
           retention-days: 1
 
   react-coverage:
-    name: React coverage
+    name: React coverage (merged)
     needs: [react-test]
     runs-on: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
 
-      - name: Setup Application
+      - name: Install dependencies
         uses: ./.github/actions/setup-app
 
-      - uses: actions/download-artifact@v8
+      - name: Download every shard's coverage
+        uses: actions/download-artifact@v8
         with:
           pattern: vitest-blob-*
           merge-multiple: true
           path: apps/dashboard/.vitest/blob
 
-      - name: Merge reports and check coverage
+      - name: Merge the shards and check the thresholds
         working-directory: apps/dashboard
         run: pnpm test:merge
 
   ember-build:
-    name: Build Ember app
+    name: Build the Ember app
     runs-on: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
 
-      - name: Setup Ember Application
+      - name: Install the Ember app's dependencies
         uses: ./.github/actions/setup-ember-app
 
-      - name: Build
+      - name: Build for tests
         working-directory: apps/irene
         run: npm run build:test
 
       # Built once here and reused, rather than rebuilt by every test partition.
-      - uses: actions/upload-artifact@v7
+      - name: Upload the build for the test jobs
+        uses: actions/upload-artifact@v7
         with:
           name: ember-dist
           path: apps/irene/dist
           retention-days: 1
 
   ember-lint:
-    name: Lint Ember app
+    name: Lint and type-check the Ember app
     runs-on: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
 
-      - name: Setup Ember Application
+      - name: Install the Ember app's dependencies
         uses: ./.github/actions/setup-ember-app
 
       # ember-cli-typescript reports type errors without failing the build, and
       # the app has no script of its own for this, so tsc is run directly.
-      - name: Type check
+      - name: Type-check
         working-directory: apps/irene
         run: npx tsc --noEmit -p tsconfig.json
 
@@ -126,20 +134,21 @@ jobs:
         run: npm run lint
 
   embed:
-    name: Embed surface
+    name: Build and check the embed bundle
     runs-on: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
 
-      - name: Setup Application
+      - name: Install dependencies
         uses: ./.github/actions/setup-app
 
-      - name: Build
+      - name: Build the embed bundle
         run: pnpm --filter @irene/dashboard build:embed
 
       # These cannot be expressed in the source, so they are asserted on the
       # output. Each one is a way the bundle silently fails inside a host page.
-      - name: Check the bundle is safe to load in a host page
+      - name: Check it is safe to load in a host page
         working-directory: apps/dashboard/embed-dist
         run: |
           set -eu
@@ -205,22 +214,24 @@ jobs:
           - type: Integration Tests - Part 8
             commandArgs: --file-path='/irene/tests/integration*.js' --split=8 --partition=8 --parallel=12 --load-balance
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
 
-      - name: Setup Ember Application
+      - name: Install the Ember app's dependencies
         uses: ./.github/actions/setup-ember-app
 
-      - uses: actions/download-artifact@v8
+      - name: Download the build
+        uses: actions/download-artifact@v8
         with:
           name: ember-dist
           path: apps/irene/dist
 
       # --wmmf writes the per-module metadata the summary below reads.
-      - name: Test
+      - name: Run ${{ matrix.tests.type }}
         working-directory: apps/irene
         run: npm run test:ember -- ${{ matrix.tests.commandArgs }} --path=dist --wmmf
 
-      - name: Job Summary
+      - name: Summarise the modules this shard ran
         if: always()
         working-directory: apps/irene
         run: |

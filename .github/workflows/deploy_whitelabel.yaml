@@ -6,15 +6,16 @@ name: Deploy WhiteLabel
 on: workflow_dispatch
 
 concurrency:
-  group: ${{ github.workflow }}-ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   trigger_deploy:
-    name: Trigger WhiteLabel Deployment
+    name: Trigger the whitelabel deployment
     runs-on: [ubuntu-latest]
     steps:
-      - uses: convictional/trigger-workflow-and-wait@v1.6.5
+      - name: Run the whitelabel repository's deploy and wait for it
+        uses: convictional/trigger-workflow-and-wait@v1.6.5
         with:
           owner: appknox
           repo: whitelabel-deployment

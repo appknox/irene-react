@@ -14,37 +14,38 @@ env:
 
 jobs:
   publish:
-    name: Build and push to ghcr
+    name: Build the image and push it to ghcr
     runs-on: [ubuntu-latest]
     permissions:
       contents: read
       packages: write
 
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
 
-      - name: Get docker tag
+      - name: Work out the image tag
         id: docker_tag
         run: echo "docker_tag=${GITHUB_REF##*/}_${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
-      - name: Docker Login to ghcr
+      - name: Sign in to ghcr
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download earthly
+      - name: Install earthly
         run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.8.15/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
 
-      - name: Earthly version
+      - name: Check earthly runs
         run: earthly --version
 
-      - name: Build and publish
+      - name: Build and push the image
         run: earthly --ci --push +publish --TAG=${{ steps.docker_tag.outputs.docker_tag }} --CONTAINER=${{ env.GHCR_CONTAINER }}
 
       # The chart pins an immutable tag, so a deploy means editing that line.
-      - name: Say what to deploy
+      - name: Write the tag to the run summary
         run: |
           {
             echo "### Staging image published"
@@ -57,7 +58,7 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Slack notification
+      - name: Tell Slack how it went
         if: always()
         uses: 8398a7/action-slack@v3
         with:
