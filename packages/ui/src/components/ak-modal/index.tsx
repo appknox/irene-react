@@ -1,5 +1,5 @@
 import { Dialog as DialogPrimitive } from 'radix-ui';
-import { type ComponentProps } from 'react';
+import { type ComponentProps, type ReactNode } from 'react';
 
 import { AkAppbar } from '@irene/ui/ak-appbar';
 import { AkIcon } from '@irene/ui/ak-icon';
@@ -76,6 +76,7 @@ function AkModalContent({
 type AkModalHeaderProps = Omit<ComponentProps<'header'>, 'color'> & {
   title: string;
   closeLabel: string;
+  icon?: ReactNode;
 };
 
 /**
@@ -86,11 +87,14 @@ type AkModalHeaderProps = Omit<ComponentProps<'header'>, 'color'> & {
  *
  * @param props.title - What the panel is for, read first by a screen reader.
  * @param props.closeLabel - Names the close control, which has no text of its own.
+ * @param props.icon - Drawn before the title.
  */
-function AkModalHeader({ title, closeLabel, children, ...props }: AkModalHeaderProps) {
+function AkModalHeader({ title, closeLabel, icon, children, ...props }: AkModalHeaderProps) {
   return (
     <AkAppbar color="light" data-slot="modal-header" className="justify-between" {...props}>
       <div className="flex items-center gap-2.5">
+        {icon}
+
         <DialogPrimitive.Title asChild>
           <AkTypography variant="h5" fontWeight="medium" color="inherit">
             {title}
