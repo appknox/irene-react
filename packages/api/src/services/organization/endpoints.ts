@@ -12,6 +12,10 @@ export const OrganizationEndpoints = {
   member: (organizationId: number | string, userId: number | string) =>
     `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/members/${encodeURIComponent(userId)}` as const,
 
+  /** One user of an organization, by their account: who they are rather than their standing. */
+  user: (organizationId: number | string, userId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/users/${encodeURIComponent(userId)}` as const,
+
   /** One namespace an organization has claimed, which a moderator approves or rejects. */
   namespace: (organizationId: number | string, namespaceId: number | string) =>
     `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/namespaces/${encodeURIComponent(namespaceId)}` as const,
