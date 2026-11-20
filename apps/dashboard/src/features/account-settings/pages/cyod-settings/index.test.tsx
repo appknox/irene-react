@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   OrganizationEndpoints,
@@ -10,6 +10,7 @@ import {
 
 import { configurationStore } from '@irene/api/stores/configuration';
 import { storeSession } from '@irene/api/utils/session';
+import * as config from '@irene/config';
 import { MERCER_DOWNLOAD_URL } from '@irene/config/product';
 import { HTTP_STATUS_CODES } from '@irene/constants';
 import { akMT } from '@irene/translations/intl';
@@ -222,6 +223,26 @@ describe('CyodSettingsPage', () => {
       expect(await screen.findByText(akMT('copiedToClipboard'))).toBeInTheDocument();
       await expect(navigator.clipboard.readText()).resolves.toBe(serverUrl);
       expect(serverUrl).not.toBe('');
+    });
+
+    it('falls back to this origin where no API host is configured', async () => {
+      const user = userEvent.setup();
+
+      vi.spyOn(config, 'getConfigValue').mockReturnValue('');
+
+      withCyod();
+
+      await renderAtRoute(CYOD_SETTINGS);
+
+      await user.click(
+        await screen.findByRole('button', { name: akMT('cyod.settings.registerADevice') })
+      );
+
+      const drawer = await screen.findByRole('dialog');
+
+      expect(drawer.querySelector('[data-test-cyod-server-url]')).toHaveTextContent(
+        window.location.origin
+      );
     });
 
     it('heads the steps as instructions, not as a list of devices', async () => {
