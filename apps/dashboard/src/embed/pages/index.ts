@@ -17,6 +17,10 @@ export const EMBEDDABLE_PAGES = {
   HomePage: lazy(async () => ({
     default: (await import('@/features/dashboard/pages/home')).HomePage,
   })),
+
+  PublicApiDocs: lazy(async () => ({
+    default: (await import('@/features/public-api')).PublicApiDocsPage,
+  })),
 } satisfies Record<string, EmbeddablePage>;
 
 /** The names a host may ask for. Read from the registry, so adding a page adds a name. */
