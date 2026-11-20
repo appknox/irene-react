@@ -17,6 +17,9 @@ export interface EmbedComponentOptions {
   props?: Record<string, unknown>;
   config?: Record<string, string>;
   version?: string;
+
+  /** Called once the screen has content, so the caller can take its placeholder down. */
+  onReady?: () => void;
 }
 
 export interface EmbedMountedComponent {

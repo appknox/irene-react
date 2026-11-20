@@ -45,6 +45,20 @@ export default class ReactComponentModifier extends Modifier<ReactComponentModif
     );
   }
 
+  /**
+   * Takes the placeholder down, leaving the other app's element behind.
+   *
+   * @param element - What this modifies, which holds the placeholder.
+   * @param container - The element the other app renders into.
+   */
+  #takeDownPlaceholder(element: HTMLElement, container: HTMLElement) {
+    for (const child of Array.from(element.children)) {
+      if (child !== container) {
+        child.remove();
+      }
+    }
+  }
+
   modify(element: HTMLElement, _positional: [], named: ReactComponentArgs) {
     if (this.#component) {
       this.#component.update(named.props);
@@ -65,11 +79,22 @@ export default class ReactComponentModifier extends Modifier<ReactComponentModif
         return;
       }
 
-      this.#component = mountIreneComponent(element, {
+      /*
+        The other app renders beside the block rather than over it. The block
+        stays until that app says it has something to show, so one placeholder
+        covers the whole wait: this bundle arriving, then the screen's own data
+        loading.
+      */
+      const container = document.createElement('div');
+
+      element.append(container);
+
+      this.#component = mountIreneComponent(container, {
         name: named.name,
         props: named.props,
         config: this.buildConfig(),
         version: String(ENV.version),
+        onReady: () => this.#takeDownPlaceholder(element, container),
       });
     });
   }

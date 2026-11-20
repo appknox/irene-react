@@ -13,15 +13,12 @@ import {
 
 import { PageSkeleton } from './page-skeleton';
 import { EmbedProviders } from './providers';
+import { ReadySignal } from './ready-signal';
 import { applyEmbedConfig, linkStylesheet } from './runtime';
 import { ScreenContext } from './screen-context';
 
 export interface ComponentMountOptions {
-  /*
-    Which page to render. The registered names are offered, and any string is
-    accepted: a host names the page at runtime and may name one that has been
-    migrated away, which is what `resolvePage` refuses.
-  */
+  /* Which page to render. Any string is accepted, since the host names it at runtime. */
   name: EmbeddablePageName | (string & NonNullable<unknown>);
 
   /** What to render it with. */
@@ -32,6 +29,9 @@ export interface ComponentMountOptions {
 
   /** The host's build, so a new one is not served the stylesheet of the last. */
   version?: string;
+
+  /* Called once the page has content. Passing it means this app draws no placeholder. */
+  onReady?: () => void;
 }
 
 export interface MountedComponent {
@@ -43,10 +43,7 @@ export interface MountedComponent {
 }
 
 /**
- * Looks a page up by name.
- *
- * Refuses an unknown name rather than rendering nothing, so a typo in a host's
- * template fails where it is made instead of leaving an empty box behind.
+ * Looks a page up by name, refusing one that is not registered.
  *
  * @param name - The name the host asked for.
  * @returns The page to render.
@@ -67,14 +64,13 @@ function resolvePage(name: string): EmbeddablePage {
 }
 
 /**
- * Renders one component of this application inside a host's own page.
+ * Renders one page of this application inside a host's own page.
  *
- * Unlike a page, a component has no router, no route and no guards — it takes
- * props and renders. Only the providers it could reach for are around it: the
+ * It has no router and no route guards, only the providers it needs: the
  * translations, the query cache and the toaster.
  *
  * @param element - Where it renders. The host must not touch its contents.
- * @param options - Which component, and what to render it with.
+ * @param options - Which page, and what to render it with.
  * @returns A handle for updating and taking it down.
  */
 export function mountIreneComponent(
@@ -91,27 +87,20 @@ export function mountIreneComponent(
 
   const root: Root = createRoot(element);
 
-  /*
-    The context goes inside the providers and around the screen: a screen reads
-    the organization from a store the signed-in routes fill, and no route runs
-    here.
+  /* Given `onReady`, the host keeps its placeholder up, so Suspense is handed nothing to draw. */
+  const { onReady } = options;
+  const fallback = onReady ? null : createElement(Skeleton);
 
-    Suspense holds a skeleton while the screen's code arrives, sized to the
-    panel the host gave this app rather than to a page: everything around it is
-    already drawn, so a full-page loader here would read as a fault.
-  */
-  const draw = (props?: Record<string, unknown>) =>
-    root.render(
-      createElement(
-        EmbedProviders,
-        null,
-        createElement(
-          ScreenContext,
-          null,
-          createElement(Suspense, { fallback: createElement(Skeleton) }, createElement(Page, props))
-        )
-      )
-    );
+  const draw = (props?: Record<string, unknown>) => {
+    const page = createElement(Page, props);
+
+    const pageReportingReadiness = onReady ? createElement(ReadySignal, { onReady }, page) : page;
+
+    const pageHeldUntilResolved = createElement(Suspense, { fallback }, pageReportingReadiness);
+    const pageWithStoresFilled = createElement(ScreenContext, null, pageHeldUntilResolved);
+
+    root.render(createElement(EmbedProviders, null, pageWithStoresFilled));
+  };
 
   draw(options.props);
 
@@ -119,11 +108,7 @@ export function mountIreneComponent(
     update: draw,
 
     destroy() {
-      /*
-        Toasts outlive the root that raised them: they are held in a module the
-        host keeps loaded, and are replayed to the next toaster that subscribes.
-        Dismissing them here retires them with the screen that raised them.
-      */
+      /* Toasts are held in a module the host keeps loaded, and replayed to the next toaster. */
       akNotify.dismiss();
 
       /* Unmounting inside the host's own teardown warns, so it waits a tick. */

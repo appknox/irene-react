@@ -86,3 +86,31 @@ describe('a mounted component', () => {
     expect(element.innerHTML).toBe('');
   });
 });
+
+describe('a host that draws the placeholder itself', () => {
+  it('is told once the screen has content', async () => {
+    const element = document.createElement('div');
+    const onReady = vi.fn();
+
+    document.body.append(element);
+
+    await act(async () => {
+      mountIreneComponent(element, { name: 'HomePage', onReady });
+    });
+
+    await waitFor(() => expect(element.textContent).toContain('home:'));
+    expect(onReady).toHaveBeenCalled();
+  });
+
+  it('is handed no placeholder of its own, so only one is ever on screen', () => {
+    const element = document.createElement('div');
+
+    document.body.append(element);
+
+    act(() => {
+      mountIreneComponent(element, { name: 'HomePage', onReady: vi.fn() });
+    });
+
+    expect(element.querySelector('[data-test-embed-page-skeleton]')).toBeNull();
+  });
+});
