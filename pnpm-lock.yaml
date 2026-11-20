@@ -137,6 +137,9 @@ importers:
       '@tanem/react-nprogress':
         specifier: ^7.1.3
         version: 7.1.3(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@tanstack/history':
+        specifier: 1.162.3
+        version: 1.162.3
       '@tanstack/react-query':
         specifier: ^5.102.8
         version: 5.102.8(react@19.3.0)
@@ -281,6 +284,9 @@ importers:
 
   packages/translations:
     dependencies:
+      dayjs:
+        specifier: ^1.11.23
+        version: 1.11.23
       react-intl:
         specifier: ^11.0.1
         version: 11.0.1(@types/react@19.3.0)(react@19.3.0)

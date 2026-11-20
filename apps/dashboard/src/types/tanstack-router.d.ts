@@ -1,3 +1,4 @@
+import type { ThirdPartyListSearch } from '@/features/storeknox/utils/third-party';
 import type { ireneDashboardRouter, RouterPageTitleContext } from '@/router';
 
 /**
@@ -6,6 +7,19 @@ import type { ireneDashboardRouter, RouterPageTitleContext } from '@/router';
  * Kept apart from the router itself so that file stays runtime code, and so
  * anything else we teach the router about has one place to live.
  */
+declare module '@tanstack/history' {
+  /**
+   * What a navigation can carry in the browser's history entry, out of the URL.
+   *
+   * `thirdPartyListSearch` is the third-party list's search when a row opens an app's details,
+   * so the details breadcrumb can restore the list's store, region, risk status, search text
+   * and page, as irene's sticky query params do. A deep link has none.
+   */
+  interface HistoryState {
+    thirdPartyListSearch?: ThirdPartyListSearch;
+  }
+}
+
 declare module '@tanstack/react-router' {
   /** Types every `Link`, `useSearch` and `getRouteApi` against our own tree. */
   interface Register {

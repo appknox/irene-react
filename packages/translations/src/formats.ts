@@ -7,6 +7,10 @@ export const FORMATS: CustomFormats = {
   },
   date: {
     hhmmss: { hour: 'numeric', minute: 'numeric', second: 'numeric' },
+    /** A calendar date with the month named, so 03/04 is never read the wrong way round: "Apr 3, 2026". */
+    mediumDate: { year: 'numeric', month: 'short', day: 'numeric' },
+    /** A calendar date with the month written out: "April 3, 2026". */
+    longDate: { year: 'numeric', month: 'long', day: 'numeric' },
   },
   number: {
     EUR: { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 },
