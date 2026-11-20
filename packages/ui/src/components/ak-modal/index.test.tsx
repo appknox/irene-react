@@ -93,6 +93,22 @@ describe('AkModal', () => {
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
+  it('draws the header icon before the title', () => {
+    render(
+      <AkModal open>
+        <AkModalContent>
+          <AkModalHeader title="Disclaimer" closeLabel="Close" icon={<span data-testid="mark" />} />
+        </AkModalContent>
+      </AkModal>
+    );
+
+    const title = screen.getByRole('heading', { name: 'Disclaimer' });
+
+    expect(
+      screen.getByTestId('mark').compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it('pads its body, and drops that padding when asked', () => {
     const { rerender } = render(
       <AkModal open>
