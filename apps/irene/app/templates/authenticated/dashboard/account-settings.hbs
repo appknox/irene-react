@@ -7,25 +7,6 @@
 }}
 <div {{style margin='-0.5em'}}>
   <ReactComponent @name='AccountSettings'>
-    <AkStack
-      @direction='column'
-      class='pt-2 px-3 pb-3'
-      {{style maxWidth='1200px' marginLeft='auto' marginRight='auto'}}
-      data-test-accountSettings-placeholder
-    >
-      <AkSkeleton @width='7.5rem' @height='1rem' class='mt-1 mb-3' />
-
-      <AkSkeleton @height='40px' class='mb-2' />
-
-      <AccountSettings::PageContentWrapper>
-        <AkStack @direction='column' @spacing='2' class='p-2' @width='full'>
-          <AkSkeleton @width='5rem' @height='1.15rem' />
-
-          <AkSkeleton @width='13rem' />
-
-          <AkSkeleton @width='250px' @height='2.5rem' />
-        </AkStack>
-      </AccountSettings::PageContentWrapper>
-    </AkStack>
+    <AccountSettings::LoadingUi data-test-accountSettings-placeholder />
   </ReactComponent>
 </div>
