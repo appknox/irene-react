@@ -103,9 +103,17 @@ export default defineConfig({
           Dependencies in a chunk of their own. They change far less often than
           the screens do, so a host that has loaded one build keeps them when
           the next ships.
+
+          Swagger UI is held out of that chunk. It is megabytes on its own and
+          one screen renders it, so it is fetched with that screen rather than
+          by every host that loads anything. Matched first, since the rule
+          below would otherwise claim it.
         */
         advancedChunks: {
-          groups: [{ name: 'vendor', test: /node_modules/ }],
+          groups: [
+            { name: 'swagger', test: /node_modules[\\/](swagger-ui|swagger-client)/ },
+            { name: 'vendor', test: /node_modules/ },
+          ],
         },
       },
     },
