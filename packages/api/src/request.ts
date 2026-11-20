@@ -166,6 +166,7 @@ export const apiRequest = {
   patch: <TData>(url: string, data?: unknown, options?: RequestOptions) =>
     request<TData>({ ...options, url, method: 'PATCH', data }),
 
-  delete: <TData>(url: string, options?: RequestOptions) =>
-    request<TData>({ ...options, url, method: 'DELETE' }),
+  /* Takes a body like the others: some endpoints (`v2/mfa`) read what to delete from it. */
+  delete: <TData>(url: string, data?: unknown, options?: RequestOptions) =>
+    request<TData>({ ...options, url, method: 'DELETE', data }),
 };

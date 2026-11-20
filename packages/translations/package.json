@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./ak-message-translate": "./src/ak-message-translate.tsx",
+    "./date-time": "./src/date-time.ts",
     "./intl": "./src/intl.ts",
     "./locale": "./src/locale.ts",
     "./messages": "./src/messages.ts",
@@ -23,6 +24,7 @@
     "react": "^19.2.0"
   },
   "dependencies": {
+    "dayjs": "^1.11.23",
     "react-intl": "^11.0.1"
   },
   "devDependencies": {

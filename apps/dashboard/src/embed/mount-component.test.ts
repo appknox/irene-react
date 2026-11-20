@@ -114,3 +114,17 @@ describe('a host that draws the placeholder itself', () => {
     expect(element.querySelector('[data-test-embed-page-skeleton]')).toBeNull();
   });
 });
+
+describe('the placeholder a mount shows while a screen loads', () => {
+  it("draws the screen's own frame where the screen registers one", () => {
+    const element = document.createElement('div');
+
+    document.body.append(element);
+
+    act(() => {
+      mountIreneComponent(element, { name: 'AccountSettings' });
+    });
+
+    expect(element.querySelector('[data-test-account-settings-skeleton]')).not.toBeNull();
+  });
+});

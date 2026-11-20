@@ -3,6 +3,7 @@ import { transformPaginatedResponse } from '@irene/api/utils/transforms';
 import type { ApiPageEnvelope } from '@irene/api/utils/pagination';
 
 import type {
+  ApiCyodRegisteredDevice,
   ApiOrganization,
   ApiOrganizationMe,
   ApiOrganizationMembership,
@@ -95,6 +96,25 @@ export default class OrganizationService {
     organizationId: number | string,
     namespaceId: number | string
   ) => apiRequest.delete<void>(OrganizationEndpoints.namespace(organizationId, namespaceId));
+
+  /**
+   * Fetches the CYOD devices registered to an organization. The list arrives in
+   * `results` with no paging around it.
+   *
+   * Refused with a 403 when the organization holds no device-farm token of its
+   * own, which callers read as "not configured" rather than as a failure.
+   *
+   * @param organizationId - The organization to ask about.
+   * @returns The devices, online or not.
+   */
+  public static readonly getRegisteredDevices = async (organizationId: number | string) => {
+    const response = await apiRequest.get<{ results: ApiCyodRegisteredDevice[] }>(
+      OrganizationEndpoints.registeredDevices(organizationId),
+      { signal: AbortSignal.timeout(REQUEST_ABORT_TIMEOUT_MS) }
+    );
+
+    return response.results;
+  };
 
   /**
    * Fetches the StoreKnox organization an account belongs to.

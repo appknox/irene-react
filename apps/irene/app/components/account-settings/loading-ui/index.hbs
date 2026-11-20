@@ -1,0 +1,28 @@
+<AkStack
+  @direction='column'
+  class='pt-2 px-3 pb-3'
+  {{style maxWidth='1200px' marginLeft='auto' marginRight='auto'}}
+  ...attributes
+>
+  <AkSkeleton @width='7.5rem' @height='1rem' class='mt-1 mb-3' />
+
+  {{! The tabs sit against each other; the spacing between them is their own padding. }}
+  <AkStack @alignItems='center' @bgColor='white' local-class='tabs-root'>
+    {{#each this.tabLabelWidths as |width|}}
+      <AkStack @alignItems='center' local-class='tab'>
+        <AkSkeleton @width={{width}} @height='0.875rem' />
+      </AkStack>
+    {{/each}}
+  </AkStack>
+
+  {{! The general tab: a heading, a line about it, and the language control. }}
+  <AccountSettings::PageContentWrapper>
+    <AkStack @direction='column' @spacing='2' @width='full' local-class='panel'>
+      <AkSkeleton @width='5rem' @height='1.15rem' />
+
+      <AkSkeleton @width='16.4rem' @height='1rem' />
+
+      <AkSkeleton @width='17.85rem' @height='2rem' />
+    </AkStack>
+  </AccountSettings::PageContentWrapper>
+</AkStack>

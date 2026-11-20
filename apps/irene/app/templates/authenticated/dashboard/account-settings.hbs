@@ -1,9 +1,12 @@
 {{page-title 'Settings'}}
 
-<PageWrapper>
-  <AccountSettings />
-
-  <AccountSettings::PageContentWrapper>
-    {{outlet}}
-  </AccountSettings::PageContentWrapper>
-</PageWrapper>
+{{!
+  The dashboard pads its main region and every page cancels that padding, as
+  PageWrapper does. The mount point carries it so the embedded screen needs no
+  knowledge of the host it renders in.
+}}
+<div {{style margin='-0.5em'}}>
+  <ReactComponent @name='AccountSettings'>
+    <AccountSettings::LoadingUi data-test-accountSettings-placeholder />
+  </ReactComponent>
+</div>

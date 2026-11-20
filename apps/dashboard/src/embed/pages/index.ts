@@ -1,4 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
+import { AccountSettingsSkeleton } from '@/features/account-settings';
 
 /** What a page rendered inside a host may be handed. */
 export type EmbeddablePage = LazyExoticComponent<ComponentType<Record<string, unknown>>>;
@@ -14,6 +15,10 @@ export type EmbeddablePage = LazyExoticComponent<ComponentType<Record<string, un
   say — gets a file of its own in this directory and is registered from there.
 */
 export const EMBEDDABLE_PAGES = {
+  AccountSettings: lazy(async () => ({
+    default: (await import('./account-settings')).AccountSettings,
+  })),
+
   HomePage: lazy(async () => ({
     default: (await import('@/features/dashboard/pages/home')).HomePage,
   })),
@@ -29,7 +34,11 @@ export type EmbeddablePageName = keyof typeof EMBEDDABLE_PAGES;
   frame, so the chrome is not withheld until the chunk lands. Anything left out
   here falls back to the generic panel placeholder.
 */
-const PAGE_SKELETONS: Partial<Record<EmbeddablePageName, ComponentType>> = {};
+const PAGE_SKELETONS: Partial<Record<EmbeddablePageName, ComponentType>> = {
+  AccountSettings: AccountSettingsSkeleton,
+};
+
+const skeletonsByName = new Map<string, ComponentType>(Object.entries(PAGE_SKELETONS));
 
 /**
  * Finds the placeholder registered for a page.
@@ -38,9 +47,7 @@ const PAGE_SKELETONS: Partial<Record<EmbeddablePageName, ComponentType>> = {};
  * @returns The page's own placeholder, or nothing where it has none.
  */
 export function findPageSkeleton(name: string): ComponentType | undefined {
-  return Object.hasOwn(PAGE_SKELETONS, name)
-    ? PAGE_SKELETONS[name as EmbeddablePageName]
-    : undefined;
+  return skeletonsByName.get(name);
 }
 
 /*

@@ -14,6 +14,9 @@ export const AuthEndpoints = {
   /** Recovers a user's password. */
   recover: () => `${API_NAMESPACES.v2}/forgot_password` as const,
 
+  /** Changes the signed-in user's password, which signs every session of theirs out. */
+  changePassword: () => `${API_NAMESPACES.v2}/change_password` as const,
+
   /** Resets a user's password. */
   resetPassword: (token: string) => `${API_NAMESPACES.v2}/forgot_password/${token}` as const,
 
