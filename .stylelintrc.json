@@ -61,6 +61,14 @@
         "selector-id-pattern": null,
         "declaration-property-value-disallowed-list": null
       }
+    },
+    {
+      "files": ["apps/dashboard/src/features/public-api/**/swagger-panel.css"],
+      "rules": {
+        "selector-class-pattern": null,
+        "selector-id-pattern": null,
+        "declaration-property-value-disallowed-list": null
+      }
     }
   ]
 }
