@@ -170,6 +170,19 @@ describe('column widths', () => {
     expect(cols[1]).toHaveStyle({ width: '30%' });
   });
 
+  it('centres a column’s header and cells together when the column asks to', () => {
+    const aligned = column.columns([
+      column.accessor('title', { header: 'Title' }),
+      column.accessor('severity', { header: 'Severity', meta: { align: 'center' } }),
+    ]);
+
+    render(<AkTable columns={aligned} data={FINDINGS} />);
+
+    expect(screen.getByRole('columnheader', { name: 'Severity' })).toHaveClass('text-center');
+    expect(screen.getByRole('cell', { name: FINDINGS[0].severity })).toHaveClass('text-center');
+    expect(screen.getByRole('columnheader', { name: 'Title' })).not.toHaveClass('text-center');
+  });
+
   it('renders table-layout fixed once any column sets a width', () => {
     const sized = column.columns([
       column.accessor('title', { header: 'Title', meta: { width: '70%' } }),
@@ -211,5 +224,87 @@ describe('grouped columns', () => {
 
     expect(groupRow?.textContent).toBe('FindingSeverity');
     expect(screen.getAllByRole('columnheader', { name: '' })).not.toHaveLength(0);
+  });
+});
+
+describe('row clicks', () => {
+  it('reports the clicked row’s data and shows a pointer over it', async () => {
+    const onRowClick = vi.fn();
+
+    renderTable({ onRowClick });
+
+    const row = screen.getByRole('cell', { name: FINDINGS[1].title }).closest('tr');
+
+    expect(row).toHaveClass('cursor-pointer');
+
+    await userEvent.click(screen.getByRole('cell', { name: FINDINGS[1].title }));
+
+    expect(onRowClick).toHaveBeenCalledWith(FINDINGS[1]);
+  });
+
+  it('leaves rows inert when nothing listens for a click', () => {
+    renderTable();
+
+    const row = screen.getByRole('cell', { name: FINDINGS[0].title }).closest('tr');
+
+    expect(row).not.toHaveClass('cursor-pointer');
+    expect(row).not.toHaveAttribute('tabindex');
+  });
+
+  it('reports a row’s data when it is focused from the keyboard and opened with Enter', async () => {
+    const onRowClick = vi.fn();
+
+    renderTable({ onRowClick });
+
+    await userEvent.tab();
+    await userEvent.keyboard('{Enter}');
+
+    expect(onRowClick).toHaveBeenCalledWith(FINDINGS[0]);
+  });
+
+  it('reports a focused row’s data when it is opened with Space', async () => {
+    const onRowClick = vi.fn();
+
+    renderTable({ onRowClick });
+
+    await userEvent.tab();
+    await userEvent.tab();
+    await userEvent.keyboard(' ');
+
+    expect(onRowClick).toHaveBeenCalledWith(FINDINGS[1]);
+  });
+
+  it('ignores other keys on a focused row', async () => {
+    const onRowClick = vi.fn();
+
+    renderTable({ onRowClick });
+
+    await userEvent.tab();
+    await userEvent.keyboard('{ArrowDown}');
+
+    expect(onRowClick).not.toHaveBeenCalled();
+  });
+
+  it('leaves Enter in a control inside the row to the control', async () => {
+    const onRowClick = vi.fn();
+
+    const columns = column.columns([
+      column.display({
+        id: 'open',
+        header: 'Open',
+        cell: ({ row }) => (
+          <button type="button" onClick={(event) => event.stopPropagation()}>
+            Open {row.original.title}
+          </button>
+        ),
+      }),
+    ]);
+
+    render(<AkTable columns={columns} data={FINDINGS} onRowClick={onRowClick} />);
+
+    screen.getByRole('button', { name: `Open ${FINDINGS[0].title}` }).focus();
+    await userEvent.keyboard('{Enter}');
+
+    expect(onRowClick).not.toHaveBeenCalled();
   });
 });

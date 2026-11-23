@@ -28,6 +28,15 @@ describe('findEmberPath', () => {
     expect(findEmberPath('/dashboard/storeknox/fake-apps')).toBe('/dashboard/storeknox/fake-apps');
   });
 
+  it('hands over the StoreKnox pages still on Ember and keeps the inventory', () => {
+    expect(findEmberPath('/dashboard/storeknox/fake-apps/42')).toBe(
+      '/dashboard/storeknox/fake-apps/42'
+    );
+
+    expect(findEmberPath('/dashboard/storeknox/inventory/app-list')).toBeUndefined();
+    expect(findEmberPath('/dashboard/storeknox/inventory-details/42')).toBeUndefined();
+  });
+
   it('prefers the longest owner, so a deeper path is not read as a shallower one', () => {
     expect(findEmberPath('/dashboard/reports')).toBeUndefined();
     expect(findEmberPath('/dashboard/reports/generate')).toBe('/dashboard/reports/generate');
