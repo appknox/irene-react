@@ -13,8 +13,16 @@ describe('AkSkeleton', () => {
   it('renders full width and one line of height by default', () => {
     const { container } = render(<AkSkeleton />);
 
-    expect(skeleton(container)?.style.width).toBe('100%');
-    expect(skeleton(container)?.style.height).toBe('1.2rem');
+    expect(skeleton(container)).toHaveClass('w-full');
+    expect(skeleton(container)).toHaveClass('h-[1.2rem]');
+  });
+
+  it('lets a class size it, since an inline size no class could beat', () => {
+    const { container } = render(<AkSkeleton className="h-5 w-56" />);
+
+    expect(skeleton(container)).toHaveClass('h-5', 'w-56');
+    expect(skeleton(container)).not.toHaveClass('w-full');
+    expect(skeleton(container)?.style.width).toBe('');
   });
 
   it('takes any CSS width and height', () => {

@@ -289,6 +289,66 @@ with the entitlements it needs.
 | Partner screens offer no upload        | `/partner/clients`                                          | No upload section and no walkthroughs: the screens are not a scannable product    |
 | Reporting explains its AI              | `/dashboard/reports/generate`, press the Powered by AI chip | A drawer titled "AI Powered Features", three sections, the last a three-item list |
 
+## StoreKnox inventory
+
+Sign in to an organization with StoreKnox. Owner, admin and member see different
+controls, so run the role-specific rows in each role.
+
+| Scenario                              | How to get there                                                        | Expected                                                                                              |
+| ------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| No StoreKnox                          | `/dashboard/storeknox/inventory/app-list` in an organization without it | Redirected to `/dashboard/projects`                                                                   |
+| Inventory                             | `/dashboard/storeknox/inventory/app-list`                               | Approved apps, active or decommissioned, with store, application, developer and monitoring status     |
+| Monitoring status reason              | Hover a status in the inventory                                         | "Reason", then why: disabled, decommissioned, initializing, unscanned versions or fake apps found     |
+| Filter by monitoring status           | Press the filter icon in the status heading, choose a state             | The list and the tab count narrow; the URL carries `monitoring_status`; "Clear Filter" appears        |
+| No match for a filter                 | Filter to a state no app is in                                          | "No inventory apps found" with "No app matches your current filter"                                   |
+| Pages                                 | More than ten apps, press Next, change the page size                    | The range reads "11-20 of N Apps"; a new size starts from the first row                               |
+| Owner tabs and settings               | As an owner                                                             | A Pending Review tab with its count, the settings button, and Archived Apps above the table           |
+| Member                                | As a member                                                             | No Pending Review tab, no settings, no Archived Apps                                                  |
+| Inventory settings                    | As an owner, press settings, flip either switch                         | A success toast; the switch keeps its new state after a reload                                        |
+| Approve or reject                     | Pending Review, press the tick or the cross                             | A toast naming the app; it leaves the list, and an approved one joins the inventory count             |
+| Pending reviews as admin              | `/dashboard/storeknox/inventory/pending-reviews` as an admin            | Redirected to the inventory                                                                           |
+| Archived apps                         | Archived Apps as an owner or admin                                      | Who archived each app and when; the restore button is off with the unlock date until the lock ends    |
+| Archived apps as member               | `/dashboard/storeknox/inventory/archived-apps` as a member              | Redirected to `/dashboard/storeknox/inventory`                                                        |
+| App details                           | Press an app's row                                                      | The trail, icon, name, package and developer, platform and store, the checks, app details, scan       |
+| Not on Appknox                        | An app with no Appknox project                                          | "This app is not part of Appknox" above the header, and an Initiate Upload button in the scan section |
+| Monitoring banner                     | An app with monitoring off, archived, or decommissioned                 | A warning across the top; archived gives the archive and unlock dates                                 |
+| Monitoring with a licence             | As an owner, flip the switch on a licensed app                          | It changes at once, with "Monitoring enabled" or "disabled"                                           |
+| Monitoring without a licence          | As an owner, turn on an unlicensed app                                  | A drawer with the licences left; confirming turns it on, cancelling puts the switch back              |
+| No licences left                      | As above with none left                                                 | "Contact Support"; after it, a thumbs-up note that stays until licences are back                      |
+| Archive                               | As an owner or admin, press archive and confirm                         | A toast, the banner, and the six-month lock date in the drawer's note                                 |
+| Decommissioned                        | A decommissioned app                                                    | No archive button and no switch; uploads are off with the reason on hover                             |
+| Initiate upload                       | An app not on Appknox, press Initiate Upload                            | The section shows processing with a percentage, and moves on as the upload does                       |
+| Failed upload                         | An app whose last upload failed                                         | The failure's reason and a Retry Upload button                                                        |
+| Brand abuse and malware               | Press either check without the feature                                  | The feature-unavailable illustration and text; the header shows a tag naming the section              |
+| Unscanned versions                    | Press Unscanned Version on an app with action needed                    | Two tabs; the latest versions with status, countries and an upload action                             |
+| Monitoring history                    | The Monitoring History tab                                              | When each version was found, paged five at a time when there are more than five                       |
+| Version upload details                | A version whose upload failed, press Check Details                      | A modal with the reason, the last attempt date, and Retry Upload                                      |
+| Unscanned versions while initializing | `…/unscanned-version` for an app still initializing                     | Redirected to the app's details                                                                       |
+
+## StoreKnox discovery
+
+Sign in to an organization with StoreKnox. The owner and a member see different
+controls, so run the role-specific rows in each role.
+
+| Scenario                   | How to get there                                                     | Expected                                                                                                                                  |
+| -------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Discovery                  | Press Discover on the inventory, or Discovery in the side navigation | The heading, an App Inventory button, the search, the disclaimer, and an invitation to search; Discovery is marked in the side navigation |
+| Tabs by role               | Open discovery as the owner, then as a member                        | The owner sees Discovery Results alone; a member also sees Requested Apps                                                                 |
+| Search                     | Type two or more characters, press Discover                          | "Showing results for" the query, then a row per listing; the URL carries `app_query` and `app_search_id`                                  |
+| Too short                  | Type one character, press Discover                                   | "Minimum 2 characters required"; nothing is searched                                                                                      |
+| Clear the field            | Type, then press the cross in the field                              | The field empties and the search mark returns                                                                                             |
+| No results                 | Search for something no store lists                                  | "No result found" with its description                                                                                                    |
+| Disclaimer                 | Press View More beside the disclaimer                                | A modal with the disclaimer's heading and full text                                                                                       |
+| Owner adds an app          | As the owner, press the add icon on a result                         | "added to inventory" toast; the row shows the inventory mark, whose tooltip says it is already there                                      |
+| Member asks for an app     | As a member, press the send icon on a result                         | "requested" toast; the row shows the requested mark                                                                                       |
+| Already there or asked for | Search for an app already in the inventory, or already requested     | The row shows its mark instead of a button                                                                                                |
+| Addition fails             | Add when the server refuses, for example with no licences            | The server's reason in a toast; the button stays                                                                                          |
+| Action help                | Hover the info icon in the Action heading                            | The owner's or the member's explanation                                                                                                   |
+| Pages                      | A search with more than ten results, press Next                      | The next page; the page shown stays, dimmed, until it arrives                                                                             |
+| Requested apps             | As a member, open Requested Apps                                     | Each request waiting for approval, or approved or rejected with who decided; hover the info icon for when                                 |
+| No requests                | As a member with no requests                                         | "No requested apps found" with where to raise one                                                                                         |
+| Owner and requests         | As the owner, open `/dashboard/storeknox/discover/requested`         | Redirected to the results                                                                                                                 |
+
 ## Dashboard navigation
 
 The side navigation every signed-in page sits beside: the logo, the product

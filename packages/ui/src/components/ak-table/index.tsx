@@ -1,11 +1,11 @@
 import { useTable, type RowData } from '@tanstack/react-table';
 import { type VariantProps } from 'class-variance-authority';
-import { type ComponentProps, type ReactNode } from 'react';
+import { type ComponentProps, type KeyboardEvent, type ReactNode } from 'react';
 
 import { cn } from '@irene/ui/cn';
 
 import { AK_TABLE_FEATURES, type AkTableColumn } from './helpers';
-import { akTableVariants } from './variants';
+import { akTableCellVariants, akTableVariants } from './variants';
 
 type AkTableProps<TData extends RowData> = Omit<ComponentProps<'table'>, 'children'> &
   VariantProps<typeof akTableVariants> & {
@@ -14,8 +14,23 @@ type AkTableProps<TData extends RowData> = Omit<ComponentProps<'table'>, 'childr
     caption?: ReactNode;
     emptyState?: ReactNode;
     getRowId?: (row: TData, index: number) => string;
+    onRowClick?: (row: TData) => void;
     wrapperClassName?: string;
   };
+
+/* Opens a focused row from the keyboard as a click does, but leaves a key pressed in a control inside it alone. */
+function _handleRowKeyDown<TData>(
+  event: KeyboardEvent<HTMLTableRowElement>,
+  row: TData,
+  onRowClick: (row: TData) => void
+) {
+  if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) {
+    return;
+  }
+
+  event.preventDefault();
+  onRowClick(row);
+}
 
 /**
  * The design system's table, over TanStack Table's headless model.
@@ -34,6 +49,8 @@ type AkTableProps<TData extends RowData> = Omit<ComponentProps<'table'>, 'childr
  * @param props.caption - Names the table for a screen reader, and on screen unless hidden.
  * @param props.emptyState - Shown in place of the body when there are no rows.
  * @param props.getRowId - Identifies a row, so React keeps its element across a reorder.
+ * @param props.onRowClick - Called with a row's data on click, or on Enter or Space once focused;
+ *   a control inside the row stops the event to keep its own.
  * @param props.wrapperClassName - Classes for the element that scrolls.
  */
 function AkTable<TData extends RowData>({
@@ -47,6 +64,7 @@ function AkTable<TData extends RowData>({
   caption,
   emptyState,
   getRowId,
+  onRowClick,
   className,
   wrapperClassName,
   ...props
@@ -84,7 +102,11 @@ function AkTable<TData extends RowData>({
           {table.getHeaderGroups().map((group) => (
             <tr key={group.id}>
               {group.headers.map((header) => (
-                <th key={header.id} scope="col">
+                <th
+                  key={header.id}
+                  scope="col"
+                  className={akTableCellVariants({ align: header.column.columnDef.meta?.align })}
+                >
                   {header.isPlaceholder ? null : <table.FlexRender header={header} />}
                 </th>
               ))}
@@ -94,9 +116,28 @@ function AkTable<TData extends RowData>({
 
         <tbody data-slot="table-body">
           {rows.map((row) => (
-            <tr key={row.id} data-slot="table-row">
+            <tr
+              key={row.id}
+              data-slot="table-row"
+              tabIndex={onRowClick ? 0 : undefined}
+              className={cn(
+                onRowClick &&
+                  `
+                    cursor-pointer
+                    focus-visible:outline-2 focus-visible:-outline-offset-2
+                    focus-visible:outline-ring
+                  `
+              )}
+              onClick={onRowClick && (() => onRowClick(row.original))}
+              onKeyDown={
+                onRowClick && ((event) => _handleRowKeyDown(event, row.original, onRowClick))
+              }
+            >
               {row.getAllCells().map((cell) => (
-                <td key={cell.id}>
+                <td
+                  key={cell.id}
+                  className={akTableCellVariants({ align: cell.column.columnDef.meta?.align })}
+                >
                   <table.FlexRender cell={cell} />
                 </td>
               ))}
