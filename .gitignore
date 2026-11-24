@@ -56,3 +56,6 @@ apps/irene/public/assets/embed/
 
 # Shard coverage blobs, merged by the coverage job.
 .vitest/
+
+# A session's scratch checkout, not part of the repo.
+.claude/worktrees/
