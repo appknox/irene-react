@@ -2,7 +2,9 @@ import { cva } from 'class-variance-authority';
 
 /*
   The box itself. `color` tints it only once it is ticked or part-ticked — an
-  empty box reads the same whatever it belongs to.
+  empty box is drawn in the text colour around it, as irene draws it with an
+  outline icon in `currentColor`, so it reads as part of the text it labels
+  rather than as something greyed out.
 
   The tint keys off Radix's own `data-state`, which it sets whether the box is
   controlled or left to manage itself.
@@ -10,7 +12,7 @@ import { cva } from 'class-variance-authority';
 export const akCheckboxVariants = cva(
   [
     'peer relative inline-flex size-4 shrink-0 cursor-pointer items-center justify-center',
-    'rounded-xs border-2 border-border-strong bg-transparent',
+    'rounded-xs border-2 border-current bg-transparent',
     'shadow-xs transition-shadow outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
     'disabled:cursor-not-allowed disabled:border-neutral-400 disabled:bg-transparent',
     /*
@@ -52,8 +54,9 @@ export const akCheckboxVariants = cva(
       },
     },
 
+    /* A ticked box is green unless told otherwise, as irene has it. */
     defaultVariants: {
-      color: 'primary',
+      color: 'success',
     },
   }
 );

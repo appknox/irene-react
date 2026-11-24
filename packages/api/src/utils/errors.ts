@@ -13,6 +13,41 @@ const NON_FIELD = 'non_field_errors';
  */
 const ABORTED_REQUEST_CODES = new Set([AxiosError.ECONNABORTED, AxiosError.ERR_CANCELED]);
 
+/** What an error object carries its message under, in the shapes this API answers with. */
+const MESSAGE_KEYS = ['detail', 'message'] as const;
+
+/**
+ * Reads one entry of an error body as a message.
+ *
+ * An entry may be the message itself, or an object carrying it — a rejection
+ * can arrive as `{ errors: [{ detail: '...' }] }` as well as
+ * `{ email: ['...'] }`. Anything else is passed over rather than stringified,
+ * since `[object Object]` tells a user nothing.
+ *
+ * @param entry - One value from an error body.
+ * @returns The message it holds, or nothing.
+ */
+function _asMessage(entry: unknown): string | undefined {
+  if (typeof entry === 'string') {
+    return entry;
+  }
+
+  if (entry === null || entry === undefined) {
+    return undefined;
+  }
+
+  /* A number or a flag is still a message of sorts; an object may only carry one. */
+  if (typeof entry !== 'object') {
+    return String(entry);
+  }
+
+  const carried = MESSAGE_KEYS.map((key) => (entry as Record<string, unknown>)[key]).find(
+    (value) => typeof value === 'string' && value !== ''
+  );
+
+  return carried as string | undefined;
+}
+
 /**
  * Normalises one DRF error value into a list of messages.
  *
@@ -21,10 +56,12 @@ const ABORTED_REQUEST_CODES = new Set([AxiosError.ECONNABORTED, AxiosError.ERR_C
  */
 function _asMessages(value: unknown): string[] {
   if (Array.isArray(value)) {
-    return value.map(String);
+    return value.map(_asMessage).filter((message) => message !== undefined);
   }
 
-  return typeof value === 'string' ? [value] : [];
+  const message = _asMessage(value);
+
+  return message === undefined ? [] : [message];
 }
 
 /**

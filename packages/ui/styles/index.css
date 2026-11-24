@@ -53,14 +53,19 @@
     color: var(--color-foreground);
     background-color: var(--color-background);
   }
+}
 
-  /*
-    A link is text, so it takes the height of its own content rather than
-    stretching to whatever lays it out — a flex row, a grid cell, a list item.
+/*
+  A link is text, so it takes the height of its own content rather than
+  stretching to whatever lays it out — a flex row, a grid cell, a list item.
 
-    In the base layer, so any height utility on the element still wins. A link
-    styled as a button keeps that button's height.
-  */
+  In the components layer rather than the base layer: a height utility on the
+  element still wins, so a link styled as a button keeps that button's height,
+  and the rule is confined to what this app renders when the stylesheet is
+  scoped for a host. In the base layer it would reach every link on the host's
+  own page and collapse its navigation.
+*/
+@layer components {
   a {
     height: fit-content;
   }

@@ -99,6 +99,9 @@ const reset = () => {
   // The cache is a module singleton, so an answer from one file would be read by the next.
   queryClient.clear();
 
+  // Screens keep their state in the address, so one left there would open the next screen with it.
+  window.history.replaceState(null, '', '/');
+
   // A connection opens on every signed-in page, and a real one would reach the socket host.
   setWebsocketTransport(websocketTransport);
   clearWebsocketSignals();

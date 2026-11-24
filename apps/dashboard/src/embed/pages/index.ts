@@ -1,13 +1,10 @@
-import type { ComponentType, LazyExoticComponent } from 'react';
+import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 /** What a page rendered inside a host may be handed. */
 export type EmbeddablePage = LazyExoticComponent<ComponentType<Record<string, unknown>>>;
 
 /*
   The pages a host may render by name.
-
-  Empty here: this branch serves every URL from Ember, so no host renders a
-  React page. A migration branch registers its own screen and no other.
 
   Each is loaded on demand, so a host downloads the screen it named and none of
   the others. A page is added here once it is migrated and a host wants it
@@ -16,7 +13,11 @@ export type EmbeddablePage = LazyExoticComponent<ComponentType<Record<string, un
   A screen that needs more than its own component — its own router for tabs,
   say — gets a file of its own in this directory and is registered from there.
 */
-export const EMBEDDABLE_PAGES = {} satisfies Record<string, EmbeddablePage>;
+export const EMBEDDABLE_PAGES = {
+  Organization: lazy(async () => ({
+    default: (await import('./organization')).Organization,
+  })),
+} satisfies Record<string, EmbeddablePage>;
 
 /** The names a host may ask for. Read from the registry, so adding a page adds a name. */
 export type EmbeddablePageName = keyof typeof EMBEDDABLE_PAGES;

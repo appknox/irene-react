@@ -108,6 +108,61 @@ export interface ApiStoreknoxOrganization {
   sk_features: ApiStoreknoxFeatures;
 }
 
+/**
+ * One invitation an organization has open, as the API sends it.
+ *
+ * `team` is the team's id alone, so an invitation into one is read as such
+ * without naming it; the team itself is fetched where its name is shown.
+ */
+export interface ApiOrganizationInvitation {
+  id: number;
+  email: string;
+  created_on: string;
+  updated_on: string;
+  team: number | null;
+}
+
+/** One team within an organization, as the API sends it. */
+export interface ApiOrganizationTeam {
+  id: number;
+  name: string;
+  created_on: string;
+  members_count: number;
+  projects_count: number;
+}
+
+/**
+ * One person's place in a team.
+ *
+ * The API sends the member's id alone, so the name and address beside it are
+ * read from the organization's users.
+ */
+export interface ApiOrganizationTeamMember {
+  id: number;
+}
+
+/** One of an organization's projects, as its own list sends it. */
+export interface ApiOrganizationProject {
+  id: number;
+  name: string;
+  package_name: string;
+  platform: number;
+}
+
+/** One project's place in a team, and whether the team may write to it. */
+export interface ApiOrganizationTeamProject {
+  id: number;
+  write: boolean;
+}
+
+/** One member of an organization, as the records that refer to them read it. */
+export interface ApiOrganizationUser {
+  id: number;
+  username: string;
+  email: string;
+  is_active: boolean;
+}
+
 /** One namespace an organization has claimed, as the API sends it. */
 export interface ApiOrganizationNamespace {
   id: number;

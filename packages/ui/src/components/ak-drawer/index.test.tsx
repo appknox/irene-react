@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import type { ComponentProps } from 'react';
@@ -63,6 +63,41 @@ describe('AkDrawer', () => {
 
     expect(screen.getByText('The report lists what the scan found.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
+  });
+
+  /*
+    A toast is raised over whatever is open and often carries the only way to
+    act on what just happened, so acting on one must not dismiss what raised it.
+  */
+  it('stays open when a toast over it is acted on', async () => {
+    const user = userEvent.setup();
+
+    await openDrawer();
+
+    const toaster = document.createElement('section');
+
+    toaster.dataset.sonnerToaster = '';
+    toaster.innerHTML = '<button type="button">Undo</button>';
+
+    /* The toaster turns pointer events back on for itself, as `AkToaster` does. */
+    toaster.style.pointerEvents = 'auto';
+    document.body.append(toaster);
+
+    await user.click(screen.getByRole('button', { name: 'Undo' }));
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    toaster.remove();
+  });
+
+  it('closes when the page behind it is pressed', async () => {
+    await openDrawer();
+
+    /* A press outside is a pointer down followed by the click it becomes. */
+    fireEvent.pointerDown(document.body);
+    fireEvent.click(document.body);
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 
   it('closes from the control in its header', async () => {

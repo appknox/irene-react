@@ -1,0 +1,10 @@
+.table {
+  width: 100%;
+  border: 1px solid var(--ak-table-border-dark);
+  border-collapse: collapse;
+}
+
+.cell {
+  padding: 0.857em 1.143em;
+  border-bottom: 1px solid var(--ak-table-border-dark);
+}

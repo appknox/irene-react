@@ -12,47 +12,4 @@ export interface OrganizationMembersRouteQueryParams {
 
 export default class AuthenticatedOrganizationMembersRoute extends ScrollToTop(
   AkBreadcrumbsRoute
-) {
-  queryParams = {
-    user_limit: {
-      refreshModel: true,
-    },
-    user_offset: {
-      refreshModel: true,
-    },
-    user_query: {
-      refreshModel: true,
-    },
-    show_inactive_user: {
-      refreshModel: true,
-    },
-    invite_limit: {
-      refreshModel: true,
-    },
-    invite_offset: {
-      refreshModel: true,
-    },
-  };
-
-  model(params: Partial<OrganizationMembersRouteQueryParams>) {
-    const {
-      user_limit,
-      user_offset,
-      user_query,
-      show_inactive_user,
-      invite_limit,
-      invite_offset,
-    } = params;
-
-    return {
-      queryParams: {
-        user_limit,
-        user_offset,
-        user_query,
-        show_inactive_user,
-        invite_limit,
-        invite_offset,
-      },
-    };
-  }
-}
+) {}

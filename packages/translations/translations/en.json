@@ -1696,6 +1696,7 @@
   "page": "Page",
   "pageNotFound": "The page cannot be found",
   "pageNotFoundHint": "The link may be broken, or the page may have moved.",
+  "paginationRange": "{start}-{end} of {total} {label}",
   "paid": "Paid",
   "partner": "Partner",
   "partnerPrivilege": {

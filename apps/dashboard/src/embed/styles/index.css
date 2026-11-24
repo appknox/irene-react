@@ -12,6 +12,18 @@
 @import './portals.css';
 
 /*
+  The mounted element paints no page background of its own.
+
+  Scoping points the design system's `body` rule at it, so it would paint this
+  app's page background over the background of the page it is mounted in. The
+  host owns the page; a surface a screen draws for itself, such as the one
+  behind a table, carries its own background.
+*/
+[data-react-root] {
+  background-color: transparent;
+}
+
+/*
   The design system's entry scans its own package. This app's screens are
   scanned here, so the utilities they use are generated too.
 */

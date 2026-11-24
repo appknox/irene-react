@@ -33,6 +33,19 @@ describe('rendering', () => {
     expect(screen.getByRole('table', { name: 'Findings' })).toBeInTheDocument();
   });
 
+  /*
+    The caption is positioned absolutely by `sr-only`. Without a positioned
+    wrapper it is laid out against the document rather than against whatever
+    scrolls the table, and makes the page as tall as the table.
+  */
+  it('keeps the caption inside the element that scrolls the table', () => {
+    const { container } = renderTable({ caption: 'Findings' });
+
+    const caption = screen.getByRole('table', { name: 'Findings' }).querySelector('caption');
+
+    expect(caption?.closest('.relative')).toBe(container.firstElementChild);
+  });
+
   it('renders a column header per column definition', () => {
     renderTable();
 
@@ -182,6 +195,29 @@ describe('column widths', () => {
   });
 });
 
+describe('column alignment', () => {
+  it('centres the header and cells of a column asking for it', () => {
+    const aligned = column.columns([
+      column.accessor('title', { header: 'Title' }),
+      column.accessor('severity', { header: 'Severity', meta: { align: 'center' } }),
+    ]);
+
+    render(<AkTable columns={aligned} data={FINDINGS} />);
+
+    expect(screen.getByRole('columnheader', { name: 'Severity' })).toHaveClass('text-center');
+
+    expect(screen.getAllByRole('cell')[1]).toHaveClass('text-center');
+  });
+
+  it('leaves a column that asks for nothing aligned to the left', () => {
+    render(<AkTable columns={COLUMNS} data={FINDINGS} />);
+
+    expect(screen.getByRole('columnheader', { name: 'Title' })).not.toHaveClass('text-center');
+
+    expect(screen.getAllByRole('cell')[0]).not.toHaveClass('text-center');
+  });
+});
+
 describe('grouped columns', () => {
   const GROUPED = column.columns([
     column.group({
@@ -211,5 +247,55 @@ describe('grouped columns', () => {
 
     expect(groupRow?.textContent).toBe('FindingSeverity');
     expect(screen.getAllByRole('columnheader', { name: '' })).not.toHaveLength(0);
+  });
+});
+
+describe('acting on a row', () => {
+  it('reports the row behind the one pressed', async () => {
+    const user = userEvent.setup();
+    const onRowClick = vi.fn();
+
+    renderTable({ onRowClick });
+
+    await user.click(screen.getByRole('cell', { name: 'Hardcoded secret' }));
+
+    expect(onRowClick).toHaveBeenCalledWith(FINDINGS[0], expect.anything());
+  });
+
+  /* A row that can be acted on is reachable without a pointer. */
+  it('acts on the focused row on Enter and on Space', async () => {
+    const user = userEvent.setup();
+    const onRowClick = vi.fn();
+
+    renderTable({ onRowClick });
+
+    await user.tab();
+    await user.keyboard('{Enter}');
+
+    expect(onRowClick).toHaveBeenCalledWith(FINDINGS[0], expect.anything());
+
+    await user.keyboard(' ');
+
+    expect(onRowClick).toHaveBeenCalledTimes(2);
+  });
+
+  it('leaves another key to the browser', async () => {
+    const user = userEvent.setup();
+    const onRowClick = vi.fn();
+
+    renderTable({ onRowClick });
+
+    await user.tab();
+    await user.keyboard('{Escape}');
+
+    expect(onRowClick).not.toHaveBeenCalled();
+  });
+
+  it('leaves the rows alone where nothing acts on them', () => {
+    renderTable();
+
+    for (const row of screen.getAllByRole('row')) {
+      expect(row).not.toHaveAttribute('tabindex');
+    }
   });
 });

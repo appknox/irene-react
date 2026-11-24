@@ -55,6 +55,7 @@ function AkMenuContent({
         className={cn(
           'z-50 min-w-52 origin-(--radix-dropdown-menu-content-transform-origin)',
           'overflow-hidden rounded-sm border border-border bg-popover py-1',
+          'font-sans text-popover-foreground',
           'text-popover-foreground shadow-2 outline-hidden',
           `
             data-[state=closed]:animate-out data-[state=closed]:fade-out-0
