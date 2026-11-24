@@ -1,14 +1,14 @@
 /*
   Where a screen that is still Ember's lives.
 
-  This map is the migration ledger. It is read by the dev server's proxy, by the
+  This map is the migration ledger, read by the dev server's proxy, by the
   handover this app performs at navigation, and by the script that bakes the
-  list into the deployed image, so a path cannot be claimed by one and missed by
-  another.
+  list into the deployed image.
 
   A key leaves this map when the page behind it is migrated, and that single
-  edit moves the URL across: the proxy stops forwarding it, the handover stops
-  claiming it, and the deployed server starts answering it with this app.
+  edit moves the URL across. Every page starts here, so a key is listed rather
+  than a prefix standing in for its children: a blanket would stop a branch
+  handing one page back.
 
   Keys are React paths; values are the Ember path for the same screen. They are
   equal except where the two apps spell a URL differently.
@@ -16,6 +16,16 @@
 
 /** The Ember path for each React path that has no screen yet. */
 export const EMBER_PATHS = {
+  '/login': '/login',
+  '/register': '/register',
+  '/register-via-invite': '/register-via-invite',
+  '/recover': '/recover',
+  '/reset': '/reset',
+  '/invite': '/invite',
+  '/invitation': '/invitation',
+  '/saml2/redirect': '/saml2/redirect',
+  '/sso/oidc/redirect': '/sso/oidc/redirect',
+  '/status': '/status',
   '/dashboard/analytics': '/dashboard/analytics',
   '/dashboard/billing': '/dashboard/billing',
   '/dashboard/file': '/dashboard/file',
@@ -23,26 +33,24 @@ export const EMBER_PATHS = {
   '/dashboard/marketplace': '/dashboard/marketplace',
   '/dashboard/notifications': '/dashboard/notifications',
   '/dashboard/offensive-security': '/dashboard/offensive-security',
+  '/dashboard/oidc': '/dashboard/oidc',
   '/dashboard/organization': '/dashboard/organization',
   '/dashboard/privacy-module': '/dashboard/privacy-module',
   '/dashboard/project': '/dashboard/project',
   '/dashboard/projects': '/dashboard/projects',
   '/dashboard/public-api': '/dashboard/public-api',
-  '/dashboard/reports/generate': '/dashboard/reports/generate',
+  '/dashboard/reports': '/dashboard/reports',
   '/dashboard/sbom': '/dashboard/sbom',
   '/dashboard/settings': '/dashboard/settings',
+  '/dashboard/status': '/dashboard/status',
   '/dashboard/store-monitoring': '/dashboard/store-monitoring',
   '/dashboard/store-release-readiness': '/dashboard/store-release-readiness',
-  '/dashboard/storeknox/discover/result': '/dashboard/storeknox/discover/result',
-  '/dashboard/storeknox/fake-apps': '/dashboard/storeknox/fake-apps',
-  '/dashboard/storeknox/inventory-details': '/dashboard/storeknox/inventory-details',
-  '/dashboard/storeknox/inventory/app-list': '/dashboard/storeknox/inventory/app-list',
-  '/dashboard/storeknox/third-party-scans': '/dashboard/storeknox/third-party-scans',
+  '/dashboard/storeknox': '/dashboard/storeknox',
   '/dashboard/subscription': '/dashboard/subscription',
   '/partner/analytics': '/partner/analytics',
   '/partner/clients': '/partner/clients',
-  '/security/download-app': '/security/downloadapp',
   '/security/projects': '/security/projects',
+  '/security/download-app': '/security/downloadapp',
   '/security/purge-analysis': '/security/purgeanalysis',
 } as const;
 

@@ -1,7 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
-import { startEmberHandover } from '@irene/ember-bridge/handover';
-
 import { setupUserAndOrgContext } from '@/actions/setup-user-context';
 import { RouteError } from '@/components/route-error';
 import { RoutePending } from '@/components/route-pending';
@@ -19,19 +17,6 @@ export const Route = createFileRoute('/_authenticated')({
         to: '/login',
         search: { unauthenticated: true, redirectTo: returnPathFor(location) },
       });
-    }
-
-    /*
-      Before the router commits, so the current page stays painted until the
-      Ember document arrives rather than being replaced by an empty shell.
-
-      reloadDocument is required: without it a root-relative href is treated as
-      an internal navigation and resolves to the not-found route.
-    */
-    const emberHref = startEmberHandover(location.pathname);
-
-    if (emberHref) {
-      throw redirect({ href: emberHref, reloadDocument: true, replace: true });
     }
 
     return { session };

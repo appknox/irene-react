@@ -7,7 +7,8 @@ describe('findEmberPath', () => {
   });
 
   it('returns nothing for a path this app serves', () => {
-    expect(findEmberPath('/dashboard/storeknox')).toBeUndefined();
+    expect(findEmberPath('/')).toBeUndefined();
+    expect(findEmberPath('/startup-sequence/test')).toBeUndefined();
   });
 
   it('carries the rest of the path across, so ids reach the Ember app', () => {
@@ -19,18 +20,26 @@ describe('findEmberPath', () => {
     expect(findEmberPath('/security/purge-analysis')).toBe('/security/purgeanalysis');
   });
 
+  /* The root is the one owner that could swallow every path, and does not. */
   it('does not claim a sibling that merely starts with an owned path', () => {
-    expect(findEmberPath('/dashboard/projects-overview')).toBeUndefined();
+    expect(findEmberPath('/logins')).toBeUndefined();
+    expect(findEmberPath('/registered')).toBeUndefined();
   });
 
-  it('leaves a migrated page alone while owning the pages under it', () => {
-    expect(findEmberPath('/dashboard/storeknox')).toBeUndefined();
-    expect(findEmberPath('/dashboard/storeknox/fake-apps')).toBe('/dashboard/storeknox/fake-apps');
+  it('claims the pages anyone reaches before signing in', () => {
+    expect(findEmberPath('/login')).toBe('/login');
+    expect(findEmberPath('/reset/a-token')).toBe('/reset/a-token');
   });
 
   it('prefers the longest owner, so a deeper path is not read as a shallower one', () => {
-    expect(findEmberPath('/dashboard/reports')).toBeUndefined();
-    expect(findEmberPath('/dashboard/reports/generate')).toBe('/dashboard/reports/generate');
+    expect(findEmberPath('/security/download-app')).toBe('/security/downloadapp');
+    expect(findEmberPath('/security/projects')).toBe('/security/projects');
+  });
+
+  /* A migrated page leaves the ledger, and is this app's from that edit onwards. */
+  it('leaves a page out of the ledger to this app', () => {
+    expect(Object.keys(EMBER_PATHS)).not.toContain('/startup-sequence/test');
+    expect(findEmberPath('/startup-sequence/test')).toBeUndefined();
   });
 });
 

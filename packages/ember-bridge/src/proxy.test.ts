@@ -32,7 +32,14 @@ describe('emberProxy', () => {
     }
   });
 
-  it('claims nothing this app serves', () => {
-    expect(Object.keys(emberProxy())).not.toContain('/dashboard/storeknox');
+  /*
+    The bare root is this app's. Forwarding it would hand the dev server's own
+    requests — its module graph and its reload channel — to the Ember app.
+  */
+  it('claims nothing this app serves, the root above all', () => {
+    const forwarded = Object.keys(emberProxy());
+
+    expect(forwarded).not.toContain('/');
+    expect(forwarded).not.toContain('/startup-sequence/test');
   });
 });

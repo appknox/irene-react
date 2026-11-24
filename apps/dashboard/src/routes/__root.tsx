@@ -1,7 +1,8 @@
-import { createRootRouteWithContext } from '@tanstack/react-router';
+import { createRootRouteWithContext, redirect } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 
 import { configurationStore } from '@irene/api/stores/configuration';
+import { startEmberHandover } from '@irene/ember-bridge/handover';
 import { getLocale, setLocale } from '@irene/translations/intl';
 import { getStoredLocale } from '@irene/translations/locale';
 
@@ -23,7 +24,18 @@ export interface RootRouterContext {
 }
 
 export const Route = createRootRouteWithContext<RootRouterContext>()({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async ({ context, location }) => {
+    /*
+      Asked first and for every page, signed in or not: the Ember app owns a URL
+      until the ledger says otherwise. reloadDocument is required, or the href
+      is treated as an internal navigation and resolves to not-found.
+    */
+    const emberHref = startEmberHandover(location.pathname);
+
+    if (emberHref) {
+      throw redirect({ href: emberHref, reloadDocument: true, replace: true });
+    }
+
     // The language this browser chose, until an account with one of its own signs in.
     const storedLocale = getStoredLocale();
     const configuration = configurationStore.getState();
