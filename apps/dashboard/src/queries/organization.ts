@@ -74,6 +74,9 @@ export const organizationKeys = {
     page: Record<string, unknown>
   ) => [...organizationKeys.teamRecords(orgId, teamId, 'invitations'), page] as const,
 
+  aiFeatures: (orgId: number | undefined) =>
+    [...organizationKeys.all(), orgId, 'ai-features'] as const,
+
   /** Every page of the organization's people, for invalidating them together. */
   usersList: (orgId: number | undefined) => [...organizationKeys.all(), orgId, 'users'] as const,
 
@@ -420,4 +423,20 @@ export const organizationProjectsOptions = (
     queryFn: () => OrganizationService.getOrganizationProjects(Number(orgId), page),
     enabled: orgId !== undefined,
     placeholderData: (previous) => previous,
+  });
+
+/**
+ * Builds the query for which of the organization's AI features are switched on.
+ *
+ * Separate from the entitlements the organization carries: a feature can be
+ * bought and left off, and this is the part a screen turns.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @returns Query options resolving to each feature and whether it is on.
+ */
+export const organizationAiFeatureSettingsOptions = (orgId: number | undefined) =>
+  queryOptions({
+    queryKey: organizationKeys.aiFeatures(orgId),
+    queryFn: () => OrganizationService.getOrganizationAiFeatureSettings(Number(orgId)),
+    enabled: orgId !== undefined,
   });

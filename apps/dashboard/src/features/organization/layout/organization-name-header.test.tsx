@@ -55,24 +55,47 @@ describe('OrganizationNameHeader', () => {
     expect(addButton()).toBeDisabled();
   });
 
-  it('offers an administrator the way through to the settings', () => {
+  /*
+    What sits beside the name belongs to the screen: the way through to the
+    settings on the organization screen, the way to rename it on the settings
+    screen. The header only places it, and hands it the naming modal.
+  */
+  it('places what the screen puts beside the name', () => {
+    inOrganization('Acme', { is_owner: false, is_admin: true });
+
+    renderWithProviders(
+      <OrganizationNameHeader action={() => <button type="button">Organization Settings</button>} />
+    );
+
+    expect(screen.getByRole('button', { name: 'Organization Settings' })).toBeInTheDocument();
+  });
+
+  it('hands that control the way to open the naming modal', async () => {
+    const user = userEvent.setup();
+
+    inOrganization('Acme', { is_owner: true, is_admin: true });
+
+    renderWithProviders(
+      <OrganizationNameHeader
+        action={({ openNameModal }) => (
+          <button type="button" onClick={openNameModal}>
+            Edit Name
+          </button>
+        )}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Edit Name' }));
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('places nothing beside the name where the screen offers nothing', () => {
     inOrganization('Acme', { is_owner: false, is_admin: true });
 
     renderWithProviders(<OrganizationNameHeader />);
 
-    expect(
-      screen.getByRole('link', { name: new RegExp(akMT('organizationSettings')) })
-    ).toHaveAttribute('href', '/dashboard/organization/settings');
-  });
-
-  it('withholds it from everyone else', () => {
-    inOrganization('Acme', { is_owner: false, is_admin: false });
-
-    renderWithProviders(<OrganizationNameHeader />);
-
-    expect(
-      screen.queryByRole('link', { name: new RegExp(akMT('organizationSettings')) })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /settings/i })).not.toBeInTheDocument();
   });
 
   it('saves a name, then says it was saved', async () => {

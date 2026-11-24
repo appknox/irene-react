@@ -1192,7 +1192,8 @@
     "uncertain": "Uncertain",
     "validatedFindings": "Validated Findings",
     "verdictUncertain": "UNCERTAIN",
-    "vulnerabilityAnalysisDescription": "Here you can view the issues detected for each test cases"
+    "vulnerabilityAnalysisDescription": "Here you can view the issues detected for each test cases",
+    "orgSettingsDesc": "Enable automatic execution of KnoxIQ for all CI/CD uploads"
   },
   "key": "Key",
   "keyInsights": "Key Insights",
@@ -3253,5 +3254,6 @@
     "downloadApp": "Download App",
     "purgeApiAnalyses": "Purge API Analyses"
   },
-  "partnerDashboard": "Partner Dashboard"
+  "partnerDashboard": "Partner Dashboard",
+  "integrations": "Integrations"
 }

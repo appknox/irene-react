@@ -118,6 +118,7 @@ export function AddTeamMembers({ team, onDone }: Readonly<AddTeamMembersProps>) 
   const columns = userColumn.columns([
     userColumn.accessor('username', {
       header: () => akMT('name'),
+      meta: { width: '75%' },
       cell: ({ getValue }) => (
         <AkTypography tag="span" noWrap title={getValue()} data-test-add-member-name>
           {getValue()}
@@ -128,7 +129,7 @@ export function AddTeamMembers({ team, onDone }: Readonly<AddTeamMembersProps>) 
     userColumn.display({
       id: 'action',
       header: () => akMT('action'),
-      meta: { align: 'center' },
+      meta: { width: '25%', align: 'center' },
       cell: ({ row }) => (
         <AkCheckbox
           checked={picked.includes(row.original.id)}

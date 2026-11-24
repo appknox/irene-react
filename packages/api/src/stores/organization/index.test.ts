@@ -111,6 +111,7 @@ describe('which modules are withheld rather than advertised', () => {
       dynamicScanAutomation: true,
       aiReporting: true,
       aiPii: true,
+      aiKnoxiq: true,
     });
   });
 

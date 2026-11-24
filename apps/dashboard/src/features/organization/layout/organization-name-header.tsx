@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
@@ -11,14 +11,23 @@ import { useOrganization } from '@/hooks/use-organization';
 
 import { OrganizationNameModal } from './organization-name-modal';
 
+/** What a screen puts beside the name, given the way to open the naming modal. */
+interface OrganizationNameHeaderProps {
+  action?: (controls: { openNameModal: () => void }) => ReactNode;
+}
+
 /**
  * The organization's name, or the control to give it one.
  *
  * Only an owner may name it, so anyone else is told why the control is closed
- * to them. Beside it sits the way through to the organization's settings,
- * which administrators alone may reach.
+ * to them. What sits beside the name is the screen's own: the way through to
+ * the settings on the organization screen, the way to rename it on the
+ * settings screen. The naming modal is handed to it, since both open the same
+ * one, as irene yields it.
+ *
+ * @param props.action - What to put beside the name.
  */
-export function OrganizationNameHeader() {
+export function OrganizationNameHeader({ action }: Readonly<OrganizationNameHeaderProps>) {
   const { selected, me } = useOrganization();
   const [isNaming, setIsNaming] = useState(false);
 
@@ -90,15 +99,7 @@ export function OrganizationNameHeader() {
         </div>
       )}
 
-      {me?.is_admin && (
-        <AkButton asChild variant="outlined" data-test-org-settings-link>
-          <a href="/dashboard/organization/settings">
-            <AkIcon name="material-symbols:settings" />
-
-            {akMT('organizationSettings')}
-          </a>
-        </AkButton>
-      )}
+      {action?.({ openNameModal: () => setIsNaming(true) })}
 
       <OrganizationNameModal
         isOpen={isNaming}

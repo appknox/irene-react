@@ -123,8 +123,9 @@ export function AddTeamProjects({ team, onDone }: Readonly<AddTeamProjectsProps>
   const columns = projectColumn.columns([
     projectColumn.accessor('package_name', {
       header: () => akMT('name'),
+      meta: { width: '75%' },
       cell: ({ row, getValue }) => (
-        <div className="flex items-center gap-3.5">
+        <div className="flex min-w-0 items-center gap-3.5">
           <AkIcon
             name={
               row.original.platform === ENUMS.PLATFORM.IOS
@@ -136,7 +137,13 @@ export function AddTeamProjects({ team, onDone }: Readonly<AddTeamProjectsProps>
             aria-hidden
           />
 
-          <AkTypography tag="span" noWrap title={getValue()} data-test-add-project-name>
+          <AkTypography
+            tag="span"
+            noWrap
+            title={getValue()}
+            className="min-w-0"
+            data-test-add-project-name
+          >
             {getValue()}
           </AkTypography>
         </div>
@@ -146,7 +153,7 @@ export function AddTeamProjects({ team, onDone }: Readonly<AddTeamProjectsProps>
     projectColumn.display({
       id: 'action',
       header: () => akMT('action'),
-      meta: { align: 'center' },
+      meta: { width: '25%', align: 'center' },
       cell: ({ row }) => (
         <AkCheckbox
           checked={picked.includes(row.original.id)}

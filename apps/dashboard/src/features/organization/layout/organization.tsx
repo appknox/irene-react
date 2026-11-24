@@ -1,6 +1,7 @@
 import { Link, Outlet, useMatchRoute, useRouterState } from '@tanstack/react-router';
 
 import { akMT } from '@irene/translations/intl';
+import { AkButton } from '@irene/ui/ak-button';
 import { AkIcon } from '@irene/ui/ak-icon';
 import { AkTabs, AkTabsBadge, AkTabsContent, AkTabsList, AkTabsTrigger } from '@irene/ui/ak-tabs';
 import type { IconName } from '@irene/ui/icons/sets';
@@ -8,6 +9,7 @@ import type { IconName } from '@irene/ui/icons/sets';
 import { useOrganization } from '@/hooks/use-organization';
 
 import { OrganizationNameHeader } from './organization-name-header';
+import { ORGANIZATION_SETTINGS_TABS } from './settings-tabs';
 import { ORGANIZATION_TABS } from './tabs';
 
 /** One tab in the organization row. */
@@ -67,7 +69,20 @@ export function OrganizationLayout() {
       <div className="w-full">
         {/* irene sets the header off from the tabs with 1em above and below. */}
         <div className="py-3.5">
-          <OrganizationNameHeader />
+          {/* irene puts the way through to the settings here, for an administrator. */}
+          <OrganizationNameHeader
+            action={() =>
+              isAdmin && (
+                <AkButton asChild variant="outlined" data-test-org-settings-link>
+                  <a href={ORGANIZATION_SETTINGS_TABS.settings}>
+                    <AkIcon name="material-symbols:settings" />
+
+                    {akMT('organizationSettings')}
+                  </a>
+                </AkButton>
+              )
+            }
+          />
         </div>
 
         <AkTabs value={activeTab} activationMode="manual" className="gap-0">

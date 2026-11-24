@@ -1,3 +1,4 @@
+import type { RouteBreadcrumb } from '@/components/breadcrumbs';
 import type { ireneDashboardRouter, RouterPageTitleContext } from '@/router';
 
 /**
@@ -23,5 +24,14 @@ declare module '@tanstack/react-router' {
    */
   interface StaticDataRouteOption {
     pageTitle?(context: RouterPageTitleContext): string;
+
+    /**
+     * Where the page sits, for the trail above it.
+     *
+     * A route names itself and the pages it hangs off, as irene's controllers
+     * do, and the trail is assembled from the open route rather than written
+     * out at the screen. Read by `@/components/breadcrumbs`.
+     */
+    breadcrumb?(context: RouterPageTitleContext): RouteBreadcrumb;
   }
 }

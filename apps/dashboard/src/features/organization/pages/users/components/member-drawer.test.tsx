@@ -1,8 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { Fragment } from 'react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { OrganizationEndpoints } from '@irene/api/services/organization/endpoints';
 import { organizationStore } from '@irene/api/stores/organization';
@@ -24,6 +24,8 @@ import { renderAtAddress } from '@tests/render';
 import { server } from '@tests/server';
 
 import { OrganizationUsersPage } from '../index';
+
+import { MemberDrawer } from './member-drawer';
 
 const MEMBERSHIP = buildOrganizationMembership({
   member: 7,
@@ -289,6 +291,65 @@ describe('the member drawer', () => {
     expect(await screen.findByText('Not permitted')).toBeInTheDocument();
   });
 
+  it('says a member has never signed in where they never have', async () => {
+    const user = userEvent.setup();
+
+    server.use(
+      http.get(`*/${OrganizationEndpoints.members('*')}`, () =>
+        HttpResponse.json({
+          count: 1,
+          next: null,
+          previous: null,
+          results: [buildOrganizationMembership({ member: 7, last_logged_in: null })],
+        })
+      )
+    );
+
+    await openMember(user);
+
+    expect(await findByTestAttribute('member-last-login')).toHaveTextContent(akMT('never'));
+  });
+
+  it('brings a deactivated member back once the question is answered', async () => {
+    const user = userEvent.setup();
+
+    withMemberRecords({ isActive: false });
+
+    server.use(
+      http.put('*/api/organizations/:organizationId/users/:userId', () =>
+        HttpResponse.json(buildOrganizationUser({ is_active: true }))
+      )
+    );
+
+    await openMember(user);
+    await user.click(await findByTestAttribute('change-activity-status-button'));
+
+    await user.click(
+      within(await findByTestAttribute('confirm-box')).getByText(akMT('confirm'))
+    );
+
+    expect(await screen.findByText(new RegExp(akMT('activated')))).toBeInTheDocument();
+  });
+
+  it('falls back to asking for another try where the refusal says nothing', async () => {
+    const user = userEvent.setup();
+
+    server.use(
+      http.put('*/api/organizations/:organizationId/users/:userId', () =>
+        HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
+      )
+    );
+
+    await openMember(user);
+    await user.click(await findByTestAttribute('change-activity-status-button'));
+
+    await user.click(
+      within(await findByTestAttribute('confirm-box')).getByText(akMT('confirm'))
+    );
+
+    expect(await screen.findByText(akMT('pleaseTryAgain'))).toBeInTheDocument();
+  });
+
   it('keeps the way to deactivate from anyone who is not an owner', async () => {
     const user = userEvent.setup();
 
@@ -313,5 +374,68 @@ describe('the member drawer', () => {
     await user.click(screen.getByRole('combobox', { name: akMT('role') }));
 
     expect(screen.queryByText(akMT('userDetails'))).not.toBeInTheDocument();
+  });
+});
+
+/*
+  Rendered on its own rather than from the row: the screen around it is open to
+  administrators alone and reads the member first, so what it does for anyone
+  else, or before that answer, cannot be reached through it.
+*/
+describe('the member drawer on its own', () => {
+  beforeEach(() => {
+    clearStoredSession();
+    storeSession(buildSession());
+    withMemberRecords();
+  });
+
+  it('leaves the name and address blank until the member has been read', async () => {
+    server.use(
+      http.get('*/api/organizations/:organizationId/users/:userId', async () => {
+        await delay('infinite');
+
+        return HttpResponse.json(buildOrganizationUser());
+      })
+    );
+
+    inOrganizationAs({ is_admin: true, is_owner: true });
+
+    renderAtAddress(
+      <MemberDrawer membership={MEMBERSHIP} onClose={vi.fn()} />,
+      '/dashboard/organization/users'
+    );
+
+    expect(await findByTestAttribute('member-username')).toHaveTextContent('');
+    expect(await findByTestAttribute('member-email')).toHaveTextContent('');
+  });
+
+  it('shows a member who may not be managed their teams alone', async () => {
+    inOrganizationAs({ is_admin: false, is_owner: false });
+
+    renderAtAddress(
+      <MemberDrawer membership={MEMBERSHIP} onClose={vi.fn()} />,
+      '/dashboard/organization/users'
+    );
+
+    expect(await screen.findByText(TEAM.name)).toBeInTheDocument();
+
+    expect(document.querySelector('[data-test-member-team-remove]')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-test-change-activity-status]')).not.toBeInTheDocument();
+  });
+
+  it('offers no way to join a team to a member who may not be managed', async () => {
+    const user = userEvent.setup();
+
+    inOrganizationAs({ is_admin: false, is_owner: false });
+
+    renderAtAddress(
+      <MemberDrawer membership={MEMBERSHIP} onClose={vi.fn()} />,
+      '/dashboard/organization/users'
+    );
+
+    await user.click(await findByTestAttribute('member-add-to-teams'));
+
+    expect(await screen.findByText(TEAM.name)).toBeInTheDocument();
+    expect(document.querySelector('[data-test-member-team-add]')).not.toBeInTheDocument();
   });
 });

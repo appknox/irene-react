@@ -40,10 +40,17 @@ const projectColumn = createAkTableColumns<ApiOrganizationTeamProject>();
  */
 function buildProjectColumns(team: ApiOrganizationTeam, isAdmin: boolean) {
   return projectColumn.columns([
+    /*
+      A package name runs long, so the column takes a share of the row rather
+      than as much as the name needs, and the name is shortened to fit it. The
+      widths lay the table out fixed, so the placeholders that stand in for
+      these rows are the same width as the rows themselves.
+    */
     projectColumn.display({
       id: 'project',
       /* irene capitalizes this one heading, since the key itself is lower case. */
       header: () => <span className="capitalize">{akMT('project')}</span>,
+      meta: { width: '50%' },
       cell: ({ row }) => <TeamProjectInfo project={row.original} />,
     }),
 
@@ -52,13 +59,14 @@ function buildProjectColumns(team: ApiOrganizationTeam, isAdmin: boolean) {
           projectColumn.display({
             id: 'access',
             header: () => akMT('accessPermissions'),
+            meta: { width: '30%' },
             cell: ({ row }) => <TeamProjectAccess team={team} project={row.original} />,
           }),
 
           projectColumn.display({
             id: 'action',
             header: () => akMT('action'),
-            meta: { align: 'center' as const },
+            meta: { width: '20%', align: 'center' as const },
             cell: ({ row }) => <RemoveTeamProject team={team} project={row.original} />,
           }),
         ]

@@ -4,6 +4,7 @@ import type { ApiPageEnvelope } from '@irene/api/utils/pagination';
 
 import type {
   ApiOrganization,
+  ApiOrganizationAiFeatureSettings,
   ApiOrganizationMe,
   ApiOrganizationMembership,
   ApiOrganizationInvitation,
@@ -608,6 +609,36 @@ export default class OrganizationService {
     organizationId: number | string,
     namespaceId: number | string
   ) => apiRequest.delete<void>(OrganizationEndpoints.namespace(organizationId, namespaceId));
+
+  /**
+   * Fetches which of the organization's AI features are switched on.
+   *
+   * @param organizationId - The organization to ask about.
+   * @returns Each feature, and whether it is on.
+   */
+  public static readonly getOrganizationAiFeatureSettings = (organizationId: number | string) =>
+    apiRequest.get<ApiOrganizationAiFeatureSettings>(
+      OrganizationEndpoints.aiFeatures(organizationId)
+    );
+
+  /**
+   * Switches the organization's AI features on and off.
+   *
+   * Every feature is sent, not only the one that changed, as irene saves the
+   * record whole.
+   *
+   * @param organizationId - The organization to set them for.
+   * @param settings - Each feature, and whether it is to be on.
+   * @returns The features, as they now stand.
+   */
+  public static readonly setOrganizationAiFeatureSettings = (
+    organizationId: number | string,
+    settings: ApiOrganizationAiFeatureSettings
+  ) =>
+    apiRequest.put<ApiOrganizationAiFeatureSettings>(
+      OrganizationEndpoints.aiFeatures(organizationId),
+      settings
+    );
 
   /**
    * Fetches the StoreKnox organization an account belongs to.

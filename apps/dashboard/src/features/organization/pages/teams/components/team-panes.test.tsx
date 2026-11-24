@@ -360,6 +360,67 @@ describe('the team drawer’s panes', () => {
     expect(await screen.findByText('Read-only project')).toBeInTheDocument();
   });
 
+  /* Only the row acted on changes; the others in the page are left as they were. */
+  it('leaves the other projects in the page alone when one is given write access', async () => {
+    const user = userEvent.setup();
+
+    server.use(
+      http.get(`*/${OrganizationEndpoints.teamProjects('*', TEAM.id)}`, () =>
+        HttpResponse.json({
+          count: 2,
+          next: null,
+          previous: null,
+          results: [
+            buildOrganizationTeamProject({ id: 99, write: false }),
+            buildOrganizationTeamProject({ id: 100, write: false }),
+          ],
+        })
+      ),
+
+      http.put('*/api/organizations/:organizationId/teams/:teamId/projects/:projectId', () =>
+        HttpResponse.json(buildOrganizationTeamProject({ id: 99, write: true }))
+      )
+    );
+
+    await openTeam(user);
+
+    const boxes = await waitFor(() => {
+      const found = document.querySelectorAll('[data-test-team-project-write]');
+
+      expect(found).toHaveLength(2);
+
+      return found;
+    });
+
+    await user.click(boxes[0] as HTMLElement);
+
+    /* The rows are drawn again from the answer, so the boxes are read again with them. */
+    const written = () => document.querySelectorAll('[data-test-team-project-write]');
+
+    await waitFor(() => expect(written()[0]).toBeChecked());
+
+    expect(written()[1]).not.toBeChecked();
+  });
+
+  it('falls back to asking for another try where a project removal is refused without a reason', async () => {
+    const user = userEvent.setup();
+
+    server.use(
+      http.delete('*/api/organizations/:organizationId/teams/:teamId/projects/:projectId', () =>
+        HttpResponse.json({}, { status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR })
+      )
+    );
+
+    await openTeam(user);
+    await user.click(await findByTestAttribute('team-project-remove'));
+
+    await user.click(
+      within(await findByTestAttribute('confirm-box')).getByText(akMT('remove'))
+    );
+
+    expect(await screen.findByText(akMT('pleaseTryAgain'))).toBeInTheDocument();
+  });
+
   it('says what went wrong when a project cannot be taken out of the team', async () => {
     const user = userEvent.setup();
 

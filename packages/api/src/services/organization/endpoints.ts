@@ -88,6 +88,10 @@ export const OrganizationEndpoints = {
   namespace: (organizationId: number | string, namespaceId: number | string) =>
     `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/namespaces/${encodeURIComponent(namespaceId)}` as const,
 
+  /** Which of the organization's AI features are switched on, read and written here. */
+  aiFeatures: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/ai_features` as const,
+
   /** The StoreKnox organization, which not every deployment has. */
   storeknoxOrganization: () => `${API_NAMESPACES.v2}/sk_organization` as const,
 };

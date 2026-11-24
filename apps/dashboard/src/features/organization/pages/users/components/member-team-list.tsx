@@ -83,6 +83,7 @@ export function MemberTeamList({
   const columns = teamColumn.columns([
     teamColumn.accessor('name', {
       header: () => akMT('teamName'),
+      meta: { width: '75%' },
       cell: ({ getValue }) => (
         <AkTypography tag="span" noWrap title={getValue()} data-test-member-team-name>
           {getValue()}
@@ -95,7 +96,7 @@ export function MemberTeamList({
           teamColumn.display({
             id: 'action',
             header: () => akMT('action'),
-            meta: { align: 'right' as const },
+            meta: { width: '25%', align: 'right' as const },
             cell: ({ row }) => action(row.original),
           }),
         ]

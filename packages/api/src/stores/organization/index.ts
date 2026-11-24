@@ -16,6 +16,7 @@ export interface OrganizationUpsellStatus {
   dynamicScanAutomation: boolean;
   aiReporting: boolean;
   aiPii: boolean;
+  aiKnoxiq: boolean;
 }
 
 /**
@@ -128,6 +129,7 @@ export const organizationStore = createStore<OrganizationStore>((set, get) => ({
       dynamicScanAutomation: !features.dynamicscan_automation && hidesUpsell,
       aiReporting: !aiFeatures.reporting && hidesUpsell,
       aiPii: !aiFeatures.pii && hidesUpsell,
+      aiKnoxiq: !aiFeatures.knoxiq && hidesUpsell,
     };
   },
 

@@ -65,12 +65,14 @@ function buildMemberColumns(team: ApiOrganizationTeam, isAdmin: boolean) {
     memberColumn.display({
       id: 'username',
       header: () => akMT('user'),
+      meta: { width: '40%' },
       cell: ({ row }) => <TeamMemberField userId={row.original.id} field="username" />,
     }),
 
     memberColumn.display({
       id: 'email',
       header: () => akMT('email'),
+      meta: { width: '40%' },
       cell: ({ row }) => <TeamMemberField userId={row.original.id} field="email" />,
     }),
 
@@ -79,7 +81,7 @@ function buildMemberColumns(team: ApiOrganizationTeam, isAdmin: boolean) {
           memberColumn.display({
             id: 'action',
             header: () => akMT('action'),
-            meta: { align: 'center' as const },
+            meta: { width: '20%', align: 'center' as const },
             cell: ({ row }) => <RemoveTeamMember team={team} userId={row.original.id} />,
           }),
         ]

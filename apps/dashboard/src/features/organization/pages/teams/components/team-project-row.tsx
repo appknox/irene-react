@@ -40,7 +40,7 @@ export function TeamProjectInfo({ project }: Readonly<Pick<TeamProjectProps, 'pr
   const isApple = data?.platform === ENUMS.PLATFORM.IOS;
 
   return (
-    <div className="flex items-center gap-3.5" data-test-team-project-info>
+    <div className="flex min-w-0 items-center gap-3.5" data-test-team-project-info>
       {data && (
         <AkIcon
           name={isApple ? 'fa-brands:apple' : 'material-symbols:android'}
@@ -50,7 +50,13 @@ export function TeamProjectInfo({ project }: Readonly<Pick<TeamProjectProps, 'pr
         />
       )}
 
-      <AkTypography tag="span" noWrap title={data?.package_name} data-test-team-project-name>
+      <AkTypography
+        tag="span"
+        noWrap
+        title={data?.package_name}
+        className="min-w-0"
+        data-test-team-project-name
+      >
         {data?.package_name ?? ''}
       </AkTypography>
     </div>

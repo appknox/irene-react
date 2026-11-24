@@ -30,6 +30,18 @@ export interface ApiOrganizationAiFeatures {
   ai_dast: boolean;
 }
 
+/**
+ * Which of the organization's AI features are switched on.
+ *
+ * Separate from `ApiOrganizationAiFeatures`, which says which ones it is
+ * entitled to: a feature can be bought and left off.
+ */
+export interface ApiOrganizationAiFeatureSettings {
+  reporting: boolean;
+  pii: boolean;
+  auto_execute_knoxiq_on_cicd_upload: boolean;
+}
+
 /** All of the organization's properties. */
 export interface ApiOrganization {
   id: number;

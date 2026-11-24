@@ -43,6 +43,7 @@ const invitationColumn = createAkTableColumns<ApiOrganizationInvitation>();
 const INVITATION_COLUMNS = invitationColumn.columns([
   invitationColumn.accessor('email', {
     header: () => akMT('email'),
+    meta: { width: '40%' },
     cell: ({ getValue }) => (
       <AkTypography tag="span" noWrap title={getValue()} data-test-team-invitation-email>
         {getValue()}
@@ -52,6 +53,7 @@ const INVITATION_COLUMNS = invitationColumn.columns([
 
   invitationColumn.accessor('created_on', {
     header: () => akMT('invitedOn'),
+    meta: { width: '24%' },
     cell: ({ getValue }) => (
       <AkTypography tag="span" color="textSecondary" data-test-team-invitation-sent>
         {formatRelativeTime(getValue())}
@@ -62,14 +64,14 @@ const INVITATION_COLUMNS = invitationColumn.columns([
   invitationColumn.display({
     id: 'resend',
     header: () => akMT('resend'),
-    meta: { align: 'center' },
+    meta: { width: '18%', align: 'center' },
     cell: ({ row }) => <ResendInvitation invitation={row.original} blurOverlay />,
   }),
 
   invitationColumn.display({
     id: 'delete',
     header: () => akMT('delete'),
-    meta: { align: 'center' },
+    meta: { width: '18%', align: 'center' },
     cell: ({ row }) => <DeleteInvitation invitation={row.original} blurOverlay />,
   }),
 ]);
