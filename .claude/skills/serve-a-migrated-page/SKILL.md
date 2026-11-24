@@ -50,6 +50,11 @@ longer claims it:
 `apps/dashboard/src/routes/` must hold a route for the path that renders the
 screen rather than `RouteShell`.
 
+A route that only redirects somewhere calls `redirectToPage`, never `redirect`
+directly. The root guard hands a path to Ember, but it does not run again for an
+internal redirect thrown inside the navigation it already guarded, so a bare
+`redirect({ to })` renders the React page at a URL the ledger still owns.
+
 ### 3. Verify
 
 ```
@@ -70,7 +75,9 @@ React route instead and the Ember chrome disappears.
 
 ### 1. Register the page
 
-In `apps/dashboard/src/embed/pages/index.ts`, add it to `EMBEDDABLE_PAGES`:
+In `apps/dashboard/src/embed/pages/index.ts`, add it to `EMBEDDABLE_PAGES`. The
+registry is empty on `develop`, so a branch registers its own screen and no
+other:
 
 ```ts
 Organization: lazy(async () => ({
@@ -115,8 +122,12 @@ name that does not change, so hard-reload irene when checking by hand.
 
 ## Both cases
 
-- Edit the ledger on the migration branch, never on `develop`.
+- Edit the ledger on the migration branch, never on `develop`. `develop` keeps
+  the setup and serves every URL from Ember: no key removed, no page registered,
+  no `<ReactComponent>` in a template.
 - One page per branch. A key you did not migrate stays as it is.
+- The embed tests stand in their own page for the registry, so they pass whatever
+  a branch has registered. Registering a screen does not mean updating them.
 - The screens that only redirect — `/`, `/dashboard`, `/partner`, `/security` —
   send the visitor to a path the ledger owns. Point a redirect somewhere else
   only when that destination is served.

@@ -1,13 +1,23 @@
 import { waitFor } from '@testing-library/react';
-import { act } from 'react';
+import { act, lazy } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { mountIreneComponent } from './mount-component';
 
-/* The registry holds real screens; this exercises the machinery around them. */
-vi.mock('@/features/dashboard/pages/home', () => ({
-  HomePage: (props: Record<string, unknown>) => `home:${props.label ?? ''}`,
-}));
+/*
+  A page registered only for these tests, so the machinery is exercised whatever
+  a branch has registered. `lazy` so it suspends, as a real page does.
+*/
+vi.mock('./pages', () => {
+  const TestPage = (props: Record<string, unknown>) => `test:${props.label ?? ''}`;
+  const page = lazy(async () => ({ default: TestPage }));
+
+  return {
+    EMBEDDABLE_PAGES: { TestPage: page },
+    findEmbeddablePage: (name: string) => (name === 'TestPage' ? page : undefined),
+    findPageSkeleton: () => undefined,
+  };
+});
 
 describe('mountIreneComponent', () => {
   it('refuses a name nothing is registered under, rather than leaving an empty box', () => {
@@ -43,10 +53,10 @@ describe('a mounted component', () => {
     document.body.append(element);
 
     const mounted = await act(async () =>
-      mountIreneComponent(element, { name: 'HomePage', props })
+      mountIreneComponent(element, { name: 'TestPage', props })
     );
 
-    await waitFor(() => expect(element.textContent).toContain('home:'));
+    await waitFor(() => expect(element.textContent).toContain('test:'));
 
     return { element, mounted };
   }
@@ -54,7 +64,7 @@ describe('a mounted component', () => {
   it('renders the registered screen into the element it is given', async () => {
     const { element } = await mount();
 
-    expect(element.textContent).toContain('home:');
+    expect(element.textContent).toContain('test:');
   });
 
   it('marks the element, so a host can see the app owns its contents', async () => {
@@ -66,11 +76,11 @@ describe('a mounted component', () => {
   it('renders again with new props, keeping the tree', async () => {
     const { element, mounted } = await mount({ label: 'first' });
 
-    expect(element.textContent).toContain('home:first');
+    expect(element.textContent).toContain('test:first');
 
     await act(async () => mounted.update({ label: 'second' }));
 
-    await waitFor(() => expect(element.textContent).toContain('home:second'));
+    await waitFor(() => expect(element.textContent).toContain('test:second'));
   });
 
   it('takes the component down, leaving the element empty', async () => {
@@ -95,10 +105,10 @@ describe('a host that draws the placeholder itself', () => {
     document.body.append(element);
 
     await act(async () => {
-      mountIreneComponent(element, { name: 'HomePage', onReady });
+      mountIreneComponent(element, { name: 'TestPage', onReady });
     });
 
-    await waitFor(() => expect(element.textContent).toContain('home:'));
+    await waitFor(() => expect(element.textContent).toContain('test:'));
     expect(onReady).toHaveBeenCalled();
   });
 
@@ -108,7 +118,7 @@ describe('a host that draws the placeholder itself', () => {
     document.body.append(element);
 
     act(() => {
-      mountIreneComponent(element, { name: 'HomePage', onReady: vi.fn() });
+      mountIreneComponent(element, { name: 'TestPage', onReady: vi.fn() });
     });
 
     expect(element.querySelector('[data-test-embed-page-skeleton]')).toBeNull();

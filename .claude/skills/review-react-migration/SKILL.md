@@ -47,6 +47,7 @@ redundant.
 - [ ] Query and path params are typed: `validateSearch` with a zod schema, params read through the route API rather than `window.location`.
 - [ ] Tab, filter and page state live in router search, not `useState`. Internal links go through the router's `Link`, or an `ak-*` link wired to it with `createLink`; a plain `<a>` to an internal path reloads the document.
 - [ ] An old URL that still has to work is a `beforeLoad` redirect with `replace: true`, not a rewrite of the link that pointed at it.
+- [ ] A route that redirects to another page goes through `redirectToPage`. A bare `redirect({ to })` skips the root guard, which does not run again inside a navigation it already guarded, and renders the React page at a URL the ledger still owns.
 - [ ] The screen's `RouteShell` is gone, and the Ember ledger entry handled per the `serve-a-migrated-page` skill — removed for a React route, kept for an embedded pane.
 
 ## 4. Data
