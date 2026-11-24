@@ -13,6 +13,35 @@ describe('AkLink', () => {
     );
   });
 
+  it('keeps a link opened in a new tab from reaching back through the opener', () => {
+    render(
+      <AkLink href="https://appknox.com" target="_blank">
+        Appknox
+      </AkLink>
+    );
+
+    expect(screen.getByRole('link', { name: 'Appknox' })).toHaveAttribute(
+      'rel',
+      'noopener noreferrer'
+    );
+  });
+
+  it('keeps the relationship it was given on a link opened in a new tab', () => {
+    render(
+      <AkLink href="https://appknox.com" target="_blank" rel="license">
+        Appknox
+      </AkLink>
+    );
+
+    expect(screen.getByRole('link', { name: 'Appknox' })).toHaveAttribute('rel', 'license');
+  });
+
+  it('leaves a link that opens in place without a relationship', () => {
+    render(<AkLink href="https://appknox.com">Appknox</AkLink>);
+
+    expect(screen.getByRole('link', { name: 'Appknox' })).not.toHaveAttribute('rel');
+  });
+
   it('renders the primary colour and an underline by default', () => {
     render(<AkLink href="#">Support</AkLink>);
 

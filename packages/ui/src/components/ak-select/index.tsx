@@ -68,7 +68,7 @@ function AkSelectContent({
         className={cn(
           'relative z-50 max-h-(--radix-select-content-available-height) min-w-28',
           'origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto',
-          'rounded-sm border bg-popover text-popover-foreground shadow-md',
+          'rounded-sm border bg-popover font-sans text-popover-foreground shadow-md',
           'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2',
           'data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
           'data-[state=closed]:animate-out data-[state=closed]:fade-out-0',

@@ -1,5 +1,3 @@
-{{page-title 'Teams'}}
-
-<div class='pt-0 pb-4'>
-  <OrganizationTeam @queryParams={{@model.queryParams}} />
-</div>
+{{! The pane and the browser tab's name are both the React screen's, which this route's
+    parent mounts: the screen switches panes without this route changing, so naming the
+    page here would leave the name behind. }}

@@ -10,9 +10,11 @@ import {
  *
  * @interface AkTableColumnMeta
  * @property {string} [width] - A CSS width for the column, e.g. `40%`. A table with any width set lays its columns out fixed, so the widths are honoured rather than treated as hints.
+ * @property {'left' | 'center' | 'right'} [align] - How the column's header and cells are aligned. Left unless set.
  */
 export interface AkTableColumnMeta {
   width?: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 /**

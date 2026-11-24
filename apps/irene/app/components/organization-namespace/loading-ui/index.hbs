@@ -1,0 +1,25 @@
+<AkStack @direction='column' @width='full' class='py-2' ...attributes>
+  <table local-class='table'>
+    <thead>
+      <tr>
+        {{#each this.columns as |width|}}
+          <td local-class='cell' {{style width=width}}>
+            <AkSkeleton @width='6rem' @height='0.875rem' />
+          </td>
+        {{/each}}
+      </tr>
+    </thead>
+
+    <tbody>
+      {{#each this.rows as |row|}}
+        <tr data-test-namespaces-placeholder-row={{row}}>
+          {{#each this.columns as |width|}}
+            <td local-class='cell' {{style width=width}}>
+              <AkSkeleton @width='70%' @height='1rem' />
+            </td>
+          {{/each}}
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</AkStack>

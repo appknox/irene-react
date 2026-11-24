@@ -1,6 +1,6 @@
 import { useTable, type RowData } from '@tanstack/react-table';
 import { type VariantProps } from 'class-variance-authority';
-import { type ComponentProps, type ReactNode } from 'react';
+import { type ComponentProps, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 
 import { cn } from '@irene/ui/cn';
 
@@ -15,6 +15,10 @@ type AkTableProps<TData extends RowData> = Omit<ComponentProps<'table'>, 'childr
     emptyState?: ReactNode;
     getRowId?: (row: TData, index: number) => string;
     wrapperClassName?: string;
+    onRowClick?: (
+      row: TData,
+      event: MouseEvent<HTMLTableRowElement> | KeyboardEvent<HTMLTableRowElement>
+    ) => void;
   };
 
 /**
@@ -35,6 +39,9 @@ type AkTableProps<TData extends RowData> = Omit<ComponentProps<'table'>, 'childr
  * @param props.emptyState - Shown in place of the body when there are no rows.
  * @param props.getRowId - Identifies a row, so React keeps its element across a reorder.
  * @param props.wrapperClassName - Classes for the element that scrolls.
+ * @param props.onRowClick - Called with the row behind the one acted on, which also makes the
+ * rows reachable by keyboard. A control inside a row is acted on first, so a caller that has one
+ * checks what the event came from.
  */
 function AkTable<TData extends RowData>({
   columns,
@@ -49,6 +56,7 @@ function AkTable<TData extends RowData>({
   getRowId,
   className,
   wrapperClassName,
+  onRowClick,
   ...props
 }: AkTableProps<TData>) {
   const table = useTable({ features: AK_TABLE_FEATURES, columns, data, getRowId });
@@ -58,8 +66,15 @@ function AkTable<TData extends RowData>({
   /* A table that sets any width lays out fixed, so every width is honoured exactly. */
   const hasColumnWidths = leafColumns.some((column) => column.columnDef.meta?.width);
 
+  /*
+    Positioned so the caption below stays inside it. `sr-only` positions the
+    caption absolutely, and an absolutely positioned element whose ancestors
+    are all static is laid out against the document rather than against the
+    element that scrolls it — which leaves it hanging below the fold and makes
+    the document as tall as the table, scrollbar and all.
+  */
   return (
-    <div className={cn('w-full overflow-x-auto', wrapperClassName)}>
+    <div className={cn('relative w-full overflow-x-auto', wrapperClassName)}>
       <table
         data-slot="table"
         data-variant={variant ?? 'semi-bordered'}
@@ -84,7 +99,14 @@ function AkTable<TData extends RowData>({
           {table.getHeaderGroups().map((group) => (
             <tr key={group.id}>
               {group.headers.map((header) => (
-                <th key={header.id} scope="col">
+                <th
+                  key={header.id}
+                  scope="col"
+                  className={cn(
+                    header.column.columnDef.meta?.align === 'center' && 'text-center',
+                    header.column.columnDef.meta?.align === 'right' && 'text-right'
+                  )}
+                >
                   {header.isPlaceholder ? null : <table.FlexRender header={header} />}
                 </th>
               ))}
@@ -94,9 +116,31 @@ function AkTable<TData extends RowData>({
 
         <tbody data-slot="table-body">
           {rows.map((row) => (
-            <tr key={row.id} data-slot="table-row">
+            <tr
+              key={row.id}
+              data-slot="table-row"
+              className={cn(onRowClick && 'cursor-pointer')}
+              tabIndex={onRowClick && 0}
+              onClick={onRowClick && ((event) => onRowClick(row.original, event))}
+              /* Enter and Space act on the focused row, as they do on a control. */
+              onKeyDown={
+                onRowClick &&
+                ((event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onRowClick(row.original, event);
+                  }
+                })
+              }
+            >
               {row.getAllCells().map((cell) => (
-                <td key={cell.id}>
+                <td
+                  key={cell.id}
+                  className={cn(
+                    cell.column.columnDef.meta?.align === 'center' && 'text-center',
+                    cell.column.columnDef.meta?.align === 'right' && 'text-right'
+                  )}
+                >
                   <table.FlexRender cell={cell} />
                 </td>
               ))}

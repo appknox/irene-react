@@ -92,6 +92,10 @@ Two layers, deliberately separate:
   --color-info-strong: var(--color-blue-700);
   --color-info-surface: var(--color-blue-50);
 
+  /* The platforms an app is built for, each in the colour it is known by. */
+  --color-android: #33a852;
+  --color-ios: #8d9096;
+
   --color-background: var(--color-white);
   --color-background-subtle: #fafafa;
   --color-background-inverse: #424651;

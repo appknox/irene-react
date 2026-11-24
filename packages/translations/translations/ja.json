@@ -1696,6 +1696,7 @@
   "page": "ページ",
   "pageNotFound": "ページが見つかりません",
   "pageNotFoundHint": "The link may be broken, or the page may have moved.",
+  "paginationRange": "{total} {label}中 {start}-{end}",
   "paid": "有料",
   "partner": "Partner",
   "partnerPrivilege": {

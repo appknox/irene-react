@@ -10,6 +10,15 @@ import { cn } from '@irene/ui/cn';
 
 import { akDrawerVariants } from './variants';
 
+/*
+  A toast is this application's own furniture, not the page behind what is
+  open: it is raised over a drawer or a modal and often carries the only way to
+  act on what just happened. Radix counts it as outside, so acting on one would
+  otherwise dismiss what raised it.
+*/
+const isWithinToast = (target: EventTarget | null) =>
+  target instanceof Element && target.closest('[data-sonner-toaster]') !== null;
+
 /**
  * A panel the page waits on, drawn down one edge of it.
  *
@@ -52,6 +61,7 @@ function AkDrawerContent({
   anchor = 'right',
   className,
   children,
+  onInteractOutside,
   ...props
 }: AkDrawerContentProps) {
   return (
@@ -59,7 +69,7 @@ function AkDrawerContent({
       <DialogPrimitive.Overlay
         data-slot="drawer-overlay"
         className={`
-          fixed inset-0 z-50 bg-black/50
+          fixed inset-0 z-50 bg-black/42
           data-[state=closed]:animate-out data-[state=closed]:fade-out-0
           data-[state=open]:animate-in data-[state=open]:fade-in-0
         `}
@@ -68,7 +78,16 @@ function AkDrawerContent({
       <DialogPrimitive.Content
         data-slot="drawer-content"
         data-anchor={anchor}
-        className={cn(akDrawerVariants({ anchor }), className)}
+        className={cn(akDrawerVariants({ anchor }), 'font-sans text-foreground', className)}
+        onInteractOutside={(event) => {
+          if (isWithinToast(event.target)) {
+            event.preventDefault();
+
+            return;
+          }
+
+          onInteractOutside?.(event);
+        }}
         {...props}
       >
         {children}

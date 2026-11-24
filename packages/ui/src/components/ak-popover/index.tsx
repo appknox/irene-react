@@ -70,7 +70,7 @@ function AkPopoverContent({
         sideOffset={sideOffset}
         className={cn(
           'z-50 w-72 origin-(--radix-popover-content-transform-origin)',
-          'rounded-sm border border-border bg-popover p-4 text-popover-foreground',
+          'rounded-sm border border-border bg-popover p-4 font-sans text-popover-foreground',
           'shadow-18 outline-hidden data-[state=closed]:animate-out data-[state=closed]:fade-out-0',
           'data-[state=closed]:zoom-out-95',
           'data-[state=closed]:duration-100 data-[state=closed]:ease-in',

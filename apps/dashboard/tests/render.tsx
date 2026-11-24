@@ -1,5 +1,7 @@
 import {
   createMemoryHistory,
+  createRootRoute,
+  createRoute,
   createRouter,
   RouterContextProvider,
   RouterProvider,
@@ -72,6 +74,53 @@ export function renderWithRouterContext(ui: ReactNode) {
     </TranslationsProvider>,
     RENDER_OPTIONS
   );
+}
+
+/**
+ * Renders a screen at one address, through a router of its own.
+ *
+ * A screen that keeps its list's state in the address needs a router to read
+ * and write it, and a link out of one needs a router to follow. This gives it
+ * both without the app's own route tree, so a test says which screen it is
+ * about and what the address holds, and nothing else loads.
+ *
+ * @param ui - The screen to render.
+ * @param address - The address to open it at, search and all.
+ * @returns The testing-library result, plus the router.
+ */
+export function renderAtAddress(ui: ReactNode, address = '/') {
+  queryClient.clear();
+
+  const rootRoute = createRootRoute();
+
+  const screenRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/$',
+
+    /* Taken as it comes: the screen reads what it knows by name. */
+    validateSearch: (search: Record<string, unknown>) => search,
+    component: () => ui,
+  });
+
+  const router: AnyRouter = createRouter({
+    routeTree: rootRoute.addChildren([screenRoute]),
+    history: createMemoryHistory({ initialEntries: [address] }),
+  });
+
+  return {
+    queryClient,
+    router,
+    ...render(
+      <TranslationsProvider>
+        <NormalizationProvider queryClient={queryClient}>
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+          </QueryClientProvider>
+        </NormalizationProvider>
+      </TranslationsProvider>,
+      RENDER_OPTIONS
+    ),
+  };
 }
 
 /** What a route render may vary. */

@@ -6,6 +6,13 @@ import type {
   ApiOrganizationFeatures,
   ApiOrganizationMe,
   ApiOrganizationMembership,
+  ApiOrganizationInvitation,
+  ApiOrganizationNamespace,
+  ApiOrganizationProject,
+  ApiOrganizationTeam,
+  ApiOrganizationTeamMember,
+  ApiOrganizationTeamProject,
+  ApiOrganizationUser,
   ApiStoreknoxOrganization,
 } from '@irene/api/services/organization';
 
@@ -82,6 +89,44 @@ export const buildOrganizationMembership = (
   ...overrides,
 });
 
+/** One team within an organization. */
+export const buildOrganizationTeam = (
+  overrides: Partial<ApiOrganizationTeam> = {}
+): ApiOrganizationTeam => ({
+  id: faker.number.int({ min: 1, max: 9999 }),
+  name: faker.company.name(),
+  created_on: faker.date.past().toISOString(),
+  members_count: faker.number.int({ min: 0, max: 50 }),
+  projects_count: faker.number.int({ min: 0, max: 50 }),
+  ...overrides,
+});
+
+/** One member of an organization, as the records that refer to them read it. */
+export const buildOrganizationUser = (
+  overrides: Partial<ApiOrganizationUser> = {}
+): ApiOrganizationUser => ({
+  id: faker.number.int({ min: 1, max: 9999 }),
+  username: faker.internet.username(),
+  email: faker.internet.email(),
+  is_active: true,
+  ...overrides,
+});
+
+/** One namespace an organization has claimed, awaiting approval unless told otherwise. */
+export const buildOrganizationNamespace = (
+  overrides: Partial<ApiOrganizationNamespace> = {}
+): ApiOrganizationNamespace => ({
+  id: faker.number.int({ min: 1, max: 9999 }),
+  value: faker.internet.domainName(),
+  created_on: faker.date.past().toISOString(),
+  approved_on: null,
+  is_approved: false,
+  platform: 0,
+  approved_by: null,
+  requested_by: faker.number.int({ min: 1, max: 9999 }),
+  ...overrides,
+});
+
 export const buildStoreknoxOrganization = (
   overrides: Partial<ApiStoreknoxOrganization> = {}
 ): ApiStoreknoxOrganization => ({
@@ -99,5 +144,45 @@ export const buildStoreknoxOrganization = (
     use_ai_validation: false,
     third_party_scanning: false,
   },
+  ...overrides,
+});
+
+/** One invitation an organization is still waiting on. */
+export const buildOrganizationInvitation = (
+  overrides: Partial<ApiOrganizationInvitation> = {}
+): ApiOrganizationInvitation => ({
+  id: faker.number.int({ min: 1, max: 9999 }),
+  email: faker.internet.email(),
+  created_on: faker.date.recent().toISOString(),
+  updated_on: faker.date.recent().toISOString(),
+  team: null,
+  ...overrides,
+});
+
+/** One person's place in a team, which carries their id alone. */
+export const buildOrganizationTeamMember = (
+  overrides: Partial<ApiOrganizationTeamMember> = {}
+): ApiOrganizationTeamMember => ({
+  id: faker.number.int({ min: 1, max: 9999 }),
+  ...overrides,
+});
+
+/** One project's place in a team, read-only unless told otherwise. */
+export const buildOrganizationTeamProject = (
+  overrides: Partial<ApiOrganizationTeamProject> = {}
+): ApiOrganizationTeamProject => ({
+  id: faker.number.int({ min: 1, max: 9999 }),
+  write: false,
+  ...overrides,
+});
+
+/** One of an organization's projects, as its own list sends it. */
+export const buildOrganizationProject = (
+  overrides: Partial<ApiOrganizationProject> = {}
+): ApiOrganizationProject => ({
+  id: faker.number.int({ min: 1, max: 9999 }),
+  name: faker.commerce.productName(),
+  package_name: faker.internet.domainName(),
+  platform: 0,
   ...overrides,
 });
