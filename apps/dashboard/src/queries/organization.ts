@@ -77,6 +77,12 @@ export const organizationKeys = {
   aiFeatures: (orgId: number | undefined) =>
     [...organizationKeys.all(), orgId, 'ai-features'] as const,
 
+  preference: (orgId: number | undefined) =>
+    [...organizationKeys.all(), orgId, 'preference'] as const,
+
+  emailDomains: (orgId: number | undefined) =>
+    [...organizationKeys.all(), orgId, 'email-domains'] as const,
+
   /** Every page of the organization's people, for invalidating them together. */
   usersList: (orgId: number | undefined) => [...organizationKeys.all(), orgId, 'users'] as const,
 
@@ -438,5 +444,31 @@ export const organizationAiFeatureSettingsOptions = (orgId: number | undefined) 
   queryOptions({
     queryKey: organizationKeys.aiFeatures(orgId),
     queryFn: () => OrganizationService.getOrganizationAiFeatureSettings(Number(orgId)),
+    enabled: orgId !== undefined,
+  });
+
+/**
+ * Builds the query for which regulations an organization's reports carry.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @returns Query options resolving to the preferences.
+ */
+export const organizationPreferenceOptions = (orgId: number | undefined) =>
+  queryOptions({
+    queryKey: organizationKeys.preference(orgId),
+    queryFn: () => OrganizationService.getOrganizationPreference(Number(orgId)),
+    enabled: orgId !== undefined,
+  });
+
+/**
+ * Builds the query for the email domains an organization restricts its accounts to.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @returns Query options resolving to the domains.
+ */
+export const organizationEmailDomainsOptions = (orgId: number | undefined) =>
+  queryOptions({
+    queryKey: organizationKeys.emailDomains(orgId),
+    queryFn: () => OrganizationService.getOrganizationEmailDomains(Number(orgId)),
     enabled: orgId !== undefined,
   });

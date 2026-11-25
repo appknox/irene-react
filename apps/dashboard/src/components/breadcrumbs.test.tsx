@@ -5,6 +5,7 @@ import {
   createRouter,
   RouterProvider,
 } from '@tanstack/react-router';
+
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -21,9 +22,25 @@ const renderAtRouteDeclaring = (crumb?: RouteBreadcrumb) => {
     component: Breadcrumbs,
   });
 
+  /* The pages above it, which the trail reads the way it reads any route's own crumb. */
+  const organizationRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/dashboard/organization/users',
+    staticData: { breadcrumb: () => ({ title: 'Organization' }) },
+  });
+
+  const settingsRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/dashboard/organization/settings',
+
+    staticData: {
+      breadcrumb: () => ({ title: 'Settings', parent: '/dashboard/organization/users' }),
+    },
+  });
+
   const router = createRouter({
-    routeTree: rootRoute.addChildren([screenRoute]),
-    history: createMemoryHistory({ initialEntries: ['/dashboard/organization/settings'] }),
+    routeTree: rootRoute.addChildren([screenRoute, organizationRoute, settingsRoute]),
+    history: createMemoryHistory({ initialEntries: ['/dashboard/organization/settings/x'] }),
   });
 
   return render(<RouterProvider router={router} />);
@@ -32,10 +49,7 @@ const renderAtRouteDeclaring = (crumb?: RouteBreadcrumb) => {
 describe('Breadcrumbs', () => {
   /* The route declares where it sits; the trail is assembled rather than written out. */
   it('reads the trail from the open route and the pages it hangs off', async () => {
-    renderAtRouteDeclaring({
-      title: 'Settings',
-      parent: { title: 'Organization', to: '/dashboard/organization/users' },
-    });
+    renderAtRouteDeclaring({ title: 'Settings', parent: '/dashboard/organization/users' });
 
     expect(await screen.findByRole('link', { name: 'Organization' })).toHaveAttribute(
       'href',
@@ -48,11 +62,7 @@ describe('Breadcrumbs', () => {
   it('reads the trail outermost first', async () => {
     renderAtRouteDeclaring({
       title: 'Service Account',
-      parent: {
-        title: 'Settings',
-        to: '/dashboard/organization/settings',
-        parent: { title: 'Organization', to: '/dashboard/organization/users' },
-      },
+      parent: '/dashboard/organization/settings',
     });
 
     const steps = await screen.findAllByRole('listitem');

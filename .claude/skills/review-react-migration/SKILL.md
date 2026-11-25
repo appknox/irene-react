@@ -52,7 +52,7 @@ redundant.
 
 ## 4. Data
 
-- [ ] Query options and cache keys live in the feature's `queries/`, as a `queryOptions()` factory plus a keys object whose entries build on `all()`. No inline `queryKey` array in a component.
+- [ ] Query options and cache keys live in `src/queries/<area>.ts`, or in the feature's own `queries/` where it has one, as a `queryOptions()` factory plus a keys object whose entries build on `all()`. No inline `queryKey` array in a component.
 - [ ] A mutation invalidates the narrowest key that is now wrong. Invalidating a parent reloads tables the user never touched, which reads to them as a page reload.
 - [ ] A toggle or counter that the response already confirms is written into the cache rather than refetched.
 - [ ] A table shows its skeleton on `isPending || isPlaceholderData`, and the skeleton mirrors the real columns so widths do not jump when data lands.

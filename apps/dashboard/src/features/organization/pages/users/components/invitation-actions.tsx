@@ -1,8 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import type { ApiOrganizationInvitation } from '@irene/api/services/organization';
-import { OrganizationService } from '@irene/api/services/organization';
+import {
+  OrganizationService,
+  type ApiOrganizationInvitation,
+} from '@irene/api/services/organization';
+
 import { getApiErrorMessage, unlessRateLimited } from '@irene/api/utils/errors';
 import { akMT } from '@irene/translations/intl';
 import { AkConfirmBox } from '@irene/ui/ak-confirm-box';
@@ -98,6 +101,16 @@ export function DeleteInvitation({
       await queryClient.invalidateQueries({
         queryKey: organizationKeys.invitationsList(selected?.id),
       });
+
+      /*
+        An invitation into a team is also listed in that team's own drawer, under
+        a key of its own, so the list there is sent round again.
+      */
+      if (invitation.team !== null) {
+        await queryClient.invalidateQueries({
+          queryKey: organizationKeys.teamRecords(selected?.id, invitation.team, 'invitations'),
+        });
+      }
     },
 
     onError: unlessRateLimited((error) => {

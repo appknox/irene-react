@@ -1,4 +1,4 @@
-import { Link, Outlet, useMatchRoute, useRouterState } from '@tanstack/react-router';
+import { Link, Outlet, useMatchRoute, useRouter, useRouterState } from '@tanstack/react-router';
 
 import { organizationStore } from '@irene/api/stores/organization';
 import { akMT } from '@irene/translations/intl';
@@ -10,8 +10,8 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { useOrganization } from '@/hooks/use-organization';
 import { useServerConfiguration } from '@/hooks/use-server-configuration';
 
-import { ORGANIZATION_SETTINGS_TABS } from './settings-tabs';
 import { OrganizationNameHeader } from './organization-name-header';
+import { ORGANIZATION_SETTINGS_TABS } from './settings-tabs';
 
 /** One tab of the organization's settings. */
 interface SettingsTab {
@@ -35,7 +35,16 @@ export function OrganizationSettingsWrapper() {
   const { selected, me } = useOrganization();
   const { isEnterprise } = useServerConfiguration();
   const matchRoute = useMatchRoute();
+  const router = useRouter();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+
+  /*
+    Embedded in an Ember route, this screen's router holds only the tabs that
+    have been migrated. A tab it has no route for is still Ember's, so it is an
+    ordinary link that loads that document rather than one this router follows.
+  */
+  const isOwnTab = (to: string) =>
+    Boolean(router.routesByPath[to as keyof typeof router.routesByPath]);
 
   const isOwner = Boolean(me?.is_owner);
   const administersOrOwns = isOwner || Boolean(me?.is_admin);
@@ -100,7 +109,11 @@ export function OrganizationSettingsWrapper() {
           <AkTabsList variant="shadow" className="sticky top-14 z-10 bg-background-subtle">
             {tabs.map((tab) => (
               <AkTabsTrigger key={tab.to} value={tab.to} asChild>
-                <Link to={tab.to}>{tab.label}</Link>
+                {isOwnTab(tab.to) ? (
+                  <Link to={tab.to}>{tab.label}</Link>
+                ) : (
+                  <a href={tab.to}>{tab.label}</a>
+                )}
               </AkTabsTrigger>
             ))}
           </AkTabsList>

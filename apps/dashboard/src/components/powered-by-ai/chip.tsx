@@ -29,7 +29,7 @@ export function PoweredByAiChip({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.25 rounded-sm border px-1.5 py-1 whitespace-nowrap',
+        'inline-flex items-center gap-1.5 rounded-xs border px-1.5 py-1 whitespace-nowrap',
         variant === 'filled'
           ? 'border-ai bg-ai text-ai-foreground'
           : 'border-ai bg-transparent text-ai',
@@ -40,7 +40,8 @@ export function PoweredByAiChip({
     >
       <AkIcon name="material-symbols:network-intel-node" className="size-4" />
 
-      <AkTypography tag="span" variant="body2" color="inherit">
+      {/* irene writes the chip at 0.857em of its own size, which is 12px here. */}
+      <AkTypography tag="span" variant="body2" color="inherit" className="text-sm">
         <AkMessageTranslate id="poweredByAi" />
       </AkTypography>
     </span>

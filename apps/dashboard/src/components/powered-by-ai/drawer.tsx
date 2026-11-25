@@ -12,6 +12,7 @@ import {
 import { akMT } from '@irene/translations/intl';
 import { AkButton } from '@irene/ui/ak-button';
 import { AkTypography } from '@irene/ui/ak-typography';
+import { cn } from '@irene/ui/cn';
 
 import { PoweredByAiChip } from './chip';
 
@@ -85,7 +86,11 @@ export function PoweredByAiDrawer({
           <AkButton
             variant="text"
             size="xs"
-            className="h-auto p-0 no-underline hover:no-underline focus-visible:no-underline"
+            className="
+              h-auto self-start p-0 no-underline
+              hover:no-underline
+              focus-visible:no-underline
+            "
             aria-label={akMT('aiPoweredFeatures')}
             data-test-powered-by-ai-trigger
           >
@@ -99,26 +104,28 @@ export function PoweredByAiDrawer({
 
         <AkDrawerBody noGutter className="flex flex-col">
           <div
-            className="
-              my-4.25 mx-5.5 flex w-160 flex-col items-start gap-2 border border-border p-5
-            "
+            className="my-4.25 mx-5.5 flex w-160 flex-col items-start border border-border p-5"
             data-test-powered-by-ai-drawer-panel
           >
             <PoweredByAiChip variant={variant} />
 
             {sections.map((section) => (
               <Fragment key={section.title}>
-                <AkTypography fontWeight="bold" className="mt-2">
+                {/* irene sets each title 1em from what is above it, and half that from its body. */}
+                <AkTypography fontWeight="bold" className="mt-3.5 mb-1.75">
                   {section.title}
                 </AkTypography>
 
                 {section.body && <AkTypography variant="body2">{section.body}</AkTypography>}
 
                 {section.points && (
-                  <ul className="list-disc pl-4.5" data-test-powered-by-ai-drawer-points>
+                  <ul
+                    className={cn('list-disc pl-3.5', section.body && 'mt-1.75')}
+                    data-test-powered-by-ai-drawer-points
+                  >
                     {section.points.map((point) => (
-                      <li key={point} className="mb-1">
-                        <AkTypography variant="body2">{point}</AkTypography>
+                      <li key={point} className="mb-1.75">
+                        {point}
                       </li>
                     ))}
                   </ul>
@@ -129,7 +136,7 @@ export function PoweredByAiDrawer({
         </AkDrawerBody>
 
         {action && (
-          <AkDrawerFooter className="items-center gap-2.5 py-2 pl-5">
+          <AkDrawerFooter className="items-center gap-1.75 py-3.5 pl-8.75">
             <AkButton
               loading={action.isWorking}
               onClick={action.onConfirm}

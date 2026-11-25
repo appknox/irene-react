@@ -20,7 +20,13 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute('/_authenticated/dashboard/organization/users')({
-  staticData: { pageTitle: () => akMT('users') },
+  staticData: {
+    pageTitle: () => akMT('users'),
+
+    /* The root of the organization's trail: irene marks this crumb as the one above which
+       nothing is drawn, so it names no parent. */
+    breadcrumb: () => ({ title: akMT('organization') }),
+  },
   validateSearch: searchSchema,
   component: OrganizationUsersPage,
 });

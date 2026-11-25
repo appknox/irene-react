@@ -5,15 +5,18 @@ import type { ApiPageEnvelope } from '@irene/api/utils/pagination';
 import type {
   ApiOrganization,
   ApiOrganizationAiFeatureSettings,
+  ApiOrganizationEmailDomain,
+  ApiOrganizationInvitation,
   ApiOrganizationMe,
   ApiOrganizationMembership,
-  ApiOrganizationInvitation,
   ApiOrganizationNamespace,
-  ApiOrganizationTeam,
+  ApiOrganizationPreference,
   ApiOrganizationProject,
+  ApiOrganizationTeam,
   ApiOrganizationTeamMember,
   ApiOrganizationTeamProject,
   ApiOrganizationUser,
+  ApiReportPreference,
   ApiStoreknoxOrganization,
 } from '@irene/api/services/organization';
 
@@ -131,10 +134,7 @@ export default class OrganizationService {
    * @param name - What to call it.
    * @returns The team as created.
    */
-  public static readonly createOrganizationTeam = (
-    organizationId: number | string,
-    name: string
-  ) =>
+  public static readonly createOrganizationTeam = (organizationId: number | string, name: string) =>
     apiRequest.post<ApiOrganizationTeam>(OrganizationEndpoints.teams(organizationId), { name });
 
   /**
@@ -146,10 +146,8 @@ export default class OrganizationService {
    * @param organizationId - The organization to invite them into.
    * @param email - Where to send the invitation.
    */
-  public static readonly inviteToOrganization = (
-    organizationId: number | string,
-    email: string
-  ) => apiRequest.post(OrganizationEndpoints.invitations(organizationId), { email });
+  public static readonly inviteToOrganization = (organizationId: number | string, email: string) =>
+    apiRequest.post(OrganizationEndpoints.invitations(organizationId), { email });
 
   /**
    * Fetches an organization's teams, a page at a time.
@@ -205,7 +203,6 @@ export default class OrganizationService {
     organizationId: number | string,
     teamId: number | string
   ) => apiRequest.get<ApiOrganizationTeam>(OrganizationEndpoints.team(organizationId, teamId));
-
 
   /**
    * Fetches the people in one team, a page at a time.
@@ -525,8 +522,7 @@ export default class OrganizationService {
   public static readonly getOrganizationUser = (
     organizationId: number | string,
     userId: number | string
-  ) =>
-    apiRequest.get<ApiOrganizationUser>(OrganizationEndpoints.user(organizationId, userId));
+  ) => apiRequest.get<ApiOrganizationUser>(OrganizationEndpoints.user(organizationId, userId));
 
   /**
    * Activates or deactivates one member of an organization.
@@ -656,4 +652,100 @@ export default class OrganizationService {
 
     return transformPaginatedResponse(page).items[0] ?? null;
   };
+  /**
+   * Turns members' override requests on or off.
+   *
+   * @param organizationId - Whose feature to set.
+   * @param isEnabled - Whether members may ask to override an analysis.
+   */
+  public static readonly setMemberOverrideRequestFeature = (
+    organizationId: number | string,
+    isEnabled: boolean
+  ) =>
+    apiRequest.patch(OrganizationEndpoints.memberOverrideRequestFeature(organizationId), {
+      member_override_request: isEnabled,
+    });
+
+  /**
+   * Makes the second factor mandatory for everyone in an organization, or optional again.
+   *
+   * @param organizationId - Whose mandate to set.
+   * @param isMandatory - Whether every account must carry a second factor.
+   * @returns The organization as it now stands.
+   */
+  public static readonly setMandatoryMfa = (
+    organizationId: number | string,
+    isMandatory: boolean
+  ) =>
+    apiRequest.put<ApiOrganization>(OrganizationEndpoints.detail(organizationId), {
+      mandatory_mfa: isMandatory,
+    });
+
+  /**
+   * Reads which regulations an organization's reports carry.
+   *
+   * @param organizationId - Whose preferences to read.
+   * @returns The preferences.
+   */
+  public static readonly getOrganizationPreference = (organizationId: number | string) =>
+    apiRequest.get<ApiOrganizationPreference>(OrganizationEndpoints.preference(organizationId));
+
+  /**
+   * Writes which regulations the reports carry.
+   *
+   * The endpoint takes the set whole rather than one regulation at a time, so a
+   * caller sends what the others are alongside the one it changed.
+   *
+   * @param organizationId - Whose preferences to write.
+   * @param reportPreference - Every regulation, and whether reports carry it.
+   * @returns The preferences as they now stand.
+   */
+  public static readonly setOrganizationReportPreference = (
+    organizationId: number | string,
+    reportPreference: ApiReportPreference
+  ) =>
+    apiRequest.put<ApiOrganizationPreference>(OrganizationEndpoints.preference(organizationId), {
+      report_preference: reportPreference,
+    });
+
+  /**
+   * Reads the email domains an organization restricts its accounts to.
+   *
+   * @param organizationId - Whose domains to read.
+   * @returns The domains, in the order the endpoint holds them.
+   */
+  public static readonly getOrganizationEmailDomains = async (organizationId: number | string) => {
+    const page = await apiRequest.get<ApiPageEnvelope<ApiOrganizationEmailDomain>>(
+      OrganizationEndpoints.emailDomains(organizationId)
+    );
+
+    return transformPaginatedResponse(page);
+  };
+
+  /**
+   * Adds an email domain.
+   *
+   * @param organizationId - Which organization to add it to.
+   * @param domainName - The domain, such as example.com.
+   * @returns The domain as it was recorded.
+   */
+  public static readonly addOrganizationEmailDomain = (
+    organizationId: number | string,
+    domainName: string
+  ) =>
+    apiRequest.post<ApiOrganizationEmailDomain>(
+      OrganizationEndpoints.emailDomains(organizationId),
+      { domain_name: domainName }
+    );
+
+  /**
+   * Removes an email domain.
+   *
+   * @param organizationId - Which organization to remove it from.
+   * @param domainId - The domain to remove.
+   */
+  public static readonly deleteOrganizationEmailDomain = (
+    organizationId: number | string,
+    domainId: number | string
+  ) => apiRequest.delete(OrganizationEndpoints.emailDomain(organizationId, domainId));
 }

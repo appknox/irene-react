@@ -1,4 +1,4 @@
-import { createElement, Suspense } from 'react';
+import { createElement, Suspense, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
 import { akNotify } from '@irene/ui/notify';
@@ -78,7 +78,7 @@ export function mountIreneComponent(
   options: ComponentMountOptions
 ): MountedComponent {
   const Page = resolvePage(options.name);
-  const Skeleton = findPageSkeleton(options.name) ?? PageSkeleton;
+  const ownSkeleton = findPageSkeleton(options.name);
 
   applyEmbedConfig(options.config);
   linkStylesheet(options.version);
@@ -87,9 +87,19 @@ export function mountIreneComponent(
 
   const root: Root = createRoot(element);
 
-  /* Given `onReady`, the host keeps its placeholder up, so Suspense is handed nothing to draw. */
+  /*
+    A page with a placeholder of its own draws the whole wait, so Suspense shows it. Otherwise
+    `onReady` means the host is keeping its own up, and Suspense is handed nothing to draw.
+  */
   const { onReady } = options;
-  const fallback = onReady ? null : createElement(Skeleton);
+
+  let fallback: ReactNode = null;
+
+  if (ownSkeleton) {
+    fallback = createElement(ownSkeleton);
+  } else if (!onReady) {
+    fallback = createElement(PageSkeleton);
+  }
 
   const draw = (props?: Record<string, unknown>) => {
     const page = createElement(Page, props);

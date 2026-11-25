@@ -21,11 +21,7 @@ export const OrganizationEndpoints = {
     `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/teams/${encodeURIComponent(teamId)}/members` as const,
 
   /** One person's place in a team, which is added to and taken out of it here. */
-  teamMember: (
-    organizationId: number | string,
-    teamId: number | string,
-    userId: number | string
-  ) =>
+  teamMember: (organizationId: number | string, teamId: number | string, userId: number | string) =>
     `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/teams/${encodeURIComponent(teamId)}/members/${encodeURIComponent(userId)}` as const,
 
   /** The projects one team works on, a page at a time. */
@@ -91,6 +87,22 @@ export const OrganizationEndpoints = {
   /** Which of the organization's AI features are switched on, read and written here. */
   aiFeatures: (organizationId: number | string) =>
     `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/ai_features` as const,
+
+  /** Whether members may ask to override an analysis, which an owner turns here. */
+  memberOverrideRequestFeature: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/member_override_request_feature` as const,
+
+  /** Which regulations an organization's reports carry, read and written whole. */
+  preference: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/preference` as const,
+
+  /** The email domains an organization restricts its accounts to. */
+  emailDomains: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/email_domains` as const,
+
+  /** One of those domains, which is removed here. */
+  emailDomain: (organizationId: number | string, domainId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/email_domains/${encodeURIComponent(domainId)}` as const,
 
   /** The StoreKnox organization, which not every deployment has. */
   storeknoxOrganization: () => `${API_NAMESPACES.v2}/sk_organization` as const,

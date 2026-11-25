@@ -197,3 +197,26 @@ describe('the standing of the signed-in account', () => {
     expect(organization().isMember()).toBe(true);
   });
 });
+
+describe('setFeature', () => {
+  it("writes one of the organization's features back, leaving the others alone", () => {
+    const organization = buildOrganization();
+
+    organization.features = { ...organization.features, member_override_request: false, sso: true };
+
+    organizationStore.getState().select(organization, buildOrganizationMe());
+    organizationStore.getState().setFeature('member_override_request', true);
+
+    expect(organizationStore.getState().features()).toMatchObject({
+      member_override_request: true,
+      sso: true,
+    });
+  });
+
+  it('writes nothing where no organization is selected', () => {
+    organizationStore.getState().clear();
+    organizationStore.getState().setFeature('member_override_request', true);
+
+    expect(organizationStore.getState().selected).toBeNull();
+  });
+});

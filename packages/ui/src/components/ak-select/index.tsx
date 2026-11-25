@@ -57,8 +57,9 @@ function AkSelectTrigger({
 function AkSelectContent({
   className,
   children,
-  position = 'item-aligned',
-  align = 'center',
+  position = 'popper',
+  align = 'start',
+  sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
   return (
@@ -86,15 +87,13 @@ function AkSelectContent({
         )}
         position={position}
         align={align}
+        sideOffset={sideOffset}
         {...props}
       >
         <AkSelectScrollUpButton />
 
         <SelectPrimitive.Viewport
-          className={cn(
-            'p-1',
-            position === 'popper' && 'h-(--radix-select-trigger-height) w-full scroll-my-1'
-          )}
+          className={cn('p-1', position === 'popper' && 'w-full scroll-my-1')}
         >
           {children}
         </SelectPrimitive.Viewport>

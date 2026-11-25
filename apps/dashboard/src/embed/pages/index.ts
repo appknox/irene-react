@@ -1,4 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
+import { ServiceAccountScreenSkeleton } from '@/features/organization/pages/service-account/components/screen-skeleton';
 
 /** What a page rendered inside a host may be handed. */
 export type EmbeddablePage = LazyExoticComponent<ComponentType<Record<string, unknown>>>;
@@ -17,6 +18,32 @@ export const EMBEDDABLE_PAGES = {
   Organization: lazy(async () => ({
     default: (await import('./organization')).Organization,
   })),
+
+  /*
+    The settings screen, built as the organization screen beside it is: its own
+    router over its own tabs. It is mounted on the Ember route once every tab
+    is this app's; until then the two panes below are mounted in the Ember
+    templates that hold them, inside Ember's own chrome.
+  */
+  OrganizationSettings: lazy(async () => ({
+    default: (await import('./organization-settings')).OrganizationSettings,
+  })),
+
+  OrganizationIntegrations: lazy(async () => ({
+    default: (await import('@/features/organization')).OrganizationIntegrationsPage,
+  })),
+
+  OrganizationAiPoweredFeatures: lazy(async () => ({
+    default: (await import('@/features/organization')).OrganizationAiPoweredFeaturesPage,
+  })),
+
+  /*
+    The service accounts are one screen over three URLs, so the host mounts it
+    on each of them and the screen itself decides which one is open.
+  */
+  OrganizationServiceAccount: lazy(async () => ({
+    default: (await import('./service-account')).ServiceAccount,
+  })),
 } satisfies Record<string, EmbeddablePage>;
 
 /** The names a host may ask for. Read from the registry, so adding a page adds a name. */
@@ -26,10 +53,17 @@ export type EmbeddablePageName = keyof typeof EMBEDDABLE_PAGES;
   What stands in for a page while its chunk is fetched.
 
   A page that draws its own frame registers a placeholder shaped like that
-  frame, so the chrome is not withheld until the chunk lands. Anything left out
-  here falls back to the generic panel placeholder.
+  frame, so the chrome is not withheld until the chunk lands. Registering one
+  says this page draws the whole wait itself, so its host should hold no
+  placeholder of its own; anything left out here leaves that to the host, and
+  falls back to the generic panel placeholder where the host holds none.
+
+  Imported rather than lazy: a placeholder that had to be fetched could not
+  stand in for a fetch.
 */
-const PAGE_SKELETONS: Partial<Record<EmbeddablePageName, ComponentType>> = {};
+const PAGE_SKELETONS: Partial<Record<EmbeddablePageName, ComponentType>> = {
+  OrganizationServiceAccount: ServiceAccountScreenSkeleton,
+};
 
 /**
  * Finds the placeholder registered for a page.

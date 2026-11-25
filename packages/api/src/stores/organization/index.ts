@@ -58,6 +58,7 @@ interface OrganizationStore {
   selected: ApiOrganization | null;
   me: ApiOrganizationMe | null;
   select: (organization: ApiOrganization, me: ApiOrganizationMe) => void;
+  setFeature: (feature: keyof ApiOrganizationFeatures, isEnabled: boolean) => void;
   clear: () => void;
   selectedId: () => string;
 
@@ -109,6 +110,19 @@ const NO_AI_FEATURES: ApiOrganizationAiFeatures = {
 export const organizationStore = createStore<OrganizationStore>((set, get) => ({
   ...NO_ORGANIZATION_SELECTED,
   select: (organization, me) => set({ selected: organization, me }),
+
+  /*
+    A screen that turns one of the organization's own features writes it back
+    here, since the navigation and the screens around it read entitlements from
+    this store rather than from the request that changed one.
+  */
+  setFeature: (feature, isEnabled) =>
+    set(({ selected }) =>
+      selected
+        ? { selected: { ...selected, features: { ...selected.features, [feature]: isEnabled } } }
+        : {}
+    ),
+
   clear: () => set(NO_ORGANIZATION_SELECTED),
 
   features: () => get().selected?.features ?? NO_FEATURES,

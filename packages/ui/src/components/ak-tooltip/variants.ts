@@ -3,8 +3,11 @@ import { cva } from 'class-variance-authority';
 /** A label that appears beside whatever it describes, on hover or focus. */
 export const akTooltipVariants = cva(
   [
-    'z-50 w-fit origin-(--radix-tooltip-content-transform-origin) rounded-sm px-2.25 py-1.25',
-    'text-sm text-balance',
+    `
+      z-50 w-fit max-w-100 origin-(--radix-tooltip-content-transform-origin) rounded-sm px-2.25
+      py-1.25
+    `,
+    'text-sm',
     'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
     'data-[state=closed]:duration-100 data-[state=closed]:ease-in',
     'data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0',
@@ -19,7 +22,7 @@ export const akTooltipVariants = cva(
   {
     variants: {
       color: {
-        light: 'bg-background text-foreground shadow-3',
+        light: 'border border-border bg-background text-foreground shadow-3',
         dark: 'bg-background-inverse text-white',
       },
     },

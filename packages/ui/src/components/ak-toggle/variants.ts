@@ -6,6 +6,9 @@ import { cva } from 'class-variance-authority';
 
   Each size is twice as wide as it is tall, so the thumb — as tall as the track
   leaves it — is round, and the distance it travels is the track's own height.
+
+  The sizes come from irene's own track height of 1.6875em on a 14px root,
+  scaled by 0.7, 1 and 1.3: 17, 24 and 31px, each in a 0.4em margin of its own.
 */
 export const akToggleVariants = cva(
   [
@@ -18,9 +21,9 @@ export const akToggleVariants = cva(
     variants: {
       /** irene's three, from its own track height of 1.6875em. */
       size: {
-        small: 'h-4.75 w-9.5 p-0.5',
-        default: 'h-6.75 w-13.5 p-0.75',
-        large: 'h-8.75 w-17.5 p-1',
+        small: 'm-1.5 h-4.25 w-8.5 p-0.5',
+        default: 'm-1.5 h-6 w-12 p-0.5',
+        large: 'm-1.5 h-7.75 w-15.5 p-0.75',
       },
     },
 
@@ -39,9 +42,9 @@ export const akToggleThumbVariants = cva(
   {
     variants: {
       size: {
-        small: 'data-[state=checked]:translate-x-4.75',
-        default: 'data-[state=checked]:translate-x-6.75',
-        large: 'data-[state=checked]:translate-x-8.75',
+        small: 'data-[state=checked]:translate-x-4.25',
+        default: 'data-[state=checked]:translate-x-6',
+        large: 'data-[state=checked]:translate-x-7.75',
       },
     },
 

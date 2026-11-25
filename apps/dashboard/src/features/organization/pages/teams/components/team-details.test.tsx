@@ -13,8 +13,8 @@ import { AkToaster } from '@irene/ui/ak-toaster';
 
 import {
   buildOrganization,
-  buildOrganizationMe,
   buildOrganizationInvitation,
+  buildOrganizationMe,
   buildOrganizationProject,
   buildOrganizationTeam,
   buildOrganizationTeamMember,
@@ -23,6 +23,7 @@ import {
   buildProject,
   buildSession,
 } from '@tests/factories';
+
 import { renderAtAddress } from '@tests/render';
 import { server } from '@tests/server';
 
@@ -82,7 +83,8 @@ const withTeamRecords = ({
 
 /** Opens the drawer the way a user does: by pressing the team's card. */
 const openTeam = async (user: ReturnType<typeof userEvent.setup>) => {
-  renderAtAddress(<Fragment>
+  renderAtAddress(
+    <Fragment>
       <OrganizationTeamsPage />
 
       <AkToaster />
@@ -203,11 +205,14 @@ describe('the team drawer', () => {
         })
       ),
 
-      http.put('*/api/organizations/:organizationId/teams/:teamId/members/:userId', ({ params }) => {
-        added.push(String(params.userId));
+      http.put(
+        '*/api/organizations/:organizationId/teams/:teamId/members/:userId',
+        ({ params }) => {
+          added.push(String(params.userId));
 
-        return HttpResponse.json({});
-      })
+          return HttpResponse.json({});
+        }
+      )
     );
 
     await openTeam(user);
@@ -385,7 +390,10 @@ describe('the team drawer', () => {
     await user.click(await findByTestAttribute('team-delete'));
 
     await user.type(await findByTestAttribute('team-delete-prompt'), 'Platform');
-    await user.click(within(await findByTestAttribute('confirm-box')).getByText(akMT('deleteTeam')));
+
+    await user.click(
+      within(await findByTestAttribute('confirm-box')).getByText(akMT('deleteTeam'))
+    );
 
     expect(await screen.findByText('Team is in use')).toBeInTheDocument();
   });
@@ -402,14 +410,47 @@ describe('the team drawer', () => {
     expect(await screen.findByText(akMT('noInvitations'))).toBeInTheDocument();
   });
 
+  it('lists the invitations again once one is withdrawn', async () => {
+    const user = userEvent.setup();
+    const invitation = buildOrganizationInvitation({ team: TEAM.id, email: 'ali@example.test' });
+
+    let listedInvitations = [invitation];
+
+    withTeamRecords({ invitations: listedInvitations });
+
+    server.use(
+      http.get(`*/${OrganizationEndpoints.teamInvitations('*', TEAM.id)}`, () =>
+        HttpResponse.json({
+          count: listedInvitations.length,
+          next: null,
+          previous: null,
+          results: listedInvitations,
+        })
+      ),
+
+      http.delete(`*/${OrganizationEndpoints.invitation('*', invitation.id)}`, () => {
+        listedInvitations = [];
+
+        return new HttpResponse(null, { status: HTTP_STATUS_CODES.NO_CONTENT });
+      })
+    );
+
+    await openTeam(user);
+
+    expect(await screen.findByText(invitation.email)).toBeInTheDocument();
+
+    await user.click(await findByTestAttribute('invitation-delete'));
+    await user.click(within(await findByTestAttribute('confirm-box')).getByText(akMT('delete')));
+
+    expect(await screen.findByText(akMT('noInvitations'))).toBeInTheDocument();
+  });
+
   it('closes on the control in its own bar', async () => {
     const user = userEvent.setup();
 
     await openTeam(user);
     await user.click(await screen.findByLabelText(akMT('close')));
 
-    await waitFor(() =>
-      expect(screen.queryByText(akMT('teamDetails'))).not.toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.queryByText(akMT('teamDetails'))).not.toBeInTheDocument());
   });
 });

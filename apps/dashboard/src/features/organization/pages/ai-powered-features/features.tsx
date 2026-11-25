@@ -1,7 +1,6 @@
+import { akMT } from '@irene/translations/intl';
 import type { ApiOrganizationAiFeatureSettings } from '@irene/api/services/organization';
 import type { OrganizationUpsellStatus } from '@irene/api/stores/organization';
-import { akMT } from '@irene/translations/intl';
-
 import type { PoweredByAiSection } from '@/components/powered-by-ai';
 
 /** Which AI feature a row is about, named as the settings name it. */
@@ -77,7 +76,7 @@ const privacySections = (): PoweredByAiSection[] => [
  * @returns The rows to draw.
  */
 export function buildAiFeatures(
-  entitlements: { reporting: boolean; pii: boolean; knoxiq: boolean },
+  entitlements: { reporting: boolean; pii: boolean },
   withheld: OrganizationUpsellStatus
 ): AiFeature[] {
   const features: Array<AiFeature | false> = [
@@ -95,16 +94,6 @@ export function buildAiFeatures(
       description: akMT('privacyModule.piiDesc'),
       isEntitled: entitlements.pii,
       sections: privacySections(),
-    },
-
-    !withheld.aiKnoxiq && {
-      key: 'auto_execute_knoxiq_on_cicd_upload' as const,
-      header: akMT('knoxIq.title'),
-      description: akMT('knoxIq.orgSettingsDesc'),
-      isEntitled: entitlements.knoxiq,
-
-      /* irene explains nothing here, so this one is turned without being asked about. */
-      sections: null,
     },
   ];
 

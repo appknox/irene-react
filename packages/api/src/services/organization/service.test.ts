@@ -5,8 +5,8 @@ import { HTTP_STATUS_CODES } from '@irene/constants';
 
 import {
   buildOrganization,
-  buildOrganizationMe,
   buildOrganizationInvitation,
+  buildOrganizationMe,
   buildOrganizationMembership,
   buildOrganizationNamespace,
   buildOrganizationProject,
@@ -206,7 +206,9 @@ describe('OrganizationService.getOrganizationMembers', () => {
   it('returns the page as items with the count across every page', async () => {
     const membership = buildOrganizationMembership({ role_display: 'Admin' });
 
-    server.use(http.get(membersUrl, () => HttpResponse.json(buildDrfPage([membership], { count: 8 }))));
+    server.use(
+      http.get(membersUrl, () => HttpResponse.json(buildDrfPage([membership], { count: 8 })))
+    );
 
     await expect(
       OrganizationService.getOrganizationMembers(ORGANIZATION_ID, { limit: 10, offset: 0 })
@@ -341,11 +343,14 @@ describe('OrganizationService.inviteToOrganization', () => {
     let invited: string | undefined;
 
     server.use(
-      http.post(buildAPITestURL(OrganizationEndpoints.invitations(ORGANIZATION_ID)), async ({ request }) => {
-        invited = ((await request.json()) as { email: string }).email;
+      http.post(
+        buildAPITestURL(OrganizationEndpoints.invitations(ORGANIZATION_ID)),
+        async ({ request }) => {
+          invited = ((await request.json()) as { email: string }).email;
 
-        return HttpResponse.json({});
-      })
+          return HttpResponse.json({});
+        }
+      )
     );
 
     await OrganizationService.inviteToOrganization(ORGANIZATION_ID, 'a@b.test');
@@ -359,11 +364,14 @@ describe('OrganizationService.setOrganizationMemberRole', () => {
     let sentRole: number | undefined;
 
     server.use(
-      http.put(buildAPITestURL(OrganizationEndpoints.member(ORGANIZATION_ID, USER_ID)), async ({ request }) => {
-        sentRole = ((await request.json()) as { role: number }).role;
+      http.put(
+        buildAPITestURL(OrganizationEndpoints.member(ORGANIZATION_ID, USER_ID)),
+        async ({ request }) => {
+          sentRole = ((await request.json()) as { role: number }).role;
 
-        return HttpResponse.json(buildOrganizationMembership({ role: 2 }));
-      })
+          return HttpResponse.json(buildOrganizationMembership({ role: 2 }));
+        }
+      )
     );
 
     await OrganizationService.setOrganizationMemberRole(ORGANIZATION_ID, USER_ID, 2);
@@ -391,11 +399,14 @@ describe('OrganizationService.getOrganizationInvitations', () => {
     let params: URLSearchParams | undefined;
 
     server.use(
-      http.get(buildAPITestURL(OrganizationEndpoints.invitations(ORGANIZATION_ID)), ({ request }) => {
-        params = new URL(request.url).searchParams;
+      http.get(
+        buildAPITestURL(OrganizationEndpoints.invitations(ORGANIZATION_ID)),
+        ({ request }) => {
+          params = new URL(request.url).searchParams;
 
-        return HttpResponse.json(buildDrfPage([], { count: 0 }));
-      })
+          return HttpResponse.json(buildDrfPage([], { count: 0 }));
+        }
+      )
     );
 
     await OrganizationService.getOrganizationInvitations(ORGANIZATION_ID, { limit: 10, offset: 0 });
@@ -425,14 +436,11 @@ describe('OrganizationService.resendOrganizationInvitation', () => {
     let resent = false;
 
     server.use(
-      http.post(
-        buildAPITestURL(OrganizationEndpoints.resendInvitation(ORGANIZATION_ID, 7)),
-        () => {
-          resent = true;
+      http.post(buildAPITestURL(OrganizationEndpoints.resendInvitation(ORGANIZATION_ID, 7)), () => {
+        resent = true;
 
-          return HttpResponse.json({});
-        }
-      )
+        return HttpResponse.json({});
+      })
     );
 
     await OrganizationService.resendOrganizationInvitation(ORGANIZATION_ID, 7);
@@ -532,9 +540,8 @@ describe('OrganizationService team projects', () => {
     const project = buildOrganizationTeamProject({ write: true });
 
     server.use(
-      http.get(
-        buildAPITestURL(OrganizationEndpoints.teamProjects(ORGANIZATION_ID, TEAM_ID)),
-        () => HttpResponse.json(buildDrfPage([project]))
+      http.get(buildAPITestURL(OrganizationEndpoints.teamProjects(ORGANIZATION_ID, TEAM_ID)), () =>
+        HttpResponse.json(buildDrfPage([project]))
       )
     );
 
@@ -598,11 +605,7 @@ describe('OrganizationService team projects', () => {
       )
     );
 
-    await OrganizationService.removeOrganizationTeamProject(
-      ORGANIZATION_ID,
-      TEAM_ID,
-      PROJECT_ID
-    );
+    await OrganizationService.removeOrganizationTeamProject(ORGANIZATION_ID, TEAM_ID, PROJECT_ID);
 
     expect(removed).toBe(true);
   });
@@ -737,14 +740,11 @@ describe('OrganizationService candidates for a team', () => {
     let asked = new URLSearchParams();
 
     server.use(
-      http.get(
-        buildAPITestURL(OrganizationEndpoints.projects(ORGANIZATION_ID)),
-        ({ request }) => {
-          asked = new URL(request.url).searchParams;
+      http.get(buildAPITestURL(OrganizationEndpoints.projects(ORGANIZATION_ID)), ({ request }) => {
+        asked = new URL(request.url).searchParams;
 
-          return HttpResponse.json(buildDrfPage([project]));
-        }
-      )
+        return HttpResponse.json(buildDrfPage([project]));
+      })
     );
 
     await expect(
@@ -764,14 +764,11 @@ describe('OrganizationService candidates for a team', () => {
     let asked = new URLSearchParams();
 
     server.use(
-      http.get(
-        buildAPITestURL(OrganizationEndpoints.projects(ORGANIZATION_ID)),
-        ({ request }) => {
-          asked = new URL(request.url).searchParams;
+      http.get(buildAPITestURL(OrganizationEndpoints.projects(ORGANIZATION_ID)), ({ request }) => {
+        asked = new URL(request.url).searchParams;
 
-          return HttpResponse.json(buildDrfPage([]));
-        }
-      )
+        return HttpResponse.json(buildDrfPage([]));
+      })
     );
 
     await OrganizationService.getOrganizationProjects(ORGANIZATION_ID, { limit: 10, offset: 0 });
@@ -859,5 +856,159 @@ describe('OrganizationService.setOrganizationUserActive', () => {
     record.stop();
 
     expect(JSON.parse(String(record.latest()?.data))).toMatchObject({ is_active: true });
+  });
+});
+
+describe('OrganizationService.setMemberOverrideRequestFeature', () => {
+  it('sends whether members may ask to override an analysis', async () => {
+    let sent: unknown = null;
+
+    server.use(
+      http.patch(
+        buildAPITestURL(OrganizationEndpoints.memberOverrideRequestFeature(ORGANIZATION_ID)),
+        async ({ request }) => {
+          const body = (await request.json()) as Record<string, unknown>;
+
+          sent = body;
+
+          return HttpResponse.json(body);
+        }
+      )
+    );
+
+    await OrganizationService.setMemberOverrideRequestFeature(ORGANIZATION_ID, true);
+
+    expect(sent).toStrictEqual({ member_override_request: true });
+  });
+});
+
+describe('OrganizationService.setMandatoryMfa', () => {
+  it('sends the mandate and returns the organization as it now stands', async () => {
+    const organization = buildOrganization({ name: 'Acme' });
+
+    organization.mandatory_mfa = true;
+
+    server.use(
+      http.put(
+        buildAPITestURL(OrganizationEndpoints.detail(ORGANIZATION_ID)),
+        async ({ request }) => {
+          expect(await request.json()).toStrictEqual({ mandatory_mfa: true });
+
+          return HttpResponse.json(organization);
+        }
+      )
+    );
+
+    await expect(OrganizationService.setMandatoryMfa(ORGANIZATION_ID, true)).resolves.toMatchObject(
+      { mandatory_mfa: true }
+    );
+  });
+});
+
+describe("an organization's report preferences", () => {
+  const preference = {
+    id: 1,
+    report_preference: {
+      show_pcidss: true,
+      show_hipaa: false,
+      show_gdpr: false,
+      show_nist: false,
+      show_sama: false,
+      show_dora: false,
+      show_eucra: false,
+      show_popia: false,
+    },
+  };
+
+  it('reads which regulations the reports carry', async () => {
+    server.use(
+      http.get(buildAPITestURL(OrganizationEndpoints.preference(ORGANIZATION_ID)), () =>
+        HttpResponse.json(preference)
+      )
+    );
+
+    await expect(
+      OrganizationService.getOrganizationPreference(ORGANIZATION_ID)
+    ).resolves.toStrictEqual(preference);
+  });
+
+  it('writes the set whole, since the endpoint takes no single regulation', async () => {
+    let sent: unknown = null;
+
+    server.use(
+      http.put(
+        buildAPITestURL(OrganizationEndpoints.preference(ORGANIZATION_ID)),
+        async ({ request }) => {
+          const body = (await request.json()) as Record<string, unknown>;
+
+          sent = body;
+
+          return HttpResponse.json(preference);
+        }
+      )
+    );
+
+    await OrganizationService.setOrganizationReportPreference(
+      ORGANIZATION_ID,
+      preference.report_preference
+    );
+
+    expect(sent).toStrictEqual({ report_preference: preference.report_preference });
+  });
+});
+
+describe("an organization's email domains", () => {
+  const domain = { id: 3, domain_name: 'example.com' };
+
+  it('returns the domains as items with a count', async () => {
+    server.use(
+      http.get(buildAPITestURL(OrganizationEndpoints.emailDomains(ORGANIZATION_ID)), () =>
+        HttpResponse.json(buildDrfPage([domain]))
+      )
+    );
+
+    await expect(
+      OrganizationService.getOrganizationEmailDomains(ORGANIZATION_ID)
+    ).resolves.toMatchObject({ items: [domain], count: 1 });
+  });
+
+  it('adds a domain under the name the endpoint expects', async () => {
+    let sent: unknown = null;
+
+    server.use(
+      http.post(
+        buildAPITestURL(OrganizationEndpoints.emailDomains(ORGANIZATION_ID)),
+        async ({ request }) => {
+          const body = (await request.json()) as Record<string, unknown>;
+
+          sent = body;
+
+          return HttpResponse.json(domain);
+        }
+      )
+    );
+
+    await OrganizationService.addOrganizationEmailDomain(ORGANIZATION_ID, 'example.com');
+
+    expect(sent).toStrictEqual({ domain_name: 'example.com' });
+  });
+
+  it('removes one domain', async () => {
+    let removed = false;
+
+    server.use(
+      http.delete(
+        buildAPITestURL(OrganizationEndpoints.emailDomain(ORGANIZATION_ID, domain.id)),
+        () => {
+          removed = true;
+
+          return new HttpResponse(null, { status: HTTP_STATUS_CODES.NO_CONTENT });
+        }
+      )
+    );
+
+    await OrganizationService.deleteOrganizationEmailDomain(ORGANIZATION_ID, domain.id);
+
+    expect(removed).toBe(true);
   });
 });

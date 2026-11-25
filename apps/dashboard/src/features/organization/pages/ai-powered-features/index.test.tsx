@@ -24,7 +24,7 @@ let saved: Record<string, boolean> | null = null;
 
 /** Puts the account in an organization entitled to the features named. */
 const inOrganizationWith = (
-  entitlements: { reporting?: boolean; pii?: boolean; knoxiq?: boolean },
+  entitlements: { reporting?: boolean; pii?: boolean },
   { hidesUpsell = false } = {}
 ) => {
   const organization = buildOrganization({ hide_upsell_features: hidesUpsell });
@@ -43,13 +43,10 @@ const inOrganizationWith = (
 };
 
 /** Answers with which features are switched on, and records what is written back. */
-const withSettings = (
-  settings: { reporting?: boolean; pii?: boolean; auto_execute_knoxiq_on_cicd_upload?: boolean } = {}
-) => {
+const withSettings = (settings: { reporting?: boolean; pii?: boolean } = {}) => {
   const current = {
     reporting: false,
     pii: false,
-    auto_execute_knoxiq_on_cicd_upload: false,
     ...settings,
   };
 
@@ -83,7 +80,7 @@ describe('the organization’s AI features', () => {
     saved = null;
     clearStoredSession();
     storeSession(buildSession());
-    inOrganizationWith({ reporting: true, pii: true, knoxiq: true });
+    inOrganizationWith({ reporting: true, pii: true });
     withSettings();
   });
 
@@ -92,8 +89,8 @@ describe('the organization’s AI features', () => {
 
     expect(await screen.findByText(akMT('reportModule.settingsHeader'))).toBeInTheDocument();
     expect(screen.getByText(akMT('privacyModule.piiLabel'))).toBeInTheDocument();
-    expect(screen.getByText(akMT('knoxIq.title'))).toBeInTheDocument();
-    expect(screen.getByText(akMT('knoxIq.orgSettingsDesc'))).toBeInTheDocument();
+    expect(screen.getByText(akMT('reportModule.settingsDesc'))).toBeInTheDocument();
+    expect(screen.getByText(akMT('privacyModule.piiDesc'))).toBeInTheDocument();
   });
 
   it('says which of them are on', async () => {
@@ -119,27 +116,7 @@ describe('the organization’s AI features', () => {
     renderTab();
 
     await waitFor(() =>
-      expect(document.querySelectorAll('[data-test-ai-feature-placeholder]')).toHaveLength(3)
-    );
-  });
-
-  /* irene asks nothing before turning this one: it explains nothing about data. */
-  it('turns KnoxIQ straight away, sending every feature with it', async () => {
-    const user = userEvent.setup();
-
-    withSettings({ reporting: true });
-
-    renderTab();
-    await screen.findByText(akMT('knoxIq.title'));
-
-    await user.click(toggleFor(akMT('knoxIq.title')));
-
-    await waitFor(() =>
-      expect(saved).toEqual({
-        reporting: true,
-        pii: false,
-        auto_execute_knoxiq_on_cicd_upload: true,
-      })
+      expect(document.querySelectorAll('[data-test-ai-feature-placeholder]')).toHaveLength(2)
     );
   });
 
@@ -193,9 +170,10 @@ describe('the organization’s AI features', () => {
     const user = userEvent.setup();
 
     renderTab();
-    await screen.findByText(akMT('knoxIq.title'));
+    await screen.findByText(akMT('reportModule.settingsHeader'));
 
-    await user.click(toggleFor(akMT('knoxIq.title')));
+    await user.click(toggleFor(akMT('reportModule.settingsHeader')));
+    await user.click(await screen.findByText(akMT('yesTurnOn')));
 
     expect(await screen.findByText(akMT('statusUpdatedSuccessfully'))).toBeInTheDocument();
   });
@@ -210,9 +188,10 @@ describe('the organization’s AI features', () => {
     );
 
     renderTab();
-    await screen.findByText(akMT('knoxIq.title'));
+    await screen.findByText(akMT('reportModule.settingsHeader'));
 
-    await user.click(toggleFor(akMT('knoxIq.title')));
+    await user.click(toggleFor(akMT('reportModule.settingsHeader')));
+    await user.click(await screen.findByText(akMT('yesTurnOn')));
 
     expect(await screen.findByText('Not permitted')).toBeInTheDocument();
   });
@@ -227,16 +206,17 @@ describe('the organization’s AI features', () => {
     );
 
     renderTab();
-    await screen.findByText(akMT('knoxIq.title'));
+    await screen.findByText(akMT('reportModule.settingsHeader'));
 
-    await user.click(toggleFor(akMT('knoxIq.title')));
+    await user.click(toggleFor(akMT('reportModule.settingsHeader')));
+    await user.click(await screen.findByText(akMT('yesTurnOn')));
 
     expect(await screen.findByText(akMT('pleaseTryAgain'))).toBeInTheDocument();
   });
 
   /* A feature the organization has not bought is shown, but cannot be turned. */
   it('closes the switch on a feature the organization is not entitled to', async () => {
-    inOrganizationWith({ reporting: false, pii: true, knoxiq: true });
+    inOrganizationWith({ reporting: false, pii: true });
 
     renderTab();
     await screen.findByText(akMT('reportModule.settingsHeader'));
@@ -246,7 +226,7 @@ describe('the organization’s AI features', () => {
   });
 
   it('leaves out a feature the organization is shown no upsell for', async () => {
-    inOrganizationWith({ reporting: false, pii: true, knoxiq: true }, { hidesUpsell: true });
+    inOrganizationWith({ reporting: false, pii: true }, { hidesUpsell: true });
 
     renderTab();
 

@@ -43,6 +43,6 @@ describe('AkToggle', () => {
   it('draws the size it is given', () => {
     render(<AkToggle aria-label="Mandatory MFA" size="small" />);
 
-    expect(screen.getByRole('switch')).toHaveClass('h-4.75', 'w-9.5');
+    expect(screen.getByRole('switch')).toHaveClass('h-4.25', 'w-8.5');
   });
 });

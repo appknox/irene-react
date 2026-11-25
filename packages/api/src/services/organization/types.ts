@@ -39,7 +39,6 @@ export interface ApiOrganizationAiFeatures {
 export interface ApiOrganizationAiFeatureSettings {
   reporting: boolean;
   pii: boolean;
-  auto_execute_knoxiq_on_cicd_upload: boolean;
 }
 
 /** All of the organization's properties. */
@@ -185,4 +184,28 @@ export interface ApiOrganizationNamespace {
   platform: number;
   approved_by: number | null;
   requested_by: number | null;
+}
+
+/** Which regulations an organization's reports carry, as the endpoint names them. */
+export interface ApiReportPreference {
+  show_pcidss: boolean;
+  show_hipaa: boolean;
+  show_gdpr: boolean;
+  show_nist: boolean;
+  show_sama: boolean;
+  show_dora: boolean;
+  show_eucra: boolean;
+  show_popia: boolean;
+}
+
+/** An organization's preferences, of which the reports' regulations are the only part read here. */
+export interface ApiOrganizationPreference {
+  id: number;
+  report_preference: ApiReportPreference;
+}
+
+/** One email domain an organization restricts its accounts to. */
+export interface ApiOrganizationEmailDomain {
+  id: number;
+  domain_name: string;
 }

@@ -22,12 +22,16 @@ replaced wholesale.
 | `app/utils/react-session.ts`               | Keeps one session across both apps |
 | `tests/unit/utils/react-session-test.js`   | Covers it                          |
 
-| Upstream file with a local change | The change                                                       |
-| --------------------------------- | ---------------------------------------------------------------- |
-| `app/authenticators/base.ts`      | Calls `syncReactSession` on authenticate, restore and invalidate |
-| `app/routes/application.ts`       | Calls `adoptReactSession` on boot                                |
-| `ember-cli-build.js`              | Excludes `assets/embed` from fingerprinting                      |
-| `config/environment.js`           | Carries this repo's product version, which upstream does not     |
+| Upstream file with a local change                                 | The change                                                       |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `app/authenticators/base.ts`                                      | Calls `syncReactSession` on authenticate, restore and invalidate |
+| `app/routes/application.ts`                                       | Calls `adoptReactSession` on boot                                |
+| `ember-cli-build.js`                                              | Excludes `assets/embed` from fingerprinting                      |
+| `config/environment.js`                                           | Carries this repo's product version, which upstream does not     |
+| `app/templates/authenticated/dashboard/organization.hbs`          | Mounts the React organization screen                             |
+| `app/templates/.../organization-settings/integrations.hbs`        | Mounts the React integrations pane                               |
+| `app/templates/.../organization-settings/ai-powered-features.hbs` | Mounts the React AI features pane                                |
+| `app/routes/.../organization-settings/integrations.ts`            | Drops the GitHub request the React pane makes itself             |
 
 ---
 
@@ -50,7 +54,11 @@ on it. Everything below that names a tag takes a commit just as well.
 
 ```
 for f in app/authenticators/base.ts app/routes/application.ts \
-         config/environment.js ember-cli-build.js; do
+         config/environment.js ember-cli-build.js \
+         app/templates/authenticated/dashboard/organization.hbs \
+         app/templates/authenticated/dashboard/organization-settings/integrations.hbs \
+         app/templates/authenticated/dashboard/organization-settings/ai-powered-features.hbs \
+         app/routes/authenticated/dashboard/organization-settings/integrations.ts; do
   git -C ../irene show "<current-tag>:$f" | diff - "apps/irene/$f" > "/tmp/irene-$(basename $f).patch"
 done
 ```
@@ -76,7 +84,9 @@ patch: upstream may have moved the code it hooks into.
 git -C ../irene show "<new-tag>:app/authenticators/base.ts" | diff - apps/irene/app/authenticators/base.ts
 ```
 
-Each of the four must show its change and nothing else.
+Each must show its change and nothing else. A mount is one `<ReactComponent>`
+around the Ember component it replaced, so a template upstream has rewritten
+needs the mount put back by hand rather than patched.
 
 ## 5. Check what the sync brought
 
