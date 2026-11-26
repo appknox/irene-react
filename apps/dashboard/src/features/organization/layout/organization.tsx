@@ -74,11 +74,11 @@ export function OrganizationLayout() {
             action={() =>
               isAdmin && (
                 <AkButton asChild variant="outlined" data-test-org-settings-link>
-                  <a href={ORGANIZATION_SETTINGS_TABS.settings}>
+                  <Link to={ORGANIZATION_SETTINGS_TABS.settings}>
                     <AkIcon name="material-symbols:settings" />
 
                     {akMT('organizationSettings')}
-                  </a>
+                  </Link>
                 </AkButton>
               )
             }

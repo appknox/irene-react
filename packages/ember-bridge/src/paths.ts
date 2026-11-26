@@ -34,7 +34,6 @@ export const EMBER_PATHS = {
   '/dashboard/notifications': '/dashboard/notifications',
   '/dashboard/offensive-security': '/dashboard/offensive-security',
   '/dashboard/oidc': '/dashboard/oidc',
-  '/dashboard/organization': '/dashboard/organization',
   '/dashboard/privacy-module': '/dashboard/privacy-module',
   '/dashboard/project': '/dashboard/project',
   '/dashboard/projects': '/dashboard/projects',

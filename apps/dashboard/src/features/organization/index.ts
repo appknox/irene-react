@@ -6,5 +6,6 @@ export { OrganizationNamespacesPage } from './pages/namespaces';
 export { OrganizationServiceAccountCreatePage } from './pages/service-account/create';
 export { OrganizationServiceAccountDetailsPage } from './pages/service-account/details';
 export { OrganizationServiceAccountPage } from './pages/service-account';
+export { OrganizationSettingsPage } from './pages/settings';
 export { OrganizationTeamsPage } from './pages/teams';
 export { OrganizationUsersPage } from './pages/users';

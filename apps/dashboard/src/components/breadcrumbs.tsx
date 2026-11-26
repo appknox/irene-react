@@ -1,7 +1,10 @@
 import { useMatches, useRouter, type AnyRouter } from '@tanstack/react-router';
 
+import { findEmberPath } from '@irene/ember-bridge/paths';
 import { AkBreadcrumbs, type AkBreadcrumb } from '@irene/ui/ak-breadcrumbs';
 import { AkLink } from '@irene/ui/ak-link';
+import { AkRouterLink } from '@irene/ui/ak-router-link';
+
 import type { RouterPageTitleContext } from '@/router';
 
 /**
@@ -22,6 +25,9 @@ export interface RouteBreadcrumb {
   to?: string;
   parent?: string;
 }
+
+/** Whether the other app still serves that address, which the ledger answers. */
+const isEmberOwned = (address: string) => findEmberPath(address) !== undefined;
 
 /* How far a trail may be walked, which stops a parent that leads back to itself. */
 const MAX_TRAIL_LENGTH = 8;
@@ -105,13 +111,27 @@ export function Breadcrumbs() {
     (crumb) => ({
       title: crumb.title,
 
-      /* A crumb climbs out of the open page, whose address may be served elsewhere, so
-         it hands the address over rather than resolving it against the open router. */
-      link: crumb.to && (
-        <AkLink color="textSecondary" underline="hover" href={crumb.to} data-test-breadcrumb-link>
-          {crumb.title}
-        </AkLink>
-      ),
+      /*
+        A crumb that this router owns is followed in place; one whose page the other app
+        still serves is handed over, which loads that document. The ledger decides which,
+        so a page moving across needs nothing changed here.
+      */
+      link:
+        crumb.to &&
+        (isEmberOwned(crumb.to) ? (
+          <AkLink color="textSecondary" underline="hover" href={crumb.to} data-test-breadcrumb-link>
+            {crumb.title}
+          </AkLink>
+        ) : (
+          <AkRouterLink
+            color="textSecondary"
+            underline="hover"
+            to={crumb.to}
+            data-test-breadcrumb-link
+          >
+            {crumb.title}
+          </AkRouterLink>
+        )),
     })
   );
 

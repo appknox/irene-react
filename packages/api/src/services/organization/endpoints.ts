@@ -104,6 +104,57 @@ export const OrganizationEndpoints = {
   emailDomain: (organizationId: number | string, domainId: number | string) =>
     `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/email_domains/${encodeURIComponent(domainId)}` as const,
 
+  /** The devices members have registered, for an organization that allows it. */
+  registeredDevices: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/registered-devices` as const,
+
+  /** Whether single sign-on is on for an organization, and whether it is the only way in. */
+  sso: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/sso/provider` as const,
+
+  /** The identity provider's own metadata: read, uploaded and removed here. */
+  samlIdpMetadata: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/sso/saml2/idp_metadata` as const,
+
+  /** What an identity provider needs to know about Appknox, which is the same for everyone. */
+  samlSpMetadata: () => `${API_NAMESPACES.v2}/sso/saml2/metadata` as const,
+
+  /** The OpenID Connect provider an organization has set up: read, added and removed here. */
+  oidcProvider: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/sso/oidc` as const,
+
+  /** The iOS signing certificates an organization holds, and where one is uploaded. */
+  signingCertificates: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/signing-certificates/` as const,
+
+  /** One of those certificates, which is removed here. */
+  signingCertificate: (organizationId: number | string, certificateId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/signing-certificates/${encodeURIComponent(certificateId)}/` as const,
+
+  /** Where one of them is made the one apps are re-signed with. */
+  activateSigningCertificate: (organizationId: number | string, certificateId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/signing-certificates/${encodeURIComponent(certificateId)}/activate/` as const,
+
+  /** The archive exports an organization has asked for, and where one is asked for. */
+  archives: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/archives` as const,
+
+  /** Where one archive's file is fetched from, which is answered as a link. */
+  archiveDownloadUrl: (organizationId: number | string, archiveId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/archives/${encodeURIComponent(archiveId)}/download_url` as const,
+
+  /** Where an export of each project's latest scan is asked for, which has its own path. */
+  latestScanArchive: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/archives/generate_excel_project_latest_scans` as const,
+
+  /** Whether old binaries are cleaned up, and how many are kept: read and written here. */
+  cleanupPreference: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/cleanup-preference` as const,
+
+  /** The cleanups that have run, and where one is started by hand. */
+  cleanups: (organizationId: number | string) =>
+    `${API_NAMESPACES.v1}/organizations/${encodeURIComponent(organizationId)}/cleanups` as const,
+
   /** The StoreKnox organization, which not every deployment has. */
   storeknoxOrganization: () => `${API_NAMESPACES.v2}/sk_organization` as const,
 };

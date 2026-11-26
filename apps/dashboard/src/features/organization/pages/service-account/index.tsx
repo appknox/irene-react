@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { Fragment, useMemo, useState } from 'react';
 
 import { ServiceAccountService, type ApiServiceAccount } from '@irene/api/services/service-account';
@@ -117,7 +118,7 @@ export function OrganizationServiceAccountPage() {
           </div>
 
           <div className="flex items-center gap-4.5">
-            <div className="flex items-center gap-1.75">
+            <div className="flex items-center">
               <AkCheckbox
                 id="show-system-created"
                 checked={urlState.show_system_created}
@@ -127,12 +128,12 @@ export function OrganizationServiceAccountPage() {
                 data-test-service-accounts-system-created
               />
 
-              <AkLabel htmlFor="show-system-created">
+              <AkLabel htmlFor="show-system-created" className="text-base font-normal">
                 {akMT('serviceAccountModule.showSystemCreated')}
               </AkLabel>
             </div>
 
-            <div className="flex items-center gap-1.75">
+            <div className="flex items-center">
               <AkCheckbox
                 id="show-cli-enabled"
                 checked={urlState.show_cli_enabled}
@@ -142,7 +143,7 @@ export function OrganizationServiceAccountPage() {
                 data-test-service-accounts-cli-enabled
               />
 
-              <AkLabel htmlFor="show-cli-enabled">
+              <AkLabel htmlFor="show-cli-enabled" className="text-base font-normal">
                 {akMT('serviceAccountModule.showCliEnabled')}
               </AkLabel>
             </div>
@@ -151,7 +152,9 @@ export function OrganizationServiceAccountPage() {
             <span className="h-8.5 w-px bg-neutral-300" />
 
             <AkButton asChild data-test-service-accounts-create>
-              <a href={`${ORGANIZATION_SETTINGS_TABS.serviceAccount}/create`}>{akMT('create')}</a>
+              <Link to={`${ORGANIZATION_SETTINGS_TABS.serviceAccount}/create`}>
+                {akMT('create')}
+              </Link>
             </AkButton>
           </div>
         </div>

@@ -3,8 +3,12 @@ import { transformPaginatedResponse } from '@irene/api/utils/transforms';
 import type { ApiPageEnvelope } from '@irene/api/utils/pagination';
 
 import type {
+  ApiOidcProvider,
   ApiOrganization,
   ApiOrganizationAiFeatureSettings,
+  ApiOrganizationArchive,
+  ApiOrganizationCleanup,
+  ApiOrganizationCleanupPreference,
   ApiOrganizationEmailDomain,
   ApiOrganizationInvitation,
   ApiOrganizationMe,
@@ -12,15 +16,24 @@ import type {
   ApiOrganizationNamespace,
   ApiOrganizationPreference,
   ApiOrganizationProject,
+  ApiOrganizationRegisteredDevice,
+  ApiOrganizationSigningCertificate,
+  ApiOrganizationSso,
   ApiOrganizationTeam,
   ApiOrganizationTeamMember,
   ApiOrganizationTeamProject,
   ApiOrganizationUser,
   ApiReportPreference,
+  ApiSamlIdpMetadata,
+  ApiSamlSpMetadata,
   ApiStoreknoxOrganization,
+  OidcProviderRequest,
+  OrganizationArchiveRequest,
+  OrganizationSigningCertificateRequest,
 } from '@irene/api/services/organization';
 
 import { OrganizationEndpoints } from './endpoints';
+import { ORGANIZATION_ARCHIVE_TYPE } from './types';
 
 /** Talks to the endpoints describing the organization a signed-in account works in. */
 export default class OrganizationService {
@@ -707,6 +720,323 @@ export default class OrganizationService {
     apiRequest.put<ApiOrganizationPreference>(OrganizationEndpoints.preference(organizationId), {
       report_preference: reportPreference,
     });
+
+  /**
+   * Turns device registration on or off for an organization.
+   *
+   * @param organizationId - Whose setting to change.
+   * @param isEnabled - Whether members may register their own devices.
+   * @returns The organization as it now stands.
+   */
+  public static readonly setCyodRegistrationEnabled = (
+    organizationId: number | string,
+    isEnabled: boolean
+  ) =>
+    apiRequest.put<ApiOrganization>(OrganizationEndpoints.detail(organizationId), {
+      cyod_registration_enabled: isEnabled,
+    });
+
+  /**
+   * Reads the devices members have registered with the organization.
+   *
+   * @param organizationId - Whose devices to read.
+   * @returns The devices, with how many there are in all.
+   */
+  public static readonly getOrganizationRegisteredDevices = async (
+    organizationId: number | string
+  ) => {
+    const page = await apiRequest.get<ApiPageEnvelope<ApiOrganizationRegisteredDevice>>(
+      OrganizationEndpoints.registeredDevices(organizationId)
+    );
+
+    return transformPaginatedResponse(page);
+  };
+
+  /**
+   * Reads whether single sign-on is on for an organization.
+   *
+   * @param organizationId - Whose setting to read.
+   * @returns The setting.
+   */
+  public static readonly getOrganizationSso = (organizationId: number | string) =>
+    apiRequest.get<ApiOrganizationSso>(OrganizationEndpoints.sso(organizationId));
+
+  /**
+   * Writes it back, as the endpoint takes both flags together.
+   *
+   * @param organizationId - Whose setting to write.
+   * @param sso - Whether it is on, and whether it is the only way in.
+   * @returns The setting as it now stands.
+   */
+  public static readonly setOrganizationSso = (
+    organizationId: number | string,
+    sso: Pick<ApiOrganizationSso, 'enabled' | 'enforced'>
+  ) => apiRequest.put<ApiOrganizationSso>(OrganizationEndpoints.sso(organizationId), sso);
+
+  /**
+   * Reads what Appknox was told about the identity provider.
+   *
+   * The endpoint answers 404 where none has been uploaded and 403 where this
+   * account may not see it, neither of which is reported as a failure.
+   *
+   * @param organizationId - Whose provider to read.
+   * @returns The provider's metadata.
+   */
+  public static readonly getSamlIdpMetadata = (organizationId: number | string) =>
+    apiRequest.get<ApiSamlIdpMetadata>(OrganizationEndpoints.samlIdpMetadata(organizationId));
+
+  /**
+   * Uploads that metadata as an XML document.
+   *
+   * It goes up as a file under `filename`, which is how the endpoint takes it,
+   * so this is the one request here that is multipart rather than JSON.
+   *
+   * @param organizationId - Whose provider to set.
+   * @param xml - The document's text.
+   * @returns The provider's metadata as it was read back.
+   */
+  public static readonly uploadSamlIdpMetadata = (organizationId: number | string, xml: string) => {
+    const body = new FormData();
+
+    body.append('filename', new Blob([xml], { type: 'text/xml' }));
+
+    return apiRequest.post<ApiSamlIdpMetadata>(
+      OrganizationEndpoints.samlIdpMetadata(organizationId),
+      body
+    );
+  };
+
+  /**
+   * Removes it, which leaves the organization with no identity provider.
+   *
+   * @param organizationId - Whose provider to remove.
+   */
+  public static readonly deleteSamlIdpMetadata = (organizationId: number | string) =>
+    apiRequest.delete(OrganizationEndpoints.samlIdpMetadata(organizationId));
+
+  /**
+   * Reads what an identity provider needs to know about Appknox.
+   *
+   * @returns The fields, and the same thing as an XML document.
+   */
+  public static readonly getSamlSpMetadata = () =>
+    apiRequest.get<ApiSamlSpMetadata>(OrganizationEndpoints.samlSpMetadata());
+
+  /**
+   * Reads the OpenID Connect provider an organization signs in through.
+   *
+   * The endpoint answers 404 where none is set up, which is not a failure.
+   *
+   * @param organizationId - Whose provider to read.
+   * @returns The provider.
+   */
+  public static readonly getOidcProvider = (organizationId: number | string) =>
+    apiRequest.get<ApiOidcProvider>(OrganizationEndpoints.oidcProvider(organizationId));
+
+  /**
+   * Sets one up.
+   *
+   * @param organizationId - Which organization to set it up for.
+   * @param provider - Its client, that client's secret, and where to discover it.
+   * @returns The provider as it was stored.
+   */
+  public static readonly createOidcProvider = (
+    organizationId: number | string,
+    provider: OidcProviderRequest
+  ) =>
+    apiRequest.post<ApiOidcProvider>(OrganizationEndpoints.oidcProvider(organizationId), provider);
+
+  /**
+   * Removes it.
+   *
+   * @param organizationId - Whose provider to remove.
+   */
+  public static readonly deleteOidcProvider = (organizationId: number | string) =>
+    apiRequest.delete(OrganizationEndpoints.oidcProvider(organizationId));
+
+  /**
+   * Reads the iOS signing certificates an organization holds.
+   *
+   * @param organizationId - Whose certificates to read.
+   * @returns The certificates, with how many there are in all.
+   */
+  public static readonly getOrganizationSigningCertificates = async (
+    organizationId: number | string
+  ) => {
+    const page = await apiRequest.get<ApiPageEnvelope<ApiOrganizationSigningCertificate>>(
+      OrganizationEndpoints.signingCertificates(organizationId)
+    );
+
+    return transformPaginatedResponse(page);
+  };
+
+  /**
+   * Adds one, with its signing material base64-encoded in the body.
+   *
+   * @param organizationId - Which organization to add it to.
+   * @param certificate - The material, its password and what it is called.
+   * @returns The certificate as it was stored.
+   */
+  public static readonly addOrganizationSigningCertificate = (
+    organizationId: number | string,
+    certificate: OrganizationSigningCertificateRequest
+  ) =>
+    apiRequest.post<ApiOrganizationSigningCertificate>(
+      OrganizationEndpoints.signingCertificates(organizationId),
+      certificate
+    );
+
+  /**
+   * Makes one of them the certificate apps are re-signed with.
+   *
+   * Only one may be active, so whichever held it loses it; the list is read
+   * again to pick that up.
+   *
+   * @param organizationId - Whose certificate to activate.
+   * @param certificateId - The certificate to activate.
+   * @returns The certificate as it now stands.
+   */
+  public static readonly activateOrganizationSigningCertificate = (
+    organizationId: number | string,
+    certificateId: number | string
+  ) =>
+    apiRequest.post<ApiOrganizationSigningCertificate>(
+      OrganizationEndpoints.activateSigningCertificate(organizationId, certificateId),
+      {}
+    );
+
+  /**
+   * Removes one.
+   *
+   * The endpoint refuses the active one while others remain, which the screen
+   * holds the control back for rather than letting it be asked.
+   *
+   * @param organizationId - Whose certificate to remove.
+   * @param certificateId - The certificate to remove.
+   */
+  public static readonly deleteOrganizationSigningCertificate = (
+    organizationId: number | string,
+    certificateId: number | string
+  ) => apiRequest.delete(OrganizationEndpoints.signingCertificate(organizationId, certificateId));
+
+  /**
+   * Reads the archive exports an organization has asked for, a page at a time.
+   *
+   * @param organizationId - Whose exports to read.
+   * @param page - Where the page starts and how many it holds.
+   * @returns The page of exports, with how many there are in all.
+   */
+  public static readonly getOrganizationArchives = async (
+    organizationId: number | string,
+    page: { limit: number; offset: number }
+  ) => {
+    const answered = await apiRequest.get<ApiPageEnvelope<ApiOrganizationArchive>>(
+      OrganizationEndpoints.archives(organizationId),
+      { params: page }
+    );
+
+    return transformPaginatedResponse(answered);
+  };
+
+  /**
+   * Asks for an export of everything over a span of days.
+   *
+   * @param organizationId - Whose export to ask for.
+   * @param span - The span it covers, either end of which may be left open.
+   * @returns The export, which is built after it is asked for.
+   */
+  public static readonly createOrganizationArchive = (
+    organizationId: number | string,
+    span: OrganizationArchiveRequest
+  ) =>
+    apiRequest.post<ApiOrganizationArchive>(OrganizationEndpoints.archives(organizationId), {
+      ...span,
+      archive_type: ORGANIZATION_ARCHIVE_TYPE.comprehensive,
+    });
+
+  /**
+   * Asks for an export of each project's latest scan, which has a path of its own.
+   *
+   * @param organizationId - Whose export to ask for.
+   * @param span - The span it covers, either end of which may be left open.
+   */
+  public static readonly createLatestScanArchive = (
+    organizationId: number | string,
+    span: OrganizationArchiveRequest
+  ) => apiRequest.post(OrganizationEndpoints.latestScanArchive(organizationId), span);
+
+  /**
+   * Reads where one export's file may be fetched from.
+   *
+   * @param organizationId - Whose export it is.
+   * @param archiveId - The export to fetch.
+   * @returns The link, which is answered afresh each time and does not last.
+   */
+  public static readonly getOrganizationArchiveDownloadUrl = async (
+    organizationId: number | string,
+    archiveId: number | string
+  ) => {
+    const answered = await apiRequest.get<{ url: string }>(
+      OrganizationEndpoints.archiveDownloadUrl(organizationId, archiveId)
+    );
+
+    return answered.url;
+  };
+
+  /**
+   * Reads whether old binaries are cleaned up, and how many are kept.
+   *
+   * @param organizationId - Whose preference to read.
+   * @returns The preference.
+   */
+  public static readonly getOrganizationCleanupPreference = (organizationId: number | string) =>
+    apiRequest.get<ApiOrganizationCleanupPreference>(
+      OrganizationEndpoints.cleanupPreference(organizationId)
+    );
+
+  /**
+   * Writes that preference back whole, as the endpoint takes it.
+   *
+   * @param organizationId - Whose preference to write.
+   * @param preference - The preference as it is to stand.
+   * @returns The preference as it now stands.
+   */
+  public static readonly setOrganizationCleanupPreference = (
+    organizationId: number | string,
+    preference: Pick<ApiOrganizationCleanupPreference, 'is_enabled' | 'files_to_keep'>
+  ) =>
+    apiRequest.put<ApiOrganizationCleanupPreference>(
+      OrganizationEndpoints.cleanupPreference(organizationId),
+      preference
+    );
+
+  /**
+   * Reads the cleanups that have run, a page at a time.
+   *
+   * @param organizationId - Whose cleanups to read.
+   * @param page - Where the page starts and how many it holds.
+   * @returns The page of cleanups, with how many there are in all.
+   */
+  public static readonly getOrganizationCleanups = async (
+    organizationId: number | string,
+    page: { limit: number; offset: number }
+  ) => {
+    const answered = await apiRequest.get<ApiPageEnvelope<ApiOrganizationCleanup>>(
+      OrganizationEndpoints.cleanups(organizationId),
+      { params: page }
+    );
+
+    return transformPaginatedResponse(answered);
+  };
+
+  /**
+   * Starts a cleanup by hand.
+   *
+   * @param organizationId - Whose cleanup to start.
+   * @returns The cleanup that was started.
+   */
+  public static readonly startOrganizationCleanup = (organizationId: number | string) =>
+    apiRequest.post<ApiOrganizationCleanup>(OrganizationEndpoints.cleanups(organizationId), {});
 
   /**
    * Reads the email domains an organization restricts its accounts to.

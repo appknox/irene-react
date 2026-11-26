@@ -12,7 +12,8 @@ import { cva } from 'class-variance-authority';
 export const akCheckboxVariants = cva(
   [
     'peer relative inline-flex size-4 shrink-0 cursor-pointer items-center justify-center',
-    'rounded-xs border-2 border-current bg-transparent',
+    /* Centred in the 21px slot irene's glyph occupies, so rows line up as they do there. */
+    'my-0.5 mx-0.5 rounded-xs border-2 border-current bg-transparent',
     'shadow-xs transition-shadow outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
     'disabled:cursor-not-allowed disabled:border-neutral-400 disabled:bg-transparent',
     /*

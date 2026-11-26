@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -55,6 +56,7 @@ export function OrganizationServiceAccountDetailsPage({
   serviceAccountId,
 }: Readonly<{ serviceAccountId: number }>) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [open, setOpen] = useState<OpenSection>(null);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [scopeEdits, setScopeEdits] = useState<ApiServiceAccountScopes | null>(null);
@@ -124,7 +126,7 @@ export function OrganizationServiceAccountDetailsPage({
 
       await queryClient.invalidateQueries({ queryKey: serviceAccountKeys.list() });
 
-      window.location.assign(ORGANIZATION_SETTINGS_TABS.serviceAccount);
+      await navigate({ to: ORGANIZATION_SETTINGS_TABS.serviceAccount, replace: true });
     },
 
     onError: reportRefusal,
@@ -181,11 +183,12 @@ export function OrganizationServiceAccountDetailsPage({
 
             <AkMenuContent align="end" arrow>
               <AkMenuItem asChild data-test-service-account-details-duplicate>
-                <a
-                  href={`${ORGANIZATION_SETTINGS_TABS.serviceAccount}/create?duplicate=${serviceAccountId}`}
+                <Link
+                  to={`${ORGANIZATION_SETTINGS_TABS.serviceAccount}/create`}
+                  search={{ duplicate: serviceAccountId }}
                 >
                   {akMT('serviceAccountModule.duplicate')}
-                </a>
+                </Link>
               </AkMenuItem>
 
               <AkMenuSeparator />

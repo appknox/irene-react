@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import { Fragment } from 'react';
 
 import {
@@ -33,15 +34,16 @@ export function ServiceAccountActions({
 }: Readonly<ServiceAccountActionsProps>) {
   return (
     <div className="flex items-center justify-center gap-1.75">
-      <a
-        href={`${ORGANIZATION_SETTINGS_TABS.serviceAccount}/${serviceAccount.id}`}
+      <Link
+        to={`${ORGANIZATION_SETTINGS_TABS.serviceAccount}/$serviceAccountId`}
+        params={{ serviceAccountId: String(serviceAccount.id) }}
         title={akMT('viewDetails')}
         aria-label={`${akMT('viewDetails')} ${serviceAccount.name}`}
         className="inline-flex items-center justify-center rounded-xs p-1.5 hover:bg-hover-light"
         data-test-service-account-details
       >
         <OverrideDetails aria-hidden="true" className="size-4" />
-      </a>
+      </Link>
 
       {/* irene rules the two apart with a 22px hairline of its own, not a divider. */}
       <span className="h-5.5 w-px bg-neutral-300" />
@@ -60,11 +62,12 @@ export function ServiceAccountActions({
         <AkMenuContent align="end" arrow>
           <Fragment>
             <AkMenuItem asChild data-test-service-account-duplicate>
-              <a
-                href={`${ORGANIZATION_SETTINGS_TABS.serviceAccount}/create?duplicate=${serviceAccount.id}`}
+              <Link
+                to={`${ORGANIZATION_SETTINGS_TABS.serviceAccount}/create`}
+                search={{ duplicate: serviceAccount.id }}
               >
                 {akMT('serviceAccountModule.duplicate')}
-              </a>
+              </Link>
             </AkMenuItem>
 
             <AkMenuSeparator />

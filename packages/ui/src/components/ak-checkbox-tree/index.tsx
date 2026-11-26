@@ -56,7 +56,7 @@ function AkTreeMark<TNode extends AkTreeNode>({
     return (
       <AkIcon
         name={isChecked ? 'material-symbols:done' : 'material-symbols:do-not-disturb-on-outline'}
-        className={cn('size-4.75', isChecked ? 'text-success' : 'text-neutral-300')}
+        className={cn('size-5.25', isChecked ? 'text-success' : 'text-neutral-300')}
         aria-label={isChecked ? checkedLabel : uncheckedLabel}
         data-test-ak-tree-state={isChecked ? 'checked' : 'unchecked'}
       />
@@ -129,7 +129,8 @@ function AkTreeRow<TNode extends AkTreeNode>({
         data-slot="tree-row"
         data-test-ak-tree-row={node.key}
       >
-        <div className="flex items-center gap-1.75">
+        {/* No gap: the box brings its own padding, which is the space irene leaves here. */}
+        <div className="flex items-center">
           <AkTreeMark
             node={node}
             isChecked={isChecked(node)}

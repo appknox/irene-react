@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -167,7 +168,7 @@ export function OrganizationServiceAccountCreatePage() {
           <div className="flex items-center gap-2.75">
             {made ? (
               <AkButton asChild data-test-service-account-create-done>
-                <a href={detailsAddress(made.id)}>{akMT('viewDetails')}</a>
+                <Link to={detailsAddress(made.id)}>{akMT('viewDetails')}</Link>
               </AkButton>
             ) : (
               <AkButton
@@ -177,7 +178,7 @@ export function OrganizationServiceAccountCreatePage() {
                 disabled={create.isPending}
                 data-test-service-account-create-cancel
               >
-                <a href={ORGANIZATION_SETTINGS_TABS.serviceAccount}>{akMT('cancel')}</a>
+                <Link to={ORGANIZATION_SETTINGS_TABS.serviceAccount}>{akMT('cancel')}</Link>
               </AkButton>
             )}
 

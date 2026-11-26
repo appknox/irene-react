@@ -80,6 +80,37 @@ export const organizationKeys = {
   preference: (orgId: number | undefined) =>
     [...organizationKeys.all(), orgId, 'preference'] as const,
 
+  sso: (orgId: number | undefined) => [...organizationKeys.all(), orgId, 'sso'] as const,
+
+  samlIdpMetadata: (orgId: number | undefined) =>
+    [...organizationKeys.all(), orgId, 'saml-idp-metadata'] as const,
+
+  samlSpMetadata: () => [...organizationKeys.all(), 'saml-sp-metadata'] as const,
+
+  oidcProvider: (orgId: number | undefined) =>
+    [...organizationKeys.all(), orgId, 'oidc-provider'] as const,
+
+  signingCertificates: (orgId: number | undefined) =>
+    [...organizationKeys.all(), orgId, 'signing-certificates'] as const,
+
+  archivesList: (orgId: number | undefined) =>
+    [...organizationKeys.all(), orgId, 'archives'] as const,
+
+  archives: (orgId: number | undefined, page: { limit: number; offset: number }) =>
+    [...organizationKeys.archivesList(orgId), page] as const,
+
+  cleanupPreference: (orgId: number | undefined) =>
+    [...organizationKeys.all(), orgId, 'cleanup-preference'] as const,
+
+  cleanupsList: (orgId: number | undefined) =>
+    [...organizationKeys.all(), orgId, 'cleanups'] as const,
+
+  cleanups: (orgId: number | undefined, page: { limit: number; offset: number }) =>
+    [...organizationKeys.cleanupsList(orgId), page] as const,
+
+  registeredDevices: (orgId: number | undefined) =>
+    [...organizationKeys.all(), orgId, 'registered-devices'] as const,
+
   emailDomains: (orgId: number | undefined) =>
     [...organizationKeys.all(), orgId, 'email-domains'] as const,
 
@@ -458,6 +489,191 @@ export const organizationPreferenceOptions = (orgId: number | undefined) =>
     queryKey: organizationKeys.preference(orgId),
     queryFn: () => OrganizationService.getOrganizationPreference(Number(orgId)),
     enabled: orgId !== undefined,
+  });
+
+/**
+ * Builds the query for whether single sign-on is on for an organization.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @returns Query options resolving to the setting.
+ */
+export const organizationSsoOptions = (orgId: number | undefined) =>
+  queryOptions({
+    queryKey: organizationKeys.sso(orgId),
+    queryFn: () => OrganizationService.getOrganizationSso(Number(orgId)),
+    enabled: orgId !== undefined,
+    retry: false,
+
+    /*
+      The refusal is the answer, so it is kept rather than asked again: a second reader of
+      it would otherwise send the same refused request, and so would every later visit to
+      the screen. What the screen changes here, it invalidates itself.
+    */
+    retryOnMount: false,
+    staleTime: Infinity,
+  });
+
+/**
+ * Builds the query for what Appknox was told about the identity provider.
+ *
+ * Answered with 404 where none is set up and 403 where the account may not see
+ * it, so the failure is left to the caller rather than retried.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @returns Query options resolving to the provider's metadata.
+ */
+export const samlIdpMetadataOptions = (orgId: number | undefined) =>
+  queryOptions({
+    queryKey: organizationKeys.samlIdpMetadata(orgId),
+    queryFn: () => OrganizationService.getSamlIdpMetadata(Number(orgId)),
+    enabled: orgId !== undefined,
+    retry: false,
+
+    /*
+      The refusal is the answer, so it is kept rather than asked again: a second reader of
+      it would otherwise send the same refused request, and so would every later visit to
+      the screen. What the screen changes here, it invalidates itself.
+    */
+    retryOnMount: false,
+    staleTime: Infinity,
+  });
+
+/**
+ * Builds the query for what an identity provider needs to know about Appknox.
+ *
+ * The same for every organization, so it is held rather than read again.
+ *
+ * @returns Query options resolving to the fields and the XML document.
+ */
+export const samlSpMetadataOptions = () =>
+  queryOptions({
+    queryKey: organizationKeys.samlSpMetadata(),
+    queryFn: () => OrganizationService.getSamlSpMetadata(),
+    staleTime: Infinity,
+  });
+
+/**
+ * Builds the query for the OpenID Connect provider an organization signs in through.
+ *
+ * Answered with 404 where none is set up, so the failure is left to the caller.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @returns Query options resolving to the provider.
+ */
+export const oidcProviderOptions = (orgId: number | undefined) =>
+  queryOptions({
+    queryKey: organizationKeys.oidcProvider(orgId),
+    queryFn: () => OrganizationService.getOidcProvider(Number(orgId)),
+    enabled: orgId !== undefined,
+    retry: false,
+
+    /*
+      The refusal is the answer, so it is kept rather than asked again: a second reader of
+      it would otherwise send the same refused request, and so would every later visit to
+      the screen. What the screen changes here, it invalidates itself.
+    */
+    retryOnMount: false,
+    staleTime: Infinity,
+  });
+
+/**
+ * Builds the query for the iOS signing certificates an organization holds.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @returns Query options resolving to the certificates.
+ */
+export const organizationSigningCertificatesOptions = (orgId: number | undefined) =>
+  queryOptions({
+    queryKey: organizationKeys.signingCertificates(orgId),
+    queryFn: () => OrganizationService.getOrganizationSigningCertificates(Number(orgId)),
+    enabled: orgId !== undefined,
+  });
+
+/**
+ * Builds the query for one page of the archive exports an organization has asked for.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @param page - Where the page starts and how many it holds.
+ * @returns Query options resolving to the page.
+ */
+export const organizationArchivesOptions = (
+  orgId: number | undefined,
+  page: { limit: number; offset: number }
+) =>
+  queryOptions({
+    queryKey: organizationKeys.archives(orgId, page),
+    queryFn: () => OrganizationService.getOrganizationArchives(Number(orgId), page),
+    enabled: orgId !== undefined,
+    placeholderData: (previous) => previous,
+  });
+
+/**
+ * Builds the query for whether old binaries are cleaned up.
+ *
+ * The endpoint answers 404 for an organization the feature is not set up for,
+ * so the failure is left to the caller, which leaves the section out.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @returns Query options resolving to the preference.
+ */
+export const organizationCleanupPreferenceOptions = (orgId: number | undefined) =>
+  queryOptions({
+    queryKey: organizationKeys.cleanupPreference(orgId),
+    queryFn: () => OrganizationService.getOrganizationCleanupPreference(Number(orgId)),
+    enabled: orgId !== undefined,
+    retry: false,
+
+    /*
+      The refusal is the answer, so it is kept rather than asked again: a second reader of
+      it would otherwise send the same refused request, and so would every later visit to
+      the screen. What the screen changes here, it invalidates itself.
+    */
+    retryOnMount: false,
+    staleTime: Infinity,
+  });
+
+/**
+ * Builds the query for one page of the cleanups that have run.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @param page - Where the page starts and how many it holds.
+ * @returns Query options resolving to the page.
+ */
+export const organizationCleanupsOptions = (
+  orgId: number | undefined,
+  page: { limit: number; offset: number }
+) =>
+  queryOptions({
+    queryKey: organizationKeys.cleanups(orgId, page),
+    queryFn: () => OrganizationService.getOrganizationCleanups(Number(orgId), page),
+    enabled: orgId !== undefined,
+    placeholderData: (previous) => previous,
+  });
+
+/**
+ * Builds the query for the devices members have registered.
+ *
+ * The endpoint refuses with 400 where the organization allows registration but
+ * has no device farm behind it, which the screen tells apart from having none
+ * registered yet, so the failure is left to the caller rather than retried.
+ *
+ * @param orgId - The organization to ask about, absent until one is selected.
+ * @returns Query options resolving to the devices.
+ */
+export const organizationRegisteredDevicesOptions = (orgId: number | undefined) =>
+  queryOptions({
+    queryKey: organizationKeys.registeredDevices(orgId),
+    queryFn: () => OrganizationService.getOrganizationRegisteredDevices(Number(orgId)),
+    enabled: orgId !== undefined,
+    retry: false,
+
+    /*
+      The refusal is the answer, so it is kept rather than asked again: a second reader of
+      it would otherwise send the same refused request, and so would every later visit to
+      the screen. What the screen changes here, it invalidates itself.
+    */
+    retryOnMount: false,
+    staleTime: Infinity,
   });
 
 /**

@@ -204,6 +204,172 @@ export interface ApiOrganizationPreference {
   report_preference: ApiReportPreference;
 }
 
+/**
+ * One device a member has registered with the organization.
+ *
+ * What it is called is whichever of its name, its model or its serial number it
+ * has, as irene reads them in that order.
+ */
+export interface ApiOrganizationRegisteredDevice {
+  id: number;
+  name: string | null;
+  serial_number: string;
+  model: string;
+  platform: number;
+  is_connected: boolean;
+  created_on: string | null;
+}
+
+/**
+ * Whether old application binaries are cleaned up, and how many are kept.
+ *
+ * The endpoint answers 404 for an organization the feature is not set up for,
+ * which is how the screen knows to leave the section out altogether.
+ */
+export interface ApiOrganizationCleanupPreference {
+  id: number;
+  is_enabled: boolean;
+
+  /** How many of a project's most recent uploads keep their binaries, between 2 and 50. */
+  files_to_keep: number;
+  last_cleaned_at: string | null;
+}
+
+/** What one cleanup took out of one project. */
+export interface ApiOrganizationCleanupProject {
+  package_name: string;
+  cleaned_files_count: number;
+}
+
+/** One cleanup that has run, by hand or on its own. */
+export interface ApiOrganizationCleanup {
+  id: number;
+  user: number | null;
+  created_on: string;
+  projects: ApiOrganizationCleanupProject[];
+
+  /** `Manual` where someone started it, and the schedule's own name otherwise. */
+  type: string;
+}
+
+/** Whether single sign-on is on, and whether it is the only way in. */
+export interface ApiOrganizationSso {
+  id: number;
+  enabled: boolean;
+
+  /** Whether members may only sign in through the provider, with no password. */
+  enforced: boolean;
+}
+
+/** The certificate an identity provider signs its assertions with. */
+export interface ApiSamlCertificate {
+  issuer: string;
+  issued_on: string;
+  expires_on: string;
+  fingerprint_sha256: string;
+  fingerprint_sha1: string;
+}
+
+/** What Appknox was told about the identity provider. */
+export interface ApiSamlIdpMetadata {
+  id: number;
+  entity_id: string;
+  sso_service_url: string;
+  created_on: string;
+  certificate: ApiSamlCertificate;
+}
+
+/** What an identity provider needs to know about Appknox. */
+export interface ApiSamlSpMetadata {
+  entity_id: string;
+  acs_url: string;
+  named_id_format: string;
+
+  /** The same thing as XML, for a provider that takes a document rather than fields. */
+  metadata: string;
+}
+
+/** The OpenID Connect provider an organization signs in through. */
+export interface ApiOidcProvider {
+  id: number;
+  username: string;
+  scopes_supported: string[];
+  enabled: boolean;
+  client_id: string;
+  client_secret: string;
+  discovery_url: string;
+}
+
+/** What is sent to set one up. */
+export interface OidcProviderRequest {
+  client_id: string;
+  client_secret: string;
+  discovery_url: string;
+}
+
+/** One iOS signing certificate an organization holds. */
+export interface ApiOrganizationSigningCertificate {
+  id: number;
+  name: string | null;
+  bundle_id: string | null;
+  app_id: string | null;
+  team_id: string | null;
+
+  /** Whether apps are re-signed with this one, which only one of them is. */
+  is_active: boolean;
+  is_expired: boolean;
+  provisions_all_devices: boolean;
+  provisioned_udids: string[];
+  expires_at: string | null;
+}
+
+/**
+ * What is sent to add one.
+ *
+ * The signing material goes up base64-encoded in a JSON body rather than as a
+ * multipart upload, which is how the endpoint takes it.
+ */
+export interface OrganizationSigningCertificateRequest {
+  p12: string;
+  mobileprovision: string;
+  password: string;
+  name: string;
+  bundle_id: string;
+}
+
+/** Which export was asked for: everything, or each project's latest scan alone. */
+export const ORGANIZATION_ARCHIVE_TYPE = { comprehensive: 0, latestScan: 1 } as const;
+
+/** One of those two. */
+export type ApiOrganizationArchiveType =
+  (typeof ORGANIZATION_ARCHIVE_TYPE)[keyof typeof ORGANIZATION_ARCHIVE_TYPE];
+
+/** Who asked for an export: someone on the dashboard, or Appknox's own systems. */
+export const ORGANIZATION_ARCHIVE_GENERATED_VIA = { dashboard: 0, crm: 1 } as const;
+
+/** One archive export. */
+export interface ApiOrganizationArchive {
+  id: number;
+  created_on: string;
+
+  /** When the file stops being available, after which it cannot be fetched. */
+  available_until: string;
+  generated_by: number | null;
+  from_date: string | null;
+  to_date: string | null;
+
+  /** How much of it is ready, which is 100 once the file can be fetched. */
+  progress_percent: number;
+  generated_via: number;
+  archive_type: ApiOrganizationArchiveType;
+}
+
+/** The span an export covers, either end of which may be left open. */
+export interface OrganizationArchiveRequest {
+  from_date?: string;
+  to_date?: string;
+}
+
 /** One email domain an organization restricts its accounts to. */
 export interface ApiOrganizationEmailDomain {
   id: number;

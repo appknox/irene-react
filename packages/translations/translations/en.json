@@ -44,6 +44,7 @@
   "addCollaborator": "Add Collaborator",
   "addDomain": "Add Domain",
   "addEmail": "Add Email",
+  "addEmailDomains": "Add email domains",
   "additionalCapabilities": "Additional capabilities",
   "addTeamMember": "Add Team Member",
   "addMember": "Add Member",
@@ -165,6 +166,7 @@
   "authenticatorCode": "Enter the code from the authenticator in the field below.",
   "authenticatorCodeLabel": "Enter the code from the authenticator app",
   "authorize": "Authorize",
+  "automatic": "Automatic",
   "automated": "Automated",
   "automatedScanRunningVncNote": "Automated DAST is running. Preview for the app is not available.",
   "automatedScanQueuedVncNote": "Automated DAST request is queued.",
@@ -695,6 +697,7 @@
     "status": "File cleaned status",
     "description": "Enabling this will delete application binaries for files which are not in the '<n>' recent uploads per project. Files for which the deletion is processed will be marked as inactive. Files marked as inactive will not allow future scans to be performed on it.",
     "noCleanup": "No Cleanups found",
+    "filesToKeepError": "Value must be between {min} and {max}",
     "msg": {
       "saveSuccess": "Cleanup preference updated!",
       "saveError": "Problem while updating cleanup preferen",
@@ -2210,6 +2213,8 @@
     "registration": {
       "title": "CYOD Registration",
       "description": "Allow organization users to register their Choose Your Own Device (CYOD) devices and configure Mercer settings.",
+      "addDeviceHint": "To add a device, go to",
+      "addDeviceHintEnd": ".",
       "saved": "CYOD registration setting updated.",
       "emptyHint": "Devices are registered from the operator's machine using the Mercer app.",
       "goToCyodSettings": "Go to CYOD Settings"
@@ -2250,6 +2255,9 @@
       "noneTitle": "No Existing certificates",
       "unnamed": "Unnamed certificate",
       "statusValid": "Valid",
+      "existingCertHint": "Check out the newly added certificate in the",
+      "existingCertHintSuffix": "section.",
+      "organizationCertificatesHeading": "Organization Certificate",
       "name": "Name (optional)",
       "namePlaceholder": "e.g. My Production Cert",
       "bundleIdLabel": "Bundle ID override (optional)",

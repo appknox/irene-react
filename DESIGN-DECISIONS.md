@@ -164,3 +164,77 @@ This goes away on its own: once every organization settings tab is React's and
 `organization-settings.hbs` mounts the whole screen, the three URLs sit inside
 one React router and the links go back to `Link`. Until then the reload is what
 keeps the layout correct, and it is not a regression against irene.
+
+### The settings screen's own date picker
+
+The organization's data exports are asked for over a span of days, which irene
+picks with `AkDatePicker` — a range calendar with the common spans down one
+side. The design system had no such component and the repo had no date picker
+dependency, so `AkDatePicker` is built here from `dayjs`, which `@irene/ui` now
+depends on: a month grid, a range chosen in two presses, and irene's own five
+spans (`last7Days`, `last30Days`, `last3Months`, `last6Months`, `lastYear`),
+each read when it is chosen rather than when the module loads.
+
+It is deliberately smaller than irene's, which also serves single and multiple
+selection and takes custom spans. Those are added when a screen needs them.
+
+### Keys irene leaves to a hardcoded string
+
+Five pieces of text on this screen are not translated upstream, so they are
+keys here rather than literals, with irene's exact English:
+
+- `addEmailDomains` — irene writes "Add email domains" into the template.
+- `automatic` — irene renders `t(type.toLowerCase())` for a cleanup's type, and
+  only `manual` exists, so a scheduled cleanup shows the key itself.
+- `fileCleanup.filesToKeepError` — irene's changeset validator carries the
+  message "Value must be between 2 and 50" in code.
+- `cyod.registration.addDeviceHint` and `addDeviceHintEnd` — present in irene's
+  own translations but missing from this repo's bundle, so they are added.
+
+### The signing certificate panel covers the organization alone
+
+irene's `Organization::SigningCertificate` serves two scopes: an organization's
+certificates, and a single project's own certificate that overrides them. The
+settings screen only ever renders the first, so only that half is ported —
+there is no project in scope here to override anything. The project half comes
+with the project settings page.
+
+### One router over the whole organization area
+
+Every page under `/dashboard/organization` — the three organization panes, the
+four settings tabs, and the two service account screens — is a route of a single
+React screen, mounted by each of the Ember routes that serve those URLs. A
+reader moving from namespaces to users to the settings to the integrations stays
+in the browser the whole way: no document is fetched again.
+
+What that costs is that Ember's own routing does not follow along. It stays on
+whichever route the screen was mounted from, so the screen writes the address
+bar and the browser tab's name itself, and a reload lands on the URL shown —
+which Ember then matches, mounting the same screen at that page. The host's side
+navigation keeps whichever entry it highlighted on arrival.
+
+The earlier arrangement, a screen per host route, is what made crossing between
+them a document load. That is gone; the service account screens and the settings
+tabs link with `Link` again, and a breadcrumb follows the router unless the
+ledger says the other app still serves that address.
+
+### The report type column is drawn differently from irene's
+
+irene writes the kind as a word and hides the span a comprehensive export
+covers behind a calendar mark you have to hover. The span is the one thing that
+tells two comprehensive exports apart, so it is written out: the kind read
+plainly, the span after it in the quieter type, one line, with the year said
+once where both ends share it. Asked for deliberately; it is the only place on
+this screen that departs from irene's own layout.
+
+### One loader per screen
+
+A screen shows a single stand-in and then its content. Nothing is drawn section
+by section as each answer arrives: the settings screen asks for every answer its
+sections need (`use-settings-ready.ts`), including the first page of each of its
+tables, and holds its own skeleton until all of them are in. The sections then
+ask for the same answers and the cache has them, so nothing is fetched twice and
+nothing fills itself in after the screen has been drawn.
+
+A table's later pages are the exception, and not a loader on arrival: by then
+the reader has the screen and is paging through it.

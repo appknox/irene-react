@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { ServiceAccountScreenSkeleton } from '@/features/organization/pages/service-account/components/screen-skeleton';
+import { OrganizationScreenSkeleton } from '@/features/organization/layout/screen-skeleton';
 
 /** What a page rendered inside a host may be handed. */
 export type EmbeddablePage = LazyExoticComponent<ComponentType<Record<string, unknown>>>;
@@ -15,34 +15,27 @@ export type EmbeddablePage = LazyExoticComponent<ComponentType<Record<string, un
   say — gets a file of its own in this directory and is registered from there.
 */
 export const EMBEDDABLE_PAGES = {
+  /*
+    Every page of the organization, under one router: the three panes, the four
+    settings tabs and the two service account screens. The host mounts it on
+    each of the routes that serve those URLs and the screen opens at whichever
+    one the address names, so moving between any of them stays in the browser.
+  */
   Organization: lazy(async () => ({
     default: (await import('./organization')).Organization,
   })),
 
   /*
-    The settings screen, built as the organization screen beside it is: its own
-    router over its own tabs. It is mounted on the Ember route once every tab
-    is this app's; until then the two panes below are mounted in the Ember
-    templates that hold them, inside Ember's own chrome.
+    The names the host used while these were three screens. They answer with the one screen
+    above, so a host still asking for them — a page held in a browser from before this
+    build, say — gets the page rather than nothing at all.
   */
   OrganizationSettings: lazy(async () => ({
-    default: (await import('./organization-settings')).OrganizationSettings,
+    default: (await import('./organization')).Organization,
   })),
 
-  OrganizationIntegrations: lazy(async () => ({
-    default: (await import('@/features/organization')).OrganizationIntegrationsPage,
-  })),
-
-  OrganizationAiPoweredFeatures: lazy(async () => ({
-    default: (await import('@/features/organization')).OrganizationAiPoweredFeaturesPage,
-  })),
-
-  /*
-    The service accounts are one screen over three URLs, so the host mounts it
-    on each of them and the screen itself decides which one is open.
-  */
   OrganizationServiceAccount: lazy(async () => ({
-    default: (await import('./service-account')).ServiceAccount,
+    default: (await import('./organization')).Organization,
   })),
 } satisfies Record<string, EmbeddablePage>;
 
@@ -62,7 +55,9 @@ export type EmbeddablePageName = keyof typeof EMBEDDABLE_PAGES;
   stand in for a fetch.
 */
 const PAGE_SKELETONS: Partial<Record<EmbeddablePageName, ComponentType>> = {
-  OrganizationServiceAccount: ServiceAccountScreenSkeleton,
+  Organization: OrganizationScreenSkeleton,
+  OrganizationSettings: OrganizationScreenSkeleton,
+  OrganizationServiceAccount: OrganizationScreenSkeleton,
 };
 
 /**

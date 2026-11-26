@@ -1,7 +1,9 @@
 {{page-title (t 'organizationSettings')}}
 
+{{! The whole organization area is one React screen, mounted here as it is on the
+    organization route: its own router draws whichever page the address names, so moving
+    between these pages never fetches the document again. The child routes stay in this
+    app's router so their URLs keep working; they render nothing of their own. }}
 <PageWrapper>
-  <Organization::SettingsWrapper @organization={{@model.organization}}>
-    {{outlet}}
-  </Organization::SettingsWrapper>
+  <ReactComponent @name='Organization' />
 </PageWrapper>
