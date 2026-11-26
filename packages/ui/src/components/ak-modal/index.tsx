@@ -1,5 +1,5 @@
 import { Dialog as DialogPrimitive } from 'radix-ui';
-import { type ComponentProps } from 'react';
+import { type ComponentProps, type ReactNode } from 'react';
 
 import { AkAppbar } from '@irene/ui/ak-appbar';
 import { AkIcon } from '@irene/ui/ak-icon';
@@ -36,21 +36,44 @@ function AkModalClose({ ...props }: ComponentProps<typeof DialogPrimitive.Close>
   return <DialogPrimitive.Close data-slot="modal-close" {...props} />;
 }
 
-/** The panel itself, over a backdrop that dims the page behind it. */
+/*
+  A toast is this application's own furniture, not the page behind what is
+  open: it is raised over a drawer or a modal and often carries the only way to
+  act on what just happened. Radix counts it as outside, so acting on one would
+  otherwise dismiss what raised it.
+*/
+const isWithinToast = (target: EventTarget | null) =>
+  target instanceof Element && target.closest('[data-sonner-toaster]') !== null;
+
+type AkModalContentProps = ComponentProps<typeof DialogPrimitive.Content> & {
+  blurOverlay?: boolean;
+};
+
+/**
+ * The panel itself, over a backdrop that dims the page behind it.
+ *
+ * @param props.blurOverlay - Blurs the page as well as dimming it, for something asked over it
+ * rather than read beside it.
+ */
 function AkModalContent({
   className,
   children,
+  blurOverlay = false,
+  onInteractOutside,
   ...props
-}: ComponentProps<typeof DialogPrimitive.Content>) {
+}: AkModalContentProps) {
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay
         data-slot="modal-overlay"
-        className={`
-          fixed inset-0 z-50 bg-black/50
-          data-[state=closed]:animate-out data-[state=closed]:fade-out-0
-          data-[state=open]:animate-in data-[state=open]:fade-in-0
-        `}
+        className={cn(
+          `
+            fixed inset-0 z-50 bg-black/42
+            data-[state=closed]:animate-out data-[state=closed]:fade-out-0
+            data-[state=open]:animate-in data-[state=open]:fade-in-0
+          `,
+          blurOverlay && 'backdrop-blur-[5px]'
+        )}
       />
 
       <DialogPrimitive.Content
@@ -58,13 +81,23 @@ function AkModalContent({
         className={cn(
           `
             fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-64px)] -translate-x-1/2
-            -translate-y-1/2 flex-col overflow-y-auto rounded-xs bg-background
+            -translate-y-1/2 flex-col overflow-y-auto rounded-xs bg-background font-sans
+            text-foreground
             data-[state=closed]:animate-out data-[state=closed]:fade-out-0
             data-[state=closed]:zoom-out-95
             data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95
           `,
           className
         )}
+        onInteractOutside={(event) => {
+          if (isWithinToast(event.target)) {
+            event.preventDefault();
+
+            return;
+          }
+
+          onInteractOutside?.(event);
+        }}
         {...props}
       >
         {children}
@@ -76,6 +109,7 @@ function AkModalContent({
 type AkModalHeaderProps = Omit<ComponentProps<'header'>, 'color'> & {
   title: string;
   closeLabel: string;
+  icon?: ReactNode;
 };
 
 /**
@@ -86,11 +120,14 @@ type AkModalHeaderProps = Omit<ComponentProps<'header'>, 'color'> & {
  *
  * @param props.title - What the panel is for, read first by a screen reader.
  * @param props.closeLabel - Names the close control, which has no text of its own.
+ * @param props.icon - Drawn before the title.
  */
-function AkModalHeader({ title, closeLabel, children, ...props }: AkModalHeaderProps) {
+function AkModalHeader({ title, closeLabel, icon, children, ...props }: AkModalHeaderProps) {
   return (
     <AkAppbar color="light" data-slot="modal-header" className="justify-between" {...props}>
       <div className="flex items-center gap-2.5">
+        {icon}
+
         <DialogPrimitive.Title asChild>
           <AkTypography variant="h5" fontWeight="medium" color="inherit">
             {title}

@@ -62,6 +62,7 @@ export const akTypographyVariants = cva('m-0 p-0', {
     noWrap: { true: 'truncate' },
     /** Lets a long unbroken string wrap instead of overflowing. */
     breakWord: { true: 'max-w-full min-w-0 wrap-anywhere' },
+    /* irene gutters by half the text's own size; 8px is that for the h5 this sits on. */
     gutterBottom: { true: 'mb-2' },
   },
 

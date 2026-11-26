@@ -251,7 +251,11 @@ export const solar = ['library-linear', 'play-bold'] as const;
 export const iconoir = ['screenshot'] as const;
 
 /** https://icon-sets.iconify.design/fluent/ */
-export const fluent = ['app-recent-24-regular'] as const;
+export const fluent = [
+  'app-recent-24-regular',
+  'shield-error-24-regular',
+  'shield-task-24-regular',
+] as const;
 
 /** https://icon-sets.iconify.design/streamline-plump/ */
 export const streamlinePlump = ['threat-phone'] as const;

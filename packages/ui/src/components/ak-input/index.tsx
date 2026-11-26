@@ -8,6 +8,7 @@ type AkInputProps = ComponentProps<'input'> & {
   hasError?: boolean;
   errorMessage?: ReactNode;
   wrapperClassName?: string;
+  rightAdornment?: ReactNode;
 };
 
 /**
@@ -21,6 +22,8 @@ type AkInputProps = ComponentProps<'input'> & {
  * @param props.hasError - Colours the border without showing a message.
  * @param props.errorMessage - The message under the field.
  * @param props.wrapperClassName - Classes for the wrapper.
+ * @param props.rightAdornment - A control drawn inside the field's trailing edge, such as a
+ * copy button. A password field draws its own reveal control there instead.
  */
 function AkInput({
   className,
@@ -28,6 +31,7 @@ function AkInput({
   type,
   hasError,
   errorMessage,
+  rightAdornment,
   'aria-invalid': ariaInvalid,
   ...props
 }: AkInputProps) {
@@ -62,7 +66,7 @@ function AkInput({
               focus-visible:ring-border-strong/40
             `,
             'aria-invalid:border-danger aria-invalid:ring-danger/20',
-            isPassword && 'pr-9',
+            (isPassword || rightAdornment) && 'pr-9',
             className
           )}
           {...props}
@@ -89,6 +93,15 @@ function AkInput({
               className="size-4"
             />
           </button>
+        )}
+
+        {!isPassword && rightAdornment && (
+          <span
+            data-slot="input-adornment"
+            className="absolute inset-y-0 right-0 flex items-center pr-1"
+          >
+            {rightAdornment}
+          </span>
         )}
       </div>
 

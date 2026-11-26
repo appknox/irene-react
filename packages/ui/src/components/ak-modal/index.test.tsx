@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { ComponentProps } from 'react';
@@ -35,6 +35,43 @@ const Invite = (props: ComponentProps<typeof AkModal>) => (
 const openInvite = () => userEvent.click(screen.getByRole('button', { name: 'Invite a teammate' }));
 
 describe('AkModal', () => {
+  /*
+    A toast is raised over whatever is open and often carries the only way to
+    act on what just happened, so acting on one must not dismiss what raised it.
+  */
+  it('stays open when a toast over it is acted on', async () => {
+    const user = userEvent.setup();
+
+    render(<Invite />);
+    await openInvite();
+
+    const toaster = document.createElement('section');
+
+    toaster.dataset.sonnerToaster = '';
+    toaster.innerHTML = '<button type="button">Undo</button>';
+
+    /* The toaster turns pointer events back on for itself, as `AkToaster` does. */
+    toaster.style.pointerEvents = 'auto';
+    document.body.append(toaster);
+
+    await user.click(screen.getByRole('button', { name: 'Undo' }));
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    toaster.remove();
+  });
+
+  it('closes when the page behind it is pressed', async () => {
+    render(<Invite />);
+    await openInvite();
+
+    /* A press outside is a pointer down followed by the click it becomes. */
+    fireEvent.pointerDown(document.body);
+    fireEvent.click(document.body);
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
   it('stays shut until the trigger is pressed', () => {
     render(<Invite />);
 
@@ -91,6 +128,22 @@ describe('AkModal', () => {
     await userEvent.keyboard('{Escape}');
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('draws the header icon before the title', () => {
+    render(
+      <AkModal open>
+        <AkModalContent>
+          <AkModalHeader title="Disclaimer" closeLabel="Close" icon={<span data-testid="mark" />} />
+        </AkModalContent>
+      </AkModal>
+    );
+
+    const title = screen.getByRole('heading', { name: 'Disclaimer' });
+
+    expect(
+      screen.getByTestId('mark').compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
   });
 
   it('pads its body, and drops that padding when asked', () => {

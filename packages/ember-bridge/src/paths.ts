@@ -45,7 +45,6 @@ export const EMBER_PATHS = {
   '/dashboard/status': '/dashboard/status',
   '/dashboard/store-monitoring': '/dashboard/store-monitoring',
   '/dashboard/store-release-readiness': '/dashboard/store-release-readiness',
-  '/dashboard/storeknox': '/dashboard/storeknox',
   '/dashboard/subscription': '/dashboard/subscription',
   '/partner/analytics': '/partner/analytics',
   '/partner/clients': '/partner/clients',

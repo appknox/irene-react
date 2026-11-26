@@ -31,6 +31,22 @@ describe('findEmberPath', () => {
     expect(findEmberPath('/reset/a-token')).toBe('/reset/a-token');
   });
 
+  it('leaves a migrated page alone while owning the pages under it', () => {
+    expect(findEmberPath('/security')).toBeUndefined();
+    expect(findEmberPath('/security/projects')).toBe('/security/projects');
+  });
+
+  it('keeps the StoreKnox inventory, discovery, fake apps and third-party scans', () => {
+    expect(findEmberPath('/dashboard/storeknox/discover/result')).toBeUndefined();
+    expect(findEmberPath('/dashboard/storeknox/fake-apps')).toBeUndefined();
+    expect(findEmberPath('/dashboard/storeknox/fake-apps/42')).toBeUndefined();
+    expect(findEmberPath('/dashboard/storeknox/third-party-scans')).toBeUndefined();
+    expect(findEmberPath('/dashboard/storeknox/third-party-scans/com.example.app')).toBeUndefined();
+
+    expect(findEmberPath('/dashboard/storeknox/inventory/app-list')).toBeUndefined();
+    expect(findEmberPath('/dashboard/storeknox/inventory-details/42')).toBeUndefined();
+  });
+
   it('prefers the longest owner, so a deeper path is not read as a shallower one', () => {
     expect(findEmberPath('/security/download-app')).toBe('/security/downloadapp');
     expect(findEmberPath('/security/projects')).toBe('/security/projects');

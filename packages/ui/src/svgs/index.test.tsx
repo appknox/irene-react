@@ -24,8 +24,8 @@ const renderSvg = (Svg: SvgModule['default'], props: ComponentProps<'svg'> = {})
  *
  * */
 describe('svgs', () => {
-  it('bundles 103 SVG files', () => {
-    expect(svgs).toHaveLength(103);
+  it('bundles 107 SVG files', () => {
+    expect(svgs).toHaveLength(107);
   });
 
   it.each(svgs)('%s renders an <svg> that keeps its viewBox', (_, { default: Svg }) => {

@@ -70,13 +70,17 @@ export const akTableVariants = cva(
         class: '[&_thead_th]:border-divider-strong [&_thead_tr]:border-divider-strong',
       },
 
+      /*
+        irene's own cells: 1.2143em across, and 0.5/0.6em down when dense,
+        0.75/1em otherwise, on a 14px root.
+      */
       {
         dense: true,
-        class: '[&_tbody_td]:px-4.5 [&_tbody_td]:py-2 [&_thead_th]:px-4.5 [&_thead_th]:py-1.5',
+        class: '[&_tbody_td]:px-4.25 [&_tbody_td]:py-2 [&_thead_th]:px-4.25 [&_thead_th]:py-1.75',
       },
       {
         dense: false,
-        class: '[&_tbody_td]:px-4.5 [&_tbody_td]:py-3.5 [&_thead_th]:px-4.5 [&_thead_th]:py-2.5',
+        class: '[&_tbody_td]:px-4.25 [&_tbody_td]:py-3.5 [&_thead_th]:px-4.25 [&_thead_th]:py-2.5',
       },
     ],
 
@@ -89,3 +93,14 @@ export const akTableVariants = cva(
     },
   }
 );
+
+/* Where a column sets its header and cells, as irene's `textAlign` column option does. */
+export const akTableCellVariants = cva('', {
+  variants: {
+    align: {
+      left: 'text-left',
+      center: 'text-center',
+      right: 'text-right',
+    },
+  },
+});

@@ -55,6 +55,7 @@ function AkMenuContent({
         className={cn(
           'z-50 min-w-52 origin-(--radix-dropdown-menu-content-transform-origin)',
           'overflow-hidden rounded-sm border border-border bg-popover py-1',
+          'font-sans text-popover-foreground',
           'text-popover-foreground shadow-2 outline-hidden',
           `
             data-[state=closed]:animate-out data-[state=closed]:fade-out-0
@@ -89,22 +90,33 @@ type AkMenuItemProps = ComponentProps<typeof MenuPrimitive.Item> & {
 /**
  * One action in the menu.
  *
- * An item with no `onSelect` states something rather than doing it — the
- * account's name and address are in the menu that way — so it takes no pointer
- * and does not close the menu.
+ * An item with neither `onSelect` nor a child of its own states something
+ * rather than doing it — the account's name and address are in the menu that
+ * way — so it takes no pointer and does not close the menu. An item rendered
+ * onto a link acts, even without `onSelect`, since the link is what it does.
  *
  * @param props.color - primary for the one action that stands apart, such as signing out.
  * @param props.disabled - Reads as unavailable and takes no selection.
+ * @param props.asChild - Render onto the single child, such as a link, rather than a div.
  */
-function AkMenuItem({ color = 'default', className, onSelect, ...props }: AkMenuItemProps) {
+function AkMenuItem({
+  color = 'default',
+  className,
+  onSelect,
+  asChild,
+  ...props
+}: AkMenuItemProps) {
+  const isAction = Boolean(onSelect) || Boolean(asChild);
+
   return (
     <MenuPrimitive.Item
       data-slot="menu-item"
       onSelect={onSelect}
+      asChild={asChild}
       className={cn(
         'flex w-full items-center gap-2 px-3.5 py-1.75 text-base outline-hidden select-none',
         'data-disabled:pointer-events-none data-disabled:opacity-50',
-        onSelect ? 'cursor-pointer focus:bg-hover-light' : 'cursor-default',
+        isAction ? 'cursor-pointer focus:bg-hover-light' : 'cursor-default',
         color === 'primary' ? 'text-primary' : 'text-foreground',
         className
       )}

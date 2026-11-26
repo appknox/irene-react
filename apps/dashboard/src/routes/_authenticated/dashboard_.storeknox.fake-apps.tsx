@@ -1,10 +1,26 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 
 import { akMT } from '@irene/translations/intl';
-import { RouteShell } from '@/components/route-shell';
+import { storeknoxOrganizationOptions } from '@/queries/organization';
 
-/* A shell until this screen is migrated; the store monitoring navigation links here. */
+/* Brand abuse and fake-app detection is a StoreKnox feature the organization has to be licensed for. */
 export const Route = createFileRoute('/_authenticated/dashboard_/storeknox/fake-apps')({
   staticData: { pageTitle: () => akMT('storeknox.fakeAppsTitle') },
-  component: () => <RouteShell name={akMT('storeknox.fakeAppsTitle')} />,
+
+  /*
+    An organization without fake-app detection is sent to its inventory. The StoreKnox organization
+    failing to load reads as no feature, as irene's route does when it has no selected organization.
+    The parent route already guards StoreKnox itself.
+  */
+  beforeLoad: async ({ context }) => {
+    const storeknoxOrganization = await context.queryClient
+      .query({ ...storeknoxOrganizationOptions(), staleTime: 'static' })
+      .catch(() => undefined);
+
+    if (!storeknoxOrganization?.sk_features.fake_app_detection) {
+      throw redirect({ to: '/dashboard/storeknox/inventory/app-list', replace: true });
+    }
+  },
+
+  component: Outlet,
 });

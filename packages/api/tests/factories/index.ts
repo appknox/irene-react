@@ -21,3 +21,31 @@ export { buildUploadedApp, buildPresignedUpload } from '@tests/factories/upload-
 export { buildUser, buildUserResponse } from '@tests/factories/user';
 
 export { buildVulnerability, buildVulnerabilityListResponse } from '@tests/factories/vulnerability';
+
+export {
+  buildAddedToInventorySkFakeApp,
+  buildApprovedSkRequestedApp,
+  buildArchivedSkApp,
+  buildBrandAbuseSkFakeApp,
+  buildIgnoredSkFakeApp,
+  buildPendingSkApp,
+  buildPendingSkRequestedApp,
+  buildRejectedSkRequestedApp,
+  buildSkApp,
+  buildSkAppMetadata,
+  buildSkAppVersion,
+  buildSkCoreFile,
+  buildSkDiscoveryResult,
+  buildSkDiscoverySearch,
+  buildSkFakeApp,
+  buildSkFakeAppStore,
+  buildSkFileRisk,
+  buildSkInventoryApp,
+  buildSkOrganizationUser,
+  buildSkStoreInstance,
+  buildSkSubscription,
+  buildSkThirdPartyApp,
+  buildSkThirdPartyConfig,
+  buildSkThirdPartyFinding,
+  buildUnscoredSkThirdPartyApp,
+} from '@tests/factories/storeknox';

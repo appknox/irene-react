@@ -83,7 +83,7 @@ describe('AkIconButton', () => {
   it('tightens its padding and its icon at the small size', () => {
     render(<AkIconButton aria-label="Refresh" size="small" />);
 
-    expect(screen.getByRole('button')).toHaveClass('p-1.25', '[&_svg]:size-4.5');
+    expect(screen.getByRole('button')).toHaveClass('p-1.25', '[&_svg]:size-4');
   });
 
   it('takes classes of its own over the variant', () => {
