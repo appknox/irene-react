@@ -55,7 +55,7 @@ export function useVersionUpload(version: ApiSkAppVersion, app: ApiSkInventoryAp
       if (!reloaded.can_initiate_upload) {
         /* Another member started a re-upload while this page was open. */
         tracked.refetch();
-        setModalOpen((open) => !open);
+        setModalOpen(false);
         akNotify.error(akMT('storeknox.initiateUploadMessages.cannotIntiateUploadForVersion'));
 
         return;

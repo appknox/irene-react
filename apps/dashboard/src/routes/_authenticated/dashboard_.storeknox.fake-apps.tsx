@@ -14,7 +14,7 @@ export const Route = createFileRoute('/_authenticated/dashboard_/storeknox/fake-
   */
   beforeLoad: async ({ context }) => {
     const storeknoxOrganization = await context.queryClient
-      .ensureQueryData(storeknoxOrganizationOptions())
+      .query({ ...storeknoxOrganizationOptions(), staleTime: 'static' })
       .catch(() => undefined);
 
     if (!storeknoxOrganization?.sk_features.fake_app_detection) {

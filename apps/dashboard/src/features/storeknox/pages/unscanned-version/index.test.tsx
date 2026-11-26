@@ -256,7 +256,7 @@ describe('an unscanned version’s upload, beyond the first attempt', () => {
     mockSkSubscription();
   });
 
-  it('refuses an upload another member started, and opens its details', async () => {
+  it('refuses an upload another member started, leaving the modal shut', async () => {
     const app = buildSkInventoryApp(needsAction);
     const version = buildSkAppVersion({ sk_app: app.id });
 
@@ -281,7 +281,8 @@ describe('an unscanned version’s upload, beyond the first attempt', () => {
       )
     ).toBeInTheDocument();
 
-    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    /* The refusal is the toast; the modal the upload was not started from stays shut. */
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('holds the retry back once the reloaded version says it cannot upload', async () => {

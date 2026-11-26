@@ -30,7 +30,7 @@ export function ArchiveDrawer({ app, open, onOpenChange }: Readonly<ArchiveDrawe
   const toggleArchive = useMutation({
     mutationFn: () => StoreknoxService.toggleArchiveStatus(app),
     onSuccess: async () => {
-      await queryClient.fetchQuery({ ...skInventoryAppOptions(app.id), staleTime: 0 });
+      await queryClient.query({ ...skInventoryAppOptions(app.id), staleTime: 0 });
       void queryClient.invalidateQueries({ queryKey: storeknoxKeys.apps() });
 
       onOpenChange(false);

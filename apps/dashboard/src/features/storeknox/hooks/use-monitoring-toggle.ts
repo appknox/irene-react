@@ -23,9 +23,15 @@ import { hasLicense } from '@/features/storeknox/utils/sk-app';
 import { useOrganization } from '@/hooks/use-organization';
 import { storeknoxOrganizationOptions } from '@/queries/organization';
 
-/** Whether the subscription's end date has passed, as irene's `orgSubIsExpired` reads it. */
+/**
+ * Whether the subscription's end date has passed, as irene's `orgSubIsExpired` reads it.
+ *
+ * A subscription with no end date does not expire. `dayjs(undefined)` is the current
+ * instant, so comparing against it would answer on whether a millisecond passed between
+ * the two readings, and that answer decides whether a licence is spent without asking.
+ */
 export const subscriptionIsExpired = (subscription: ApiSkSubscription | undefined) =>
-  Boolean(subscription) && dayjs().isAfter(subscription?.end_date ?? undefined);
+  Boolean(subscription?.end_date) && dayjs().isAfter(subscription?.end_date);
 
 /**
  * The details header's monitoring switch. Turning an unlicensed app on asks first,
@@ -48,7 +54,7 @@ export function useMonitoringToggle(app: ApiSkInventoryApp) {
   const toggle = useMutation({
     mutationFn: (next: boolean) => StoreknoxService.updateMonitoring(app.id, next),
     onSuccess: async (_, next) => {
-      const reloaded = await queryClient.fetchQuery({
+      const reloaded = await queryClient.query({
         ...skInventoryAppOptions(app.id),
         staleTime: 0,
       });

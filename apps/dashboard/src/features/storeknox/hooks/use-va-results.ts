@@ -33,7 +33,7 @@ export function useVaResults(app: ApiSkInventoryApp) {
   const file = useQuery({ ...skFileOptions(fileId ?? ''), enabled: fileId !== null });
 
   const reloadApp = async () => {
-    const reloaded = await queryClient.fetchQuery({
+    const reloaded = await queryClient.query({
       ...skInventoryAppOptions(app.id),
       staleTime: 0,
     });
