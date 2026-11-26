@@ -13,10 +13,10 @@ describe('AkChip', () => {
     expect(screen.getByText('12')).toBeInTheDocument();
   });
 
-  it('sits closer to an icon than to the edge of the chip', () => {
+  it('keeps the label the same distance from an icon as from the edge', () => {
     render(<AkChip label="Beta" icon={<span data-testid="chip-icon" />} />);
 
-    expect(screen.getByText('Beta')).toHaveClass('ml-0.5');
+    expect(screen.getByText('Beta')).toHaveClass('ml-1.75');
   });
 
   it('keeps the label off the edge when there is no icon', () => {

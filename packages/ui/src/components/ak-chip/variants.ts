@@ -8,7 +8,7 @@ import { cva } from 'class-variance-authority';
  */
 export const akChipVariants = cva(
   [
-    'inline-flex max-w-full shrink-0 cursor-default items-center justify-center rounded-sm p-0',
+    'inline-flex max-w-full shrink-0 cursor-default items-center justify-center rounded-xs p-0',
     'align-middle whitespace-nowrap',
   ],
   {
@@ -32,10 +32,8 @@ export const akChipVariants = cva(
 
       /* The marks scale with the chip, so a small one does not carry a full-size icon. */
       size: {
-        small:
-          'h-5.5 text-sm **:data-[slot=chip-delete]:size-3.5 **:data-[slot=chip-icon]:size-3.5',
-        medium:
-          'h-8 text-base **:data-[slot=chip-delete]:size-4.5 **:data-[slot=chip-icon]:size-4.5',
+        small: 'h-5.5 text-sm **:data-[slot=chip-delete]:size-3.5 **:data-[slot=chip-icon]:size-3',
+        medium: 'h-8 text-base **:data-[slot=chip-delete]:size-4.5 **:data-[slot=chip-icon]:size-4',
       },
 
       /** A chip that acts on a click reads and behaves as a control. */

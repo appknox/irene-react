@@ -1,4 +1,4 @@
-import { useId, type ComponentProps, type ReactNode } from 'react';
+import { Fragment, useId, type ComponentProps, type ReactNode } from 'react';
 
 import { akMT } from '@irene/translations/intl';
 
@@ -59,10 +59,16 @@ function AkPagination({
     <nav
       data-slot="pagination"
       data-variant={variant}
-      className={cn('flex items-center justify-between gap-3 bg-neutral-100 px-4 py-3', className)}
+      className={cn(
+        `
+          mt-2.5 flex h-11.25 w-full items-center justify-between gap-3 rounded-xs bg-neutral-100
+          px-3.75 py-2
+        `,
+        className
+      )}
       {...props}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         <AkTypography tag="span" fontWeight="medium" id={perPageLabelId}>
           {perPageLabel}
         </AkTypography>
@@ -71,7 +77,11 @@ function AkPagination({
           value={String(state.limit)}
           onValueChange={(value) => onItemPerPageChange({ limit: Number(value), offset: 0 })}
         >
-          <AkSelectTrigger size="sm" aria-labelledby={perPageLabelId}>
+          <AkSelectTrigger
+            size="sm"
+            aria-labelledby={perPageLabelId}
+            className="h-7.5 min-w-12.5 bg-background px-2"
+          >
             <AkSelectValue />
           </AkSelectTrigger>
 
@@ -85,25 +95,36 @@ function AkPagination({
         </AkSelect>
 
         {totalItems > 0 && (
-          <AkTypography
-            tag="span"
-            className="border-l border-border pl-3"
-            data-slot="pagination-range"
-          >
-            {akMT('paginationRange', {
-              start: state.startItemIdx,
-              end: state.endItemIdx,
-              total: totalItems,
-              label: tableItemLabel ?? '',
-            })}
-          </AkTypography>
+          <Fragment>
+            <span className="h-full min-h-8 w-px bg-divider-strong" aria-hidden />
+
+            <AkTypography tag="span" data-slot="pagination-range">
+              {akMT('paginationRange', {
+                start: state.startItemIdx,
+                end: state.endItemIdx,
+                total: totalItems,
+                label: tableItemLabel ?? '',
+              })}
+            </AkTypography>
+          </Fragment>
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
+        {!isCompact && (
+          <span className="mr-2.25 h-full min-h-8 w-px bg-divider-strong" aria-hidden />
+        )}
+
+        {/*
+          Compact carries the arrow alone, so it is a square with the arrow in
+          the middle of it. With a label beside it the padding is uneven
+          instead, drawing the arrow in towards the word.
+        */}
         <AkButton
           variant="outlined"
           color="neutral"
+          size={isCompact ? 'icon-sm' : 'default'}
+          className={cn('bg-background', isCompact ? 'size-7.5' : 'h-7.5 min-w-0 pr-3 pl-0.5')}
           disabled={state.disablePrev}
           aria-label={isCompact ? akMT('previous') : undefined}
           leftIcon={<AkIcon name="material-symbols:arrow-left" />}
@@ -117,6 +138,8 @@ function AkPagination({
         <AkButton
           variant="outlined"
           color="neutral"
+          size={isCompact ? 'icon-sm' : 'default'}
+          className={cn('bg-background', isCompact ? 'size-7.5' : 'h-7.5 min-w-0 pr-0.5 pl-3')}
           disabled={state.disableNext}
           aria-label={isCompact ? akMT('next') : undefined}
           rightIcon={<AkIcon name="material-symbols:arrow-right" />}

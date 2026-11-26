@@ -87,7 +87,7 @@ function AkChip({
           className={cn(
             'mr-1.75 truncate',
             !labelVariant && LABEL_SIZE[size ?? 'medium'],
-            icon ? 'ml-0.5' : 'ml-1.75',
+            'ml-1.75',
             labelClassName
           )}
         >

@@ -23,16 +23,20 @@ type AkCheckboxProps = ComponentProps<typeof CheckboxPrimitive.Root> &
  */
 function AkCheckbox({ className, color, ...props }: AkCheckboxProps) {
   return (
-    <span className="group/checkbox relative inline-flex" data-slot="checkbox-field">
-      {/* The halo effect of hovering over the checkbox.*/}
-      <span
-        className={cn(
-          'pointer-events-none absolute -inset-2 rounded-full bg-neutral-100 opacity-0',
-          'transition-opacity group-hover/checkbox:opacity-100',
-          'group-has-disabled/checkbox:opacity-0'
-        )}
-      />
-
+    /*
+      The box sits in a padded, round field of its own, as irene's does: 6px of padding
+      around a 21px slot, which is what spaces a box from the label beside it and what the
+      hover shows on. The slot is the size of irene's own glyph; the box drawn inside it is
+      smaller, exactly as that glyph's square is.
+    */
+    <span
+      className={cn(
+        'group/checkbox inline-flex rounded-full p-1.5 transition-colors',
+        /* irene leaves the hover off a box that cannot be ticked. */
+        'hover:bg-hover-light has-[:disabled]:hover:bg-transparent'
+      )}
+      data-slot="checkbox-field"
+    >
       <CheckboxPrimitive.Root
         data-slot="checkbox"
         className={cn(akCheckboxVariants({ color }), className)}

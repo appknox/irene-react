@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -148,5 +148,98 @@ describe('getAkPaginationState', () => {
     expect(
       getAkPaginationState({ totalItems: 1, limit: 5, offset: 0, itemPerPageOptions: [] }).options
     ).toEqual([5, 10, 20, 30, 40]);
+  });
+});
+
+describe('the pagination bar against the design', () => {
+  const previous = () => screen.getByRole('button', { name: akMT('previous') });
+  const next = () => screen.getByRole('button', { name: akMT('next') });
+
+  /** The rules between the bar's groups, which carry no meaning of their own. */
+  const rules = () => document.querySelectorAll('span[aria-hidden].w-px');
+
+  it('sizes its buttons to the bar rather than to a form', () => {
+    renderPagination();
+
+    expect(previous()).toHaveClass('h-7.5');
+    expect(next()).toHaveClass('h-7.5');
+  });
+
+  it('draws the controls on white, against the bar behind them', () => {
+    renderPagination();
+
+    expect(previous()).toHaveClass('bg-background');
+    expect(screen.getByRole('combobox')).toHaveClass('bg-background');
+  });
+
+  it('rules off the range from the page size, and the buttons from both', () => {
+    renderPagination();
+
+    expect(rules()).toHaveLength(2);
+  });
+
+  it('drops the rule before the buttons when compact', () => {
+    renderPagination({ variant: 'compact' });
+
+    expect(rules()).toHaveLength(1);
+  });
+
+  it('draws no rule beside a range it is not showing', () => {
+    renderPagination({ totalItems: 0 });
+
+    expect(rules()).toHaveLength(1);
+  });
+});
+
+describe('the spacing between the bar\'s controls', () => {
+  /*
+    Tailwind emits a spacing utility only for values of at most two decimals, so
+    a class like `gap-2.625` silently produces no rule and the controls sit flush
+    against each other. These name the classes rather than measure them, since
+    jsdom computes no stylesheet.
+  */
+  const groups = () => document.querySelectorAll('[data-slot="pagination"] > div');
+
+  it('spaces the page size from its label, and the range from both', () => {
+    renderPagination();
+
+    expect(groups()[0]).toHaveClass('gap-2.5');
+  });
+
+  it('spaces the buttons from each other', () => {
+    renderPagination();
+
+    expect(groups()[1]).toHaveClass('gap-2.5');
+  });
+});
+
+describe('the page size the bar is showing', () => {
+  it('reads out the size in use', () => {
+    renderPagination({ limit: 25 });
+
+    expect(screen.getByRole('combobox')).toHaveTextContent('25');
+  });
+
+  it('reads out the one chosen, once the caller has taken it', async () => {
+    const user = userEvent.setup();
+
+    const { onItemPerPageChange } = renderPagination({ limit: 10 });
+
+    await user.click(screen.getByRole('combobox'));
+    await user.click(screen.getByRole('option', { name: '50' }));
+
+    /* The bar holds no state of its own; the caller owns the page and hands it back. */
+    expect(onItemPerPageChange).toHaveBeenCalledWith({ limit: 50, offset: 0 });
+
+    cleanup();
+    renderPagination({ limit: 50 });
+
+    expect(screen.getByRole('combobox')).toHaveTextContent('50');
+  });
+
+  it('leaves the size room to be read', () => {
+    renderPagination();
+
+    expect(screen.getByRole('combobox')).not.toHaveClass('w-12.5');
   });
 });
